@@ -12,5 +12,7 @@ Vagrant.configure(2) do |config|
 
   config.vm.provision "install_packages", type: "shell", path: "build/vagrant/install_packages.sh"
   config.vm.provision "install_composer", type: "shell", path: "build/vagrant/install_composer.sh"
+  config.vm.provision "install_konto_check", type: "shell", path: "build/installKontoCheck.sh"
+  config.vm.provision "install_app", type: "shell", path: "build/vagrant/install_app.sh"
 
 end
