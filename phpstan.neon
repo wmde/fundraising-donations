@@ -1,0 +1,3 @@
+parameters:
+  excludes_analyse:
+    - */contexts/PaymentContext/tests/*

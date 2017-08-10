@@ -1,0 +1,1 @@
+EXPERIMENTAL (such T4) extract of the Donation Context out of the FundraisingFrontend git repo.

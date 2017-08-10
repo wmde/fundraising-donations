@@ -1,0 +1,97 @@
+{
+	"name": "wmde/fundraising-donations",
+	"description": "",
+	"homepage": "https://github.com/wmde/FundraisingDonations",
+	"license": "GPL-2.0+",
+	"require": {
+		"php": ">=7.1",
+		"ext-curl": "*",
+
+		"wmde/fundraising-store": "~6.0",
+		"doctrine/orm": "~2.5",
+
+		"psr/log": "~1.0",
+		"pimple/pimple": "~3.0",
+
+		"wmde/euro": "~1.0",
+		"sofort/sofortlib-php": "^3.2"
+	},
+	"repositories": [
+		{
+			"type": "package",
+			"package": {
+				"name": "micropayment-de/service-client",
+				"version": "1.21.0",
+				"dist": {
+					"type": "zip",
+					"url": "https://techdoc.micropayment.de/payment/serviceclient/download/mcp-serviceclient_1_21.zip",
+					"reference": "1.21.0"
+				},
+				"autoload": {
+					"classmap": [
+						"lib",
+						"services"
+					],
+					"files": [
+						"lib/init.php"
+					]
+				}
+			}
+		}
+	],
+	"require-dev": {
+		"ext-pdo_sqlite": "*",
+
+		"phpunit/phpunit": "~6.0",
+		"codeception/specify": "~0.4.3",
+		"whatthejeff/nyancat-phpunit-resultprinter": "~1.2",
+		"ockcyp/covers-validator": "@dev",
+		"phpstan/phpstan": "^0.7.0",
+		"squizlabs/php_codesniffer": "~2.8",
+		"phpmd/phpmd": "~2.3",
+		"slevomat/coding-standard": "^2.3",
+
+		"mikey179/vfsStream": "~1.6",
+		"wmde/psr-log-test-doubles": "~2.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"WMDE\\Fundraising\\Frontend\\DonationContext\\": "src/",
+			"WMDE\\Fundraising\\Frontend\\PaymentContext\\": "contexts/PaymentContext/src/",
+			"WMDE\\Fundraising\\Frontend\\": "todo/"
+		}
+	},
+	"autoload-dev": {
+		"psr-4": {
+			"WMDE\\Fundraising\\Frontend\\DonationContext\\Tests\\": "tests/",
+			"WMDE\\Fundraising\\Frontend\\PaymentContext\\Tests\\": "contexts/PaymentContext/tests/"
+		}
+	},
+	"scripts": {
+		"test": [
+			"composer validate --no-interaction",
+			"vendor/bin/covers-validator",
+			"vendor/bin/phpunit"
+		],
+		"cs": [
+			"@phpcs"
+		],
+		"ci": [
+			"@test",
+			"@cs",
+			"@validate-app-config",
+			"@stan"
+		],
+		"phpcs": [
+			"vendor/bin/phpcs"
+		],
+		"phpmd": [
+			"vendor/bin/phpmd src/ text phpmd.xml"
+		],
+		"validate-app-config": "./console validate-config app/config/config.dist.json app/config/config.test.json",
+		"stan": "./vendor/bin/phpstan analyse --level=1 --no-progress cli/ contexts/ src/ tests/"
+	},
+	"config": {
+		"discard-changes": true
+	}
+}
