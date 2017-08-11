@@ -16,29 +16,6 @@
 		"wmde/euro": "~1.0",
 		"sofort/sofortlib-php": "^3.2"
 	},
-	"repositories": [
-		{
-			"type": "package",
-			"package": {
-				"name": "micropayment-de/service-client",
-				"version": "1.21.0",
-				"dist": {
-					"type": "zip",
-					"url": "https://techdoc.micropayment.de/payment/serviceclient/download/mcp-serviceclient_1_21.zip",
-					"reference": "1.21.0"
-				},
-				"autoload": {
-					"classmap": [
-						"lib",
-						"services"
-					],
-					"files": [
-						"lib/init.php"
-					]
-				}
-			}
-		}
-	],
 	"require-dev": {
 		"ext-pdo_sqlite": "*",
 
