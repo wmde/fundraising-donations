@@ -1,14 +1,20 @@
 language: php
 
+services:
+  - docker
+
 php:
   - 7.1
-  - master
 
-sudo: false
+before_install:
+  - docker build -t wmde/fundraising-donations .
 
-install: travis_retry composer install
+install:
+  - travis_retry composer install
 
-script: composer ci
+script:
+  - composer ci
+  - docker run -it --rm -v $PWD:/usr/src/myapp -w /usr/src/myapp wmde/fundraising-donations ./vendor/bin/phpunit
 
 after_success:
   - if [[ "`phpenv version-name`" != "7.1" ]]; then exit 0; fi
