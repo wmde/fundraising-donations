@@ -40,28 +40,6 @@
 			"WMDE\\Fundraising\\Frontend\\PaymentContext\\Tests\\": "contexts/PaymentContext/tests/"
 		}
 	},
-	"scripts": {
-		"test": [
-			"composer validate --no-interaction",
-			"vendor/bin/covers-validator",
-			"vendor/bin/phpunit"
-		],
-		"cs": [
-			"@phpcs"
-		],
-		"ci": [
-			"@test",
-			"@cs",
-			"@stan"
-		],
-		"phpcs": [
-			"vendor/bin/phpcs"
-		],
-		"phpmd": [
-			"vendor/bin/phpmd src/ text phpmd.xml"
-		],
-		"stan": "./vendor/bin/phpstan analyse --level=1 --no-progress contexts/ src/ tests/"
-	},
 	"config": {
 		"discard-changes": true
 	},

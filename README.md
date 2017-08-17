@@ -8,10 +8,15 @@ EXPERIMENTAL (such T4) extract of the Donation Context out of the FundraisingFro
 
     docker run -it --rm --user $(id -u):$(id -g) -v ~/.composer:/composer -v $(pwd):/app docker.io/composer
 
-### Build application container
-
-    docker build -t wmde/fundraising-donations .
-
 ### Run tests
 
-    docker run -it --rm -v "$PWD":/usr/src/myapp -w /usr/src/myapp wmde/fundraising-donations ./vendor/bin/phpunit
+    make ci
+
+This implicitly builds the `app` container as defined in `docker-compose.yml` & `Dockerfile`
+and runs various code quality checks.
+
+#### PHPUnit with filter
+
+Individual commands like PHPUnit with a filter can be run like
+
+   docker-compose run --rm app ./vendor/bin/phpunit --filter valid
