@@ -4,19 +4,19 @@ EXPERIMENTAL (such T4) extract of the Donation Context out of the FundraisingFro
 
 ## Development
 
-### Install dependencies
+### Installing the dependencies
 
     docker run -it --rm --user $(id -u):$(id -g) -v ~/.composer:/composer -v $(pwd):/app docker.io/composer
 
-### Run tests
+### Running the tests
 
     make ci
 
 This implicitly builds the `app` container as defined in `docker-compose.yml` & `Dockerfile`
-and runs various code quality checks.
+and executes all CI checks. For commands that run only a subset, see `Makefile`.
 
 #### PHPUnit with filter
 
 Individual commands like PHPUnit with a filter can be run like
 
-   docker-compose run --rm app ./vendor/bin/phpunit --filter valid
+    docker-compose run --rm app ./vendor/bin/phpunit --filter valid
