@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\MembershipContext\Domain\Model;
+namespace WMDE\Fundraising\Frontend\Infrastructure;
 
 /**
  * @licence GNU GPL v2+

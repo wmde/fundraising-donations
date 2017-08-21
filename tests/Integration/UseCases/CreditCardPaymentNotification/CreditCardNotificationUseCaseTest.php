@@ -18,7 +18,7 @@ use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationA
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardPaymentHandlerException;
-use WMDE\Fundraising\Frontend\MembershipContext\Tests\Data\ValidCreditCardNotificationRequest;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidCreditCardNotificationRequest;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\Frontend\Tests\Fixtures\FakeCreditCardService;
 use WMDE\Fundraising\Frontend\Tests\Fixtures\ThrowingEntityManager;
