@@ -29,11 +29,12 @@ class CreditCard {
 			'mp_user_firstname' => $firstName,
 			'mp_user_surname' => $lastName,
 			'sid' => $donationId,
-			'skin' => $this->config->getSkin(),
+			'gfx' => $this->config->getLogo(),
 			'token' => $accessToken,
 			'utoken' => $updateToken,
 			'amount' => $amount->getEuroCents(),
-			'theme' => $this->config->getTheme()
+			'theme' => $this->config->getTheme(),
+			'producttype' => 'fee'
 		];
 		if ( $this->config->isTestMode() ) {
 			$params['testmode'] = '1';
