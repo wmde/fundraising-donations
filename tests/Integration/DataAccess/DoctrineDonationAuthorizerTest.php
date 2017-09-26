@@ -47,12 +47,12 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 	 * @slowThreshold 400
 	 */
 	public function testWhenNoDonations(): void {
-		$this->specify( 'update authorization fails', function() {
+		$this->specify( 'update authorization fails', function(): void {
 			$authorizer = $this->newAuthorizationServiceWithDonations( self::CORRECT_UPDATE_TOKEN );
 			$this->assertFalse( $authorizer->userCanModifyDonation( self::MEANINGLESS_DONATION_ID ) );
 		} );
 
-		$this->specify( 'access authorization fails', function() {
+		$this->specify( 'access authorization fails', function(): void {
 			$authorizer = $this->newAuthorizationServiceWithDonations( self::CORRECT_ACCESS_TOKEN );
 			$this->assertFalse( $authorizer->canAccessDonation( self::MEANINGLESS_DONATION_ID ) );
 		} );
@@ -71,7 +71,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given correct donation id and correct token, update authorization succeeds',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( self::CORRECT_UPDATE_TOKEN, null, $donation );
 				$this->assertTrue( $authorizer->userCanModifyDonation( $donation->getId() ) );
 			}
@@ -79,7 +79,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given wrong donation id and correct token, update authorization fails',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( self::CORRECT_UPDATE_TOKEN, null, $donation );
 				$this->assertFalse( $authorizer->userCanModifyDonation( self::ID_OF_WRONG_DONATION ) );
 			}
@@ -87,7 +87,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given correct donation id and wrong token, update authorization fails',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( self::WRONG__UPDATE_TOKEN, null, $donation );
 				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 			}
@@ -95,7 +95,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given correct donation id and correct token, access authorization succeeds',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( null, self::CORRECT_ACCESS_TOKEN, $donation );
 				$this->assertTrue( $authorizer->canAccessDonation( $donation->getId() ) );
 			}
@@ -103,7 +103,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given wrong donation id and correct token, access authorization fails',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( null, self::CORRECT_ACCESS_TOKEN, $donation );
 				$this->assertFalse( $authorizer->canAccessDonation( self::ID_OF_WRONG_DONATION ) );
 			}
@@ -111,7 +111,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given correct donation id and wrong token, access authorization fails',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( null, self::WRONG_ACCESS_TOKEN, $donation );
 				$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
 			}
@@ -130,7 +130,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given correct donation id and a token, update authorization fails',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( self::MEANINGLESS_TOKEN, null, $donation );
 				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 			}
@@ -138,7 +138,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given correct donation id and a token, access authorization fails',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( null, self::MEANINGLESS_TOKEN, $donation );
 				$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
 			}
@@ -157,7 +157,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given correct donation id and a token, update authorization fails for users',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( self::CORRECT_UPDATE_TOKEN, null, $donation );
 				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 			}
@@ -165,7 +165,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 
 		$this->specify(
 			'given correct donation id and a token, update authorization succeeds for system',
-			function() use ( $donation ) {
+			function() use ( $donation ): void {
 				$authorizer = $this->newAuthorizationServiceWithDonations( self::CORRECT_UPDATE_TOKEN, null, $donation );
 				$this->assertTrue( $authorizer->systemCanModifyDonation( $donation->getId() ) );
 			}
@@ -186,11 +186,11 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 			self::CORRECT_ACCESS_TOKEN
 		);
 
-		$this->specify( 'update authorization fails', function() use ( $authorizer ) {
+		$this->specify( 'update authorization fails', function() use ( $authorizer ): void {
 			$this->assertFalse( $authorizer->userCanModifyDonation( self::MEANINGLESS_DONATION_ID ) );
 		} );
 
-		$this->specify( 'access authorization fails', function() use ( $authorizer ) {
+		$this->specify( 'access authorization fails', function() use ( $authorizer ): void {
 			$this->assertFalse( $authorizer->canAccessDonation( self::MEANINGLESS_DONATION_ID ) );
 		} );
 	}

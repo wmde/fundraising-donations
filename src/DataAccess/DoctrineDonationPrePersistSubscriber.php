@@ -37,7 +37,7 @@ class DoctrineDonationPrePersistSubscriber implements EventSubscriber {
 		$entity = $args->getObject();
 
 		if ( $entity instanceof Donation ) {
-			$entity->modifyDataObject( function ( DonationData $data ) {
+			$entity->modifyDataObject( function ( DonationData $data ): void {
 				if ( $this->isEmpty( $data->getAccessToken() ) ) {
 					$data->setAccessToken( $this->accessTokenGenerator->generateToken() );
 				}
