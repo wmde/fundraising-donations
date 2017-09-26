@@ -22,6 +22,7 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationVa
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\ReferrerGeneralizer;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\LessSimpleTransferCodeGenerator;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\TransferCodeGenerator;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
@@ -210,7 +211,7 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	private function newTransferCodeGenerator(): TransferCodeGenerator {
-		return $this->createMock( TransferCodeGenerator::class );
+		return LessSimpleTransferCodeGenerator::newRandomGenerator();
 	}
 
 	public function testGivenValidRequest_confirmationEmailIsSent(): void {
@@ -353,6 +354,28 @@ class AddDonationUseCaseTest extends TestCase {
 
 		$useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
 		$this->assertSame( Donation::STATUS_CANCELLED, $repository->getDonationById( 1 )->getStatus() );
+	}
+
+	public function testWhenBankTransferDonationIsAnonymous_transferCodeStartsWithXR(): void {
+		$useCase = $this->newValidationSucceedingUseCase();
+
+		$response = $useCase->addDonation( $this->newMinimumDonationRequest() );
+
+		$this->assertStringStartsWith(
+			'XR-',
+			$response->getDonation()->getPayment()->getPaymentMethod()->getBankTransferCode()
+		);
+	}
+
+	public function testWhenBankTransferDonationIsAnonymous_transferCodeStartsWithXW(): void {
+		$useCase = $this->newValidationSucceedingUseCase();
+
+		$response = $useCase->addDonation( $this->newValidCompanyDonationRequest() );
+
+		$this->assertStringStartsWith(
+			'XW-',
+			$response->getDonation()->getPayment()->getPaymentMethod()->getBankTransferCode()
+		);
 	}
 
 }
