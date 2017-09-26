@@ -142,7 +142,7 @@
             <property name="usefulAnnotations" type="array" value="
 				@see,
 				@throws,
-				@expectException,
+				@expectedException,
 				@dataProvider,
 				@slowThreshold,
 				@noinspection

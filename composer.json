@@ -14,7 +14,8 @@
 		"pimple/pimple": "~3.0",
 
 		"wmde/euro": "~1.0",
-		"sofort/sofortlib-php": "^3.2"
+		"sofort/sofortlib-php": "^3.2",
+		"globalcitizen/php-iso7064": "^1.0"
 	},
 	"require-dev": {
 		"ext-pdo_sqlite": "*",
