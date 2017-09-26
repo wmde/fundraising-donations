@@ -81,4 +81,19 @@ class UniqueTransferCodeGeneratorTest extends \PHPUnit\Framework\TestCase {
 		$this->assertSame( 'third', $this->newUniqueGenerator()->generateTransferCode( '' ) );
 	}
 
+	public function testPassesPrefixToDecoratedGenerator(): void {
+		$decoratedGenerator = $this->createMock( TransferCodeGenerator::class );
+
+		$decoratedGenerator->expects( $this->once() )
+			->method( 'generateTransferCode' )
+			->with( $this->equalTo( 'SUCH!' ) );
+
+		$generator = new UniqueTransferCodeGenerator(
+			$decoratedGenerator,
+			$this->entityManager
+		);
+
+		$generator->generateTransferCode( 'SUCH!' );
+	}
+
 }
