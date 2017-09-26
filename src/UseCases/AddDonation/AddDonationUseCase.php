@@ -144,13 +144,13 @@ class AddDonationUseCase {
 
 		switch ( $paymentType ) {
 			case PaymentType::BANK_TRANSFER:
-				return new BankTransferPayment( $this->transferCodeGenerator->generateTransferCode() );
+				return new BankTransferPayment( $this->transferCodeGenerator->generateTransferCode( '' ) );
 			case PaymentType::DIRECT_DEBIT:
 				return new DirectDebitPayment( $donationRequest->getBankData() );
 			case PaymentType::PAYPAL:
 				return new PayPalPayment( new PayPalData() );
 			case PaymentType::SOFORT:
-				return new SofortPayment( $this->transferCodeGenerator->generateTransferCode() );
+				return new SofortPayment( $this->transferCodeGenerator->generateTransferCode( '' ) );
 			default:
 				return new PaymentWithoutAssociatedData( $paymentType );
 		}

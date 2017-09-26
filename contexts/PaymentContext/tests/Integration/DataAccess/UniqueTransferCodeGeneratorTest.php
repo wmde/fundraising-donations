@@ -43,19 +43,19 @@ class UniqueTransferCodeGeneratorTest extends \PHPUnit\Framework\TestCase {
 		return new class() implements TransferCodeGenerator {
 			private $position = 0;
 
-			public function generateTransferCode(): string {
+			public function generateTransferCode( string $prefix ): string {
 				return ['first', 'second', 'third'][$this->position++];
 			}
 		};
 	}
 
 	public function testWhenFirstResultIsUnique_itGetsReturned(): void {
-		$this->assertSame( 'first', $this->newUniqueGenerator()->generateTransferCode() );
+		$this->assertSame( 'first', $this->newUniqueGenerator()->generateTransferCode( '' ) );
 	}
 
 	public function testWhenFirstResultIsNotUnique_secondResultGetsReturned(): void {
 		$this->storeDonationWithTransferCode( 'first' );
-		$this->assertSame( 'second', $this->newUniqueGenerator()->generateTransferCode() );
+		$this->assertSame( 'second', $this->newUniqueGenerator()->generateTransferCode( '' ) );
 	}
 
 	private function storeDonationWithTransferCode( string $code ): void {
@@ -78,7 +78,7 @@ class UniqueTransferCodeGeneratorTest extends \PHPUnit\Framework\TestCase {
 	public function testWhenFirstAndSecondResultsAreNotUnique_thirdResultGetsReturned(): void {
 		$this->storeDonationWithTransferCode( 'first' );
 		$this->storeDonationWithTransferCode( 'second' );
-		$this->assertSame( 'third', $this->newUniqueGenerator()->generateTransferCode() );
+		$this->assertSame( 'third', $this->newUniqueGenerator()->generateTransferCode( '' ) );
 	}
 
 }
