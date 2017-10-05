@@ -5,8 +5,10 @@
 -->
 <ruleset name="FundraisingDonations">
 
+    <file>contexts/</file>
     <file>src/</file>
     <file>tests/</file>
+    <file>todo/</file>
 
     <arg name="extensions" value="php"/>
     <arg value="s"/>
@@ -142,7 +144,8 @@
             <property name="usefulAnnotations" type="array" value="
 				@see,
 				@throws,
-				@expectException,
+				@expectedException,
+				@expectedExceptionMessage,
 				@dataProvider,
 				@slowThreshold,
 				@noinspection
