@@ -20,42 +20,42 @@ The codes start with the prefixes `XW` and `XR`. The prefixes signify internal d
 0. Convert the transfer code to upper case
 
    Examples:
-     - `XW-A3d-EFZ-L` => `XW-A3D-EFZ-L`
+     - `XW-A3d-EFT-Z` => `XW-A3D-EFT-Z`
 
 1. Strip all characters not in the character set
 
    Examples:
-     - `XW-A3D-EFZ-L` => `XWA3DEFZL`
+     - `XW-A3D-EFT-Z` => `XWA3DEFTZ`
 
 2. Make sure that the string code is exactly 9 characters long
 
    Examples:
-     - `XWA3DEFZL` => OK
+     - `XWA3DEFTZ` => OK
 
 3. Calculate the MD5 sum of the first 8 characters
 
    Examples:
-     - `XWA3DEFZ` => `50b5324c4bb532e3d7f80436508712b1`
+     - `XWA3DEFT` => `fa4d9a9ec0894cd1b65de63a5e705f05`
 
 4. Calculate the decimal digit sum of the hexadecimal MD5 
 
    Examples:
-     - the decimal digit sum of `50b5324c4bb532e3d7f80436508712b1` becomes `186`
+     - the decimal digit sum of `fa4d9a9ec0894cd1b65de63a5e705f05` becomes `262`
      - the decimal digit sum of `aa` becomes `20` (10+10),
      - the decimal digit sum of `12FE` becomes `32` (1+2+15+14)
 
 5. Calculate the modulo 19 of the decimal digit sum
 
    Examples:
-     - `186 % 19` => `6`
+     - `262 % 19` => `15`
 
 6. In the character set, get the character at the index equaling the number from step 5 
    
    Examples: 
      - 0 => `A`
      - 1 => `B`
-     - 6 => `L`
+     - 15 => `Z`
 
 7. Compare the last character of the transfer code to the character from step 6
 
-   Examples: `L` = `L` => OK
+   Examples: `Z` = `Z` => OK
