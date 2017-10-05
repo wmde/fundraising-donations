@@ -36,8 +36,8 @@ class LessSimpleTransferCodeGenerator implements TransferCodeGenerator {
 		return new self( $characterSource );
 	}
 
-	public function generateTransferCode(): string {
-		$code = $this->generateCode() . '-';
+	public function generateTransferCode( string $prefix ): string {
+		$code = $prefix . $this->generateCode() . '-';
 		return $code . $this->checksumGenerator->createChecksum( $code );
 	}
 

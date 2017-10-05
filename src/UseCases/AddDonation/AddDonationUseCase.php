@@ -144,16 +144,22 @@ class AddDonationUseCase {
 
 		switch ( $paymentType ) {
 			case PaymentType::BANK_TRANSFER:
-				return new BankTransferPayment( $this->transferCodeGenerator->generateTransferCode() );
+				return new BankTransferPayment( $this->newTransferCode( $donationRequest ) );
 			case PaymentType::DIRECT_DEBIT:
 				return new DirectDebitPayment( $donationRequest->getBankData() );
 			case PaymentType::PAYPAL:
 				return new PayPalPayment( new PayPalData() );
 			case PaymentType::SOFORT:
-				return new SofortPayment( $this->transferCodeGenerator->generateTransferCode() );
+				return new SofortPayment( $this->newTransferCode( $donationRequest ) );
 			default:
 				return new PaymentWithoutAssociatedData( $paymentType );
 		}
+	}
+
+	private function newTransferCode( AddDonationRequest $donationRequest ): string {
+		return $this->transferCodeGenerator->generateTransferCode(
+			$donationRequest->donorIsAnonymous() ? 'XR-' : 'XW-'
+		);
 	}
 
 	private function newTrackingInfoFromRequest( AddDonationRequest $request ): DonationTrackingInfo {
