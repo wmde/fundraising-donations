@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\Frontend\PaymentContext\Domain;
 
+use InvalidArgumentException;
+
 /**
  * @licence GNU GPL v2+
  */
@@ -16,7 +18,7 @@ class ChecksumGenerator {
 	 */
 	public function __construct( array $checksumCharacters ) {
 		if ( count( $checksumCharacters ) < 2 ) {
-			throw new \InvalidArgumentException(
+			throw new InvalidArgumentException(
 				'Need at least two characters to create meaningful checksum'
 			);
 		}
@@ -30,13 +32,21 @@ class ChecksumGenerator {
 	 * @return string The checksum as a single character present in the constructors array argument
 	 */
 	public function createChecksum( string $string ): string {
-		$checksum = hexdec( substr( md5( $this->normalizeString( $string ) ), 0, 8 ) );
+		$checksum = md5( $this->normalizeString( $string ) );
+		$checkDigitSum = array_sum(
+			array_map(
+				function ( $digit ) {
+					return base_convert( $digit, 16, 10 );
+				},
+				str_split( $checksum )
+			)
+		);
 
-		return $this->checksumCharacters[$checksum % count( $this->checksumCharacters )];
+		return $this->checksumCharacters[$checkDigitSum % count( $this->checksumCharacters )];
 	}
 
 	private function normalizeString( string $string ): string {
-		return strtoupper( str_replace( [ '-', '_', ' ' ], [ '', '', '' ], $string ) );
+		return strtoupper( str_replace( [ '-', '_', ' ' ], '', $string ) );
 	}
 
 }
