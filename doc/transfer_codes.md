@@ -47,7 +47,7 @@ The codes start with the prefixes `XW` and `XR`. The prefixes signify internal d
 5. Calculate the modulo 19 of the decimal digit sum
 
    Examples:
-     - `186 & 19` => `6`
+     - `186 % 19` => `6`
 
 6. In the character set, get the character at the index equaling the number from step 5 
    
