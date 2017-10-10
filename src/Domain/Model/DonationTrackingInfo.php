@@ -96,6 +96,7 @@ class DonationTrackingInfo {
 		$trackingInfo->setSource( '' );
 		$trackingInfo->setTotalImpressionCount( 0 );
 		$trackingInfo->setTracking( '' );
+
 		return $trackingInfo;
 	}
 

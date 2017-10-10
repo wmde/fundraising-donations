@@ -10,8 +10,6 @@ use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardTransactionData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalData;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment;
 
 /**
  * @licence GNU GPL v2+
@@ -95,6 +93,7 @@ class Donation {
 
 	/**
 	 * @param int $id
+	 *
 	 * @throws \RuntimeException
 	 */
 	public function assignId( int $id ): void {
@@ -248,7 +247,10 @@ class Donation {
 	}
 
 	public function hasExternalPayment(): bool {
-		return in_array( $this->getPaymentType(), [ PaymentType::PAYPAL, PaymentType::CREDIT_CARD, PaymentType::SOFORT ] );
+		return in_array(
+			$this->getPaymentType(),
+			[ PaymentType::PAYPAL, PaymentType::CREDIT_CARD, PaymentType::SOFORT ]
+		);
 	}
 
 	private function isIncomplete(): bool {
