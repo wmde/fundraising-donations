@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\SofortPaymentNotification;
 
-use DateTime;
 use RuntimeException;
 use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
@@ -13,8 +12,8 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationExc
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\SofortPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\ResponseModel\SofortNotificationResponse;
 use WMDE\Fundraising\Frontend\PaymentContext\RequestModel\SofortNotificationRequest;
+use WMDE\Fundraising\Frontend\PaymentContext\ResponseModel\SofortNotificationResponse;
 
 class SofortPaymentNotificationUseCase {
 
@@ -32,7 +31,8 @@ class SofortPaymentNotificationUseCase {
 	public function handleNotification( SofortNotificationRequest $request ): SofortNotificationResponse {
 		try {
 			$donation = $this->repository->getDonationById( $request->getDonationId() );
-		} catch ( GetDonationException $ex ) {
+		}
+		catch ( GetDonationException $ex ) {
 			return $this->createFailureResponse( $ex );
 		}
 
@@ -73,26 +73,31 @@ class SofortPaymentNotificationUseCase {
 	}
 
 	private function createUnhandledResponse( string $reason ): SofortNotificationResponse {
-		return SofortNotificationResponse::newUnhandledResponse( [
-			'message' => $reason
-		] );
+		return SofortNotificationResponse::newUnhandledResponse(
+			[
+				'message' => $reason
+			]
+		);
 	}
 
 	private function sendConfirmationEmailFor( Donation $donation ): void {
 		if ( $donation->getDonor() !== null ) {
 			try {
 				$this->mailer->sendConfirmationMailFor( $donation );
-			} catch ( RuntimeException $ex ) {
+			}
+			catch ( RuntimeException $ex ) {
 				// no need to re-throw or return false, this is not a fatal error, only a minor inconvenience
 			}
 		}
 	}
 
 	private function createFailureResponse( RuntimeException $ex ): SofortNotificationResponse {
-		return SofortNotificationResponse::newFailureResponse( [
-			'message' => $ex->getMessage(),
-			'stackTrace' => $ex->getTraceAsString()
-		] );
+		return SofortNotificationResponse::newFailureResponse(
+			[
+				'message' => $ex->getMessage(),
+				'stackTrace' => $ex->getTraceAsString()
+			]
+		);
 	}
 
 }

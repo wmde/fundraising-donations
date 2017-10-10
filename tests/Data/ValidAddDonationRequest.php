@@ -22,7 +22,7 @@ class ValidAddDonationRequest {
 		$request->setAmount( Euro::newFromInt( 5 ) );
 		$request->setBankData( self::newValidBankData() );
 		$request->setInterval( ValidDonation::PAYMENT_INTERVAL_IN_MONTHS );
-		$request->setOptIn( (string) ValidDonation::OPTS_INTO_NEWSLETTER );
+		$request->setOptIn( (string)ValidDonation::OPTS_INTO_NEWSLETTER );
 		$request->setPaymentType( PaymentType::DIRECT_DEBIT );
 
 		$request->setDonorType( DonorName::PERSON_PRIVATE );

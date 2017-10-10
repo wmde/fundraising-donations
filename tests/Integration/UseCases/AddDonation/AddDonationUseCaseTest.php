@@ -4,8 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\AddDonation;
 
-use PHPUnit_Framework_MockObject_MockObject;
 use PHPUnit\Framework\TestCase;
+use PHPUnit_Framework_MockObject_MockObject;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokens;
@@ -13,6 +13,7 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
@@ -24,7 +25,6 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\InitialDonati
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\ReferrerGeneralizer;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\TransferCodeGenerator;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\Frontend\Validation\ConstraintViolation;
 
 /**
@@ -77,10 +77,12 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	private function newTokenFetcher(): DonationTokenFetcher {
-		return new FixedDonationTokenFetcher( new DonationTokens(
-			self::ACCESS_TOKEN,
-			self::UPDATE_TOKEN
-		) );
+		return new FixedDonationTokenFetcher(
+			new DonationTokens(
+				self::ACCESS_TOKEN,
+				self::UPDATE_TOKEN
+			)
+		);
 	}
 
 	private function newOneHourInterval(): \DateInterval {
@@ -335,7 +337,10 @@ class AddDonationUseCaseTest extends TestCase {
 
 		$response = $useCase->addDonation( $this->newValidCompanyDonationRequest() );
 
-		$this->assertSame( DonorName::COMPANY_SALUTATION, $response->getDonation()->getDonor()->getName()->getSalutation() );
+		$this->assertSame(
+			DonorName::COMPANY_SALUTATION,
+			$response->getDonation()->getDonor()->getName()->getSalutation()
+		);
 	}
 
 	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsDeleted(): void {

@@ -26,6 +26,7 @@ class ReferrerGeneralizerTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @dataProvider urlProvider
+	 *
 	 * @param string $expected
 	 * @param string $url
 	 */

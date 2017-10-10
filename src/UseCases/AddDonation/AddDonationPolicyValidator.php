@@ -36,7 +36,7 @@ class AddDonationPolicyValidator {
 	}
 
 	public function isAutoDeleted( AddDonationRequest $request ): bool {
-		foreach( $this->emailAddressBlacklist as $blacklistEntry ) {
+		foreach ( $this->emailAddressBlacklist as $blacklistEntry ) {
 			if ( preg_match( $blacklistEntry, $request->getDonorEmailAddress() ) ) {
 				return true;
 			}
@@ -54,7 +54,10 @@ class AddDonationPolicyValidator {
 			$this->getPolicyViolationsForField( $request->getDonorFirstName(), Result::SOURCE_DONOR_FIRST_NAME ),
 			$this->getPolicyViolationsForField( $request->getDonorLastName(), Result::SOURCE_DONOR_LAST_NAME ),
 			$this->getPolicyViolationsForField( $request->getDonorCompany(), Result::SOURCE_DONOR_COMPANY ),
-			$this->getPolicyViolationsForField( $request->getDonorStreetAddress(), Result::SOURCE_DONOR_STREET_ADDRESS ),
+			$this->getPolicyViolationsForField(
+				$request->getDonorStreetAddress(),
+				Result::SOURCE_DONOR_STREET_ADDRESS
+			),
 			$this->getPolicyViolationsForField( $request->getDonorCity(), Result::SOURCE_DONOR_CITY )
 		);
 	}
@@ -71,9 +74,9 @@ class AddDonationPolicyValidator {
 
 	private function getAmountViolations( AddDonationRequest $request ): array {
 		return array_map(
-			function ( ConstraintViolation $violation ) {
-					$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
-					return $violation;
+			function( ConstraintViolation $violation ) {
+				$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
+				return $violation;
 			},
 			$this->amountPolicyValidator->validate(
 				$request->getAmount()->getEuroFloat(),

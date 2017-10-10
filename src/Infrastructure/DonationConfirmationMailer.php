@@ -5,8 +5,8 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\DonationContext\Infrastructure;
 
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\Frontend\Infrastructure\EmailAddress;
+use WMDE\Fundraising\Frontend\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
 
@@ -33,7 +33,7 @@ class DonationConfirmationMailer {
 		return [
 			'recipient' => [
 				'lastName' => $donation->getDonor()->getName()->getLastName(),
-				'salutation' =>	$donation->getDonor()->getName()->getSalutation(),
+				'salutation' => $donation->getDonor()->getName()->getSalutation(),
 				'title' => $donation->getDonor()->getName()->getTitle()
 			],
 			'donation' => [

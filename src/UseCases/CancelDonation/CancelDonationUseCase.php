@@ -10,8 +10,8 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationReposi
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
-use WMDE\Fundraising\Frontend\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\Frontend\Infrastructure\EmailAddress;
+use WMDE\Fundraising\Frontend\Infrastructure\TemplateMailerInterface;
 
 /**
  * @licence GNU GPL v2+
@@ -27,7 +27,7 @@ class CancelDonationUseCase {
 	private $donationLogger;
 
 	public function __construct( DonationRepository $donationRepository, TemplateMailerInterface $mailer,
-		DonationAuthorizer $authorizationService, DonationEventLogger $donationLogger ) {
+								 DonationAuthorizer $authorizationService, DonationEventLogger $donationLogger ) {
 
 		$this->donationRepository = $donationRepository;
 		$this->mailer = $mailer;
@@ -109,7 +109,7 @@ class CancelDonationUseCase {
 
 			'recipient' => [
 				'lastName' => $donation->getDonor()->getName()->getLastName(),
-				'salutation' =>	$donation->getDonor()->getName()->getSalutation(),
+				'salutation' => $donation->getDonor()->getName()->getSalutation(),
 				'title' => $donation->getDonor()->getName()->getTitle()
 			],
 		];

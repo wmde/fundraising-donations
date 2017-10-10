@@ -19,8 +19,8 @@ use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmatio
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\ResponseModel\PaypalNotificationResponse;
 use WMDE\Fundraising\Frontend\PaymentContext\RequestModel\PayPalPaymentNotificationRequest;
+use WMDE\Fundraising\Frontend\PaymentContext\ResponseModel\PaypalNotificationResponse;
 
 /**
  * @license GNU GPL v2+
@@ -53,7 +53,8 @@ class HandlePayPalPaymentNotificationUseCase {
 
 		try {
 			$donation = $this->repository->getDonationById( $request->getInternalId() );
-		} catch ( GetDonationException $ex ) {
+		}
+		catch ( GetDonationException $ex ) {
 			return $this->createErrorResponse( $ex );
 		}
 
@@ -69,7 +70,8 @@ class HandlePayPalPaymentNotificationUseCase {
 
 		try {
 			$this->repository->storeDonation( $donation );
-		} catch ( StoreDonationException $ex ) {
+		}
+		catch ( StoreDonationException $ex ) {
 			return $this->createErrorResponse( $ex );
 		}
 
@@ -97,7 +99,8 @@ class HandlePayPalPaymentNotificationUseCase {
 
 		try {
 			$donation->confirmBooked();
-		} catch ( \RuntimeException $ex ) {
+		}
+		catch ( \RuntimeException $ex ) {
 			return $this->createErrorResponse( $ex );
 		}
 
@@ -115,16 +118,19 @@ class HandlePayPalPaymentNotificationUseCase {
 	}
 
 	private function createUnhandledResponse( string $reason ): PaypalNotificationResponse {
-		return PaypalNotificationResponse::newUnhandledResponse( [
-			'message' => $reason
-		] );
+		return PaypalNotificationResponse::newUnhandledResponse(
+			[
+				'message' => $reason
+			]
+		);
 	}
 
 	private function sendConfirmationEmailFor( Donation $donation ): void {
 		if ( $donation->getDonor() !== null ) {
 			try {
 				$this->mailer->sendConfirmationMailFor( $donation );
-			} catch ( \RuntimeException $ex ) {
+			}
+			catch ( \RuntimeException $ex ) {
 				// no need to re-throw or return false, this is not a fatal error, only a minor inconvenience
 			}
 		}
@@ -187,7 +193,8 @@ class HandlePayPalPaymentNotificationUseCase {
 		);
 		try {
 			$this->repository->storeDonation( $childDonation );
-		} catch ( StoreDonationException $ex ) {
+		}
+		catch ( StoreDonationException $ex ) {
 			return $this->createErrorResponse( $ex );
 		}
 		/** @var \WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment $paymentMethod */
@@ -195,14 +202,15 @@ class HandlePayPalPaymentNotificationUseCase {
 		$paymentMethod->getPayPalData()->addChildPayment( $request->getTransactionId(), $childDonation->getId() );
 		try {
 			$this->repository->storeDonation( $donation );
-		} catch ( StoreDonationException $ex ) {
+		}
+		catch ( StoreDonationException $ex ) {
 			return $this->createErrorResponse( $ex );
 		}
 		$this->logChildDonationCreatedEvent( $donation->getId(), $childDonation->getId() );
 		return PaypalNotificationResponse::newSuccessResponse();
 	}
 
-	private function logChildDonationCreatedEvent( $parentId, $childId ): void {	// @codingStandardsIgnoreLine
+	private function logChildDonationCreatedEvent( $parentId, $childId ): void {    // @codingStandardsIgnoreLine
 		$this->donationEventLogger->log(
 			$parentId,
 			"paypal_handler: new transaction id to corresponding child donation: $childId"
@@ -257,10 +265,12 @@ class HandlePayPalPaymentNotificationUseCase {
 	}
 
 	private function createErrorResponse( \Exception $ex ): PaypalNotificationResponse {
-		return PaypalNotificationResponse::newFailureResponse( [
-			'message' => $ex->getMessage(),
-			'stackTrace' => $ex->getTraceAsString()
-		] );
+		return PaypalNotificationResponse::newFailureResponse(
+			[
+				'message' => $ex->getMessage(),
+				'stackTrace' => $ex->getTraceAsString()
+			]
+		);
 	}
 
 }

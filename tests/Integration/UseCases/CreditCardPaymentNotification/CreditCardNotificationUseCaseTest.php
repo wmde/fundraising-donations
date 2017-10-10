@@ -4,12 +4,14 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\CreditCardPaymentNotification;
 
-use Psr\Log\NullLogger;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidCreditCardNotificationRequest;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
@@ -18,8 +20,6 @@ use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationA
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardPaymentHandlerException;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidCreditCardNotificationRequest;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\Frontend\Tests\Fixtures\FakeCreditCardService;
 use WMDE\Fundraising\Frontend\Tests\Fixtures\ThrowingEntityManager;
 
@@ -81,7 +81,8 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		try {
 			$useCase->handleNotification( $request );
 			$this->assertTrue( true );
-		} catch ( \Exception $e ) {
+		}
+		catch ( \Exception $e ) {
 			$this->fail();
 		}
 	}
@@ -171,7 +172,8 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 		try {
 			$useCase->handleNotification( $request );
-		} catch ( \Exception $e ) {
+		}
+		catch ( \Exception $e ) {
 			$this->fail();
 		}
 	}

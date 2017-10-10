@@ -5,13 +5,13 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\ShowDonationConfirmation;
 
 use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokens;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\ShowDonationConfirmation\ShowDonationConfirmationRequest;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\ShowDonationConfirmation\ShowDonationConfirmationUseCase;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
 
 /**
  * @covers WMDE\Fundraising\Frontend\DonationContext\UseCases\ShowDonationConfirmation\ShowDonationConfirmationUseCase
@@ -32,9 +32,11 @@ class ShowDonationConfirmationUseCaseTest extends \PHPUnit\Framework\TestCase {
 			new FakeDonationRepository( ValidDonation::newDirectDebitDonation() )
 		);
 
-		$response = $useCase->showConfirmation( new ShowDonationConfirmationRequest(
-			self::CORRECT_DONATION_ID
-		) );
+		$response = $useCase->showConfirmation(
+			new ShowDonationConfirmationRequest(
+				self::CORRECT_DONATION_ID
+			)
+		);
 
 		$this->assertFalse( $response->accessIsPermitted() );
 		$this->assertNull( $response->getDonation() );
@@ -47,9 +49,11 @@ class ShowDonationConfirmationUseCaseTest extends \PHPUnit\Framework\TestCase {
 			new FakeDonationRepository( ValidDonation::newDirectDebitDonation() )
 		);
 
-		$response = $useCase->showConfirmation( new ShowDonationConfirmationRequest(
-			self::CORRECT_DONATION_ID
-		) );
+		$response = $useCase->showConfirmation(
+			new ShowDonationConfirmationRequest(
+				self::CORRECT_DONATION_ID
+			)
+		);
 
 		$this->assertTrue( $response->accessIsPermitted() );
 	}
@@ -61,9 +65,11 @@ class ShowDonationConfirmationUseCaseTest extends \PHPUnit\Framework\TestCase {
 			new FakeDonationRepository()
 		);
 
-		$response = $useCase->showConfirmation( new ShowDonationConfirmationRequest(
-			self::CORRECT_DONATION_ID
-		) );
+		$response = $useCase->showConfirmation(
+			new ShowDonationConfirmationRequest(
+				self::CORRECT_DONATION_ID
+			)
+		);
 
 		$this->assertFalse( $response->accessIsPermitted() );
 		$this->assertNull( $response->getDonation() );
@@ -78,9 +84,11 @@ class ShowDonationConfirmationUseCaseTest extends \PHPUnit\Framework\TestCase {
 			new FakeDonationRepository( $donation )
 		);
 
-		$response = $useCase->showConfirmation( new ShowDonationConfirmationRequest(
-			self::CORRECT_DONATION_ID
-		) );
+		$response = $useCase->showConfirmation(
+			new ShowDonationConfirmationRequest(
+				self::CORRECT_DONATION_ID
+			)
+		);
 
 		$this->assertEquals( $donation, $response->getDonation() );
 	}

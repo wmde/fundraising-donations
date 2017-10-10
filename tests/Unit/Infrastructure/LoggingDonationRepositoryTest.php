@@ -9,8 +9,8 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationReposi
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\LoggingDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\PsrLogTestDoubles\LoggerSpy;
 
 /**
@@ -68,7 +68,11 @@ class LoggingDonationRepositoryTest extends \PHPUnit\Framework\TestCase {
 		$logCall = $logger->getLogCalls()->getFirstCall();
 
 		$this->assertSame( LogLevel::CRITICAL, $logCall->getLevel() );
-		$this->assertArrayHasKey( 'exception', $logCall->getContext(), 'the log context should contain an exception element' );
+		$this->assertArrayHasKey(
+			'exception',
+			$logCall->getContext(),
+			'the log context should contain an exception element'
+		);
 		$this->assertInstanceOf( $expectedExceptionType, $logCall->getContext()['exception'] );
 	}
 

@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\AddComment;
 
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonationComment;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
@@ -13,7 +14,6 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentRequ
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentUseCase;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentValidationResult;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentValidator;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\Frontend\Validation\TextPolicyValidator;
 
 /**
@@ -182,9 +182,13 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 	public function testWhenValidationFails_failureResponseIsReturned(): void {
 		$this->donationRepository = $this->newFakeRepositoryWithDonation();
 		$this->commentValidator = $this->createMock( AddCommentValidator::class );
-		$this->commentValidator->method( 'validate' )->willReturn( new AddCommentValidationResult( [
-			'comment' => 'failed'
-		] ) );
+		$this->commentValidator->method( 'validate' )->willReturn(
+			new AddCommentValidationResult(
+				[
+					'comment' => 'failed'
+				]
+			)
+		);
 
 		$response = $this->newUseCase()->addComment( $this->newValidRequest() );
 		$this->assertFalse( $response->isSuccessful() );

@@ -76,10 +76,13 @@ class AddDonationValidator {
 			$this->request->getPaymentType()
 		);
 
-		$violations = array_map( function( ConstraintViolation $violation ) {
-			$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
-			return $violation;
-		}, $result->getViolations() );
+		$violations = array_map(
+			function( ConstraintViolation $violation ) {
+				$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
+				return $violation;
+			},
+			$result->getViolations()
+		);
 		$this->addViolations( $violations );
 	}
 
@@ -105,12 +108,17 @@ class AddDonationValidator {
 			return;
 		}
 		if ( $this->emailValidator->validate( $this->request->getDonorEmailAddress() )->hasViolations() ) {
-			$this->addViolations( [ new ConstraintViolation(
-				$this->request->getDonorEmailAddress(),
-				Result::VIOLATION_MISSING,
-				Result::SOURCE_DONOR_EMAIL
-			) ] );
-		} else {
+			$this->addViolations(
+				[
+					new ConstraintViolation(
+						$this->request->getDonorEmailAddress(),
+						Result::VIOLATION_MISSING,
+						Result::SOURCE_DONOR_EMAIL
+					)
+				]
+			);
+		}
+		else {
 			$this->validateFieldLength( $this->request->getDonorEmailAddress(), Result::SOURCE_DONOR_EMAIL );
 		}
 	}
@@ -134,7 +142,8 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_COMPANY
 			);
-		} else {
+		}
+		else {
 			$this->validateFieldLength( $this->request->getDonorCompany(), Result::SOURCE_DONOR_COMPANY );
 		}
 	}
@@ -148,7 +157,8 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_FIRST_NAME
 			);
-		} else {
+		}
+		else {
 			$this->validateFieldLength( $this->request->getDonorFirstName(), Result::SOURCE_DONOR_FIRST_NAME );
 		}
 
@@ -158,7 +168,8 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_LAST_NAME
 			);
-		} else {
+		}
+		else {
 			$this->validateFieldLength( $this->request->getDonorLastName(), Result::SOURCE_DONOR_LAST_NAME );
 		}
 
@@ -168,7 +179,8 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_SALUTATION
 			);
-		} else {
+		}
+		else {
 			$this->validateFieldLength( $this->request->getDonorSalutation(), Result::SOURCE_DONOR_SALUTATION );
 		}
 
@@ -191,7 +203,8 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_STREET_ADDRESS
 			);
-		} else {
+		}
+		else {
 			$this->validateFieldLength( $this->request->getDonorStreetAddress(), Result::SOURCE_DONOR_STREET_ADDRESS );
 		}
 
@@ -201,7 +214,8 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_POSTAL_CODE
 			);
-		} else {
+		}
+		else {
 			$this->validateFieldLength( $this->request->getDonorPostalCode(), Result::SOURCE_DONOR_POSTAL_CODE );
 		}
 
@@ -211,7 +225,8 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_CITY
 			);
-		} else {
+		}
+		else {
 			$this->validateFieldLength( $this->request->getDonorCity(), Result::SOURCE_DONOR_CITY );
 		}
 
@@ -221,7 +236,8 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_COUNTRY
 			);
-		} else {
+		}
+		else {
 			$this->validateFieldLength( $this->request->getDonorCountryCode(), Result::SOURCE_DONOR_COUNTRY );
 		}
 
@@ -237,7 +253,7 @@ class AddDonationValidator {
 	}
 
 	private function validatePayment(): void {
-		if ( ! in_array( $this->request->getPaymentType(), PaymentType::getPaymentTypes() ) ) {
+		if ( !in_array( $this->request->getPaymentType(), PaymentType::getPaymentTypes() ) ) {
 			$this->violations[] = new ConstraintViolation(
 				$this->request->getPaymentType(),
 				Result::VIOLATION_WRONG_PAYMENT_TYPE,
@@ -247,7 +263,7 @@ class AddDonationValidator {
 	}
 
 	private function validateFieldLength( string $value, string $fieldName ): void {
-		if ( strlen( $value ) > $this->maximumFieldLengths[$fieldName] )  {
+		if ( strlen( $value ) > $this->maximumFieldLengths[$fieldName] ) {
 			$this->violations[] = new ConstraintViolation( $value, Result::VIOLATION_WRONG_LENGTH, $fieldName );
 		}
 	}

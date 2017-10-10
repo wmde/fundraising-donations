@@ -28,11 +28,13 @@ class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testWhenThereAreLessCommentsThanTheLimit_theyAreAllPresented(): void {
-		$useCase = new ListCommentsUseCase( new InMemoryCommentFinder(
-			$this->newCommentWithAuthorName( 'name0' ),
-			$this->newCommentWithAuthorName( 'name1' ),
-			$this->newCommentWithAuthorName( 'name2' )
-		) );
+		$useCase = new ListCommentsUseCase(
+			new InMemoryCommentFinder(
+				$this->newCommentWithAuthorName( 'name0' ),
+				$this->newCommentWithAuthorName( 'name1' ),
+				$this->newCommentWithAuthorName( 'name2' )
+			)
+		);
 
 		$this->assertEquals(
 			new CommentList(
@@ -53,12 +55,14 @@ class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testWhenThereAreMoreCommentsThanTheLimit_onlyTheFirstFewArePresented(): void {
-		$useCase = new ListCommentsUseCase( new InMemoryCommentFinder(
-			$this->newCommentWithAuthorName( 'name0' ),
-			$this->newCommentWithAuthorName( 'name1' ),
-			$this->newCommentWithAuthorName( 'name2' ),
-			$this->newCommentWithAuthorName( 'name3' )
-		) );
+		$useCase = new ListCommentsUseCase(
+			new InMemoryCommentFinder(
+				$this->newCommentWithAuthorName( 'name0' ),
+				$this->newCommentWithAuthorName( 'name1' ),
+				$this->newCommentWithAuthorName( 'name2' ),
+				$this->newCommentWithAuthorName( 'name3' )
+			)
+		);
 
 		$this->assertEquals(
 			new CommentList(
@@ -70,12 +74,14 @@ class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testWhenPageParameterIsTwo_correctOffsetIsUsed(): void {
-		$useCase = new ListCommentsUseCase( new InMemoryCommentFinder(
-			$this->newCommentWithAuthorName( 'name0' ),
-			$this->newCommentWithAuthorName( 'name1' ),
-			$this->newCommentWithAuthorName( 'name2' ),
-			$this->newCommentWithAuthorName( 'name3' )
-		) );
+		$useCase = new ListCommentsUseCase(
+			new InMemoryCommentFinder(
+				$this->newCommentWithAuthorName( 'name0' ),
+				$this->newCommentWithAuthorName( 'name1' ),
+				$this->newCommentWithAuthorName( 'name2' ),
+				$this->newCommentWithAuthorName( 'name3' )
+			)
+		);
 
 		$this->assertEquals(
 			new CommentList(
@@ -89,12 +95,14 @@ class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {
 	 * @dataProvider invalidPageNumberProvider
 	 */
 	public function testGivenInvalidPageNumber_firstPageIsReturned( int $invalidPageNumber ): void {
-		$useCase = new ListCommentsUseCase( new InMemoryCommentFinder(
-			$this->newCommentWithAuthorName( 'name0' ),
-			$this->newCommentWithAuthorName( 'name1' ),
-			$this->newCommentWithAuthorName( 'name2' ),
-			$this->newCommentWithAuthorName( 'name3' )
-		) );
+		$useCase = new ListCommentsUseCase(
+			new InMemoryCommentFinder(
+				$this->newCommentWithAuthorName( 'name0' ),
+				$this->newCommentWithAuthorName( 'name1' ),
+				$this->newCommentWithAuthorName( 'name2' ),
+				$this->newCommentWithAuthorName( 'name3' )
+			)
+		);
 
 		$this->assertEquals(
 			new CommentList(
@@ -120,10 +128,12 @@ class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {
 	public function testGivenInvalidLimit_10resultsAreReturned( int $invalidLimit ): void {
 		$useCase = new ListCommentsUseCase( $this->newInMemoryCommentFinderWithComments( 20 ) );
 
-		$commentList = $useCase->listComments( new CommentListingRequest(
-			$invalidLimit,
-			CommentListingRequest::FIRST_PAGE
-		) );
+		$commentList = $useCase->listComments(
+			new CommentListingRequest(
+				$invalidLimit,
+				CommentListingRequest::FIRST_PAGE
+			)
+		);
 
 		$this->assertCount( 10, $commentList->toArray() );
 	}

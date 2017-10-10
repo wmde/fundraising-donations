@@ -33,6 +33,7 @@ class AddCommentResponse {
 
 	/**
 	 * Returns the error message, or empty string in case the request was a success.
+	 *
 	 * @return string
 	 */
 	public function getErrorMessage(): string {
