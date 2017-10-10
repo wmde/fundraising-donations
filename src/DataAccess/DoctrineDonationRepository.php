@@ -70,24 +70,6 @@ class DoctrineDonationRepository implements DonationRepository {
 		$donation->assignId( $doctrineDonation->getId() );
 	}
 
-	private function updateDonation( Donation $donation ): void {
-		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
-
-		if ( $doctrineDonation === null ) {
-			throw new StoreDonationException();
-		}
-
-		$this->updateDonationEntity( $doctrineDonation, $donation );
-
-		try {
-			$this->entityManager->persist( $doctrineDonation );
-			$this->entityManager->flush();
-		}
-		catch ( ORMException $ex ) {
-			throw new StoreDonationException( $ex );
-		}
-	}
-
 	private function updateDonationEntity( DoctrineDonation $doctrineDonation, Donation $donation ): void {
 		$doctrineDonation->setId( $donation->getId() );
 		$this->updatePaymentInformation( $doctrineDonation, $donation );
@@ -95,10 +77,12 @@ class DoctrineDonationRepository implements DonationRepository {
 		$this->updateComment( $doctrineDonation, $donation->getComment() );
 		$doctrineDonation->setDonorOptsIntoNewsletter( $donation->getOptsIntoNewsletter() );
 
-		$doctrineDonation->encodeAndSetData( array_merge(
-			$doctrineDonation->getDecodedData(),
-			$this->getDataMap( $donation )
-		) );
+		$doctrineDonation->encodeAndSetData(
+			array_merge(
+				$doctrineDonation->getDecodedData(),
+				$this->getDataMap( $donation )
+			)
+		);
 	}
 
 	private function updatePaymentInformation( DoctrineDonation $doctrineDonation, Donation $donation ): void {
@@ -114,6 +98,19 @@ class DoctrineDonationRepository implements DonationRepository {
 		if ( $paymentMethod instanceof SofortPayment ) {
 			$this->updateSofortPaymentInformation( $doctrineDonation, $paymentMethod );
 		}
+	}
+
+	public static function getBankTransferCode( PaymentMethod $paymentMethod ): string {
+		if ( $paymentMethod instanceof BankTransferPayment ) {
+			return $paymentMethod->getBankTransferCode();
+		}
+		else {
+			if ( $paymentMethod instanceof SofortPayment ) {
+				return $paymentMethod->getBankTransferCode();
+			}
+		}
+
+		return '';
 	}
 
 	private function updateSofortPaymentInformation( DoctrineDonation $doctrineDonation, SofortPayment $paymentMethod ): void {
@@ -132,7 +129,8 @@ class DoctrineDonationRepository implements DonationRepository {
 			if ( $doctrineDonation->getId() === null ) {
 				$doctrineDonation->setDonorFullName( 'Anonym' );
 			}
-		} else {
+		}
+		else {
 			$doctrineDonation->setDonorCity( $donor->getPhysicalAddress()->getCity() );
 			$doctrineDonation->setDonorEmail( $donor->getEmailAddress() );
 			$doctrineDonation->setDonorFullName( $donor->getName()->getFullName() );
@@ -144,21 +142,12 @@ class DoctrineDonationRepository implements DonationRepository {
 			$doctrineDonation->setIsPublic( false );
 			$doctrineDonation->setComment( '' );
 			$doctrineDonation->setPublicRecord( '' );
-		} else {
+		}
+		else {
 			$doctrineDonation->setIsPublic( $comment->isPublic() );
 			$doctrineDonation->setComment( $comment->getCommentText() );
 			$doctrineDonation->setPublicRecord( $comment->getAuthorDisplayName() );
 		}
-	}
-
-	public static function getBankTransferCode( PaymentMethod $paymentMethod ): string {
-		if ( $paymentMethod instanceof BankTransferPayment ) {
-			return $paymentMethod->getBankTransferCode();
-		} elseif ( $paymentMethod instanceof SofortPayment ) {
-			return $paymentMethod->getBankTransferCode();
-		}
-
-		return '';
 	}
 
 	private function getDataMap( Donation $donation ): array {
@@ -204,38 +193,6 @@ class DoctrineDonationRepository implements DonationRepository {
 			'konto' => $bankData->getAccount(),
 			'blz' => $bankData->getBankCode(),
 			'bankname' => $bankData->getBankName(),
-		];
-	}
-
-	private function getDataFieldsFromDonor( Donor $personalInfo = null ): array {
-		if ( $personalInfo === null ) {
-			return [ 'adresstyp' => 'anonym' ];
-		}
-
-		return array_merge(
-			$this->getDataFieldsFromPersonName( $personalInfo->getName() ),
-			$this->getDataFieldsFromAddress( $personalInfo->getPhysicalAddress() ),
-			[ 'email' => $personalInfo->getEmailAddress() ]
-		);
-	}
-
-	private function getDataFieldsFromPersonName( DonorName $name ): array {
-		return [
-			'adresstyp' => $name->getPersonType(),
-			'anrede' => $name->getSalutation(),
-			'titel' => $name->getTitle(),
-			'vorname' => $name->getFirstName(),
-			'nachname' => $name->getLastName(),
-			'firma' => $name->getCompanyName(),
-		];
-	}
-
-	private function getDataFieldsFromAddress( DonorAddress $address ): array {
-		return [
-			'strasse' => $address->getStreetAddress(),
-			'plz' => $address->getPostalCode(),
-			'ort' => $address->getCity(),
-			'country' => $address->getCountryCode(),
 		];
 	}
 
@@ -285,6 +242,71 @@ class DoctrineDonationRepository implements DonationRepository {
 		return implode( '/', [ $cardExpiry->getMonth(), $cardExpiry->getYear() ] );
 	}
 
+	private function getDataFieldsFromDonor( Donor $personalInfo = null ): array {
+		if ( $personalInfo === null ) {
+			return [ 'adresstyp' => 'anonym' ];
+		}
+
+		return array_merge(
+			$this->getDataFieldsFromPersonName( $personalInfo->getName() ),
+			$this->getDataFieldsFromAddress( $personalInfo->getPhysicalAddress() ),
+			[ 'email' => $personalInfo->getEmailAddress() ]
+		);
+	}
+
+	private function getDataFieldsFromPersonName( DonorName $name ): array {
+		return [
+			'adresstyp' => $name->getPersonType(),
+			'anrede' => $name->getSalutation(),
+			'titel' => $name->getTitle(),
+			'vorname' => $name->getFirstName(),
+			'nachname' => $name->getLastName(),
+			'firma' => $name->getCompanyName(),
+		];
+	}
+
+	private function getDataFieldsFromAddress( DonorAddress $address ): array {
+		return [
+			'strasse' => $address->getStreetAddress(),
+			'plz' => $address->getPostalCode(),
+			'ort' => $address->getCity(),
+			'country' => $address->getCountryCode(),
+		];
+	}
+
+	private function updateDonation( Donation $donation ): void {
+		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
+
+		if ( $doctrineDonation === null ) {
+			throw new StoreDonationException();
+		}
+
+		$this->updateDonationEntity( $doctrineDonation, $donation );
+
+		try {
+			$this->entityManager->persist( $doctrineDonation );
+			$this->entityManager->flush();
+		}
+		catch ( ORMException $ex ) {
+			throw new StoreDonationException( $ex );
+		}
+	}
+
+	/**
+	 * @param int $id
+	 *
+	 * @return DoctrineDonation|null
+	 * @throws ORMException
+	 */
+	public function getDoctrineDonationById( int $id ): ?DoctrineDonation {
+		return $this->entityManager->getRepository( DoctrineDonation::class )->findOneBy(
+			[
+				'id' => $id,
+				'deletionTime' => null
+			]
+		);
+	}
+
 	public function getDonationById( int $id ): ?Donation {
 		try {
 			$donation = $this->getDoctrineDonationById( $id );
@@ -298,18 +320,6 @@ class DoctrineDonationRepository implements DonationRepository {
 		}
 
 		return $this->newDonationDomainObject( $donation );
-	}
-
-	/**
-	 * @param int $id
-	 * @return DoctrineDonation|null
-	 * @throws ORMException
-	 */
-	public function getDoctrineDonationById( int $id ): ?DoctrineDonation {
-		return $this->entityManager->getRepository( DoctrineDonation::class )->findOneBy( [
-			'id' => $id,
-			'deletionTime' => null
-		] );
 	}
 
 	private function newDonationDomainObject( DoctrineDonation $dd ): Donation {
@@ -336,33 +346,15 @@ class DoctrineDonationRepository implements DonationRepository {
 		);
 	}
 
-	private function getPaymentFromEntity( DoctrineDonation $dd ): DonationPayment {
-		return new DonationPayment(
-			Euro::newFromString( $dd->getAmount() ),
-			$dd->getPaymentIntervalInMonths(),
-			$this->getPaymentMethodFromEntity( $dd )
-		);
-	}
-
-	private function getPaymentMethodFromEntity( DoctrineDonation $dd ): PaymentMethod {
-		switch ( $dd->getPaymentType() ) {
-			case PaymentType::BANK_TRANSFER:
-				return new BankTransferPayment( $dd->getBankTransferCode() );
-			case PaymentType::DIRECT_DEBIT:
-				return new DirectDebitPayment( $this->getBankDataFromEntity( $dd ) );
-			case PaymentType::PAYPAL:
-				return new PayPalPayment( $this->getPayPalDataFromEntity( $dd ) );
-			case PaymentType::CREDIT_CARD:
-				return new CreditCardPayment( $this->getCreditCardDataFromEntity( $dd ) );
-			case PaymentType::SOFORT:
-				$sofortPayment = new SofortPayment( $dd->getBankTransferCode() );
-				$doctrinePayment = $dd->getPayment();
-				if ( $doctrinePayment instanceof DoctrineSofortPayment ) {
-					$sofortPayment->setConfirmedAt( $doctrinePayment->getConfirmedAt() );
-				}
-				return $sofortPayment;
+	private function entityHasDonorInformation( DoctrineDonation $dd ): bool {
+		// If entity was backed up, its information was purged
+		if ( $dd->getDtBackup() !== null ) {
+			return false;
 		}
-		return new PaymentWithoutAssociatedData( $dd->getPaymentType() );
+
+		$data = $dd->getDecodedData();
+
+		return isset( $data['adresstyp'] ) && $data['adresstyp'] !== DonorName::PERSON_ANONYMOUS;
 	}
 
 	private function getPersonNameFromEntity( DoctrineDonation $dd ): DonorName {
@@ -393,6 +385,37 @@ class DoctrineDonationRepository implements DonationRepository {
 		return $address->freeze()->assertNoNullFields();
 	}
 
+	private function getPaymentFromEntity( DoctrineDonation $dd ): DonationPayment {
+		return new DonationPayment(
+			Euro::newFromString( $dd->getAmount() ),
+			$dd->getPaymentIntervalInMonths(),
+			$this->getPaymentMethodFromEntity( $dd )
+		);
+	}
+
+	private function getPaymentMethodFromEntity( DoctrineDonation $dd ): PaymentMethod {
+		switch ( $dd->getPaymentType() ) {
+			case PaymentType::BANK_TRANSFER:
+				return new BankTransferPayment( $dd->getBankTransferCode() );
+			case PaymentType::DIRECT_DEBIT:
+				return new DirectDebitPayment( $this->getBankDataFromEntity( $dd ) );
+			case PaymentType::PAYPAL:
+				return new PayPalPayment( $this->getPayPalDataFromEntity( $dd ) );
+			case PaymentType::CREDIT_CARD:
+				return new CreditCardPayment( $this->getCreditCardDataFromEntity( $dd ) );
+			case PaymentType::SOFORT:
+				$sofortPayment = new SofortPayment( $dd->getBankTransferCode() );
+				$doctrinePayment = $dd->getPayment();
+				if ( $doctrinePayment instanceof DoctrineSofortPayment ) {
+					$sofortPayment->setConfirmedAt( $doctrinePayment->getConfirmedAt() );
+				}
+
+				return $sofortPayment;
+		}
+
+		return new PaymentWithoutAssociatedData( $dd->getPaymentType() );
+	}
+
 	private function getBankDataFromEntity( DoctrineDonation $dd ): BankData {
 		$data = $dd->getDecodedData();
 
@@ -402,24 +425,9 @@ class DoctrineDonationRepository implements DonationRepository {
 		$bankData->setAccount( $data['konto'] ?? '' );
 		$bankData->setBankCode( $data['blz'] ?? '' );
 		$bankData->setBankName( $data['bankname'] ?? '' );
+
 		return $bankData->freeze()->assertNoNullFields();
 
-	}
-
-	private function getTrackingInfoFromEntity( DoctrineDonation $dd ): DonationTrackingInfo {
-		$data = $dd->getDecodedData();
-
-		$trackingInfo = new DonationTrackingInfo();
-
-		$trackingInfo->setLayout( $data['layout'] ?? '' );
-		$trackingInfo->setTotalImpressionCount( intval( $data['impCount'] ?? '0', 10 ) );
-		$trackingInfo->setSingleBannerImpressionCount( intval( $data['bImpCount'] ?? '0', 10 ) );
-		$trackingInfo->setTracking( $data['tracking'] ?? '' );
-		$trackingInfo->setSkin( $data['skin'] ?? '' );
-		$trackingInfo->setColor( $data['color'] ?? '' );
-		$trackingInfo->setSource( $data['source'] ?? '' );
-
-		return $trackingInfo->freeze()->assertNoNullFields();
 	}
 
 	private function getPayPalDataFromEntity( DoctrineDonation $dd ): ?PayPalData {
@@ -466,6 +474,22 @@ class DoctrineDonationRepository implements DonationRepository {
 			->freeze();
 	}
 
+	private function getTrackingInfoFromEntity( DoctrineDonation $dd ): DonationTrackingInfo {
+		$data = $dd->getDecodedData();
+
+		$trackingInfo = new DonationTrackingInfo();
+
+		$trackingInfo->setLayout( $data['layout'] ?? '' );
+		$trackingInfo->setTotalImpressionCount( intval( $data['impCount'] ?? '0', 10 ) );
+		$trackingInfo->setSingleBannerImpressionCount( intval( $data['bImpCount'] ?? '0', 10 ) );
+		$trackingInfo->setTracking( $data['tracking'] ?? '' );
+		$trackingInfo->setSkin( $data['skin'] ?? '' );
+		$trackingInfo->setColor( $data['color'] ?? '' );
+		$trackingInfo->setSource( $data['source'] ?? '' );
+
+		return $trackingInfo->freeze()->assertNoNullFields();
+	}
+
 	private function getCommentFromEntity( DoctrineDonation $dd ): ?DonationComment {
 		if ( $dd->getComment() === '' ) {
 			return null;
@@ -476,16 +500,6 @@ class DoctrineDonationRepository implements DonationRepository {
 			$dd->getIsPublic(),
 			$dd->getPublicRecord()
 		);
-	}
-
-	private function entityHasDonorInformation( DoctrineDonation $dd ): bool {
-		// If entity was backed up, its information was purged
-		if ( $dd->getDtBackup() !== null ) {
-			return false;
-		}
-
-		$data = $dd->getDecodedData();
-		return isset( $data['adresstyp'] ) && $data['adresstyp'] !== DonorName::PERSON_ANONYMOUS;
 	}
 
 }
