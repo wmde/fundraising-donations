@@ -21,12 +21,13 @@ class EmailValidator {
 		$this->domainValidator = $tldValidator;
 	}
 
-	public function validate( $emailAddress ): ValidationResult {	// @codingStandardsIgnoreLine
+	public function validate( $emailAddress ): ValidationResult {    // @codingStandardsIgnoreLine
 		$mailAddress = null;
 
 		try {
 			$mailAddress = new EmailAddress( $emailAddress );
-		} catch ( \InvalidArgumentException $e ) {
+		}
+		catch ( \InvalidArgumentException $e ) {
 			return new ValidationResult( new ConstraintViolation( $emailAddress, 'email_address_wrong_format' ) );
 		}
 
@@ -35,7 +36,9 @@ class EmailValidator {
 		}
 
 		if ( !$this->domainValidator->isValid( $mailAddress->getNormalizedDomain() ) ) {
-			return new ValidationResult( new ConstraintViolation( $emailAddress, 'email_address_domain_record_not_found' ) );
+			return new ValidationResult(
+				new ConstraintViolation( $emailAddress, 'email_address_domain_record_not_found' )
+			);
 		}
 
 		return new ValidationResult();

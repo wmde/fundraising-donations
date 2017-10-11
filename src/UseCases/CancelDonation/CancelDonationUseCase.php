@@ -27,7 +27,7 @@ class CancelDonationUseCase {
 	private $donationLogger;
 
 	public function __construct( DonationRepository $donationRepository, TemplateMailerInterface $mailer,
-								 DonationAuthorizer $authorizationService, DonationEventLogger $donationLogger ) {
+		DonationAuthorizer $authorizationService, DonationEventLogger $donationLogger ) {
 
 		$this->donationRepository = $donationRepository;
 		$this->mailer = $mailer;

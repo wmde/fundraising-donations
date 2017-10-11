@@ -25,8 +25,7 @@ class DoctrineDonationEventLogger implements DonationEventLogger {
 			$this->timestampFunction = function() {
 				return date( 'Y-m-d H:i:s' );
 			};
-		}
-		else {
+		} else {
 			$this->timestampFunction = $timestampFunction;
 		}
 	}

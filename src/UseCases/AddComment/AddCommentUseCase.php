@@ -24,7 +24,7 @@ class AddCommentUseCase {
 	private $commentValidator;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-								 TextPolicyValidator $textPolicyValidator, AddCommentValidator $commentValidator ) {
+		TextPolicyValidator $textPolicyValidator, AddCommentValidator $commentValidator ) {
 
 		$this->donationRepository = $repository;
 		$this->authorizationService = $authorizationService;

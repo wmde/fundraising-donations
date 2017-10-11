@@ -22,6 +22,7 @@ class AmountPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @dataProvider smallAmountProvider
+	 *
 	 * @param float $amount
 	 * @param int $interval
 	 */
@@ -41,6 +42,7 @@ class AmountPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 
 	/**
 	 * @dataProvider offLimitAmountProvider
+	 *
 	 * @param float $amount
 	 * @param int $interval
 	 */

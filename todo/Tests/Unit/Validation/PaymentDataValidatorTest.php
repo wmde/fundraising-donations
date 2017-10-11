@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\Tests\Unit\Validation;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
 use WMDE\Fundraising\Frontend\Validation\PaymentDataValidator;
 
 /**

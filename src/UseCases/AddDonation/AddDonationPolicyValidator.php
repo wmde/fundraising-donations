@@ -20,7 +20,7 @@ class AddDonationPolicyValidator {
 	private $emailAddressBlacklist;
 
 	public function __construct( AmountPolicyValidator $amountPolicyValidator, TextPolicyValidator $textPolicyValidator,
-								 array $emailAddressBlacklist = [] ) {
+		array $emailAddressBlacklist = [] ) {
 		$this->amountPolicyValidator = $amountPolicyValidator;
 		$this->textPolicyValidator = $textPolicyValidator;
 		$this->emailAddressBlacklist = $emailAddressBlacklist;

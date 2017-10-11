@@ -21,7 +21,7 @@ class ShowDonationConfirmationUseCase {
 	private $donationRepository;
 
 	public function __construct( DonationAuthorizer $authorizer, DonationTokenFetcher $tokenFetcher,
-								 DonationRepository $donationRepository ) {
+		DonationRepository $donationRepository ) {
 		$this->authorizer = $authorizer;
 		$this->tokenFetcher = $tokenFetcher;
 		$this->donationRepository = $donationRepository;

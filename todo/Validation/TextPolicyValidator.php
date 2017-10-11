@@ -53,10 +53,10 @@ class TextPolicyValidator {
 	}
 
 	public function hasHarmlessContent( string $text, int $flags ): bool {
-		$ignoreWhiteWords = (bool) ( $flags & self::IGNORE_WHITEWORDS );
+		$ignoreWhiteWords = (bool)( $flags & self::IGNORE_WHITEWORDS );
 
 		if ( $flags & self::CHECK_URLS ) {
-			$testWithDNS = (bool) ( $flags & self::CHECK_URLS_DNS );
+			$testWithDNS = (bool)( $flags & self::CHECK_URLS_DNS );
 
 			if ( $this->hasUrls( $text, $testWithDNS, $ignoreWhiteWords ) ) {
 				return false;
@@ -109,10 +109,14 @@ class TextPolicyValidator {
 
 	private function hasBadWordNotMatchingWhiteWords( array $badMatches, array $whiteMatches ): bool {
 		return count(
-			array_udiff( $badMatches, $whiteMatches, function( $badMatch, $whiteMatch ) {
-				return !preg_match( $this->composeRegex( [ $badMatch ] ), $whiteMatch );
-			} )
-		) > 0;
+				array_udiff(
+					$badMatches,
+					$whiteMatches,
+					function( $badMatch, $whiteMatch ) {
+						return !preg_match( $this->composeRegex( [ $badMatch ] ), $whiteMatch );
+					}
+				)
+			) > 0;
 	}
 
 	private function wordMatchesWhiteWords( string $word ): bool {
@@ -129,7 +133,9 @@ class TextPolicyValidator {
 		if ( $testWithDNS ) {
 			$possibleDomainNames = $this->extractPossibleDomainNames( $text );
 			foreach ( $possibleDomainNames as $domainName ) {
-				if ( !( $ignoreWhiteWords && $this->wordMatchesWhiteWords( $domainName ) ) && $this->isExistingDomain( $domainName ) ) {
+				if ( !( $ignoreWhiteWords && $this->wordMatchesWhiteWords( $domainName ) ) && $this->isExistingDomain(
+						$domainName
+					) ) {
 					return true;
 				}
 			}
@@ -152,7 +158,7 @@ class TextPolicyValidator {
 
 	private function composeRegex( array $wordArray ): string {
 		$quotedWords = array_map(
-			function ( string $word ) {
+			function( string $word ) {
 				return preg_quote( $word, '#' );
 			},
 			$wordArray

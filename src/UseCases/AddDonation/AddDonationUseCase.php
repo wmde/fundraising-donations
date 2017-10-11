@@ -40,9 +40,9 @@ class AddDonationUseCase {
 	private $initialDonationStatusPicker;
 
 	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
-								 AddDonationPolicyValidator $policyValidator, ReferrerGeneralizer $referrerGeneralizer,
-								 DonationConfirmationMailer $mailer, TransferCodeGenerator $transferCodeGenerator,
-								 DonationTokenFetcher $tokenFetcher, InitialDonationStatusPicker $initialDonationStatusPicker ) {
+		AddDonationPolicyValidator $policyValidator, ReferrerGeneralizer $referrerGeneralizer,
+		DonationConfirmationMailer $mailer, TransferCodeGenerator $transferCodeGenerator,
+		DonationTokenFetcher $tokenFetcher, InitialDonationStatusPicker $initialDonationStatusPicker ) {
 		$this->donationRepository = $donationRepository;
 		$this->donationValidator = $donationValidator;
 		$this->policyValidator = $policyValidator;

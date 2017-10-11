@@ -22,7 +22,7 @@ class SofortPaymentNotificationUseCase {
 	private $mailer;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-								 DonationConfirmationMailer $mailer ) {
+		DonationConfirmationMailer $mailer ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->mailer = $mailer;

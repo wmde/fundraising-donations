@@ -54,7 +54,7 @@ class Donation {
 	 * @throws \InvalidArgumentException
 	 */
 	public function __construct( ?int $id, string $status, ?Donor $donor, DonationPayment $payment,
-								 bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
+		bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 
 		$this->id = $id;
 		$this->setStatus( $status );

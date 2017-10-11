@@ -15,9 +15,11 @@ use WMDE\Fundraising\Frontend\Infrastructure\RandomTokenGenerator;
 class RandomTokenGeneratorTest extends \PHPUnit\Framework\TestCase {
 
 	public function testGenerateTokenReturnsHexString(): void {
-		$this->assertTrue( ctype_xdigit(
-			( new RandomTokenGenerator( 10, new \DateInterval( 'PT1H' ) ) )->generateToken()
-		) );
+		$this->assertTrue(
+			ctype_xdigit(
+				( new RandomTokenGenerator( 10, new \DateInterval( 'PT1H' ) ) )->generateToken()
+			)
+		);
 	}
 
 	public function testGenerateTokenReturnsDifferentStringsOnSuccessiveCalls(): void {

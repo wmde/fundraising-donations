@@ -12,11 +12,9 @@ class InitialDonationStatusPicker {
 	public function __invoke( string $paymentType ): string {
 		if ( $paymentType === PaymentType::DIRECT_DEBIT ) {
 			return Donation::STATUS_NEW;
-		}
-		elseif ( $paymentType === PaymentType::BANK_TRANSFER ) {
+		} elseif ( $paymentType === PaymentType::BANK_TRANSFER ) {
 			return Donation::STATUS_PROMISE;
-		}
-		elseif ( $paymentType === PaymentType::SOFORT ) {
+		} elseif ( $paymentType === PaymentType::SOFORT ) {
 			return Donation::STATUS_PROMISE;
 		}
 

@@ -49,8 +49,7 @@ class DoctrineDonationRepository implements DonationRepository {
 	public function storeDonation( Donation $donation ): void {
 		if ( $donation->getId() === null ) {
 			$this->insertDonation( $donation );
-		}
-		else {
+		} else {
 			$this->updateDonation( $donation );
 		}
 	}
@@ -103,8 +102,7 @@ class DoctrineDonationRepository implements DonationRepository {
 	public static function getBankTransferCode( PaymentMethod $paymentMethod ): string {
 		if ( $paymentMethod instanceof BankTransferPayment ) {
 			return $paymentMethod->getBankTransferCode();
-		}
-		else {
+		} else {
 			if ( $paymentMethod instanceof SofortPayment ) {
 				return $paymentMethod->getBankTransferCode();
 			}
@@ -129,8 +127,7 @@ class DoctrineDonationRepository implements DonationRepository {
 			if ( $doctrineDonation->getId() === null ) {
 				$doctrineDonation->setDonorFullName( 'Anonym' );
 			}
-		}
-		else {
+		} else {
 			$doctrineDonation->setDonorCity( $donor->getPhysicalAddress()->getCity() );
 			$doctrineDonation->setDonorEmail( $donor->getEmailAddress() );
 			$doctrineDonation->setDonorFullName( $donor->getName()->getFullName() );
@@ -142,8 +139,7 @@ class DoctrineDonationRepository implements DonationRepository {
 			$doctrineDonation->setIsPublic( false );
 			$doctrineDonation->setComment( '' );
 			$doctrineDonation->setPublicRecord( '' );
-		}
-		else {
+		} else {
 			$doctrineDonation->setIsPublic( $comment->isPublic() );
 			$doctrineDonation->setComment( $comment->getCommentText() );
 			$doctrineDonation->setPublicRecord( $comment->getAuthorDisplayName() );

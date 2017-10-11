@@ -30,7 +30,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 	private const ID_OF_WRONG_DONATION = 42;
 
 	private function newAuthorizationServiceWithDonations( string $updateToken = null,
-														   string $accessToken = null, Donation ...$donations ): DonationAuthorizer {
+		string $accessToken = null, Donation ...$donations ): DonationAuthorizer {
 
 		$entityManager = TestEnvironment::newInstance()->getFactory()->getEntityManager();
 

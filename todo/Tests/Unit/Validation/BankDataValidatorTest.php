@@ -65,7 +65,13 @@ class BankDataValidatorTest extends ValidatorTestCase {
 
 	public function testAllRequiredFieldsGiven_validationSucceeds(): void {
 		$bankDataValidator = $this->newBankDataValidator();
-		$bankData = $this->newBankData( 'DE00123456789012345678', 'SCROUSDBXXX', 'Scrooge Bank', '12345678', '1234567890' );
+		$bankData = $this->newBankData(
+			'DE00123456789012345678',
+			'SCROUSDBXXX',
+			'Scrooge Bank',
+			'12345678',
+			'1234567890'
+		);
 		$this->assertTrue( $bankDataValidator->validate( $bankData )->isSuccessful() );
 	}
 

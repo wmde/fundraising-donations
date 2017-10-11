@@ -47,7 +47,7 @@ class AddDonationValidator {
 	];
 
 	public function __construct( PaymentDataValidator $paymentDataValidator, BankDataValidator $bankDataValidator,
-								 EmailValidator $emailValidator ) {
+		EmailValidator $emailValidator ) {
 
 		$this->paymentDataValidator = $paymentDataValidator;
 		$this->bankDataValidator = $bankDataValidator;
@@ -117,8 +117,7 @@ class AddDonationValidator {
 					)
 				]
 			);
-		}
-		else {
+		} else {
 			$this->validateFieldLength( $this->request->getDonorEmailAddress(), Result::SOURCE_DONOR_EMAIL );
 		}
 	}
@@ -129,8 +128,7 @@ class AddDonationValidator {
 		}
 		if ( $this->request->donorIsCompany() ) {
 			$this->validateCompanyName();
-		}
-		else {
+		} else {
 			$this->validatePersonName();
 		}
 	}
@@ -142,8 +140,7 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_COMPANY
 			);
-		}
-		else {
+		} else {
 			$this->validateFieldLength( $this->request->getDonorCompany(), Result::SOURCE_DONOR_COMPANY );
 		}
 	}
@@ -157,8 +154,7 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_FIRST_NAME
 			);
-		}
-		else {
+		} else {
 			$this->validateFieldLength( $this->request->getDonorFirstName(), Result::SOURCE_DONOR_FIRST_NAME );
 		}
 
@@ -168,8 +164,7 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_LAST_NAME
 			);
-		}
-		else {
+		} else {
 			$this->validateFieldLength( $this->request->getDonorLastName(), Result::SOURCE_DONOR_LAST_NAME );
 		}
 
@@ -179,8 +174,7 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_SALUTATION
 			);
-		}
-		else {
+		} else {
 			$this->validateFieldLength( $this->request->getDonorSalutation(), Result::SOURCE_DONOR_SALUTATION );
 		}
 
@@ -203,8 +197,7 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_STREET_ADDRESS
 			);
-		}
-		else {
+		} else {
 			$this->validateFieldLength( $this->request->getDonorStreetAddress(), Result::SOURCE_DONOR_STREET_ADDRESS );
 		}
 
@@ -214,8 +207,7 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_POSTAL_CODE
 			);
-		}
-		else {
+		} else {
 			$this->validateFieldLength( $this->request->getDonorPostalCode(), Result::SOURCE_DONOR_POSTAL_CODE );
 		}
 
@@ -225,8 +217,7 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_CITY
 			);
-		}
-		else {
+		} else {
 			$this->validateFieldLength( $this->request->getDonorCity(), Result::SOURCE_DONOR_CITY );
 		}
 
@@ -236,8 +227,7 @@ class AddDonationValidator {
 				Result::VIOLATION_MISSING,
 				Result::SOURCE_DONOR_COUNTRY
 			);
-		}
-		else {
+		} else {
 			$this->validateFieldLength( $this->request->getDonorCountryCode(), Result::SOURCE_DONOR_COUNTRY );
 		}
 

@@ -35,7 +35,7 @@ class HandlePayPalPaymentNotificationUseCase {
 	private $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-								 DonationConfirmationMailer $mailer, DonationEventLogger $donationEventLogger ) {
+		DonationConfirmationMailer $mailer, DonationEventLogger $donationEventLogger ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->mailer = $mailer;
@@ -160,7 +160,7 @@ class HandlePayPalPaymentNotificationUseCase {
 	}
 
 	private function donationWasBookedWithDifferentTransactionId( Donation $donation,
-																  PayPalPaymentNotificationRequest $request ): bool {
+		PayPalPaymentNotificationRequest $request ): bool {
 		/**
 		 * @var PayPalPayment $payment
 		 */
