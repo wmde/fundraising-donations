@@ -257,6 +257,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 
 	public function testGivenNewTransactionIdForBookedDonation_childTransactionWithSameDataIsCreated(): void {
 		$donation = ValidDonation::newBookedPayPalDonation();
+		$donation->setOptsIntoDonationReceipt( true );
 		$transactionId = '16R12136PU8783961';
 
 		$fakeRepository = new FakeDonationRepository();
@@ -287,6 +288,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$this->assertEquals( $donation->getDonor(), $childDonation->getDonor() );
 		$this->assertEquals( $donation->getPaymentIntervalInMonths(), $childDonation->getPaymentIntervalInMonths() );
 		$this->assertTrue( $childDonation->isBooked() );
+		$this->assertTrue( $childDonation->getOptsIntoDonationReceipt() );
 	}
 
 	public function testGivenNewTransactionIdForBookedDonation_childCreationeventIsLogged(): void {
@@ -457,6 +459,8 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		/** @var PayPalData $paypalData */
 		$paypalData = $payment->getPaymentMethod()->getPaypalData();
 		$this->assertSame( ValidPayPalNotificationRequest::PAYER_ADDRESS_NAME, $paypalData->getAddressName() );
+
+		$this->assertNull( $donation->getOptsIntoDonationReceipt() );
 	}
 
 	/**

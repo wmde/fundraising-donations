@@ -360,4 +360,46 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertSame( Donation::STATUS_CANCELLED, $repository->getDonationById( 1 )->getStatus() );
 	}
 
+	public function testOptingIntoDonationReceipt_persistedInDonation(): void {
+		$repository = $this->newRepository();
+		$useCase = new AddDonationUseCase(
+			$repository,
+			$this->getSucceedingValidatorMock(),
+			$this->getAutoDeletingPolicyValidatorMock(),
+			new ReferrerGeneralizer( 'http://foo.bar', [] ),
+			$this->newMailer(),
+			$this->newTransferCodeGenerator(),
+			$this->newTokenFetcher(),
+			new InitialDonationStatusPicker()
+		);
+
+		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+		$request->setOptsIntoDonationReceipt( true );
+
+		$useCase->addDonation( $request );
+
+		$this->assertSame( true, $repository->getDonationById( 1 )->getOptsIntoDonationReceipt() );
+	}
+
+	public function testOptingOutOfDonationReceipt_persistedInDonation(): void {
+		$repository = $this->newRepository();
+		$useCase = new AddDonationUseCase(
+			$repository,
+			$this->getSucceedingValidatorMock(),
+			$this->getAutoDeletingPolicyValidatorMock(),
+			new ReferrerGeneralizer( 'http://foo.bar', [] ),
+			$this->newMailer(),
+			$this->newTransferCodeGenerator(),
+			$this->newTokenFetcher(),
+			new InitialDonationStatusPicker()
+		);
+
+		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+		$request->setOptsIntoDonationReceipt( false );
+
+		$useCase->addDonation( $request );
+
+		$this->assertSame( false, $repository->getDonationById( 1 )->getOptsIntoDonationReceipt() );
+	}
+
 }

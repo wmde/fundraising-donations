@@ -75,6 +75,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		$this->updateDonorInformation( $doctrineDonation, $donation->getDonor() );
 		$this->updateComment( $doctrineDonation, $donation->getComment() );
 		$doctrineDonation->setDonorOptsIntoNewsletter( $donation->getOptsIntoNewsletter() );
+		$doctrineDonation->setDonationReceipt( $donation->getOptsIntoDonationReceipt() );
 
 		$doctrineDonation->encodeAndSetData(
 			array_merge(
@@ -319,7 +320,7 @@ class DoctrineDonationRepository implements DonationRepository {
 	}
 
 	private function newDonationDomainObject( DoctrineDonation $dd ): Donation {
-		return new Donation(
+		$donation = new Donation(
 			$dd->getId(),
 			$dd->getStatus(),
 			$this->getDonorFromEntity( $dd ),
@@ -328,6 +329,8 @@ class DoctrineDonationRepository implements DonationRepository {
 			$this->getTrackingInfoFromEntity( $dd ),
 			$this->getCommentFromEntity( $dd )
 		);
+		$donation->setOptsIntoDonationReceipt( $dd->getDonationReceipt() );
+		return $donation;
 	}
 
 	private function getDonorFromEntity( DoctrineDonation $dd ): ?Donor {
