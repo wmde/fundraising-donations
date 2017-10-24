@@ -27,17 +27,28 @@ class DonorNameValidator {
 	private function validatePrivatePerson( DonorName $instance ): ValidationResult {
 		$validator = new RequiredFieldValidator();
 
-		return new ValidationResult( ...array_filter( [
-			$this->getFieldViolation( $validator->validate( $instance->getSalutation() ), 'salutation' ),
-			$this->getFieldViolation( $validator->validate( $instance->getFirstName() ), 'firstName' ),
-			$this->getFieldViolation( $validator->validate( $instance->getLastName() ), 'lastName' )
-		] ) );
+		return new ValidationResult(
+			...array_filter(
+				[
+					$this->getFieldViolation( $validator->validate( $instance->getSalutation() ), 'salutation' ),
+					$this->getFieldViolation( $validator->validate( $instance->getFirstName() ), 'firstName' ),
+					$this->getFieldViolation( $validator->validate( $instance->getLastName() ), 'lastName' )
+				]
+			)
+		);
 	}
 
 	private function validateCompanyPerson( DonorName $instance ): ValidationResult {
-		return new ValidationResult( ...array_filter( [
-			$this->getFieldViolation( ( new RequiredFieldValidator() )->validate( $instance->getCompanyName() ), 'company' )
-		] ) );
+		return new ValidationResult(
+			...array_filter(
+				[
+					$this->getFieldViolation(
+						( new RequiredFieldValidator() )->validate( $instance->getCompanyName() ),
+						'company'
+					)
+				]
+			)
+		);
 	}
 
 }

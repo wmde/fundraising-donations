@@ -30,8 +30,8 @@ class CreditCardNotificationUseCase {
 	private $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-								 CreditCardService $creditCardService, DonationConfirmationMailer $mailer,
-								 LoggerInterface $logger, DonationEventLogger $donationEventLogger ) {
+		CreditCardService $creditCardService, DonationConfirmationMailer $mailer,
+		LoggerInterface $logger, DonationEventLogger $donationEventLogger ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->creditCardService = $creditCardService;
@@ -42,12 +42,14 @@ class CreditCardNotificationUseCase {
 
 	/**
 	 * @param CreditCardPaymentNotificationRequest $request
+	 *
 	 * @throws CreditCardPaymentHandlerException
 	 */
 	public function handleNotification( CreditCardPaymentNotificationRequest $request ): void {
 		try {
 			$donation = $this->repository->getDonationById( $request->getDonationId() );
-		} catch ( GetDonationException $ex ) {
+		}
+		catch ( GetDonationException $ex ) {
 			throw new CreditCardPaymentHandlerException( 'data set could not be retrieved from database', $ex );
 		}
 
@@ -74,7 +76,8 @@ class CreditCardNotificationUseCase {
 		try {
 			$donation->addCreditCardData( $this->newCreditCardDataFromRequest( $request ) );
 			$donation->confirmBooked();
-		} catch ( \RuntimeException $e ) {
+		}
+		catch ( \RuntimeException $e ) {
 			throw new CreditCardPaymentHandlerException( 'data set could not be updated', $e );
 		}
 
@@ -93,7 +96,8 @@ class CreditCardNotificationUseCase {
 		if ( $donation->getDonor() !== null ) {
 			try {
 				$this->mailer->sendConfirmationMailFor( $donation );
-			} catch ( \RuntimeException $ex ) {
+			}
+			catch ( \RuntimeException $ex ) {
 				// no need to re-throw or return false, this is not a fatal error, only a minor inconvenience
 			}
 		}

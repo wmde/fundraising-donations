@@ -21,8 +21,8 @@ class DonorValidator {
 	private $mailValidator;
 
 	public function __construct( DonorNameValidator $nameValidator,
-								 DonorAddressValidator $addressValidator,
-								 EmailValidator $mailValidator ) {
+		DonorAddressValidator $addressValidator,
+		EmailValidator $mailValidator ) {
 		$this->nameValidator = $nameValidator;
 		$this->addressValidator = $addressValidator;
 		$this->mailValidator = $mailValidator;

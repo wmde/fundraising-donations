@@ -19,12 +19,16 @@ class DonorAddressValidator {
 	public function validate( DonorAddress $address ): ValidationResult {
 		$validator = new RequiredFieldValidator();
 
-		return new ValidationResult( ...array_filter( [
-			$this->getFieldViolation( $validator->validate( $address->getStreetAddress() ), 'street' ),
-			$this->getFieldViolation( $validator->validate( $address->getPostalCode() ), 'postcode' ),
-			$this->getFieldViolation( $validator->validate( $address->getCity() ), 'city' ),
-			$this->getFieldViolation( $validator->validate( $address->getCountryCode() ), 'country' )
-		] ) );
+		return new ValidationResult(
+			...array_filter(
+				[
+					$this->getFieldViolation( $validator->validate( $address->getStreetAddress() ), 'street' ),
+					$this->getFieldViolation( $validator->validate( $address->getPostalCode() ), 'postcode' ),
+					$this->getFieldViolation( $validator->validate( $address->getCity() ), 'city' ),
+					$this->getFieldViolation( $validator->validate( $address->getCountryCode() ), 'country' )
+				]
+			)
+		);
 	}
 
 }

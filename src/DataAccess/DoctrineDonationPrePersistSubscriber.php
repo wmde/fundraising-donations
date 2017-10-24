@@ -37,20 +37,22 @@ class DoctrineDonationPrePersistSubscriber implements EventSubscriber {
 		$entity = $args->getObject();
 
 		if ( $entity instanceof Donation ) {
-			$entity->modifyDataObject( function ( DonationData $data ): void {
-				if ( $this->isEmpty( $data->getAccessToken() ) ) {
-					$data->setAccessToken( $this->accessTokenGenerator->generateToken() );
-				}
+			$entity->modifyDataObject(
+				function( DonationData $data ): void {
+					if ( $this->isEmpty( $data->getAccessToken() ) ) {
+						$data->setAccessToken( $this->accessTokenGenerator->generateToken() );
+					}
 
-				if ( $this->isEmpty( $data->getUpdateToken() ) ) {
-					$data->setUpdateToken( $this->updateTokenGenerator->generateToken() );
-				}
+					if ( $this->isEmpty( $data->getUpdateToken() ) ) {
+						$data->setUpdateToken( $this->updateTokenGenerator->generateToken() );
+					}
 
-				if ( $this->isEmpty( $data->getUpdateTokenExpiry() ) ) {
-					$expiry = $this->updateTokenGenerator->generateTokenExpiry();
-					$data->setUpdateTokenExpiry( $expiry->format( self::DATE_TIME_FORMAT ) );
+					if ( $this->isEmpty( $data->getUpdateTokenExpiry() ) ) {
+						$expiry = $this->updateTokenGenerator->generateTokenExpiry();
+						$data->setUpdateTokenExpiry( $expiry->format( self::DATE_TIME_FORMAT ) );
+					}
 				}
-			} );
+			);
 		}
 	}
 

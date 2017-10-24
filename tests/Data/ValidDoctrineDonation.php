@@ -37,11 +37,13 @@ class ValidDoctrineDonation {
 		$donation->setDonorFullName( ValidDonation::DONOR_FULL_NAME );
 		$donation->setDonorOptsIntoNewsletter( ValidDonation::OPTS_INTO_NEWSLETTER );
 
-		$donation->encodeAndSetData( array_merge(
-			$this->getTrackingInfoArray(),
-			$this->getBankDataArray(),
-			$this->getDonorArray()
-		) );
+		$donation->encodeAndSetData(
+			array_merge(
+				$this->getTrackingInfoArray(),
+				$this->getBankDataArray(),
+				$this->getDonorArray()
+			)
+		);
 
 		return $donation;
 	}

@@ -12,8 +12,10 @@ class AddCommentValidatorTest extends \PHPUnit\Framework\TestCase {
 	private function newValidAddCommentRequest(): AddCommentRequest {
 		$request = new AddCommentRequest();
 		$request->setAuthorDisplayName( 'Gandalf the Grey' );
-		$request->setCommentText( 'In the common tongue it reads "One Wiki to Rule Them All. One Wiki to Find Them. ' .
-			'One Wiki to Bring Them All and In The Darkness Bind Them." ' );
+		$request->setCommentText(
+			'In the common tongue it reads "One Wiki to Rule Them All. One Wiki to Find Them. ' .
+			'One Wiki to Bring Them All and In The Darkness Bind Them." '
+		);
 		$request->setIsPublic( true );
 		$request->setDonationId( 1 );
 		return $request;

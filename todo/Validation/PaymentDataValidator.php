@@ -48,11 +48,13 @@ class PaymentDataValidator {
 	 */
 	public function validate( $amount, string $paymentType ): ValidationResult {
 		if ( !in_array( $paymentType, $this->allowedTypes ) ) {
-			return new ValidationResult( new ConstraintViolation(
-				$paymentType,
-				self::VIOLATION_UNKNOWN_PAYMENT_TYPE,
-				self::SOURCE_PAYMENT_TYPE
-			) );
+			return new ValidationResult(
+				new ConstraintViolation(
+					$paymentType,
+					self::VIOLATION_UNKNOWN_PAYMENT_TYPE,
+					self::SOURCE_PAYMENT_TYPE
+				)
+			);
 		}
 
 		if ( $amount instanceof Euro ) {
@@ -60,27 +62,33 @@ class PaymentDataValidator {
 		}
 
 		if ( !is_numeric( $amount ) ) {
-			return new ValidationResult( new ConstraintViolation(
-				$amount,
-				self::VIOLATION_AMOUNT_NOT_NUMERIC,
-				self::SOURCE_AMOUNT
-			) );
+			return new ValidationResult(
+				new ConstraintViolation(
+					$amount,
+					self::VIOLATION_AMOUNT_NOT_NUMERIC,
+					self::SOURCE_AMOUNT
+				)
+			);
 		}
 
 		if ( $amount < $this->getMinAmountFor( $paymentType ) ) {
-			return new ValidationResult( new ConstraintViolation(
-				$amount,
-				self::VIOLATION_AMOUNT_TOO_LOW,
-				self::SOURCE_AMOUNT
-			) );
+			return new ValidationResult(
+				new ConstraintViolation(
+					$amount,
+					self::VIOLATION_AMOUNT_TOO_LOW,
+					self::SOURCE_AMOUNT
+				)
+			);
 		}
 
 		if ( $amount >= $this->maxAmount ) {
-			return new ValidationResult( new ConstraintViolation(
-				$amount,
-				self::VIOLATION_AMOUNT_TOO_HIGH,
-				self::SOURCE_AMOUNT
-			) );
+			return new ValidationResult(
+				new ConstraintViolation(
+					$amount,
+					self::VIOLATION_AMOUNT_TOO_HIGH,
+					self::SOURCE_AMOUNT
+				)
+			);
 		}
 
 		return new ValidationResult();

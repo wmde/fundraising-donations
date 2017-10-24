@@ -36,11 +36,13 @@ class IncompleteDoctrineDonation {
 		$donation->setPaymentType( PaymentType::PAYPAL );
 		$donation->setStatus( Donation::STATUS_NEW );
 
-		$donation->encodeAndSetData( array_merge(
-			$this->getTrackingInfoArray(),
-			$this->getDonorArray(),
-			[ 'paypal_payer_id' => ValidPayPalNotificationRequest::PAYER_ID ]
-		) );
+		$donation->encodeAndSetData(
+			array_merge(
+				$this->getTrackingInfoArray(),
+				$this->getDonorArray(),
+				[ 'paypal_payer_id' => ValidPayPalNotificationRequest::PAYER_ID ]
+			)
+		);
 
 		return $donation;
 	}
@@ -52,10 +54,12 @@ class IncompleteDoctrineDonation {
 		$donation->setPaymentType( PaymentType::PAYPAL );
 		$donation->setStatus( Donation::STATUS_NEW );
 
-		$donation->encodeAndSetData( array_merge(
-			$this->getDonorArray(),
-			$this->getPaypalArray()
-		) );
+		$donation->encodeAndSetData(
+			array_merge(
+				$this->getDonorArray(),
+				$this->getPaypalArray()
+			)
+		);
 
 		return $donation;
 	}
@@ -67,10 +71,12 @@ class IncompleteDoctrineDonation {
 		$donation->setPaymentType( PaymentType::DIRECT_DEBIT );
 		$donation->setStatus( Donation::STATUS_NEW );
 
-		$donation->encodeAndSetData( array_merge(
-			$this->getTrackingInfoArray(),
-			$this->getDonorArray()
-		) );
+		$donation->encodeAndSetData(
+			array_merge(
+				$this->getTrackingInfoArray(),
+				$this->getDonorArray()
+			)
+		);
 
 		return $donation;
 	}
@@ -82,10 +88,12 @@ class IncompleteDoctrineDonation {
 		$donation->setPaymentType( PaymentType::CREDIT_CARD );
 		$donation->setStatus( Donation::STATUS_NEW );
 
-		$donation->encodeAndSetData( array_merge(
-			$this->getTrackingInfoArray(),
-			$this->getDonorArray()
-		) );
+		$donation->encodeAndSetData(
+			array_merge(
+				$this->getTrackingInfoArray(),
+				$this->getDonorArray()
+			)
+		);
 
 		return $donation;
 	}
@@ -150,8 +158,8 @@ class IncompleteDoctrineDonation {
 			'paypal_address_status' => ValidPayPalNotificationRequest::PAYER_ADDRESS_STATUS,
 			'paypal_mc_gross' => '5.99',
 			'paypal_mc_currency' => ValidPayPalNotificationRequest::CURRENCY_CODE,
-			'paypal_mc_fee' => '0.18' ,
-			'paypal_settle_amount' => '0' ,
+			'paypal_mc_fee' => '0.18',
+			'paypal_settle_amount' => '0',
 			'paypal_first_name' => ValidPayPalNotificationRequest::PAYER_FIRST_NAME,
 			'paypal_last_name' => ValidPayPalNotificationRequest::PAYER_LAST_NAME,
 			'paypal_address_name' => ValidPayPalNotificationRequest::PAYER_ADDRESS_NAME,

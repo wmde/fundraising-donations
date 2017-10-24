@@ -19,12 +19,15 @@ class EmailValidatorTest extends \PHPUnit\Framework\TestCase {
 	private function newStubDomainValidator(): DomainNameValidator {
 		return new class() implements DomainNameValidator {
 			public function isValid( string $domain ): bool {
-				return in_array( $domain, [
-					'wikimedia.de',
-					'nick.berlin',
-					'xn--triebwerk-grn-7ob.de',
-					'xn--4gbrim.xn----ymcbaaajlc6dj7bxne2c.xn--wgbh1c'
-				] );
+				return in_array(
+					$domain,
+					[
+						'wikimedia.de',
+						'nick.berlin',
+						'xn--triebwerk-grn-7ob.de',
+						'xn--4gbrim.xn----ymcbaaajlc6dj7bxne2c.xn--wgbh1c'
+					]
+				);
 			}
 		};
 	}

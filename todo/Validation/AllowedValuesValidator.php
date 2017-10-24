@@ -14,6 +14,7 @@ class AllowedValuesValidator {
 
 	/**
 	 * @param array $allowedValues
+	 *
 	 * @throws \UnexpectedValueException
 	 */
 	public function __construct( array $allowedValues ) {
@@ -23,7 +24,7 @@ class AllowedValuesValidator {
 		$this->allowedValues = $allowedValues;
 	}
 
-	public function validate( $value ): ValidationResult {	// @codingStandardsIgnoreLine
+	public function validate( $value ): ValidationResult {    // @codingStandardsIgnoreLine
 		if ( in_array( $value, $this->allowedValues, true ) ) {
 			return new ValidationResult();
 		}

@@ -30,8 +30,14 @@ class BankDataValidator {
 			$stringLengthValidator = new StringLengthValidator();
 			$violations[] = $this->getFieldViolation( $validator->validate( $bankData->getAccount() ), 'konto' );
 			$violations[] = $this->getFieldViolation( $validator->validate( $bankData->getBankCode() ), 'blz' );
-			$violations[] = $this->getFieldViolation( $stringLengthValidator->validate( $bankData->getAccount(), 10 ), 'konto' );
-			$violations[] = $this->getFieldViolation( $stringLengthValidator->validate( $bankData->getBankCode(), 8 ), 'blz' );
+			$violations[] = $this->getFieldViolation(
+				$stringLengthValidator->validate( $bankData->getAccount(), 10 ),
+				'konto'
+			);
+			$violations[] = $this->getFieldViolation(
+				$stringLengthValidator->validate( $bankData->getBankCode(), 8 ),
+				'blz'
+			);
 		}
 
 		$violations[] = $this->getFieldViolation( $this->ibanValidator->validate( $bankData->getIban() ), 'iban' );

@@ -47,7 +47,7 @@ class AddDonationValidator {
 	];
 
 	public function __construct( PaymentDataValidator $paymentDataValidator, BankDataValidator $bankDataValidator,
-								 EmailValidator $emailValidator ) {
+		EmailValidator $emailValidator ) {
 
 		$this->paymentDataValidator = $paymentDataValidator;
 		$this->bankDataValidator = $bankDataValidator;
@@ -76,10 +76,13 @@ class AddDonationValidator {
 			$this->request->getPaymentType()
 		);
 
-		$violations = array_map( function( ConstraintViolation $violation ) {
-			$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
-			return $violation;
-		}, $result->getViolations() );
+		$violations = array_map(
+			function( ConstraintViolation $violation ) {
+				$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
+				return $violation;
+			},
+			$result->getViolations()
+		);
 		$this->addViolations( $violations );
 	}
 
@@ -105,11 +108,15 @@ class AddDonationValidator {
 			return;
 		}
 		if ( $this->emailValidator->validate( $this->request->getDonorEmailAddress() )->hasViolations() ) {
-			$this->addViolations( [ new ConstraintViolation(
-				$this->request->getDonorEmailAddress(),
-				Result::VIOLATION_MISSING,
-				Result::SOURCE_DONOR_EMAIL
-			) ] );
+			$this->addViolations(
+				[
+					new ConstraintViolation(
+						$this->request->getDonorEmailAddress(),
+						Result::VIOLATION_MISSING,
+						Result::SOURCE_DONOR_EMAIL
+					)
+				]
+			);
 		} else {
 			$this->validateFieldLength( $this->request->getDonorEmailAddress(), Result::SOURCE_DONOR_EMAIL );
 		}
@@ -121,8 +128,7 @@ class AddDonationValidator {
 		}
 		if ( $this->request->donorIsCompany() ) {
 			$this->validateCompanyName();
-		}
-		else {
+		} else {
 			$this->validatePersonName();
 		}
 	}
@@ -237,7 +243,7 @@ class AddDonationValidator {
 	}
 
 	private function validatePayment(): void {
-		if ( ! in_array( $this->request->getPaymentType(), PaymentType::getPaymentTypes() ) ) {
+		if ( !in_array( $this->request->getPaymentType(), PaymentType::getPaymentTypes() ) ) {
 			$this->violations[] = new ConstraintViolation(
 				$this->request->getPaymentType(),
 				Result::VIOLATION_WRONG_PAYMENT_TYPE,
@@ -247,7 +253,7 @@ class AddDonationValidator {
 	}
 
 	private function validateFieldLength( string $value, string $fieldName ): void {
-		if ( strlen( $value ) > $this->maximumFieldLengths[$fieldName] )  {
+		if ( strlen( $value ) > $this->maximumFieldLengths[$fieldName] ) {
 			$this->violations[] = new ConstraintViolation( $value, Result::VIOLATION_WRONG_LENGTH, $fieldName );
 		}
 	}

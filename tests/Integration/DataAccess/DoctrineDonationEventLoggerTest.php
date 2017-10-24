@@ -8,8 +8,8 @@ use Doctrine\ORM\EntityManager;
 use WMDE\Fundraising\Entities\Donation;
 use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationEventLogger;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogException;
-use WMDE\Fundraising\Frontend\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\TestEnvironment;
+use WMDE\Fundraising\Frontend\Tests\Fixtures\ThrowingEntityManager;
 
 /**
  * @covers WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationEventLogger

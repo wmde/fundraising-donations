@@ -6,11 +6,11 @@ namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\A
 
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\Iban;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\Frontend\Validation\BankDataValidator;
 use WMDE\Fundraising\Frontend\Validation\ConstraintViolation;
 use WMDE\Fundraising\Frontend\Validation\EmailValidator;
@@ -229,7 +229,10 @@ class AddDonationValidatorTest extends \PHPUnit\Framework\TestCase {
 			}
 		}
 
-		$this->assertTrue( $violated, 'Failed asserting that constraint for field "' . $fieldName . '"" was violated.' );
+		$this->assertTrue(
+			$violated,
+			'Failed asserting that constraint for field "' . $fieldName . '"" was violated.'
+		);
 	}
 
 }

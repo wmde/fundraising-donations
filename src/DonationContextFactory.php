@@ -45,7 +45,9 @@ class DonationContextFactory {
 			$entityManager = ( new StoreFactory( $this->getConnection(), $this->getVarPath() . '/doctrine_proxies' ) )
 				->getEntityManager();
 			if ( $this->addDoctrineSubscribers ) {
-				$entityManager->getEventManager()->addEventSubscriber( $this->newDoctrineDonationPrePersistSubscriber() );
+				$entityManager->getEventManager()->addEventSubscriber(
+					$this->newDoctrineDonationPrePersistSubscriber()
+				);
 			}
 
 			return $entityManager;

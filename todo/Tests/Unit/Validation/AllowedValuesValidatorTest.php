@@ -20,7 +20,7 @@ class AllowedValuesValidatorTest extends ValidatorTestCase {
 	}
 
 	public function testGivenAllowedValues_theyAreAccepted(): void {
-		$validator = new AllowedValuesValidator( ['kittens', 'unicorns'] );
+		$validator = new AllowedValuesValidator( [ 'kittens', 'unicorns' ] );
 		$this->assertTrue( $validator->validate( 'kittens' )->isSuccessful() );
 		$this->assertTrue( $validator->validate( 'unicorns' )->isSuccessful() );
 
@@ -28,7 +28,7 @@ class AllowedValuesValidatorTest extends ValidatorTestCase {
 	}
 
 	public function testAllowedValuesAreCheckedStrictly(): void {
-		$validator = new AllowedValuesValidator( ['1', '2'] );
+		$validator = new AllowedValuesValidator( [ '1', '2' ] );
 		$this->assertTrue( $validator->validate( '1' )->isSuccessful() );
 		$this->assertFalse( $validator->validate( 1 )->isSuccessful() );
 	}

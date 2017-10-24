@@ -25,7 +25,7 @@ class CreditCardConfig {
 	private $testMode;
 
 	private function __construct( string $baseUrl, string $projectId, string $backgroundColor, string $logo, string $theme,
-								  bool $testMode ) {
+		bool $testMode ) {
 		$this->baseUrl = $baseUrl;
 		$this->projectId = $projectId;
 		$this->backgroundColor = $backgroundColor;
@@ -36,6 +36,7 @@ class CreditCardConfig {
 
 	/**
 	 * @param array $config
+	 *
 	 * @return self
 	 * @throws \RuntimeException
 	 */
