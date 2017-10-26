@@ -191,6 +191,8 @@ class HandlePayPalPaymentNotificationUseCase {
 			new DonationPayment( $payment->getAmount(), $payment->getIntervalInMonths(), $childPaymentMethod ),
 			$donation->getOptsIntoNewsletter(), $donation->getTrackingInfo()
 		);
+		$childDonation->setOptsIntoDonationReceipt( $donation->getOptsIntoDonationReceipt() );
+
 		try {
 			$this->repository->storeDonation( $childDonation );
 		}

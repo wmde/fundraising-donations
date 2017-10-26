@@ -38,6 +38,15 @@ class Donation {
 	private $comment;
 
 	/**
+	 * If the user wants to receive a donation receipt
+	 *
+	 * Can be null as there are historic, and machine-made records without this information
+	 *
+	 * @var bool|null
+	 */
+	private $optsIntoDonationReceipt;
+
+	/**
 	 * TODO: move out of Donation
 	 */
 	private $trackingInfo;
@@ -271,6 +280,14 @@ class Donation {
 
 	public function markAsDeleted(): void {
 		$this->status = self::STATUS_CANCELLED;
+	}
+
+	public function setOptsIntoDonationReceipt( ?bool $optOut ): void {
+		$this->optsIntoDonationReceipt = $optOut;
+	}
+
+	public function getOptsIntoDonationReceipt(): ?bool {
+		return $this->optsIntoDonationReceipt;
 	}
 
 }

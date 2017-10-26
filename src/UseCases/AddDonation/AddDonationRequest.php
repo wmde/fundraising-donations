@@ -27,6 +27,11 @@ class AddDonationRequest {
 	private $donorCountryCode;
 	private $donorEmailAddress;
 
+	/**
+	 * Newsletter subscription
+	 *
+	 * @var string
+	 */
 	private $optIn = '';
 
 	# donation
@@ -46,6 +51,8 @@ class AddDonationRequest {
 	private $color = '';
 	private $skin = '';
 	private $layout = '';
+
+	private $optsIntoDonationReceipt = true;
 
 	public function getOptIn(): string {
 		return $this->optIn;
@@ -235,4 +242,13 @@ class AddDonationRequest {
 	public function donorIsCompany(): bool {
 		return $this->getDonorType() === DonorName::PERSON_COMPANY;
 	}
+
+	public function setOptsIntoDonationReceipt( bool $optIn ): void {
+		$this->optsIntoDonationReceipt = $optIn;
+	}
+
+	public function getOptsIntoDonationReceipt(): bool {
+		return $this->optsIntoDonationReceipt;
+	}
+
 }

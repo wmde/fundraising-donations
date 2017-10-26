@@ -87,7 +87,7 @@ class AddDonationUseCase {
 	}
 
 	private function newDonationFromRequest( AddDonationRequest $donationRequest ): Donation {
-		return new Donation(
+		$donation = new Donation(
 			null,
 			( $this->initialDonationStatusPicker )( $donationRequest->getPaymentType() ),
 			$this->getPersonalInfoFromRequest( $donationRequest ),
@@ -95,6 +95,9 @@ class AddDonationUseCase {
 			$donationRequest->getOptIn() === '1',
 			$this->newTrackingInfoFromRequest( $donationRequest )
 		);
+		$donation->setOptsIntoDonationReceipt( $donationRequest->getOptsIntoDonationReceipt() );
+
+		return $donation;
 	}
 
 	private function getPersonalInfoFromRequest( AddDonationRequest $request ): ?Donor {
