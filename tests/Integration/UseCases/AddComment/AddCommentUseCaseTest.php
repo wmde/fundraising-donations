@@ -14,7 +14,7 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentRequ
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentUseCase;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentValidationResult;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentValidator;
-use WMDE\Fundraising\Frontend\Validation\TextPolicyValidator;
+use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
  * @covers WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentUseCase

@@ -5,6 +5,8 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\Validation;
 
 use WMDE\Euro\Euro;
+use WMDE\FunValidators\ConstraintViolation;
+use WMDE\FunValidators\ValidationResult;
 
 /**
  * @licence GNU GPL v2+

@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\Validation\ConstraintViolation;
+use WMDE\FunValidators\ConstraintViolation;
 
 /**
  * @license GNU GPL v2+

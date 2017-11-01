@@ -9,7 +9,7 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\Frontend\Validation\TextPolicyValidator;
+use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
  * @license GNU GPL v2+
