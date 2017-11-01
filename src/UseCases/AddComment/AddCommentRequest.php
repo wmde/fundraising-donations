@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment;
 
-use WMDE\Fundraising\Frontend\FreezableValueObject;
+use WMDE\FreezableValueObject\FreezableValueObject;
 
 /**
  * @license GNU GPL v2+
