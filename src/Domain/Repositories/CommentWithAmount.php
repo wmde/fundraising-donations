@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories;
 
 use DateTime;
-use WMDE\Fundraising\Frontend\FreezableValueObject;
+use WMDE\FreezableValueObject\FreezableValueObject;
 
 /**
  * @licence GNU GPL v2+
