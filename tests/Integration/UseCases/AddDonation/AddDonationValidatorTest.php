@@ -12,11 +12,11 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationVa
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\Iban;
 use WMDE\Fundraising\Frontend\Validation\BankDataValidator;
-use WMDE\Fundraising\Frontend\Validation\ConstraintViolation;
-use WMDE\Fundraising\Frontend\Validation\EmailValidator;
 use WMDE\Fundraising\Frontend\Validation\IbanValidator;
 use WMDE\Fundraising\Frontend\Validation\PaymentDataValidator;
-use WMDE\Fundraising\Frontend\Validation\ValidationResult;
+use WMDE\FunValidators\ConstraintViolation;
+use WMDE\FunValidators\ValidationResult;
+use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
  * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidator
