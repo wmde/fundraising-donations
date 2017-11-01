@@ -58,6 +58,13 @@ class SofortPaymentNotificationUseCase {
 			return $this->createUnhandledResponse( 'Duplicate notification' );
 		}
 
+		try {
+			$donation->confirmBooked();
+		}
+		catch ( \RuntimeException $ex ) {
+			return $this->createFailureResponse( $ex );
+		}
+
 		$paymentMethod->setConfirmedAt( $request->getTime() );
 
 		try {

@@ -14,8 +14,6 @@ class InitialDonationStatusPicker {
 			return Donation::STATUS_NEW;
 		} elseif ( $paymentType === PaymentType::BANK_TRANSFER ) {
 			return Donation::STATUS_PROMISE;
-		} elseif ( $paymentType === PaymentType::SOFORT ) {
-			return Donation::STATUS_PROMISE;
 		}
 
 		return Donation::STATUS_EXTERNAL_INCOMPLETE;

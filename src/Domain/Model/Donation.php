@@ -199,6 +199,11 @@ class Donation {
 			$this->makeCommentPrivate();
 		}
 
+		if ( $this->getPaymentType() === PaymentType::SOFORT ) {
+			$this->status = self::STATUS_PROMISE;
+			return;
+		}
+
 		$this->status = self::STATUS_EXTERNAL_BOOKED;
 	}
 
