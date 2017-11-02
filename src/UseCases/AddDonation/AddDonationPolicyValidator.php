@@ -5,9 +5,9 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
-use WMDE\Fundraising\Frontend\Validation\AmountPolicyValidator;
-use WMDE\Fundraising\Frontend\Validation\ConstraintViolation;
-use WMDE\Fundraising\Frontend\Validation\TextPolicyValidator;
+use WMDE\FunValidators\ConstraintViolation;
+use WMDE\FunValidators\Validators\AmountPolicyValidator;
+use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
  * @license GNU GPL v2+

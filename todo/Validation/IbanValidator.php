@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\Validation;
 
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\Iban;
+use WMDE\FunValidators\ValidationResult;
 
 /**
  * @licence GNU GPL v2+

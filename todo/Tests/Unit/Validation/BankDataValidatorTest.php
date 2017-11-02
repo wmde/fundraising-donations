@@ -8,10 +8,10 @@ use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\Iban;
 use WMDE\Fundraising\Frontend\Validation\BankDataValidator;
 use WMDE\Fundraising\Frontend\Validation\IbanValidator;
-use WMDE\Fundraising\Frontend\Validation\ValidationResult;
+use WMDE\FunValidators\ValidationResult;
 
 /**
- * @covers WMDE\Fundraising\Frontend\Validation\BankDataValidator
+ * @covers \WMDE\Fundraising\Frontend\Validation\BankDataValidator
  *
  * @license GNU GPL v2+
  * @author Kai Nissen < kai.nissen@wikimedia.de >
