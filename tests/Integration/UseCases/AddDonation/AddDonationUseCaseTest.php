@@ -25,7 +25,7 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\InitialDonati
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\ReferrerGeneralizer;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\TransferCodeGenerator;
-use WMDE\Fundraising\Frontend\Validation\ConstraintViolation;
+use WMDE\FunValidators\ConstraintViolation;
 
 /**
  * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationUseCase

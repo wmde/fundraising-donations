@@ -6,10 +6,10 @@ namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\A
 
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
-use WMDE\Fundraising\Frontend\Validation\AmountPolicyValidator;
-use WMDE\Fundraising\Frontend\Validation\ConstraintViolation;
-use WMDE\Fundraising\Frontend\Validation\TextPolicyValidator;
-use WMDE\Fundraising\Frontend\Validation\ValidationResult;
+use WMDE\FunValidators\ConstraintViolation;
+use WMDE\FunValidators\ValidationResult;
+use WMDE\FunValidators\Validators\AmountPolicyValidator;
+use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
  * @covers WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator

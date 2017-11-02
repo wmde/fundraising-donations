@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation;
 
-use WMDE\Fundraising\Frontend\Validation\ValidationResult;
+use WMDE\FunValidators\ValidationResult;
 
 /**
  * @license GNU GPL v2+

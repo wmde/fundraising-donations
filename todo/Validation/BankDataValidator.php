@@ -5,6 +5,10 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\Validation;
 
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankData;
+use WMDE\FunValidators\CanValidateField;
+use WMDE\FunValidators\ValidationResult;
+use WMDE\FunValidators\Validators\RequiredFieldValidator;
+use WMDE\FunValidators\Validators\StringLengthValidator;
 
 /**
  * @license GNU GPL v2+
