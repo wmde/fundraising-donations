@@ -10,7 +10,7 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationReposi
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
-use WMDE\Fundraising\Frontend\Infrastructure\EmailAddress;
+use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\Frontend\Infrastructure\TemplateMailerInterface;
 
 /**
