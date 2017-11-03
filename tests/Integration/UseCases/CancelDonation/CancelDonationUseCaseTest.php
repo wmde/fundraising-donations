@@ -13,7 +13,7 @@ use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationA
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\CancelDonation\CancelDonationRequest;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\CancelDonation\CancelDonationResponse;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\CancelDonation\CancelDonationUseCase;
-use WMDE\Fundraising\Frontend\Infrastructure\EmailAddress;
+use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\Frontend\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\Frontend\Tests\Fixtures\TemplateBasedMailerSpy;
 

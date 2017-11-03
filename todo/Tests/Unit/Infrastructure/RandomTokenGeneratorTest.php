@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\Frontend\Tests\Unit\Infrastructure;
 use WMDE\Fundraising\Frontend\Infrastructure\RandomTokenGenerator;
 
 /**
- * @covers WMDE\Fundraising\Frontend\Infrastructure\RandomTokenGenerator
+ * @covers \WMDE\Fundraising\Frontend\Infrastructure\RandomTokenGenerator
  *
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
