@@ -100,7 +100,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$this->assertCount( 1, $repositorySpy->getStoreDonationCalls() );
 	}
 
-	public function testWhenAuthorizationSucceeds_donationIsStillPromised(): void {
+	public function testWhenAuthorizationSucceeds_donationIsStillBooked(): void {
 		$donation = ValidDonation::newIncompleteSofortDonation();
 		$repository = new FakeDonationRepository( $donation );
 
@@ -113,7 +113,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$request = ValidSofortNotificationRequest::newInstantPayment();
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
-		$this->assertSame( Donation::STATUS_PROMISE, $repository->getDonationById( $donation->getId() )->getStatus() );
+		$this->assertSame( Donation::STATUS_EXTERNAL_BOOKED, $repository->getDonationById( $donation->getId() )->getStatus() );
 	}
 
 	public function testWhenPaymentTypeIsNonSofort_unhandledResponseIsReturned(): void {
