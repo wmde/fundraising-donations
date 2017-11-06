@@ -16,8 +16,8 @@ class InitialDonationStatusPickerTest extends TestCase {
 
 		$this->assertSame( 'N', $picker( 'BEZ' ) );
 		$this->assertSame( 'Z', $picker( 'UEB' ) );
-		$this->assertSame( 'Z', $picker( 'SUB' ) );
 
+		$this->assertSame( 'X', $picker( 'SUB' ) );
 		$this->assertSame( 'X', $picker( 'MCP' ) );
 		$this->assertSame( 'X', $picker( 'foo' ) );
 	}
