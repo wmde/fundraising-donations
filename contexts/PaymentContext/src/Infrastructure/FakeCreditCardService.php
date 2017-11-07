@@ -2,10 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\Tests\Fixtures;
-
-use WMDE\Fundraising\Frontend\PaymentContext\Infrastructure\CreditCardExpiry;
-use WMDE\Fundraising\Frontend\PaymentContext\Infrastructure\CreditCardService;
+namespace WMDE\Fundraising\Frontend\PaymentContext\Infrastructure;
 
 /**
  * @licence GNU GPL v2+
