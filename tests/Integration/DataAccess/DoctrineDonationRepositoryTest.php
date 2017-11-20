@@ -14,13 +14,13 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationE
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\IncompleteDoctrineDonation;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\TestEnvironment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\DirectDebitPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\SofortPayment;
-use WMDE\Fundraising\Frontend\Tests\Fixtures\ThrowingEntityManager;
 
 /**
  * @covers \WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationRepository
