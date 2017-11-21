@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\Tests\Unit\Validation;
+namespace WMDE\Fundraising\Frontend\PaymentContext\Tests\Unit\Domain;
 
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\PaymentDataValidator;
