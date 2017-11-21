@@ -11,9 +11,9 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationVa
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\Iban;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\Fundraising\Frontend\Validation\BankDataValidator;
 use WMDE\Fundraising\Frontend\Validation\IbanValidator;
-use WMDE\Fundraising\Frontend\Validation\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\EmailValidator;
