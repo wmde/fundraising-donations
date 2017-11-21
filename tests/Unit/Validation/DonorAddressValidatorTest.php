@@ -2,10 +2,11 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\Tests\Unit\Validation;
+namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\Validation;
 
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorAddress;
 use WMDE\Fundraising\Frontend\DonationContext\Validation\DonorAddressValidator;
+use WMDE\Fundraising\Frontend\Tests\Unit\Validation\ValidatorTestCase;
 
 /**
  * @covers \WMDE\Fundraising\Frontend\DonationContext\Validation\DonorAddressValidator
