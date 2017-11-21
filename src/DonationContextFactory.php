@@ -8,9 +8,9 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Pimple\Container;
+use WMDE\Fundraising\Frontend\DonationContext\Authorization\RandomTokenGenerator;
+use WMDE\Fundraising\Frontend\DonationContext\Authorization\TokenGenerator;
 use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationPrePersistSubscriber;
-use WMDE\Fundraising\Frontend\Infrastructure\RandomTokenGenerator;
-use WMDE\Fundraising\Frontend\Infrastructure\TokenGenerator;
 use WMDE\Fundraising\Store\Factory as StoreFactory;
 use WMDE\Fundraising\Store\Installer;
 
