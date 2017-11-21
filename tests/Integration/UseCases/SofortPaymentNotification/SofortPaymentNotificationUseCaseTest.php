@@ -14,8 +14,8 @@ use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\DonationRepositoryS
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
+use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase;
-use WMDE\Fundraising\Frontend\Tests\Fixtures\ThrowingEntityManager;
 
 /**
  * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase
