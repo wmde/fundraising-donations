@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation;
 
+use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse;
 use WMDE\FunValidators\ValidationResult;
 
 /**
@@ -19,16 +20,16 @@ class AddDonationValidationResult extends ValidationResult {
 	public const SOURCE_BANK_NAME = 'bankname';
 	public const SOURCE_BANK_CODE = 'blz';
 	public const SOURCE_BANK_ACCOUNT = 'konto';
-	public const SOURCE_DONOR_EMAIL = 'email';
-	public const SOURCE_DONOR_COMPANY = 'companyName';
-	public const SOURCE_DONOR_FIRST_NAME = 'firstName';
-	public const SOURCE_DONOR_LAST_NAME = 'lastName';
-	public const SOURCE_DONOR_SALUTATION = 'salutation';
-	public const SOURCE_DONOR_TITLE = 'title';
-	public const SOURCE_DONOR_STREET_ADDRESS = 'street';
-	public const SOURCE_DONOR_POSTAL_CODE = 'postcode';
-	public const SOURCE_DONOR_CITY = 'city';
-	public const SOURCE_DONOR_COUNTRY = 'country';
+	public const SOURCE_DONOR_EMAIL = ValidateDonorResponse::SOURCE_EMAIL;
+	public const SOURCE_DONOR_COMPANY = ValidateDonorResponse::SOURCE_COMPANY;
+	public const SOURCE_DONOR_FIRST_NAME = ValidateDonorResponse::SOURCE_FIRST_NAME;
+	public const SOURCE_DONOR_LAST_NAME = ValidateDonorResponse::SOURCE_LAST_NAME;
+	public const SOURCE_DONOR_SALUTATION = ValidateDonorResponse::SOURCE_SALUTATION;
+	public const SOURCE_DONOR_TITLE = ValidateDonorResponse::SOURCE_TITLE;
+	public const SOURCE_DONOR_STREET_ADDRESS = ValidateDonorResponse::SOURCE_STREET_ADDRESS;
+	public const SOURCE_DONOR_POSTAL_CODE = ValidateDonorResponse::SOURCE_POSTAL_CODE;
+	public const SOURCE_DONOR_CITY = ValidateDonorResponse::SOURCE_CITY;
+	public const SOURCE_DONOR_COUNTRY = ValidateDonorResponse::SOURCE_COUNTRY;
 	public const SOURCE_TRACKING_SOURCE = 'source';
 
 	public const VIOLATION_TOO_LOW = 'too-low';
