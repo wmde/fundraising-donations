@@ -138,7 +138,7 @@ class AddDonationValidatorTest extends \PHPUnit\Framework\TestCase {
 		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_PAYMENT_AMOUNT );
 	}
 
-	public function testPersonalInfoWithLongFields_validationFails(): void {
+	public function testDonorWithLongFields_validationFails(): void {
 		$longText = str_repeat( 'Cats ', 500 );
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorFirstName( $longText );
