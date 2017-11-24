@@ -106,7 +106,7 @@ class ValidateDonorUseCaseTest extends TestCase {
 		$this->assertPassesValidation( $requestModel );
 	}
 
-	public function testPersonalInfoWithLongFields_validationFails(): void {
+	public function testTextValuesAreTooLong_validationFails(): void {
 		$longText = str_repeat( 'Cats ', 500 );
 
 		$requestModel = ValidateDonorRequest::newInstance()
@@ -167,5 +167,7 @@ class ValidateDonorUseCaseTest extends TestCase {
 		$this->assertPassesValidation( $this->getValidRequestModel()->withPostalCode( '1234' ) );
 		$this->assertPassesValidation( $this->getValidRequestModel()->withPostalCode( '12345' ) );
 	}
+
+
 
 }
