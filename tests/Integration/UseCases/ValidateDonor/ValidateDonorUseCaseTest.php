@@ -78,19 +78,22 @@ class ValidateDonorUseCaseTest extends TestCase {
 		);
 	}
 
-	private function assertConstraintWasViolated( ValidationResult $result, string $fieldName ): void {
+	private function assertConstraintWasViolated( ValidationResult $result, string $fieldName, string $violationType = null ): void {
 		$this->assertContainsOnlyInstancesOf( ConstraintViolation::class, $result->getViolations() );
-		$this->assertTrue( $result->hasViolations() );
 
-		$violated = false;
 		foreach ( $result->getViolations() as $violation ) {
 			if ( $violation->getSource() === $fieldName ) {
-				$violated = true;
+				$this->assertTrue(
+					$violationType === null || $violationType === $violation->getMessageIdentifier(),
+					"Failed asserting that constraint for field \"$fieldName\" caused violation of type \"$violationType\"."
+				);
+
+				return;
 			}
 		}
 
 		$this->assertTrue(
-			$violated,
+			false,
 			'Failed asserting that constraint for field "' . $fieldName . '"" was violated.'
 		);
 	}
@@ -130,6 +133,35 @@ class ValidateDonorUseCaseTest extends TestCase {
 		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_POSTAL_CODE );
 		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_COUNTRY );
 		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_EMAIL );
+	}
+
+	/**
+	 * @dataProvider invalidPostalCodeProvider
+	 */
+	public function testInvalidPostalCodeFailsValidation( string $invalidPostalCode ) {
+		$requestModel = $this->getValidRequestModel()
+			->withPostalCode( $invalidPostalCode );
+
+		$this->assertConstraintWasViolated(
+			$this->donorValidator->validateDonor( $requestModel ),
+			ValidateDonorResponse::SOURCE_POSTAL_CODE,
+			ValidateDonorResponse::VIOLATION_NOT_POSTCODE
+		);
+	}
+
+	public function invalidPostalCodeProvider(): iterable {
+		yield [ '1' ];
+		yield [ '12' ];
+		yield [ '123' ];
+		yield [ '123456' ];
+		yield [ '12 34' ];
+		yield [ '1234a' ];
+		yield [ 'aaaa' ];
+	}
+
+	public function testGivenValidPostCode_validationIsSuccessful() {
+		$this->assertPassesValidation( $this->getValidRequestModel()->withPostalCode( '1234' ) );
+		$this->assertPassesValidation( $this->getValidRequestModel()->withPostalCode( '12345' ) );
 	}
 
 }
