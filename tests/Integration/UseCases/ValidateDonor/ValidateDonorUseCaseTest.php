@@ -124,15 +124,19 @@ class ValidateDonorUseCaseTest extends TestCase {
 
 		$result = $this->donorValidator->validateDonor( $requestModel );
 
-		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_FIRST_NAME );
-		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_LAST_NAME );
-		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_SALUTATION );
-		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_TITLE );
-		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_STREET_ADDRESS );
-		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_CITY );
-		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_POSTAL_CODE );
-		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_COUNTRY );
-		$this->assertConstraintWasViolated( $result, ValidateDonorResponse::SOURCE_EMAIL );
+		foreach ( [
+					  ValidateDonorResponse::SOURCE_FIRST_NAME,
+					  ValidateDonorResponse::SOURCE_LAST_NAME,
+					  ValidateDonorResponse::SOURCE_SALUTATION,
+					  ValidateDonorResponse::SOURCE_TITLE,
+					  ValidateDonorResponse::SOURCE_STREET_ADDRESS,
+					  ValidateDonorResponse::SOURCE_CITY,
+					  ValidateDonorResponse::SOURCE_POSTAL_CODE,
+					  ValidateDonorResponse::SOURCE_COUNTRY,
+					  ValidateDonorResponse::SOURCE_EMAIL,
+				  ] as $fieldName ) {
+			$this->assertConstraintWasViolated( $result, $fieldName, ValidateDonorResponse::VIOLATION_WRONG_LENGTH );
+		}
 	}
 
 	/**
