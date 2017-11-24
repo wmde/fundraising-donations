@@ -220,17 +220,16 @@ class AddDonationValidatorTest extends \PHPUnit\Framework\TestCase {
 
 	private function assertConstraintWasViolated( ValidationResult $result, string $fieldName ): void {
 		$this->assertContainsOnlyInstancesOf( ConstraintViolation::class, $result->getViolations() );
-		$this->assertTrue( $result->hasViolations() );
 
-		$violated = false;
 		foreach ( $result->getViolations() as $violation ) {
 			if ( $violation->getSource() === $fieldName ) {
-				$violated = true;
+				$this->assertTrue( true );
+				return;
 			}
 		}
 
 		$this->assertTrue(
-			$violated,
+			false,
 			'Failed asserting that constraint for field "' . $fieldName . '"" was violated.'
 		);
 	}
