@@ -8,7 +8,7 @@ use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
 use WMDE\Fundraising\Entities\Donation;
-use WMDE\Fundraising\Frontend\Infrastructure\TokenGenerator;
+use WMDE\Fundraising\Frontend\DonationContext\Authorization\TokenGenerator;
 use WMDE\Fundraising\Store\DonationData;
 
 /**
