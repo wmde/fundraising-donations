@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\Tests\Unit\Validation;
+namespace WMDE\Fundraising\Frontend\PaymentContext\Tests\Unit\Domain;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\Frontend\Validation\PaymentDataValidator;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\PaymentDataValidator;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\Validation\PaymentDataValidator
+ * @covers \WMDE\Fundraising\Frontend\PaymentContext\Domain\PaymentDataValidator
  *
  * @licence GNU GPL v2+
  * @author Kai Nissen < kai.nissen@wikimedia.de >

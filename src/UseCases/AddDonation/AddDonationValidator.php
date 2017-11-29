@@ -8,8 +8,8 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationVa
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\Fundraising\Frontend\Validation\BankDataValidator;
-use WMDE\Fundraising\Frontend\Validation\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\EmailValidator;
 
