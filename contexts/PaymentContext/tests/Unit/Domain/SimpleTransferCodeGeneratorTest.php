@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\Tests\Unit;
+namespace WMDE\Fundraising\Frontend\PaymentContext\Tests\Unit\Domain;
 
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\SimpleTransferCodeGenerator;
 
