@@ -27,7 +27,7 @@ use WMDE\Fundraising\Frontend\PaymentContext\ResponseModel\PaypalNotificationRes
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
-class HandlePayPalPaymentNotificationUseCase {
+class HandlePayPalPaymentCompletionNotificationUseCase {
 
 	private $repository;
 	private $authorizationService;
