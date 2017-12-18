@@ -28,18 +28,20 @@ class ShowDonationConfirmationUseCase {
 	}
 
 	public function showConfirmation( ShowDonationConfirmationRequest $request ): ShowDonationConfirmationResponse {
-		if ( $this->authorizer->canAccessDonation( $request->getDonationId() ) ) {
-			$donation = $this->getDonationById( $request->getDonationId() );
-
-			if ( $donation !== null ) {
-				return ShowDonationConfirmationResponse::newValidResponse(
-					$donation,
-					$this->tokenFetcher->getTokens( $request->getDonationId() )->getUpdateToken()
-				);
-			}
+		if ( !$this->authorizer->canAccessDonation( $request->getDonationId() ) ) {
+			return ShowDonationConfirmationResponse::newNotAllowedResponse();
 		}
 
-		return ShowDonationConfirmationResponse::newNotAllowedResponse();
+		$donation = $this->getDonationById( $request->getDonationId() );
+
+		if ( $donation === null ) {
+			return ShowDonationConfirmationResponse::newNotAllowedResponse();
+		}
+
+		return ShowDonationConfirmationResponse::newValidResponse(
+			$donation, // TODO: create a DTO to not expose the Donation Entity beyond the UC layer
+			$this->tokenFetcher->getTokens( $request->getDonationId() )->getUpdateToken()
+		);
 	}
 
 	private function getDonationById( int $donationId ): ?Donation {
