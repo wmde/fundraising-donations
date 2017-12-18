@@ -17,7 +17,7 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentVali
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentUseCase
+ * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentUseCase
  *
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
@@ -27,7 +27,6 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 	private const DONATION_ID = 9001;
 	private const COMMENT_TEXT = 'Your programmers deserve a raise';
 	private const COMMENT_IS_PUBLIC = true;
-	private const COMMENT_AUTHOR = 'Uncle Bob';
 
 	private $donationRepository;
 	private $authorizer;
@@ -62,7 +61,7 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 			new DonationComment(
 				self::COMMENT_TEXT,
 				self::COMMENT_IS_PUBLIC,
-				self::COMMENT_AUTHOR
+				'nyan Jeroen De Dauw'
 			),
 			$this->donationRepository->getDonationById( self::DONATION_ID )->getComment()
 		);
@@ -91,7 +90,7 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 
 		$addCommentRequest->setCommentText( self::COMMENT_TEXT );
 		$addCommentRequest->setIsPublic( self::COMMENT_IS_PUBLIC );
-		$addCommentRequest->setAuthorDisplayName( self::COMMENT_AUTHOR );
+		$addCommentRequest->setIsNamed();
 		$addCommentRequest->setDonationId( self::DONATION_ID );
 
 		return $addCommentRequest->freeze()->assertNoNullFields();
@@ -198,6 +197,26 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 		$validator = $this->createMock( AddCommentValidator::class );
 		$validator->method( 'validate' )->willReturn( new AddCommentValidationResult( [] ) );
 		return $validator;
+	}
+
+	public function testGivenAnonymousRequest_authorDisplayNameIsAnonymous(): void {
+		$this->donationRepository = $this->newFakeRepositoryWithDonation();
+
+		$addCommentRequest = new AddCommentRequest();
+
+		$addCommentRequest->setIsAnonymous();
+		$addCommentRequest->setCommentText( self::COMMENT_TEXT );
+		$addCommentRequest->setIsPublic( self::COMMENT_IS_PUBLIC );
+		$addCommentRequest->setDonationId( self::DONATION_ID );
+
+		$response = $this->newUseCase()->addComment( $addCommentRequest );
+
+		$this->assertSame(
+			'Anonym',
+			$this->donationRepository->getDonationById( self::DONATION_ID )->getComment()->getAuthorDisplayName()
+		);
+
+		$this->assertTrue( $response->isSuccessful() );
 	}
 
 }
