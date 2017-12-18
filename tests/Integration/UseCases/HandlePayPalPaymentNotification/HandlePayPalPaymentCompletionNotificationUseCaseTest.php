@@ -19,22 +19,22 @@ use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationReposit
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentNotificationUseCase;
+use WMDE\Fundraising\Frontend\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalData;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentNotificationUseCase
+ * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase
  *
  * @licence GNU GPL v2+
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
-class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
+class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 	use DonationEventLoggerAsserter;
 
 	public function testWhenRepositoryThrowsException_errorResponseIsReturned(): void {
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ) ),
 			new FailingDonationAuthorizer(),
 			$this->getMailer(),
@@ -50,7 +50,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$fakeRepository = new FakeDonationRepository();
 		$fakeRepository->storeDonation( ValidDonation::newIncompletePayPalDonation() );
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new FailingDonationAuthorizer(),
 			$this->getMailer(),
@@ -65,7 +65,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$fakeRepository = new FakeDonationRepository();
 		$fakeRepository->storeDonation( ValidDonation::newIncompletePayPalDonation() );
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -81,7 +81,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$fakeRepository->storeDonation( ValidDonation::newDirectDebitDonation() );
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -94,7 +94,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 	public function testWhenPaymentStatusIsPending_unhandledResponseIsReturned(): void {
 		$request = ValidPayPalNotificationRequest::newPendingPayment();
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			new FakeDonationRepository(),
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -107,7 +107,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 	public function testWhenTransactionTypeIsForSubscriptionChanges_unhandledResponseIsReturned(): void {
 		$request = ValidPayPalNotificationRequest::newSubscriptionModification();
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			new FakeDonationRepository(),
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -126,7 +126,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 			->method( 'sendConfirmationMailFor' )
 			->with( $donation );
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$mailer,
@@ -147,7 +147,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 			->method( 'sendConfirmationMailFor' );
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$mailer,
@@ -162,7 +162,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$repositorySpy = new DonationRepositorySpy( $donation );
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$repositorySpy,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -178,7 +178,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$repository = new FakeDonationRepository( $donation );
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$repository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -196,7 +196,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$eventLogger = new DonationEventLoggerSpy();
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$repositorySpy,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -218,7 +218,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 			->willThrowException( new \RuntimeException( 'Oh noes!' ) );
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$mailer,
@@ -237,7 +237,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 
 		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -265,7 +265,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 
 		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -302,7 +302,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 
 		$eventLogger = new DonationEventLoggerSpy();
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -334,7 +334,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -355,7 +355,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 
 		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -369,7 +369,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$repositorySpy = new DonationRepositorySpy();
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 12345 );
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$repositorySpy,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -390,7 +390,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 
 		$request = ValidPayPalNotificationRequest::newRecurringPayment( $donation->getId() );
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$repositorySpy,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -411,7 +411,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$mailer->expects( $this->once() )
 			->method( 'sendConfirmationMailFor' )
 			->with( $this->anything() );
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			new FakeDonationRepository(),
 			new SucceedingDonationAuthorizer(),
 			$mailer,
@@ -425,7 +425,7 @@ class HandlePayPalPaymentNotificationUseCaseTest extends TestCase {
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 12345 );
 		$eventLogger = new DonationEventLoggerSpy();
 
-		$useCase = new HandlePayPalPaymentNotificationUseCase(
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			new FakeDonationRepository(),
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
