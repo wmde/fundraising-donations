@@ -43,14 +43,6 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 	}
 
 	public function handleNotification( PayPalPaymentNotificationRequest $request ): PaypalNotificationResponse {
-		if ( !$request->isSuccessfulPaymentNotification() ) {
-			return $this->createUnhandledResponse( 'Unhandled PayPal instant payment notification' );
-		}
-
-		if ( $this->isSubscriptionRelatedNonPaymentTransaction( $request ) ) {
-			return $this->createUnhandledResponse( 'Unhandled PayPal subscription notification' );
-		}
-
 		try {
 			$donation = $this->repository->getDonationById( $request->getInternalId() );
 		}
@@ -134,10 +126,6 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 				// no need to re-throw or return false, this is not a fatal error, only a minor inconvenience
 			}
 		}
-	}
-
-	private function isSubscriptionRelatedNonPaymentTransaction( PayPalPaymentNotificationRequest $request ): bool {
-		return $request->isForRecurringPayment() && !$request->isRecurringPaymentCompletion();
 	}
 
 	private function newPayPalDataFromRequest( PayPalPaymentNotificationRequest $request ): PayPalData {
