@@ -91,31 +91,6 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertFalse( $useCase->handleNotification( $request )->notificationWasHandled() );
 	}
 
-	public function testWhenPaymentStatusIsPending_unhandledResponseIsReturned(): void {
-		$request = ValidPayPalNotificationRequest::newPendingPayment();
-
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			new FakeDonationRepository(),
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-
-		$this->assertFalse( $useCase->handleNotification( $request )->notificationWasHandled() );
-	}
-
-	public function testWhenTransactionTypeIsForSubscriptionChanges_unhandledResponseIsReturned(): void {
-		$request = ValidPayPalNotificationRequest::newSubscriptionModification();
-
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			new FakeDonationRepository(),
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-		$this->assertFalse( $useCase->handleNotification( $request )->notificationWasHandled() );
-	}
-
 	public function testWhenAuthorizationSucceeds_confirmationMailIsSent(): void {
 		$donation = ValidDonation::newIncompletePayPalDonation();
 		$fakeRepository = new FakeDonationRepository();
