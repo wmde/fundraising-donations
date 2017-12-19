@@ -16,7 +16,7 @@ class AddCommentRequest {
 
 	private $commentText;
 	private $isPublic;
-	private $authorDisplayName;
+	private $isAnonymous;
 	private $donationId;
 
 	public function getCommentText(): string {
@@ -39,13 +39,19 @@ class AddCommentRequest {
 		return $this;
 	}
 
-	public function getAuthorDisplayName(): string {
-		return $this->authorDisplayName;
+	public function isAnonymous(): bool {
+		return $this->isAnonymous;
 	}
 
-	public function setAuthorDisplayName( string $authorDisplayName ): self {
+	public function setIsAnonymous(): self {
 		$this->assertIsWritable();
-		$this->authorDisplayName = $authorDisplayName;
+		$this->isAnonymous = true;
+		return $this;
+	}
+
+	public function setIsNamed(): self {
+		$this->assertIsWritable();
+		$this->isAnonymous = false;
 		return $this;
 	}
 
