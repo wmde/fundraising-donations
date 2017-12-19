@@ -12,7 +12,6 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentVali
  */
 class AddCommentValidator {
 
-	private const MAX_NAME_LENGTH = 150;
 	private const MAX_COMMENT_LENGTH = 2048;
 
 	public function validate( AddCommentRequest $request ): Result {
@@ -20,10 +19,6 @@ class AddCommentValidator {
 
 		if ( strlen( $request->getCommentText() ) > self::MAX_COMMENT_LENGTH ) {
 			$violations[Result::SOURCE_COMMENT] = Result::VIOLATION_COMMENT_TOO_LONG;
-		}
-
-		if ( strlen( $request->getAuthorDisplayName() ) > self::MAX_NAME_LENGTH ) {
-			$violations[Result::SOURCE_NAME] = Result::VIOLATION_NAME_TOO_LONG;
 		}
 
 		return new Result( $violations );

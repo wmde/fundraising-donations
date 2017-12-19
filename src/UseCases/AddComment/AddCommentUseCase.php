@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment;
 
 use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
@@ -62,7 +63,7 @@ class AddCommentUseCase {
 			$successMessage = 'comment_success_needs_moderation';
 		}
 
-		$donation->addComment( $this->newCommentFromRequest( $addCommentRequest ) );
+		$donation->addComment( $this->newComment( $donation, $addCommentRequest ) );
 
 		if ( !$this->commentTextPassesValidation( $addCommentRequest->getCommentText() ) ) {
 			$donation->notifyOfCommentValidationFailure();
@@ -83,11 +84,11 @@ class AddCommentUseCase {
 		return $this->authorizationService->userCanModifyDonation( $addCommentRequest->getDonationId() );
 	}
 
-	private function newCommentFromRequest( AddCommentRequest $request ): DonationComment {
+	private function newComment( Donation $donation, AddCommentRequest $request ): DonationComment {
 		return new DonationComment(
 			$request->getCommentText(),
 			$this->commentCanBePublic( $request ),
-			$request->getAuthorDisplayName()
+			$request->isAnonymous() ? 'Anonym' : $donation->getDonor()->getName()->getFullName()
 		);
 	}
 

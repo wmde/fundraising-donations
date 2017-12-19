@@ -11,7 +11,7 @@ class AddCommentValidatorTest extends \PHPUnit\Framework\TestCase {
 
 	private function newValidAddCommentRequest(): AddCommentRequest {
 		$request = new AddCommentRequest();
-		$request->setAuthorDisplayName( 'Gandalf the Grey' );
+		$request->setIsNamed();
 		$request->setCommentText(
 			'In the common tongue it reads "One Wiki to Rule Them All. One Wiki to Find Them. ' .
 			'One Wiki to Bring Them All and In The Darkness Bind Them." '
@@ -30,13 +30,6 @@ class AddCommentValidatorTest extends \PHPUnit\Framework\TestCase {
 		$validator = new AddCommentValidator();
 		$request = $this->newValidAddCommentRequest();
 		$request->setCommentText( str_repeat( 'All work and no play makes jack a dull boy.', 1000 ) );
-		$this->assertFalse( $validator->validate( $request )->isSuccessful() );
-	}
-
-	public function testLongName_isNotSuccessful(): void {
-		$validator = new AddCommentValidator();
-		$request = $this->newValidAddCommentRequest();
-		$request->setAuthorDisplayName( str_repeat( 'Dr. ', 50 ) . $request->getAuthorDisplayName() );
 		$this->assertFalse( $validator->validate( $request )->isSuccessful() );
 	}
 
