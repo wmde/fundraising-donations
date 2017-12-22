@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\ShowDonationConfirmation;
+namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation;
 
 /**
  * @license GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class ShowDonationConfirmationRequest {
+class GetDonationRequest {
 
 	private $donationId;
 
