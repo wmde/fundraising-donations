@@ -2,11 +2,11 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\Tests\Fixtures;
+namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures;
 
 use PHPUnit\Framework\TestCase;
 use WMDE\EmailAddress\EmailAddress;
-use WMDE\Fundraising\Frontend\Infrastructure\TemplateMailerInterface;
+use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\TemplateMailerInterface;
 
 /**
  * @licence GNU GPL v2+
