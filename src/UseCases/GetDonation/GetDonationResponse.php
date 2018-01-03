@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\ShowDonationConfirmation;
+namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation;
 
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
 
@@ -10,7 +10,7 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
  * @license GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class ShowDonationConfirmationResponse {
+class GetDonationResponse {
 
 	public static function newNotAllowedResponse(): self {
 		return new self( null );
