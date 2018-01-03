@@ -4,10 +4,14 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\UseCases\AddComment;
 
+use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentRequest;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentValidator;
 
-class AddCommentValidatorTest extends \PHPUnit\Framework\TestCase {
+/**
+ * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentValidator
+ */
+class AddCommentValidatorTest extends TestCase {
 
 	private function newValidAddCommentRequest(): AddCommentRequest {
 		$request = new AddCommentRequest();
