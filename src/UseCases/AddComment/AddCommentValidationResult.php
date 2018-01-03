@@ -12,6 +12,7 @@ class AddCommentValidationResult {
 
 	public const VIOLATION_NAME_TOO_LONG = 'comment_failure_name_too_long';
 	public const VIOLATION_COMMENT_TOO_LONG = 'comment_failure_text_too_long';
+	public const VIOLATION_COMMENT_INVALID_CHARS = 'comment_failure_text_invalid_chars';
 
 	public const SOURCE_COMMENT = 'kommentar';
 	public const SOURCE_NAME = 'eintrag';
