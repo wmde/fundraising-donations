@@ -17,7 +17,7 @@ class AddCommentValidator {
 	public function validate( AddCommentRequest $request ): Result {
 		$text = $request->getCommentText();
 
-		if ( preg_replace( '/[\x{10000}-\x{10FFFF}]/u', "\xEF\xBF\xBD", $text ) !== $text ) {
+		if ( $this->containsInvalidCharacters( $text ) ) {
 			return new Result( [ Result::SOURCE_COMMENT => Result::VIOLATION_COMMENT_INVALID_CHARS ] );
 		}
 
@@ -27,4 +27,9 @@ class AddCommentValidator {
 
 		return new Result( [] );
 	}
+
+	private function containsInvalidCharacters( string $text ): bool {
+		return preg_replace( '/[\x{10000}-\x{10FFFF}]/u', "\xEF\xBF\xBD", $text ) !== $text;
+	}
+
 }
