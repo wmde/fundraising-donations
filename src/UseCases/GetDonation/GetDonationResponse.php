@@ -13,34 +13,42 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
 class GetDonationResponse {
 
 	public static function newNotAllowedResponse(): self {
-		return new self( null );
+		return new self();
 	}
 
 	public static function newValidResponse( Donation $donation, string $updateToken ): self {
 		return new self( $donation, $updateToken );
 	}
 
-	private $donation;
+	private $donationId;
+	private $donationStatus;
+
+	private $paymentAmount;
+	private $paymentMethod;
+	private $paymentInterval;
+
+	private $donorType;
+	private $donorFirstName;
+	private $donorLastName;
+	private $donorSalutation;
+	private $donorTitle;
+	private $donorCompany;
+	private $donorStreetAddress;
+	private $donorPostalCode;
+	private $donorCity;
+	private $donorCountryCode;
+	private $donorEmailAddress;
+	private $donorOptsIntoNewsletter;
+
+
+
 	private $updateToken;
+	private $accessToken;
 
-	private function __construct( Donation $donation = null, string $updateToken = null ) {
-		$this->donation = $donation;
-		$this->updateToken = $updateToken;
-	}
 
-	/**
-	 * Returns the Donation when @see accessIsPermitted returns true, or null otherwise.
-	 */
-	public function getDonation(): ?Donation {
-		return $this->donation;
-	}
 
 	public function accessIsPermitted(): bool {
 		return $this->donation !== null;
-	}
-
-	public function getUpdateToken(): ?string {
-		return $this->updateToken;
 	}
 
 }
