@@ -9,7 +9,7 @@ use WMDE\Euro\Euro;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardTransactionData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 
 /**
  * @licence GNU GPL v2+
@@ -130,8 +130,8 @@ class Donation {
 		return $this->payment->getIntervalInMonths();
 	}
 
-	public function getPaymentType(): string {
-		return $this->payment->getPaymentMethod()->getType();
+	public function getPaymentMethodId(): string {
+		return $this->getPaymentMethod()->getId();
 	}
 
 	/**
@@ -172,7 +172,7 @@ class Donation {
 	 * @throws RuntimeException
 	 */
 	public function cancel(): void {
-		if ( $this->getPaymentType() !== PaymentType::DIRECT_DEBIT ) {
+		if ( $this->getPaymentMethodId() !== PaymentMethods::DIRECT_DEBIT ) {
 			throw new RuntimeException( 'Can only cancel direct debit' );
 		}
 
@@ -257,8 +257,8 @@ class Donation {
 
 	public function hasExternalPayment(): bool {
 		return in_array(
-			$this->getPaymentType(),
-			[ PaymentType::PAYPAL, PaymentType::CREDIT_CARD, PaymentType::SOFORT ]
+			$this->getPaymentMethodId(),
+			[ PaymentMethods::PAYPAL, PaymentMethods::CREDIT_CARD, PaymentMethods::SOFORT ]
 		);
 	}
 

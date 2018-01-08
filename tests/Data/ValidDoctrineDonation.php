@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Data;
 
 use WMDE\Fundraising\Entities\Donation;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 
 /**
  * @licence GNU GPL v2+
@@ -30,7 +30,7 @@ class ValidDoctrineDonation {
 
 		$donation->setAmount( (string)ValidDonation::DONATION_AMOUNT );
 		$donation->setPaymentIntervalInMonths( ValidDonation::PAYMENT_INTERVAL_IN_MONTHS );
-		$donation->setPaymentType( PaymentType::DIRECT_DEBIT );
+		$donation->setPaymentType( PaymentMethods::DIRECT_DEBIT );
 
 		$donation->setDonorCity( ValidDonation::DONOR_CITY );
 		$donation->setDonorEmail( ValidDonation::DONOR_EMAIL_ADDRESS );
