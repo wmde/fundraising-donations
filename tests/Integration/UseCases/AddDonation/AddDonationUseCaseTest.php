@@ -23,7 +23,7 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationVa
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\ReferrerGeneralizer;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\TransferCodeGenerator;
 use WMDE\FunValidators\ConstraintViolation;
 
@@ -179,14 +179,14 @@ class AddDonationUseCaseTest extends TestCase {
 	private function newMinimumDonationRequest(): AddDonationRequest {
 		$donationRequest = new AddDonationRequest();
 		$donationRequest->setAmount( Euro::newFromString( '1.00' ) );
-		$donationRequest->setPaymentType( PaymentType::BANK_TRANSFER );
+		$donationRequest->setPaymentType( PaymentMethods::BANK_TRANSFER );
 		$donationRequest->setDonorType( DonorName::PERSON_ANONYMOUS );
 		return $donationRequest;
 	}
 
 	private function newInvalidDonationRequest(): AddDonationRequest {
 		$donationRequest = new AddDonationRequest();
-		$donationRequest->setPaymentType( PaymentType::DIRECT_DEBIT );
+		$donationRequest->setPaymentType( PaymentMethods::DIRECT_DEBIT );
 		$donationRequest->setAmount( Euro::newFromInt( 0 ) );
 		$donationRequest->setDonorType( DonorName::PERSON_ANONYMOUS );
 		return $donationRequest;
