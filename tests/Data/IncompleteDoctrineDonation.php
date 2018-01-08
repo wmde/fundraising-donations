@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Data;
 
 use WMDE\Fundraising\Entities\Donation;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 
 /**
  * @licence GNU GPL v2+
@@ -33,7 +33,7 @@ class IncompleteDoctrineDonation {
 		$donation = new Donation();
 		$this->setPaymentData( $donation );
 		$this->setDonorData( $donation );
-		$donation->setPaymentType( PaymentType::PAYPAL );
+		$donation->setPaymentType( PaymentMethods::PAYPAL );
 		$donation->setStatus( Donation::STATUS_NEW );
 
 		$donation->encodeAndSetData(
@@ -51,7 +51,7 @@ class IncompleteDoctrineDonation {
 		$donation = new Donation();
 		$this->setPaymentData( $donation );
 		$this->setDonorData( $donation );
-		$donation->setPaymentType( PaymentType::PAYPAL );
+		$donation->setPaymentType( PaymentMethods::PAYPAL );
 		$donation->setStatus( Donation::STATUS_NEW );
 
 		$donation->encodeAndSetData(
@@ -68,7 +68,7 @@ class IncompleteDoctrineDonation {
 		$donation = new Donation();
 		$this->setPaymentData( $donation );
 		$this->setDonorData( $donation );
-		$donation->setPaymentType( PaymentType::DIRECT_DEBIT );
+		$donation->setPaymentType( PaymentMethods::DIRECT_DEBIT );
 		$donation->setStatus( Donation::STATUS_NEW );
 
 		$donation->encodeAndSetData(
@@ -85,7 +85,7 @@ class IncompleteDoctrineDonation {
 		$donation = new Donation();
 		$this->setPaymentData( $donation );
 		$this->setDonorData( $donation );
-		$donation->setPaymentType( PaymentType::CREDIT_CARD );
+		$donation->setPaymentType( PaymentMethods::CREDIT_CARD );
 		$donation->setStatus( Donation::STATUS_NEW );
 
 		$donation->encodeAndSetData(

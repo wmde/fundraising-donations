@@ -8,7 +8,7 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationVa
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\BankDataValidator;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\EmailValidator;
@@ -82,7 +82,7 @@ class AddDonationValidator {
 	}
 
 	private function validateBankData(): void {
-		if ( $this->request->getPaymentType() !== PaymentType::DIRECT_DEBIT ) {
+		if ( $this->request->getPaymentType() !== PaymentMethods::DIRECT_DEBIT ) {
 			return;
 		}
 
@@ -95,7 +95,7 @@ class AddDonationValidator {
 	}
 
 	private function validatePayment(): void {
-		if ( !in_array( $this->request->getPaymentType(), PaymentType::getPaymentTypes() ) ) {
+		if ( !in_array( $this->request->getPaymentType(), PaymentMethods::getList() ) ) {
 			$this->violations[] = new ConstraintViolation(
 				$this->request->getPaymentType(),
 				Result::VIOLATION_WRONG_PAYMENT_TYPE,

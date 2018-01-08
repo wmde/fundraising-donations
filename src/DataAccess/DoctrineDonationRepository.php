@@ -26,7 +26,7 @@ use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardTransactionD
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\DirectDebitPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\Iban;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentWithoutAssociatedData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment;
@@ -90,7 +90,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		$doctrineDonation->setAmount( $donation->getAmount()->getEuroString() );
 		$doctrineDonation->setPaymentIntervalInMonths( $donation->getPaymentIntervalInMonths() );
 
-		$doctrineDonation->setPaymentType( $donation->getPaymentType() );
+		$doctrineDonation->setPaymentType( $donation->getPaymentMethodId() );
 		$doctrineDonation->setBankTransferCode( self::getBankTransferCode( $donation->getPaymentMethod() ) );
 
 		$paymentMethod = $donation->getPaymentMethod();
@@ -394,15 +394,15 @@ class DoctrineDonationRepository implements DonationRepository {
 
 	private function getPaymentMethodFromEntity( DoctrineDonation $dd ): PaymentMethod {
 		switch ( $dd->getPaymentType() ) {
-			case PaymentType::BANK_TRANSFER:
+			case PaymentMethods::BANK_TRANSFER:
 				return new BankTransferPayment( $dd->getBankTransferCode() );
-			case PaymentType::DIRECT_DEBIT:
+			case PaymentMethods::DIRECT_DEBIT:
 				return new DirectDebitPayment( $this->getBankDataFromEntity( $dd ) );
-			case PaymentType::PAYPAL:
+			case PaymentMethods::PAYPAL:
 				return new PayPalPayment( $this->getPayPalDataFromEntity( $dd ) );
-			case PaymentType::CREDIT_CARD:
+			case PaymentMethods::CREDIT_CARD:
 				return new CreditCardPayment( $this->getCreditCardDataFromEntity( $dd ) );
-			case PaymentType::SOFORT:
+			case PaymentMethods::SOFORT:
 				$sofortPayment = new SofortPayment( $dd->getBankTransferCode() );
 				$doctrinePayment = $dd->getPayment();
 				if ( $doctrinePayment instanceof DoctrineSofortPayment ) {
