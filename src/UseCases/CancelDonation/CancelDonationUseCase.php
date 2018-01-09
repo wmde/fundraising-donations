@@ -4,14 +4,14 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\CancelDonation;
 
+use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
-use WMDE\EmailAddress\EmailAddress;
-use WMDE\Fundraising\Frontend\Infrastructure\TemplateMailerInterface;
+use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\TemplateMailerInterface;
 
 /**
  * @licence GNU GPL v2+

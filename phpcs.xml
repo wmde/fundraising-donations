@@ -8,7 +8,6 @@
     <file>contexts/</file>
     <file>src/</file>
     <file>tests/</file>
-    <file>todo/</file>
 
     <arg name="extensions" value="php"/>
     <arg value="s"/>

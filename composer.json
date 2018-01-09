@@ -38,7 +38,6 @@
 		"psr-4": {
 			"WMDE\\Fundraising\\Frontend\\DonationContext\\": "src/",
 			"WMDE\\Fundraising\\Frontend\\PaymentContext\\": "contexts/PaymentContext/src/",
-			"WMDE\\Fundraising\\Frontend\\": "todo/",
 			"WMDE\\Fundraising\\Frontend\\DonationContext\\Tests\\": "tests/",
 			"WMDE\\Fundraising\\Frontend\\PaymentContext\\Tests\\": "contexts/PaymentContext/tests/"
 		}
