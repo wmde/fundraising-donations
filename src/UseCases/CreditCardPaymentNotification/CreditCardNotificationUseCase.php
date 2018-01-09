@@ -13,7 +13,7 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationE
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardTransactionData;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentType;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 use WMDE\Fundraising\Frontend\PaymentContext\Infrastructure\CreditCardService;
 
 /**
@@ -57,7 +57,7 @@ class CreditCardNotificationUseCase {
 			throw new CreditCardPaymentHandlerException( 'donation not found' );
 		}
 
-		if ( $donation->getPaymentType() !== PaymentType::CREDIT_CARD ) {
+		if ( $donation->getPaymentMethodId() !== PaymentMethods::CREDIT_CARD ) {
 			throw new CreditCardPaymentHandlerException( 'payment type mismatch' );
 		}
 

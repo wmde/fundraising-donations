@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\ShowDonationConfirmation;
+namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation;
 
 use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokenFetcher;
@@ -14,7 +14,7 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationExc
  * @license GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class ShowDonationConfirmationUseCase {
+class GetDonationUseCase {
 
 	private $authorizer;
 	private $tokenFetcher;
@@ -27,18 +27,18 @@ class ShowDonationConfirmationUseCase {
 		$this->donationRepository = $donationRepository;
 	}
 
-	public function showConfirmation( ShowDonationConfirmationRequest $request ): ShowDonationConfirmationResponse {
+	public function showConfirmation( GetDonationRequest $request ): GetDonationResponse {
 		if ( !$this->authorizer->canAccessDonation( $request->getDonationId() ) ) {
-			return ShowDonationConfirmationResponse::newNotAllowedResponse();
+			return GetDonationResponse::newNotAllowedResponse();
 		}
 
 		$donation = $this->getDonationById( $request->getDonationId() );
 
 		if ( $donation === null ) {
-			return ShowDonationConfirmationResponse::newNotAllowedResponse();
+			return GetDonationResponse::newNotAllowedResponse();
 		}
 
-		return ShowDonationConfirmationResponse::newValidResponse(
+		return GetDonationResponse::newValidResponse(
 			$donation, // TODO: create a DTO to not expose the Donation Entity beyond the UC layer
 			$this->tokenFetcher->getTokens( $request->getDonationId() )->getUpdateToken()
 		);
