@@ -13,16 +13,16 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\CreditCardPaymentNotifica
  */
 class ValidCreditCardNotificationRequest {
 
-	const AMOUNT = 13.37;
-	const PAYMENT_ID = 'customer.prefix-ID2tbnag4a9u';
-	const CUSTOMER_ID = 'e20fb9d5281c1bca1901c19f6e46213191bb4c17';
-	const SESSION_ID = 'CC13064b2620f4028b7d340e3449676213336a4d';
-	const AUTH_ID = 'd1d6fae40cf96af52477a9e521558ab7';
-	const TOKEN = 'my_secret_token';
-	const UPDATE_TOKEN = 'my_secret_update_token';
-	const TITLE = 'Your generous donation';
-	const COUNTRY_CODE = 'DE';
-	const CURRENCY_CODE = 'EUR';
+	public const AMOUNT = 13.37;
+	public const PAYMENT_ID = 'customer.prefix-ID2tbnag4a9u';
+	public const CUSTOMER_ID = 'e20fb9d5281c1bca1901c19f6e46213191bb4c17';
+	public const SESSION_ID = 'CC13064b2620f4028b7d340e3449676213336a4d';
+	public const AUTH_ID = 'd1d6fae40cf96af52477a9e521558ab7';
+	public const TOKEN = 'my_secret_token';
+	public const UPDATE_TOKEN = 'my_secret_update_token';
+	public const TITLE = 'Your generous donation';
+	public const COUNTRY_CODE = 'DE';
+	public const CURRENCY_CODE = 'EUR';
 
 	public static function newBillingNotification( int $donationId ): CreditCardPaymentNotificationRequest {
 		return self::newBaseRequest()

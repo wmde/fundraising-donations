@@ -15,12 +15,21 @@ class AddCommentValidator {
 	private const MAX_COMMENT_LENGTH = 2048;
 
 	public function validate( AddCommentRequest $request ): Result {
-		$violations = [];
+		$text = $request->getCommentText();
 
-		if ( strlen( $request->getCommentText() ) > self::MAX_COMMENT_LENGTH ) {
-			$violations[Result::SOURCE_COMMENT] = Result::VIOLATION_COMMENT_TOO_LONG;
+		if ( $this->containsInvalidCharacters( $text ) ) {
+			return new Result( [ Result::SOURCE_COMMENT => Result::VIOLATION_COMMENT_INVALID_CHARS ] );
 		}
 
-		return new Result( $violations );
+		if ( strlen( $text ) > self::MAX_COMMENT_LENGTH ) {
+			return new Result( [ Result::SOURCE_COMMENT => Result::VIOLATION_COMMENT_TOO_LONG ] );
+		}
+
+		return new Result( [] );
 	}
+
+	private function containsInvalidCharacters( string $text ): bool {
+		return preg_replace( '/[\x{10000}-\x{10FFFF}]/u', "\xEF\xBF\xBD", $text ) !== $text;
+	}
+
 }

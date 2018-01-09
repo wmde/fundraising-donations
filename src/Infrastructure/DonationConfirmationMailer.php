@@ -40,7 +40,7 @@ class DonationConfirmationMailer {
 				'amount' => $donation->getAmount()->getEuroFloat(), // number is formatted in template
 				'interval' => $donation->getPaymentIntervalInMonths(),
 				'needsModeration' => $donation->needsModeration(),
-				'paymentType' => $donation->getPaymentType(),
+				'paymentType' => $donation->getPaymentMethodId(),
 				'bankTransferCode' => $this->getBankTransferCode( $donation->getPaymentMethod() ),
 			]
 		];

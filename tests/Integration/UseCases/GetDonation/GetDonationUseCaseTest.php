@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\ShowDonationConfirmation;
+namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\GetDonation;
 
 use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
@@ -10,30 +10,30 @@ use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FailingDonationAuth
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ShowDonationConfirmation\ShowDonationConfirmationRequest;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ShowDonationConfirmation\ShowDonationConfirmationUseCase;
+use WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation\GetDonationRequest;
+use WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation\GetDonationUseCase;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\UseCases\ShowDonationConfirmation\ShowDonationConfirmationUseCase
+ * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation\GetDonationUseCase
  *
  * @license GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class ShowDonationConfirmationUseCaseTest extends \PHPUnit\Framework\TestCase {
+class GetDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 
 	private const CORRECT_DONATION_ID = 1;
 	private const ACCESS_TOKEN = 'some token';
 	private const UPDATE_TOKEN = 'some other token';
 
 	public function testWhenAuthorizerSaysNoCanHaz_accessIsNotPermitted(): void {
-		$useCase = new ShowDonationConfirmationUseCase(
+		$useCase = new GetDonationUseCase(
 			new FailingDonationAuthorizer(),
 			$this->newFixedTokenFetcher(),
 			new FakeDonationRepository( ValidDonation::newDirectDebitDonation() )
 		);
 
 		$response = $useCase->showConfirmation(
-			new ShowDonationConfirmationRequest(
+			new GetDonationRequest(
 				self::CORRECT_DONATION_ID
 			)
 		);
@@ -43,14 +43,14 @@ class ShowDonationConfirmationUseCaseTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testWhenAuthorizerSaysSureThingBro_accessIsPermitted(): void {
-		$useCase = new ShowDonationConfirmationUseCase(
+		$useCase = new GetDonationUseCase(
 			new SucceedingDonationAuthorizer(),
 			$this->newFixedTokenFetcher(),
 			new FakeDonationRepository( ValidDonation::newDirectDebitDonation() )
 		);
 
 		$response = $useCase->showConfirmation(
-			new ShowDonationConfirmationRequest(
+			new GetDonationRequest(
 				self::CORRECT_DONATION_ID
 			)
 		);
@@ -59,14 +59,14 @@ class ShowDonationConfirmationUseCaseTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testWhenDonationDoesNotExist_accessIsNotPermitted(): void {
-		$useCase = new ShowDonationConfirmationUseCase(
+		$useCase = new GetDonationUseCase(
 			new SucceedingDonationAuthorizer(),
 			$this->newFixedTokenFetcher(),
 			new FakeDonationRepository()
 		);
 
 		$response = $useCase->showConfirmation(
-			new ShowDonationConfirmationRequest(
+			new GetDonationRequest(
 				self::CORRECT_DONATION_ID
 			)
 		);
@@ -78,14 +78,14 @@ class ShowDonationConfirmationUseCaseTest extends \PHPUnit\Framework\TestCase {
 	public function testWhenDonationExistsAndAccessIsAllowed_donationIsReturned(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$useCase = new ShowDonationConfirmationUseCase(
+		$useCase = new GetDonationUseCase(
 			new SucceedingDonationAuthorizer(),
 			$this->newFixedTokenFetcher(),
 			new FakeDonationRepository( $donation )
 		);
 
 		$response = $useCase->showConfirmation(
-			new ShowDonationConfirmationRequest(
+			new GetDonationRequest(
 				self::CORRECT_DONATION_ID
 			)
 		);
