@@ -9,7 +9,6 @@ use WMDE\Euro\Euro;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardTransactionData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 
 /**
  * @licence GNU GPL v2+
@@ -172,7 +171,7 @@ class Donation {
 	 * @throws RuntimeException
 	 */
 	public function cancel(): void {
-		if ( $this->getPaymentMethodId() !== PaymentMethods::DIRECT_DEBIT ) {
+		if ( $this->getPaymentMethodId() !== PaymentMethod::DIRECT_DEBIT ) {
 			throw new RuntimeException( 'Can only cancel direct debit' );
 		}
 
@@ -258,7 +257,7 @@ class Donation {
 	public function hasExternalPayment(): bool {
 		return in_array(
 			$this->getPaymentMethodId(),
-			[ PaymentMethods::PAYPAL, PaymentMethods::CREDIT_CARD, PaymentMethods::SOFORT ]
+			[ PaymentMethod::PAYPAL, PaymentMethod::CREDIT_CARD, PaymentMethod::SOFORT ]
 		);
 	}
 
