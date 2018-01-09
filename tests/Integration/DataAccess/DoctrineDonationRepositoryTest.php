@@ -77,7 +77,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		return $donation;
 	}
 
-	public function testWhenPersistenceFails_domainExceptionIsThrown(): void {
+	public function testWhenInsertFails_domainExceptionIsThrown(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$repository = new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ) );
@@ -369,6 +369,16 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->entityManager->persist( $doctrineDonation );
 		$this->entityManager->flush();
 		return $doctrineDonation->getId();
+	}
+
+	public function testWhenUpdateFails_domainExceptionIsThrown(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->assignId( 42 );
+
+		$repository = new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ) );
+
+		$this->expectException( StoreDonationException::class );
+		$repository->storeDonation( $donation );
 	}
 
 }
