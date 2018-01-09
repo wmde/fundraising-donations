@@ -272,7 +272,12 @@ class DoctrineDonationRepository implements DonationRepository {
 	}
 
 	private function updateDonation( Donation $donation ): void {
-		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
+		try {
+			$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
+		}
+		catch ( ORMException $ex ) {
+			throw new StoreDonationException( $ex );
+		}
 
 		if ( $doctrineDonation === null ) {
 			throw new StoreDonationException();
