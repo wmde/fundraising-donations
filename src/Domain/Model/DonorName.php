@@ -115,4 +115,12 @@ class DonorName {
 		);
 	}
 
+	public function isPrivatePerson(): bool {
+		return $this->getPersonType() === self::PERSON_PRIVATE;
+	}
+
+	public function isCompany(): bool {
+		return $this->getPersonType() === self::PERSON_COMPANY;
+	}
+
 }
