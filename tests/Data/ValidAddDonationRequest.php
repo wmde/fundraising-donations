@@ -9,7 +9,7 @@ use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\Iban;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
  * @license GNU GPL v2+
@@ -23,7 +23,7 @@ class ValidAddDonationRequest {
 		$request->setBankData( self::newValidBankData() );
 		$request->setInterval( ValidDonation::PAYMENT_INTERVAL_IN_MONTHS );
 		$request->setOptIn( (string)ValidDonation::OPTS_INTO_NEWSLETTER );
-		$request->setPaymentType( PaymentMethods::DIRECT_DEBIT );
+		$request->setPaymentType( PaymentMethod::DIRECT_DEBIT );
 
 		$request->setDonorType( DonorName::PERSON_PRIVATE );
 		$request->setDonorSalutation( ValidDonation::DONOR_SALUTATION );
