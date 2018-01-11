@@ -88,4 +88,18 @@ class DonorNameTest extends TestCase {
 		$this->assertSame( 'Globex Corp.', $companyName->getFullName() );
 	}
 
+	public function testPrivatePersonNameCanBeIdentified(): void {
+		$personName = DonorName::newPrivatePersonName();
+
+		$this->assertTrue( $personName->isPrivatePerson() );
+		$this->assertFalse( $personName->isCompany() );
+	}
+
+	public function testCompanyNameCanBeIdentified(): void {
+		$personName = DonorName::newCompanyName();
+
+		$this->assertFalse( $personName->isPrivatePerson() );
+		$this->assertTrue( $personName->isCompany() );
+	}
+
 }
