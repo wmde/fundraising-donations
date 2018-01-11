@@ -8,6 +8,7 @@ use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationVa
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
 use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\BankDataValidator;
+use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
@@ -82,7 +83,7 @@ class AddDonationValidator {
 	}
 
 	private function validateBankData(): void {
-		if ( $this->request->getPaymentType() !== PaymentMethods::DIRECT_DEBIT ) {
+		if ( $this->request->getPaymentType() !== PaymentMethod::DIRECT_DEBIT ) {
 			return;
 		}
 

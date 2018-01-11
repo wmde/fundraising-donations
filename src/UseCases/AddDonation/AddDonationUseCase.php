@@ -16,7 +16,6 @@ use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmatio
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\DirectDebitPayment;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentWithoutAssociatedData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalData;
 use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment;
@@ -146,13 +145,13 @@ class AddDonationUseCase {
 		$paymentType = $donationRequest->getPaymentType();
 
 		switch ( $paymentType ) {
-			case PaymentMethods::BANK_TRANSFER:
+			case PaymentMethod::BANK_TRANSFER:
 				return new BankTransferPayment( $this->transferCodeGenerator->generateTransferCode( 'W-Q-' ) );
-			case PaymentMethods::DIRECT_DEBIT:
+			case PaymentMethod::DIRECT_DEBIT:
 				return new DirectDebitPayment( $donationRequest->getBankData() );
-			case PaymentMethods::PAYPAL:
+			case PaymentMethod::PAYPAL:
 				return new PayPalPayment( new PayPalData() );
-			case PaymentMethods::SOFORT:
+			case PaymentMethod::SOFORT:
 				return new SofortPayment( $this->transferCodeGenerator->generateTransferCode( 'W-Q-' ) );
 			default:
 				return new PaymentWithoutAssociatedData( $paymentType );
