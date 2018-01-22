@@ -2,19 +2,19 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\GetDonation;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\GetDonation;
 
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokens;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation\GetDonationRequest;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation\GetDonationUseCase;
+use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationUseCase;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation\GetDonationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationUseCase
  *
  * @license GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

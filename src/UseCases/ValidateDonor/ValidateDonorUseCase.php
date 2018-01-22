@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor;
+namespace WMDE\Fundraising\DonationContext\UseCases\ValidateDonor;
 
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse as Response;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse as Response;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\EmailValidator;
 

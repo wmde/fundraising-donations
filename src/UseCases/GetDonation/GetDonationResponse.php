@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation;
+namespace WMDE\Fundraising\DonationContext\UseCases\GetDonation;
 
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 
 /**
  * @license GNU GPL v2+

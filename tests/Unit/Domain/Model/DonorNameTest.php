@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\Domain\Model;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Model\DonorName
  *
  * @license GNU GPL v2+
  * @author Kai Nissen < kai.nissen@wikimedia.de >

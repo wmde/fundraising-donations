@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\CancelDonation;
+namespace WMDE\Fundraising\DonationContext\UseCases\CancelDonation;
 
 /**
  * @licence GNU GPL v2+

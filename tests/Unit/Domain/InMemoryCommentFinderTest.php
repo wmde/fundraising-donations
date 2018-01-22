@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\Domain;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain;
 
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentWithAmount;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\InMemoryCommentFinder;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\InMemoryCommentFinder;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\InMemoryCommentFinder
+ * @covers WMDE\Fundraising\DonationContext\Tests\Fixtures\InMemoryCommentFinder
  *
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

@@ -2,17 +2,17 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\DataAccess;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use WMDE\Fundraising\Entities\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationEventLogger;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogException;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\ThrowingEntityManager;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\TestEnvironment;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationEventLogger;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogException;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
+use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationEventLogger
+ * @covers WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationEventLogger
  */
 class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
 

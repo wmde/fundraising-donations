@@ -2,10 +2,10 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Data;
+namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\Frontend\PaymentContext\RequestModel\PayPalPaymentNotificationRequest;
+use WMDE\Fundraising\PaymentContext\RequestModel\PayPalPaymentNotificationRequest;
 
 /**
  * @license GNU GPL v2+

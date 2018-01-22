@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures;
+namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 
 /**
  * @license GNU GPL v2+

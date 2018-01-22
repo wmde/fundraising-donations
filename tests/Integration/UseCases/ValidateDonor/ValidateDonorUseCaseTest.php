@@ -2,19 +2,19 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\ValidateDonor;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\ValidateDonor;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase
  *
  * @license GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

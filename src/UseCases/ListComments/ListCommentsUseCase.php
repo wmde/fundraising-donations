@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\ListComments;
+namespace WMDE\Fundraising\DonationContext\UseCases\ListComments;
 
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentFinder;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentFinder;
 
 /**
  * @licence GNU GPL v2+

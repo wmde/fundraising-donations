@@ -2,15 +2,15 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext;
+namespace WMDE\Fundraising\DonationContext;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Pimple\Container;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\RandomTokenGenerator;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\TokenGenerator;
-use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationPrePersistSubscriber;
+use WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator;
+use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationPrePersistSubscriber;
 use WMDE\Fundraising\Store\Factory as StoreFactory;
 use WMDE\Fundraising\Store\Installer;
 

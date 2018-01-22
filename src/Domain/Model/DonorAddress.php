@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Domain\Model;
+namespace WMDE\Fundraising\DonationContext\Domain\Model;
 
 use WMDE\FreezableValueObject\FreezableValueObject;
 

@@ -2,22 +2,22 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\AddComment;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddComment;
 
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonationComment;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\ThrowingDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentRequest;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentUseCase;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentValidationResult;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentValidator;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingDonationRepository;
+use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentRequest;
+use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentUseCase;
+use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentValidationResult;
+use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\AddComment\AddCommentUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentUseCase
  *
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >

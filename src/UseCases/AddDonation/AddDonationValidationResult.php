@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation;
+namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse;
 use WMDE\FunValidators\ValidationResult;
 
 /**

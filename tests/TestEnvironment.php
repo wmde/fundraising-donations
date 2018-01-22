@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests;
+namespace WMDE\Fundraising\DonationContext\Tests;
 
-use WMDE\Fundraising\Frontend\DonationContext\DonationContextFactory;
+use WMDE\Fundraising\DonationContext\DonationContextFactory;
 
 /**
  * @licence GNU GPL v2+
