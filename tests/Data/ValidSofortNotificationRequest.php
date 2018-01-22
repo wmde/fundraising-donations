@@ -2,10 +2,10 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Data;
+namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use DateTime;
-use WMDE\Fundraising\Frontend\PaymentContext\RequestModel\SofortNotificationRequest;
+use WMDE\Fundraising\PaymentContext\RequestModel\SofortNotificationRequest;
 
 class ValidSofortNotificationRequest {
 

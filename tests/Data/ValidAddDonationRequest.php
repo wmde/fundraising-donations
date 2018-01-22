@@ -2,14 +2,14 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Data;
+namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationRequest;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankData;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\Iban;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
  * @license GNU GPL v2+

@@ -2,25 +2,25 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\HandlePayPalPaymentNotification;
+namespace WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonationPayment;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donor;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorAddress;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalData;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\RequestModel\PayPalPaymentNotificationRequest;
-use WMDE\Fundraising\Frontend\PaymentContext\ResponseModel\PaypalNotificationResponse;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
+use WMDE\Fundraising\PaymentContext\RequestModel\PayPalPaymentNotificationRequest;
+use WMDE\Fundraising\PaymentContext\ResponseModel\PaypalNotificationResponse;
 
 /**
  * @license GNU GPL v2+
@@ -187,7 +187,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		catch ( StoreDonationException $ex ) {
 			return $this->createErrorResponse( $ex );
 		}
-		/** @var \WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment $paymentMethod */
+		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $paymentMethod */
 		$paymentMethod = $payment->getPaymentMethod();
 		$paymentMethod->getPayPalData()->addChildPayment( $request->getTransactionId(), $childDonation->getId() );
 		try {

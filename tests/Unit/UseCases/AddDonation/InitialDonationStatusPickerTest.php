@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\UseCases\AddDonation;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddDonation;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker
  */
 class InitialDonationStatusPickerTest extends TestCase {
 	public function testGetInitialDonationStatus(): void {

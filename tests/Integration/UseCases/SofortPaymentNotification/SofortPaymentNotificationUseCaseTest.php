@@ -2,23 +2,23 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\SofortPaymentNotification;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\SofortPaymentNotification;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidSofortNotificationRequest;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\DonationRepositorySpy;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\ThrowingEntityManager;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidSofortNotificationRequest;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
+use WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase
  */
 class SofortPaymentNotificationUseCaseTest extends TestCase {
 

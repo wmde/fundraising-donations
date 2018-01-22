@@ -2,12 +2,12 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext;
+namespace WMDE\Fundraising\DonationContext;
 
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 
 /**
  * @licence GNU GPL v2+

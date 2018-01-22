@@ -2,17 +2,17 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\AddDonation;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidAddDonationRequest;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator
+ * @covers WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator
  *
  * @licence GNU GPL v2+
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >

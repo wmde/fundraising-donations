@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\DataAccess;
+namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use WMDE\Fundraising\Entities\Donation as DoctrineDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogException;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 
 /**
  * @license GNU GPL v2+

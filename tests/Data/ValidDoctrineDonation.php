@@ -2,10 +2,10 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Data;
+namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use WMDE\Fundraising\Entities\Donation;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
  * @licence GNU GPL v2+

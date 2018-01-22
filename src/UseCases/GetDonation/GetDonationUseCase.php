@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation;
+namespace WMDE\Fundraising\DonationContext\UseCases\GetDonation;
 
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokenFetcher;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
 /**
  * @license GNU GPL v2+

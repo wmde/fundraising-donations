@@ -2,25 +2,25 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation;
+namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokenFetcher;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonationPayment;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donor;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorAddress;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankTransferPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\DirectDebitPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentWithoutAssociatedData;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalData;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\SofortPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\TransferCodeGenerator;
+use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentWithoutAssociatedData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
+use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
 
 /**
  * @license GNU GPL v2+

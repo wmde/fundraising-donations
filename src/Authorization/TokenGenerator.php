@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Authorization;
+namespace WMDE\Fundraising\DonationContext\Authorization;
 
 /**
  * @licence GNU GPL v2+

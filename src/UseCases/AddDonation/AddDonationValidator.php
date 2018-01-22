@@ -2,15 +2,15 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation;
+namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\BankDataValidator;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethods;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\PaymentDataValidator;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase;
+use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethods;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\EmailValidator;
 

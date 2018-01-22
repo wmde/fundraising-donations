@@ -2,16 +2,16 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\ListComments;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\ListComments;
 
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentWithAmount;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\InMemoryCommentFinder;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ListComments\CommentList;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ListComments\CommentListingRequest;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ListComments\ListCommentsUseCase;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\InMemoryCommentFinder;
+use WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentList;
+use WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentListingRequest;
+use WMDE\Fundraising\DonationContext\UseCases\ListComments\ListCommentsUseCase;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\UseCases\ListComments\ListCommentsUseCase
+ * @covers WMDE\Fundraising\DonationContext\UseCases\ListComments\ListCommentsUseCase
  *
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

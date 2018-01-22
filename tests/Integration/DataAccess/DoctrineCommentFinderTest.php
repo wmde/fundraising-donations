@@ -2,19 +2,19 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\DataAccess;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use WMDE\Fundraising\Entities\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineCommentFinder;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentListingException;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentWithAmount;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\TestEnvironment;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
+use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineCommentFinder
+ * @covers WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder
  *
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

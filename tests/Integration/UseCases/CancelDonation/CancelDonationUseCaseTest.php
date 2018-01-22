@@ -2,23 +2,23 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\CancelDonation;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CancelDonation;
 
 use WMDE\EmailAddress\EmailAddress;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\TemplateMailerInterface;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\CancelDonation\CancelDonationRequest;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\CancelDonation\CancelDonationResponse;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\CancelDonation\CancelDonationUseCase;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
+use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationResponse;
+use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\UseCases\CancelDonation\CancelDonationUseCase
+ * @covers WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase
  *
  * @license GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

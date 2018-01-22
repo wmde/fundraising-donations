@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories;
+namespace WMDE\Fundraising\DonationContext\Domain\Repositories;
 
 /**
  * @license GNU GPL v2+

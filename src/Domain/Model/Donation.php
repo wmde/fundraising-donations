@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Domain\Model;
+namespace WMDE\Fundraising\DonationContext\Domain\Model;
 
 use RuntimeException;
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardTransactionData;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
  * @licence GNU GPL v2+

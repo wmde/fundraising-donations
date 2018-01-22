@@ -2,12 +2,12 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\Authorization;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\Authorization;
 
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\RandomTokenGenerator;
+use WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\Authorization\RandomTokenGenerator
+ * @covers \WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator
  *
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

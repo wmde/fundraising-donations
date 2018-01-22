@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\UseCases\ListComments;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ListComments;
 
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentWithAmount;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\ListComments\CommentList;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
+use WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentList;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\UseCases\ListComments\CommentList
+ * @covers WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentList
  *
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

@@ -2,14 +2,14 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\DataAccess;
+namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use WMDE\Fundraising\Entities\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentFinder;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentListingException;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentWithAmount;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentFinder;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
 
 /**
  * @licence GNU GPL v2+

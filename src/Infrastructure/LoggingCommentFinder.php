@@ -2,13 +2,13 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Infrastructure;
+namespace WMDE\Fundraising\DonationContext\Infrastructure;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentFinder;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentListingException;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\CommentWithAmount;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentFinder;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
 
 /**
  * @license GNU GPL v2+
