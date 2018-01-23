@@ -2,17 +2,17 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\DataAccess;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationRepository;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankTransferPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\SofortPayment;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationRepository
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
  */
 class DoctrineDonationRepositoryTest extends TestCase {
 

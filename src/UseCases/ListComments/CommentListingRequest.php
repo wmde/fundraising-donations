@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\ListComments;
+namespace WMDE\Fundraising\DonationContext\UseCases\ListComments;
 
 /**
  * @licence GNU GPL v2+

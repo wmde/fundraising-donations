@@ -2,10 +2,10 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration;
 
 use PHPUnit\Framework\Assert;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 
 trait DonationEventLoggerAsserter {
 	public function assertEventLogContainsExpression( DonationEventLoggerSpy $eventLoggerSpy, int $donationId, string $expr ): void {

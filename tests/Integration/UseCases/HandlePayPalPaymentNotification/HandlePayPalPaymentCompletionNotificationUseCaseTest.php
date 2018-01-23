@@ -2,28 +2,28 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\HandlePayPalPaymentNotification;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\HandlePayPalPaymentNotification;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidPayPalNotificationRequest;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\DonationRepositorySpy;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\ThrowingEntityManager;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalData;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayPalNotificationRequest;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
+use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
+use WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase
  *
  * @licence GNU GPL v2+
  * @author Kai Nissen < kai.nissen@wikimedia.de >
@@ -221,7 +221,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 
-		/** @var \WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment $payment */
+		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $payment */
 		$payment = $fakeRepository->getDonationById( $donation->getId() )->getPaymentMethod();
 
 		$this->assertTrue(
@@ -250,13 +250,13 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 
 		$donation = $fakeRepository->getDonationById( $donation->getId() );
-		/** @var \WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment $payment */
+		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $payment */
 		$payment = $donation->getPaymentMethod();
 		$childDonation = $fakeRepository->getDonationById(
 			$payment->getPayPalData()->getChildPaymentEntityId( $transactionId )
 		);
 		$this->assertNotNull( $childDonation );
-		/** @var \WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment $childDonationPaymentMethod */
+		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $childDonationPaymentMethod */
 		$childDonationPaymentMethod = $childDonation->getPaymentMethod();
 		$this->assertEquals( $transactionId, $childDonationPaymentMethod->getPayPalData()->getPaymentId() );
 		$this->assertEquals( $donation->getAmount(), $childDonation->getAmount() );
@@ -287,7 +287,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 
 		$donation = $fakeRepository->getDonationById( $donation->getId() );
-		/** @var \WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment $payment */
+		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $payment */
 		$payment = $donation->getPaymentMethod();
 		$childDonationId = $payment->getPayPalData()->getChildPaymentEntityId( $transactionId );
 

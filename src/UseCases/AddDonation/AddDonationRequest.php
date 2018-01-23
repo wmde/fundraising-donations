@@ -2,11 +2,11 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation;
+namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankData;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
 
 /**
  * @license GNU GPL v2+

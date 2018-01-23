@@ -2,19 +2,19 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\CreditCardPaymentNotification;
+namespace WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification;
 
 use Psr\Log\LoggerInterface;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationEventLogger;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardTransactionData;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\Frontend\PaymentContext\Infrastructure\CreditCardService;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardService;
 
 /**
  * @license GNU GPL v2+

@@ -2,10 +2,10 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures;
+namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
 /**
  * @licence GNU GPL v2+

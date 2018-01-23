@@ -2,18 +2,18 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\SofortPaymentNotification;
+namespace WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification;
 
 use RuntimeException;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\DonationConfirmationMailer;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\SofortPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\RequestModel\SofortNotificationRequest;
-use WMDE\Fundraising\Frontend\PaymentContext\ResponseModel\SofortNotificationResponse;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
+use WMDE\Fundraising\PaymentContext\RequestModel\SofortNotificationRequest;
+use WMDE\Fundraising\PaymentContext\ResponseModel\SofortNotificationResponse;
 
 class SofortPaymentNotificationUseCase {
 

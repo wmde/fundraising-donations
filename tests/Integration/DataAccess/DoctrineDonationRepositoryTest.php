@@ -2,28 +2,28 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\DataAccess;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\Entities\Donation as DoctrineDonation;
-use WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\IncompleteDoctrineDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDoctrineDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\ThrowingEntityManager;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\TestEnvironment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankTransferPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\CreditCardPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\DirectDebitPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\PayPalPayment;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\SofortPayment;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
+use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
+use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\DataAccess\DoctrineDonationRepository
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
  *
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

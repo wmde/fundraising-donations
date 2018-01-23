@@ -2,24 +2,24 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Integration\UseCases\AddDonation;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidAddDonationRequest;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidator;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\BankDataValidator;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\IbanValidator;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\BankData;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\Model\Iban;
-use WMDE\Fundraising\Frontend\PaymentContext\Domain\PaymentDataValidator;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
+use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
+use WMDE\Fundraising\PaymentContext\Domain\IbanValidator;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\AddDonationValidator
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator
  *
  * @licence GNU GPL v2+
  * @author Kai Nissen < kai.nissen@wikimedia.de >

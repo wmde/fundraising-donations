@@ -2,12 +2,12 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\DataAccess;
+namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use WMDE\Fundraising\Entities\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 
 /**
  * @licence GNU GPL v2+

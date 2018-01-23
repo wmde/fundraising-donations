@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\UseCases\GetDonation;
+namespace WMDE\Fundraising\DonationContext\UseCases\GetDonation;
 
 /**
  * @license GNU GPL v2+

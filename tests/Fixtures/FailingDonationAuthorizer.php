@@ -2,9 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures;
+namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 
 /**
  * @licence GNU GPL v2+
