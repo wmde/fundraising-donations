@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Infrastructure;
+namespace WMDE\Fundraising\DonationContext\Infrastructure;
 
 /**
  * Logs information on changes to the donation during its lifecycle.

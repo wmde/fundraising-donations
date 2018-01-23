@@ -2,19 +2,19 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\Infrastructure;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\Infrastructure;
 
 use Psr\Log\LogLevel;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\Frontend\DonationContext\Infrastructure\LoggingDonationRepository;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\LoggingDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\PsrLogTestDoubles\LoggerSpy;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\Infrastructure\LoggingDonationRepository
+ * @covers WMDE\Fundraising\DonationContext\Infrastructure\LoggingDonationRepository
  *
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >

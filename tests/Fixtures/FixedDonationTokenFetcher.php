@@ -2,11 +2,11 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Fixtures;
+namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokenFetcher;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokenFetchingException;
-use WMDE\Fundraising\Frontend\DonationContext\Authorization\DonationTokens;
+use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
+use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetchingException;
+use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 
 /**
  * @licence GNU GPL v2+

@@ -2,12 +2,12 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\UseCases\AddDonation;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddDonation;
 
-use WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\ReferrerGeneralizer;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\ReferrerGeneralizer;
 
 /**
- * @covers \WMDE\Fundraising\Frontend\DonationContext\UseCases\AddDonation\ReferrerGeneralizer
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\ReferrerGeneralizer
  *
  * @licence GNU GPL v2+
  * @author Kai Nissen < kai.nissen@wikimedia.de >

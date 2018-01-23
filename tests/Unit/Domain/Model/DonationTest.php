@@ -2,14 +2,14 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\Frontend\DonationContext\Tests\Unit\Domain\Model;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
 use RuntimeException;
-use WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\Frontend\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 
 /**
- * @covers WMDE\Fundraising\Frontend\DonationContext\Domain\Model\Donation
+ * @covers WMDE\Fundraising\DonationContext\Domain\Model\Donation
  *
  * @license GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
