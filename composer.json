@@ -7,18 +7,25 @@
 		"php": ">=7.1",
 		"ext-curl": "*",
 
-		"wmde/fundraising-store": "~7.0",
 		"doctrine/orm": "~2.5",
-
 		"psr/log": "~1.0",
 		"pimple/pimple": "~3.0",
 
+		"wmde/fundraising-store": "~7.0",
+		"wmde/fundraising-payments": "@dev",
 		"wmde/euro": "~1.0",
 		"wmde/email-address": "~1.0",
 		"wmde/freezable-value-object": "~1.0",
 		"wmde/fun-validators": "~1.0",
+
 		"sofort/sofortlib-php": "^3.2"
 	},
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/wmde/fundraising-payments"
+		}
+	],
 	"require-dev": {
 		"ext-pdo_sqlite": "*",
 
