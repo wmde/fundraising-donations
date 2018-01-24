@@ -3,6 +3,8 @@ Bounded Context for the Wikimedia Deutschland fundraising donation (sub-)domain.
 Currently also temporarily contains the payment Bounded Context, pending further refactoring.
 
 [![Build Status](https://travis-ci.org/wmde/fundraising-donations.svg?branch=master)](https://travis-ci.org/wmde/fundraising-donations)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/wmde/fundraising-donations/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/wmde/fundraising-donations/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/wmde/fundraising-donations/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/wmde/fundraising-donations/?branch=master)
 
 ## Development
 
