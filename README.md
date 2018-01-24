@@ -1,6 +1,6 @@
-Bounded Context for the Wikimedia Deutschland fundraising donation (sub-)domain. Used by the [user facing donation application](https://github.com/wmde/FundraisingFrontend) and the "Fundraising Operations Center" (which is not public software).
-
-Currently also temporarily contains the payment Bounded Context, pending further refactoring.
+Bounded Context for the Wikimedia Deutschland fundraising donation (sub-)domain.
+Used by the [user facing donation application](https://github.com/wmde/FundraisingFrontend)
+and the "Fundraising Operations Center" (which is not public software).
 
 [![Build Status](https://travis-ci.org/wmde/fundraising-donations.svg?branch=master)](https://travis-ci.org/wmde/fundraising-donations)
 
