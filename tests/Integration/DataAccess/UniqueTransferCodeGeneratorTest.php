@@ -2,21 +2,21 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\PaymentContext\Tests\Integration\DataAccess;
+namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\DataAccess\UniqueTransferCodeGenerator;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
-use WMDE\Fundraising\PaymentContext\DataAccess\UniqueTransferCodeGenerator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
 
 /**
- * @covers \WMDE\Fundraising\PaymentContext\DataAccess\UniqueTransferCodeGenerator
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\UniqueTransferCodeGenerator
  *
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
