@@ -2,7 +2,7 @@
 	"name": "wmde/fundraising-donations",
 	"description": "Bounded Context for the Wikimedia Deutschland fundraising donation subdomain",
 	"homepage": "https://github.com/wmde/FundraisingDonations",
-	"license": "GPL-2.0+",
+	"license": "GPL-2.0-or-later",
 	"require": {
 		"php": ">=7.1",
 		"ext-curl": "*",
