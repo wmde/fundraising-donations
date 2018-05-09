@@ -11,6 +11,9 @@ install:
   - travis_retry composer install
 
 script:
+  - cat ~/.travis_ci_environment.yml
+  - cat ~/.phpenv
+  - ls -al ~/.composer
   - composer validate --no-interaction
   - make ci
 
