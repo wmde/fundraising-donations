@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
+use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
@@ -11,8 +12,7 @@ use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationR
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
 use WMDE\Fundraising\PaymentContext\Domain\IbanValidator;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
-use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
@@ -25,10 +25,7 @@ use WMDE\FunValidators\Validators\EmailValidator;
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
-class AddDonationValidatorTest extends \PHPUnit\Framework\TestCase {
-
-	private const FOREIGN_IBAN = 'NL18ABNA0484869868';
-	private const FOREIGN_BIC = 'ABNANL2A';
+class AddDonationValidatorTest extends TestCase {
 
 	/** @var AddDonationValidator */
 	private $donationValidator;
@@ -97,35 +94,33 @@ class AddDonationValidatorTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	public function testDirectDebitMissingBankData_validatorReturnsFalse(): void {
-		$bankData = new BankData();
-		$bankData->setIban( new Iban( '' ) );
-		$bankData->setBic( '' );
-		$bankData->setBankName( '' );
+	public function testGivenFailingBankDataValidator_validatorReturnsFalse(): void {
+		$bankdataValidator = $this->createMock( BankDataValidator::class );
+		$bankdataValidator->method( 'validate' )->willReturn( new ValidationResult( new ConstraintViolation( '', '' ) ) );
+		$validator = new AddDonationValidator(
+			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
+			$bankdataValidator,
+			$this->newMockEmailValidator()
+		);
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setBankData( $bankData );
 
-		$result = $this->donationValidator->validate( $request );
+		$result = $validator->validate( $request );
 		$this->assertFalse( $result->isSuccessful() );
-
-		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_IBAN );
-		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_BIC );
 	}
 
-	public function testForeignDirectDebitMissingBankData_validationSucceeds(): void {
-		$bankData = new BankData();
-		$bankData->setIban( new Iban( self::FOREIGN_IBAN ) );
-		$bankData->setBic( self::FOREIGN_BIC );
-		$bankData->setBankName( '' );
-		$bankData->setAccount( '' );
-		$bankData->setBankCode( '' );
-
+	public function testBankDataIsOnlyValidatedForDirectDebit() {
+		$bankdataValidator = $this->createMock( BankDataValidator::class );
+		$bankdataValidator->expects( $this->never() )->method( 'validate' );
+		$validator = new AddDonationValidator(
+			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::BANK_TRANSFER ] ),
+			$bankdataValidator,
+			$this->newMockEmailValidator()
+		);
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setBankData( $bankData );
+		$request->setPaymentType( PaymentMethod::BANK_TRANSFER );
 
-		$result = $this->donationValidator->validate( $request );
+		$result = $validator->validate( $request );
 		$this->assertTrue( $result->isSuccessful() );
-		$this->assertFalse( $result->hasViolations() );
 	}
 
 	public function testAmountTooLow_validatorReturnsFalse(): void {
@@ -165,27 +160,6 @@ class AddDonationValidatorTest extends \PHPUnit\Framework\TestCase {
 		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_DONOR_EMAIL );
 	}
 
-	public function testBankDataWithLongFields_validationFails(): void {
-		$longText = str_repeat( 'Cats ', 500 );
-		$request = ValidAddDonationRequest::getRequest();
-		$validBankData = $request->getBankData();
-		$bankData = new BankData();
-		$bankData->setBic( $longText );
-		$bankData->setBankName( $longText );
-		// Other length violations will be caught by IBAN validation
-		$bankData->setIban( $validBankData->getIban() );
-		$bankData->setAccount( $validBankData->getAccount() );
-		$bankData->setBankCode( $validBankData->getBankCode() );
-		$bankData->freeze();
-		$request->setBankData( $bankData );
-
-		$result = $this->donationValidator->validate( $request );
-		$this->assertFalse( $result->isSuccessful() );
-
-		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_BANK_NAME );
-		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_BIC );
-	}
-
 	public function testLongSource_validationFails(): void {
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setSource( 'http://catlady.com/#' . str_repeat( 'Cats ', 500 ) );
@@ -198,7 +172,7 @@ class AddDonationValidatorTest extends \PHPUnit\Framework\TestCase {
 
 	private function newDonationValidator(): AddDonationValidator {
 		return new AddDonationValidator(
-			new PaymentDataValidator( 1.0, 100000, [ 'BEZ' ] ),
+			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
 			$this->newBankDataValidator(),
 			$this->newMockEmailValidator()
 		);

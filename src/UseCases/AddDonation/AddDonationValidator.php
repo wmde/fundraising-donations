@@ -35,8 +35,6 @@ class AddDonationValidator {
 	private $violations;
 
 	private $maximumFieldLengths = [
-		Result::SOURCE_BANK_NAME => 100,
-		Result::SOURCE_BIC => 32,
 		Result::SOURCE_TRACKING_SOURCE => 250
 	];
 
@@ -91,8 +89,6 @@ class AddDonationValidator {
 		$validationResult = $this->bankDataValidator->validate( $bankData );
 
 		$this->addViolations( $validationResult->getViolations() );
-		$this->validateFieldLength( $bankData->getBankName(), Result::SOURCE_BANK_NAME );
-		$this->validateFieldLength( $bankData->getBic(), Result::SOURCE_BIC );
 	}
 
 	private function validatePayment(): void {
