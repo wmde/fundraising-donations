@@ -15,11 +15,6 @@ class AddDonationValidationResult extends ValidationResult {
 
 	public const SOURCE_PAYMENT_TYPE = 'zahlweise';
 	public const SOURCE_PAYMENT_AMOUNT = 'amount';
-	public const SOURCE_IBAN = 'iban';
-	public const SOURCE_BIC = 'bic';
-	public const SOURCE_BANK_NAME = 'bankname';
-	public const SOURCE_BANK_CODE = 'blz';
-	public const SOURCE_BANK_ACCOUNT = 'konto';
 	public const SOURCE_DONOR_EMAIL = ValidateDonorResponse::SOURCE_EMAIL;
 	public const SOURCE_DONOR_COMPANY = ValidateDonorResponse::SOURCE_COMPANY;
 	public const SOURCE_DONOR_FIRST_NAME = ValidateDonorResponse::SOURCE_FIRST_NAME;
@@ -38,7 +33,6 @@ class AddDonationValidationResult extends ValidationResult {
 	public const VIOLATION_NOT_MONEY = 'not-money';
 	public const VIOLATION_MISSING = 'missing';
 	public const VIOLATION_IBAN_BLOCKED = 'iban-blocked';
-	public const VIOLATION_IBAN_INVALID = 'iban-invalid';
 	public const VIOLATION_NOT_DATE = 'not-date';
 	public const VIOLATION_NOT_PHONE_NUMBER = 'not-phone';
 	public const VIOLATION_NOT_EMAIL = 'not-email';
