@@ -10,6 +10,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
+use WMDE\Fundraising\PaymentContext\Domain\BankDataValidationResult;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
 use WMDE\Fundraising\PaymentContext\Domain\IbanValidator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
@@ -95,25 +96,33 @@ class AddDonationValidatorTest extends TestCase {
 	}
 
 	public function testGivenFailingBankDataValidator_validatorReturnsFalse(): void {
-		$bankdataValidator = $this->createMock( BankDataValidator::class );
-		$bankdataValidator->method( 'validate' )->willReturn( new ValidationResult( new ConstraintViolation( '', '' ) ) );
+		$bankDataValidator = $this->createMock( BankDataValidator::class );
+		$bankDataValidator->method( 'validate' )->willReturn( new ValidationResult(
+			new ConstraintViolation(
+				'',
+				BankDataValidationResult::VIOLATION_MISSING,
+				BankDataValidationResult::SOURCE_IBAN
+			)
+		) );
 		$validator = new AddDonationValidator(
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
-			$bankdataValidator,
+			$bankDataValidator,
 			$this->newMockEmailValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
 
 		$result = $validator->validate( $request );
 		$this->assertFalse( $result->isSuccessful() );
+
+		$this->assertConstraintWasViolated( $result, BankDataValidationResult::SOURCE_IBAN );
 	}
 
 	public function testBankDataIsOnlyValidatedForDirectDebit() {
-		$bankdataValidator = $this->createMock( BankDataValidator::class );
-		$bankdataValidator->expects( $this->never() )->method( 'validate' );
+		$bankDataValidator = $this->createMock( BankDataValidator::class );
+		$bankDataValidator->expects( $this->never() )->method( 'validate' );
 		$validator = new AddDonationValidator(
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::BANK_TRANSFER ] ),
-			$bankdataValidator,
+			$bankDataValidator,
 			$this->newMockEmailValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
