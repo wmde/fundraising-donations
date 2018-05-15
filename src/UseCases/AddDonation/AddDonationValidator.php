@@ -7,7 +7,10 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
 use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
 use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase;
+use WMDE\Fundraising\PaymentContext\Domain\BankDataValidationResult;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
+use WMDE\Fundraising\PaymentContext\Domain\IbanBlocklist;
+use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethods;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
@@ -22,6 +25,7 @@ class AddDonationValidator {
 
 	private $paymentDataValidator;
 	private $bankDataValidator;
+	private $ibanBlocklist;
 	private $donorValidator;
 
 	/**
@@ -39,10 +43,11 @@ class AddDonationValidator {
 	];
 
 	public function __construct( PaymentDataValidator $paymentDataValidator, BankDataValidator $bankDataValidator,
-		EmailValidator $emailValidator ) {
+		IbanBlocklist $ibanBlocklist, EmailValidator $emailValidator ) {
 
 		$this->paymentDataValidator = $paymentDataValidator;
 		$this->bankDataValidator = $bankDataValidator;
+		$this->ibanBlocklist = $ibanBlocklist;
 		$this->donorValidator = new ValidateDonorUseCase( $emailValidator );
 	}
 
@@ -89,6 +94,8 @@ class AddDonationValidator {
 		$validationResult = $this->bankDataValidator->validate( $bankData );
 
 		$this->addViolations( $validationResult->getViolations() );
+
+		$this->validateIban( $bankData->getIban() );
 	}
 
 	private function validatePayment(): void {
@@ -136,6 +143,16 @@ class AddDonationValidator {
 		$this->validateFieldLength( $this->request->getSource(), Result::SOURCE_TRACKING_SOURCE );
 		// validation of impression counts is not needed because input is converted to int
 		// validation of skin, color and layout is not needed because they are static legacy values and empty.
+	}
+
+	private function validateIban( Iban $iban ): void {
+		if ( $this->ibanBlocklist->isIbanBlocked( $iban ) ) {
+			$this->addViolations( [ new ConstraintViolation(
+				$iban->toString(),
+				Result::VIOLATION_IBAN_BLOCKED,
+				BankDataValidationResult::SOURCE_IBAN
+			) ] );
+		}
 	}
 
 }
