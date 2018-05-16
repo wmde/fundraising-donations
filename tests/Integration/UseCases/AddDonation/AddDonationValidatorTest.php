@@ -8,9 +8,12 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
+use WMDE\Fundraising\PaymentContext\Domain\BankDataValidationResult;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
+use WMDE\Fundraising\PaymentContext\Domain\IbanBlocklist;
 use WMDE\Fundraising\PaymentContext\Domain\IbanValidator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
@@ -95,25 +98,35 @@ class AddDonationValidatorTest extends TestCase {
 	}
 
 	public function testGivenFailingBankDataValidator_validatorReturnsFalse(): void {
-		$bankdataValidator = $this->createMock( BankDataValidator::class );
-		$bankdataValidator->method( 'validate' )->willReturn( new ValidationResult( new ConstraintViolation( '', '' ) ) );
+		$bankDataValidator = $this->createMock( BankDataValidator::class );
+		$bankDataValidator->method( 'validate' )->willReturn( new ValidationResult(
+			new ConstraintViolation(
+				'',
+				BankDataValidationResult::VIOLATION_MISSING,
+				BankDataValidationResult::SOURCE_IBAN
+			)
+		) );
 		$validator = new AddDonationValidator(
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
-			$bankdataValidator,
+			$bankDataValidator,
+			$this->newEmptyIbanBlocklist(),
 			$this->newMockEmailValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
 
 		$result = $validator->validate( $request );
 		$this->assertFalse( $result->isSuccessful() );
+
+		$this->assertConstraintWasViolated( $result, BankDataValidationResult::SOURCE_IBAN );
 	}
 
 	public function testBankDataIsOnlyValidatedForDirectDebit() {
-		$bankdataValidator = $this->createMock( BankDataValidator::class );
-		$bankdataValidator->expects( $this->never() )->method( 'validate' );
+		$bankDataValidator = $this->createMock( BankDataValidator::class );
+		$bankDataValidator->expects( $this->never() )->method( 'validate' );
 		$validator = new AddDonationValidator(
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::BANK_TRANSFER ] ),
-			$bankdataValidator,
+			$bankDataValidator,
+			$this->newEmptyIbanBlocklist(),
 			$this->newMockEmailValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
@@ -121,6 +134,21 @@ class AddDonationValidatorTest extends TestCase {
 
 		$result = $validator->validate( $request );
 		$this->assertTrue( $result->isSuccessful() );
+	}
+
+	public function testGivenBlockedIban_validatorReturnsFalse(): void {
+		$validator = new AddDonationValidator(
+			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
+			$this->newBankDataValidator(),
+			new IbanBlocklist( [ ValidDonation::PAYMENT_IBAN ] ),
+			$this->newMockEmailValidator()
+		);
+		$request = ValidAddDonationRequest::getRequest();
+
+		$result = $validator->validate( $request );
+		$this->assertFalse( $result->isSuccessful() );
+
+		$this->assertConstraintWasViolated( $result, BankDataValidationResult::SOURCE_IBAN );
 	}
 
 	public function testAmountTooLow_validatorReturnsFalse(): void {
@@ -174,6 +202,7 @@ class AddDonationValidatorTest extends TestCase {
 		return new AddDonationValidator(
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
 			$this->newBankDataValidator(),
+			$this->newEmptyIbanBlocklist(),
 			$this->newMockEmailValidator()
 		);
 	}
@@ -206,6 +235,10 @@ class AddDonationValidatorTest extends TestCase {
 			false,
 			'Failed asserting that constraint for field "' . $fieldName . '"" was violated.'
 		);
+	}
+
+	private function newEmptyIbanBlocklist(): IbanBlocklist {
+		return new IbanBlocklist( [] );
 	}
 
 }
