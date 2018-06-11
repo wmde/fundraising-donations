@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
+use WMDE\Fundraising\Entities\AddressChange;
 use WMDE\Fundraising\Entities\Donation;
 use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
 use WMDE\Fundraising\Store\DonationData;
@@ -53,6 +54,10 @@ class DoctrineDonationPrePersistSubscriber implements EventSubscriber {
 					}
 				}
 			);
+
+			if ( $entity->getAddressChange() === null ) {
+				$entity->setAddressChange( new AddressChange() );
+			}
 		}
 	}
 
