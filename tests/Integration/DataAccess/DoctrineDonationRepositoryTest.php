@@ -63,10 +63,12 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$actual = $this->getDoctrineDonationById( $expected->getId() );
 
 		$this->assertNotNull( $actual->getCreationTime() );
+
+		//UUID identifiers would mismatch so we have to overwrite them
 		$actual->setCreationTime( null );
+		$actual->setAddressChange( $expected->getAddressChange() );
 
 		$this->assertEquals( $expected->getDecodedData(), $actual->getDecodedData() );
-
 		$this->assertEquals( $expected, $actual );
 	}
 
