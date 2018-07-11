@@ -35,6 +35,7 @@ class Donation {
 	private $payment;
 	private $optsIntoNewsletter;
 	private $comment;
+	private $isExported;
 
 	/**
 	 * If the user wants to receive a donation receipt
@@ -138,6 +139,10 @@ class Donation {
 	 */
 	public function getDonor(): ?Donor {
 		return $this->donor;
+	}
+
+	public function setDonor( Donor $donor ): void {
+		$this->donor = $donor;
 	}
 
 	/**
@@ -271,6 +276,14 @@ class Donation {
 
 	public function isBooked(): bool {
 		return $this->status === self::STATUS_EXTERNAL_BOOKED;
+	}
+
+	public function isExported(): bool {
+		return $this->isExported;
+	}
+
+	public function setIsExported( bool $isExported ): void {
+		$this->isExported = $isExported;
 	}
 
 	public function isCancelled(): bool {

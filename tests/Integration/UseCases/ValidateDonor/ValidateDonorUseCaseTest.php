@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\ValidateDonor;
 
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
 use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse;
@@ -64,12 +65,12 @@ class ValidateDonorUseCaseTest extends TestCase {
 			->withSalutation( ValidDonation::DONOR_SALUTATION )
 			->withStreetAddress( ValidDonation::DONOR_STREET_ADDRESS )
 			->withTitle( ValidDonation::DONOR_TITLE )
-			->withType( ValidateDonorRequest::PERSON_PRIVATE );
+			->withType( DonorName::PERSON_PRIVATE );
 	}
 
 	public function testCompanyDonorWithoutCompanyNameFailsValidation() {
 		$requestModel = $this->getValidRequestModel()
-			->withType( ValidateDonorRequest::PERSON_COMPANY )
+			->withType( DonorName::PERSON_COMPANY )
 			->withCompanyName( '' );
 
 		$this->assertConstraintWasViolated(
@@ -100,7 +101,7 @@ class ValidateDonorUseCaseTest extends TestCase {
 
 	public function testCompanyDonorWithCompanyNamePassesValidation() {
 		$requestModel = $this->getValidRequestModel()
-			->withType( ValidateDonorRequest::PERSON_COMPANY )
+			->withType( DonorName::PERSON_COMPANY )
 			->withCompanyName( 'Such Company' );
 
 		$this->assertPassesValidation( $requestModel );
