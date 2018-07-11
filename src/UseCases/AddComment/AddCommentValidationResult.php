@@ -36,7 +36,7 @@ class AddCommentValidationResult {
 
 	public function getFirstViolation(): string {
 		if ( empty( $this->violations ) ) {
-			throw new \RuntimeException( 'There are not validation errors.' );
+			throw new \RuntimeException( 'There are no validation errors.' );
 		}
 		return reset( $this->violations );
 	}

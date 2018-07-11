@@ -334,6 +334,7 @@ class DoctrineDonationRepository implements DonationRepository {
 			$this->getCommentFromEntity( $dd )
 		);
 		$donation->setOptsIntoDonationReceipt( $dd->getDonationReceipt() );
+		$donation->setIsExported( $this->getExportState( $dd ) );
 		return $donation;
 	}
 
@@ -505,4 +506,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		);
 	}
 
+	private function getExportState( DoctrineDonation $dd ): bool {
+		return $dd->getDtGruen() && $dd->getDtGruen()->getTimestamp() > 0;
+	}
 }
