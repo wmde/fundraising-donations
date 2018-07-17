@@ -4,7 +4,7 @@
 	"homepage": "https://github.com/wmde/FundraisingDonations",
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"php": ">=7.1",
+		"php": ">=7.2",
 		"ext-curl": "*",
 
 		"doctrine/orm": "~2.5",
@@ -28,13 +28,13 @@
 	"require-dev": {
 		"ext-pdo_sqlite": "*",
 
-		"phpunit/phpunit": "~6.0",
+		"phpunit/phpunit": "~7.0",
 		"codeception/specify": "~1.0",
 		"whatthejeff/nyancat-phpunit-resultprinter": "~1.2",
 		"ockcyp/covers-validator": "@dev",
-		"phpstan/phpstan": "^0.7.0",
+		"phpstan/phpstan": "^0.10",
 		"squizlabs/php_codesniffer": "~2.8",
-		"phpmd/phpmd": "~2.3",
+		"phpmd/phpmd": "~2.6",
 		"slevomat/coding-standard": "^2.3",
 
 		"mikey179/vfsStream": "~1.6",
