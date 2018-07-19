@@ -40,7 +40,6 @@ class DonorValidator {
 	}
 
 	public function validate( DonorDataInterface $donorData ) {
-		$this->donorData = $donorData;
 		$this->validateDonorName( $donorData );
 		$this->validateDonorEmail( $donorData );
 		$this->validateDonorAddress( $donorData );
@@ -73,8 +72,14 @@ class DonorValidator {
 
 		if ( $this->donorIsCompany( $donorData ) ) {
 			$this->validateCompanyName( $donorData );
-		} else {
+		} elseif ( $this->donorIsPerson( $donorData ) ) {
 			$this->validatePersonName( $donorData );
+		} else {
+			$this->violations[] = new ConstraintViolation(
+				$donorData->getDonorType(),
+				Response::VIOLATION_WRONG_TYPE,
+				Response::SOURCE_ADDRESS_TYPE
+			);
 		}
 	}
 
