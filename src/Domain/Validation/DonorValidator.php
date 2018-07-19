@@ -17,11 +17,6 @@ class DonorValidator {
 	private $emailValidator;
 
 	/**
-	 * @var DonorDataInterface
-	 */
-	private $donorData;
-
-	/**
 	 * @var ConstraintViolation[]
 	 */
 	private $violations;
@@ -39,152 +34,152 @@ class DonorValidator {
 		Response::SOURCE_COUNTRY => 8,
 	];
 
-	public function __construct( DonorDataInterface $donorData, EmailValidator $mailValidator ) {
-		$this->donorData = $donorData;
+	public function __construct( EmailValidator $mailValidator ) {
 		$this->emailValidator = $mailValidator;
 		$this->violations = [];
 	}
 
-	public function validateDonorData() {
-		$this->validateDonorName();
-		$this->validateDonorEmail();
-		$this->validateDonorAddress();
+	public function validate( DonorDataInterface $donorData ) {
+		$this->donorData = $donorData;
+		$this->validateDonorName( $donorData );
+		$this->validateDonorEmail( $donorData );
+		$this->validateDonorAddress( $donorData );
 	}
 
-	private function validateDonorEmail(): void {
-		if ( $this->donorIsAnonymous() ) {
+	private function validateDonorEmail( DonorDataInterface $donorData ): void {
+		if ( $this->donorIsAnonymous( $donorData ) ) {
 			return;
 		}
 
-		if ( $this->emailValidator->validate( $this->donorData->getEmailAddress() )->hasViolations() ) {
+		if ( $this->emailValidator->validate( $donorData->getEmailAddress() )->hasViolations() ) {
 			$this->addViolations(
 				[
 					new ConstraintViolation(
-						$this->donorData->getEmailAddress(),
+						$donorData->getEmailAddress(),
 						Response::VIOLATION_MISSING,
 						Response::SOURCE_EMAIL
 					)
 				]
 			);
 		} else {
-			$this->validateFieldLength( $this->donorData->getEmailAddress(), Response::SOURCE_EMAIL );
+			$this->validateFieldLength( $donorData->getEmailAddress(), Response::SOURCE_EMAIL );
 		}
 	}
 
-	private function validateDonorName(): void {
-		if ( $this->donorIsAnonymous() ) {
+	private function validateDonorName( DonorDataInterface $donorData ): void {
+		if ( $this->donorIsAnonymous( $donorData ) ) {
 			return;
 		}
 
-		if ( $this->donorIsCompany() ) {
-			$this->validateCompanyName();
+		if ( $this->donorIsCompany( $donorData ) ) {
+			$this->validateCompanyName( $donorData );
 		} else {
-			$this->validatePersonName();
+			$this->validatePersonName( $donorData );
 		}
 	}
 
-	private function validateCompanyName(): void {
-		if ( $this->donorData->getCompanyName() === '' ) {
+	private function validateCompanyName( DonorDataInterface $donorData ): void {
+		if ( $donorData->getCompanyName() === '' ) {
 			$this->violations[] = new ConstraintViolation(
-				$this->donorData->getCompanyName(),
+				$donorData->getCompanyName(),
 				Response::VIOLATION_MISSING,
 				Response::SOURCE_COMPANY
 			);
 		} else {
-			$this->validateFieldLength( $this->donorData->getCompanyName(), Response::SOURCE_COMPANY );
+			$this->validateFieldLength( $donorData->getCompanyName(), Response::SOURCE_COMPANY );
 		}
 	}
 
-	public function validatePersonName(): void {
+	public function validatePersonName( DonorDataInterface $donorData ): void {
 		$violations = [];
 
-		if ( $this->donorData->getFirstName() === '' ) {
+		if ( $donorData->getFirstName() === '' ) {
 			$violations[] = new ConstraintViolation(
-				$this->donorData->getFirstName(),
+				$donorData->getFirstName(),
 				Response::VIOLATION_MISSING,
 				Response::SOURCE_FIRST_NAME
 			);
 		} else {
-			$this->validateFieldLength( $this->donorData->getFirstName(), Response::SOURCE_FIRST_NAME );
+			$this->validateFieldLength( $donorData->getFirstName(), Response::SOURCE_FIRST_NAME );
 		}
 
-		if ( $this->donorData->getLastName() === '' ) {
+		if ( $donorData->getLastName() === '' ) {
 			$violations[] = new ConstraintViolation(
-				$this->donorData->getLastName(),
+				$donorData->getLastName(),
 				Response::VIOLATION_MISSING,
 				Response::SOURCE_LAST_NAME
 			);
 		} else {
-			$this->validateFieldLength( $this->donorData->getLastName(), Response::SOURCE_LAST_NAME );
+			$this->validateFieldLength( $donorData->getLastName(), Response::SOURCE_LAST_NAME );
 		}
 
-		if ( $this->donorData->getSalutation() === '' ) {
+		if ( $donorData->getSalutation() === '' ) {
 			$violations[] = new ConstraintViolation(
-				$this->donorData->getSalutation(),
+				$donorData->getSalutation(),
 				Response::VIOLATION_MISSING,
 				Response::SOURCE_SALUTATION
 			);
 		} else {
-			$this->validateFieldLength( $this->donorData->getSalutation(), Response::SOURCE_SALUTATION );
+			$this->validateFieldLength( $donorData->getSalutation(), Response::SOURCE_SALUTATION );
 		}
 
-		$this->validateFieldLength( $this->donorData->getTitle(), Response::SOURCE_TITLE );
+		$this->validateFieldLength( $donorData->getTitle(), Response::SOURCE_TITLE );
 
 		// TODO: check if donor title is in the list of allowed titles?
 
 		$this->addViolations( $violations );
 	}
 
-	private function validateDonorAddress(): void {
-		if ( $this->donorIsAnonymous() ) {
+	private function validateDonorAddress( DonorDataInterface $donorData ): void {
+		if ( $this->donorIsAnonymous( $donorData ) ) {
 			return;
 		}
 
 		$violations = [];
 
-		if ( $this->donorData->getStreetAddress() === '' ) {
+		if ( $donorData->getStreetAddress() === '' ) {
 			$violations[] = new ConstraintViolation(
-				$this->donorData->getStreetAddress(),
+				$donorData->getStreetAddress(),
 				Response::VIOLATION_MISSING,
 				Response::SOURCE_STREET_ADDRESS
 			);
 		} else {
-			$this->validateFieldLength( $this->donorData->getStreetAddress(), Response::SOURCE_STREET_ADDRESS );
+			$this->validateFieldLength( $donorData->getStreetAddress(), Response::SOURCE_STREET_ADDRESS );
 		}
 
-		if ( $this->donorData->getPostalCode() === '' ) {
+		if ( $donorData->getPostalCode() === '' ) {
 			$violations[] = new ConstraintViolation(
-				$this->donorData->getPostalCode(),
+				$donorData->getPostalCode(),
 				Response::VIOLATION_MISSING,
 				Response::SOURCE_POSTAL_CODE
 			);
 		} else {
-			$this->validateFieldLength( $this->donorData->getPostalCode(), Response::SOURCE_POSTAL_CODE );
+			$this->validateFieldLength( $donorData->getPostalCode(), Response::SOURCE_POSTAL_CODE );
 		}
 
-		if ( $this->donorData->getCity() === '' ) {
+		if ( $donorData->getCity() === '' ) {
 			$violations[] = new ConstraintViolation(
-				$this->donorData->getCity(),
+				$donorData->getCity(),
 				Response::VIOLATION_MISSING,
 				Response::SOURCE_CITY
 			);
 		} else {
-			$this->validateFieldLength( $this->donorData->getCity(), Response::SOURCE_CITY );
+			$this->validateFieldLength( $donorData->getCity(), Response::SOURCE_CITY );
 		}
 
-		if ( $this->donorData->getCountryCode() === '' ) {
+		if ( $donorData->getCountryCode() === '' ) {
 			$violations[] = new ConstraintViolation(
-				$this->donorData->getCountryCode(),
+				$donorData->getCountryCode(),
 				Response::VIOLATION_MISSING,
 				Response::SOURCE_COUNTRY
 			);
 		} else {
-			$this->validateFieldLength( $this->donorData->getCountryCode(), Response::SOURCE_COUNTRY );
+			$this->validateFieldLength( $donorData->getCountryCode(), Response::SOURCE_COUNTRY );
 		}
 
-		if ( !preg_match( '/^\\d{4,5}$/', $this->donorData->getPostalCode() ) ) {
+		if ( !preg_match( '/^\\d{4,5}$/', $donorData->getPostalCode() ) ) {
 			$violations[] = new ConstraintViolation(
-				$this->donorData->getPostalCode(),
+				$donorData->getPostalCode(),
 				Response::VIOLATION_NOT_POSTCODE,
 				Response::SOURCE_POSTAL_CODE
 			);
@@ -203,16 +198,16 @@ class DonorValidator {
 		}
 	}
 
-	public function donorIsAnonymous(): bool {
-		return $this->donorData->getDonorType() === DonorName::PERSON_ANONYMOUS;
+	public function donorIsAnonymous( DonorDataInterface $donorData ): bool {
+		return $donorData->getDonorType() === DonorName::PERSON_ANONYMOUS;
 	}
 
-	public function donorIsCompany(): bool {
-		return $this->donorData->getDonorType() === DonorName::PERSON_COMPANY;
+	public function donorIsCompany( DonorDataInterface $donorData ): bool {
+		return $donorData->getDonorType() === DonorName::PERSON_COMPANY;
 	}
 
-	public function donorIsPerson(): bool {
-		return $this->donorData->getDonorType() === DonorName::PERSON_PRIVATE;
+	public function donorIsPerson( DonorDataInterface $donorData ): bool {
+		return $donorData->getDonorType() === DonorName::PERSON_PRIVATE;
 	}
 
 	private function addViolations( array $violations ): void {
