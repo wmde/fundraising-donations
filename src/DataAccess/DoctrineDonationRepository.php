@@ -34,8 +34,6 @@ use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardExpiry;
 
 /**
  * @license GNU GPL v2+
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineDonationRepository implements DonationRepository {
 
@@ -75,6 +73,10 @@ class DoctrineDonationRepository implements DonationRepository {
 		$this->updateComment( $doctrineDonation, $donation->getComment() );
 		$doctrineDonation->setDonorOptsIntoNewsletter( $donation->getOptsIntoNewsletter() );
 		$doctrineDonation->setDonationReceipt( $donation->getOptsIntoDonationReceipt() );
+
+		// TODO create $this->updateExportState($doctrineDonation, $donation);
+		// currently, that method is not needed because the export state is set in a dedicated
+		// export script that does not use the domain model 
 
 		$doctrineDonation->encodeAndSetData(
 			array_merge(
@@ -334,7 +336,7 @@ class DoctrineDonationRepository implements DonationRepository {
 			$this->getCommentFromEntity( $dd )
 		);
 		$donation->setOptsIntoDonationReceipt( $dd->getDonationReceipt() );
-		$donation->setIsExported( $this->getExportState( $dd ) );
+		$this->getExportState( $dd ) ? $donation->markAsExported() : null;
 		return $donation;
 	}
 
