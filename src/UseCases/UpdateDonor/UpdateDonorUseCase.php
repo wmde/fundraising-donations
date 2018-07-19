@@ -9,6 +9,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 
 /**
  * @license GNU GPL v2+
@@ -18,15 +19,18 @@ class UpdateDonorUseCase {
 	private $authorizationService;
 	private $donationRepository;
 	private $updateDonorValidator;
+	private $donationConfirmationMailer;
 
 	public function __construct(
 		DonationAuthorizer $authorizationService,
 		UpdateDonorValidator $updateDonorValidator,
-		DonationRepository $donationRepository
+		DonationRepository $donationRepository,
+		DonationConfirmationMailer $donationConfirmationMailer
 	) {
 		$this->authorizationService = $authorizationService;
 		$this->donationRepository = $donationRepository;
 		$this->updateDonorValidator = $updateDonorValidator;
+		$this->donationConfirmationMailer = $donationConfirmationMailer;
 	}
 
 	public function updateDonor( UpdateDonorRequest $updateDonorRequest ): UpdateDonorResponse {
@@ -49,13 +53,15 @@ class UpdateDonorUseCase {
 			);
 		}
 		catch ( \UnexpectedValueException $e ) {
-			return UpdateDonorResponse::newFailureResponse( 'donor_change_failure_generic' );
+			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::VIOLATION_GENERIC );
 		}
 
 		$donation->setDonor( $donor );
 		$this->donationRepository->storeDonation( $donation );
 
-		return UpdateDonorResponse::newSuccessResponse( 'donor_change_success_comment', $donation );
+		$this->donationConfirmationMailer->sendConfirmationMailFor( $donation );
+
+		return UpdateDonorResponse::newSuccessResponse( UpdateDonorResponse::SUCCESS_TEXT, $donation );
 	}
 
 	private function getDonorAddressFromRequest( UpdateDonorRequest $updateDonorRequest ): DonorAddress {
