@@ -35,26 +35,32 @@ class UpdateDonorUseCase {
 
 	public function updateDonor( UpdateDonorRequest $updateDonorRequest ): UpdateDonorResponse {
 		if ( !$this->requestIsAllowed( $updateDonorRequest ) ) {
-			return UpdateDonorResponse::newFailureResponse( 'donor_change_failure_access_denied' );
+			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_ACCESS_DENIED );
 		}
+
+		// No null check needed here, because authorizationService will deny access to non-existing donations
 		$donation = $this->donationRepository->getDonationById( $updateDonorRequest->getDonationId() );
+
 		if ( $donation->isExported() ) {
-			return UpdateDonorResponse::newFailureResponse( 'donor_change_failure_exported' );
+			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_DONATION_IS_EXPORTED );
 		}
+
+		if ( $donation->getDonor() !== null ) {
+			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_DONATION_HAS_ADDRESS );
+		}
+
 		$validationResult = $this->updateDonorValidator->validateDonorData( $updateDonorRequest );
 		if ( $validationResult->getViolations() ) {
-			return UpdateDonorResponse::newFailureResponse( $validationResult->getFirstViolation() );
+			// We don't need to return the full validation result since we rely on the client-side validation to catch
+			// invalid input and don't output individual field violations in the PHP template
+			return UpdateDonorResponse::newFailureResponse( $validationResult->getFirstViolation()->getMessageIdentifier() );
 		}
-		try {
-			$donor = new Donor(
-				$this->getDonorNameFromRequest( $updateDonorRequest ),
-				$this->getDonorAddressFromRequest( $updateDonorRequest ),
-				$updateDonorRequest->getEmailAddress()
-			);
-		}
-		catch ( \UnexpectedValueException $e ) {
-			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::VIOLATION_GENERIC );
-		}
+
+		$donor = new Donor(
+			$this->getDonorNameFromRequest( $updateDonorRequest ),
+			$this->getDonorAddressFromRequest( $updateDonorRequest ),
+			$updateDonorRequest->getEmailAddress()
+		);
 
 		$donation->setDonor( $donor );
 		$this->donationRepository->storeDonation( $donation );
@@ -86,6 +92,7 @@ class UpdateDonorUseCase {
 			$donorName = DonorName::newCompanyName();
 			$donorName->setCompanyName( $updateDonorRequest->getCompanyName() );
 		} else {
+			// This should only happen if the UpdateDonorValidator does not catch invalid address types
 			throw new \UnexpectedValueException( 'Donor must be a known PersonType' );
 		}
 		$donorName->assertNoNullFields();

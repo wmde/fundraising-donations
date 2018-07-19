@@ -76,7 +76,7 @@ class DoctrineDonationRepository implements DonationRepository {
 
 		// TODO create $this->updateExportState($doctrineDonation, $donation);
 		// currently, that method is not needed because the export state is set in a dedicated
-		// export script that does not use the domain model 
+		// export script that does not use the domain model
 
 		$doctrineDonation->encodeAndSetData(
 			array_merge(
