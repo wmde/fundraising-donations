@@ -3,31 +3,19 @@
 declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
+use WMDE\FunValidators\ConstraintViolation;
+use WMDE\FunValidators\ValidationResult;
 
 /**
  * @license GNU GPL v2+
  */
-class UpdateDonorValidationResult {
+class UpdateDonorValidationResult extends ValidationResult {
 
-	private $violations;
-
-	public function __construct( array $violations = [] ) {
-		$this->violations = $violations;
-	}
-
-	public function getViolations(): array {
-		return $this->violations;
-	}
-
-	public function isSuccessful(): bool {
-		return empty( $this->violations );
-	}
-
-	public function getFirstViolation(): string {
-		if ( empty( $this->violations ) ) {
+	public function getFirstViolation(): ConstraintViolation {
+		if ( empty( $this->getViolations() ) ) {
 			throw new \RuntimeException( 'There are no validation errors.' );
 		}
-		return reset( $this->violations );
+		return $this->getViolations()[0];
 	}
 
 }

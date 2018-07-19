@@ -5,27 +5,35 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Domain\Validation\DonorValidator;
-use WMDE\FunValidators\Validators\EmailValidator;
+use WMDE\FunValidators\ConstraintViolation;
 
 /**
  * @license GNU GPL v2+
  */
 class UpdateDonorValidator {
 
-	private $emailValidator;
+	public const VIOLATION_ANONYMOUS_ADDRESS = 'donor_change_failure_anonymous_address';
+	public const SOURCE_ADDRESS_TYPE = 'address_type';
 
-	public function __construct( EmailValidator $mailValidator ) {
-		$this->emailValidator = $mailValidator;
+	private $donorValidator;
+
+	public function __construct( DonorValidator $donorValidator ) {
+		$this->donorValidator = $donorValidator;
 	}
 
 	public function validateDonorData( UpdateDonorRequest $donorRequest ): UpdateDonorValidationResult {
-		$addressValidator = new DonorValidator( $donorRequest, $this->emailValidator );
-		if ( $addressValidator->donorIsAnonymous() ) {
-			return new UpdateDonorValidationResult( [ UpdateDonorResponse::VIOLATION_GENERIC ] );
+		if ( $this->donorValidator->donorIsAnonymous( $donorRequest ) ) {
+			return new UpdateDonorValidationResult(
+				new ConstraintViolation(
+					$donorRequest->getDonorType(),
+					self::VIOLATION_ANONYMOUS_ADDRESS,
+					self::SOURCE_ADDRESS_TYPE
+				)
+			);
 		}
-		$addressValidator->validateDonorData();
-		if ( $addressValidator->getViolations() ) {
-			return new UpdateDonorValidationResult( $addressValidator->getViolations() );
+		$this->donorValidator->validate( $donorRequest );
+		if ( $this->donorValidator->getViolations() ) {
+			return new UpdateDonorValidationResult( ...$this->donorValidator->getViolations() );
 		}
 		return new UpdateDonorValidationResult();
 	}

@@ -18,11 +18,11 @@ class ValidateDonorUseCase {
 	}
 
 	public function validateDonor( ValidateDonorRequest $donorRequest ): ValidateDonorResponse {
-		$addressValidator = new DonorValidator( $donorRequest, $this->emailValidator );
-		if ( $addressValidator->donorIsAnonymous() ) {
+		$addressValidator = new DonorValidator( $this->emailValidator );
+		if ( $addressValidator->donorIsAnonymous( $donorRequest ) ) {
 			return new ValidateDonorResponse();
 		}
-		$addressValidator->validateDonorData();
+		$addressValidator->validate( $donorRequest );
 		return new ValidateDonorResponse( ...$addressValidator->getViolations() );
 	}
 }
