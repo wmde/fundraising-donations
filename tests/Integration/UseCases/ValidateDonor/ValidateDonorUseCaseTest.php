@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\ValidateDonor;
 
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
 use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse;
@@ -15,9 +16,9 @@ use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Validation\DonorValidator
  *
  * @license GNU GPL v2+
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class ValidateDonorUseCaseTest extends TestCase {
 
@@ -64,12 +65,12 @@ class ValidateDonorUseCaseTest extends TestCase {
 			->withSalutation( ValidDonation::DONOR_SALUTATION )
 			->withStreetAddress( ValidDonation::DONOR_STREET_ADDRESS )
 			->withTitle( ValidDonation::DONOR_TITLE )
-			->withType( ValidateDonorRequest::PERSON_PRIVATE );
+			->withType( DonorName::PERSON_PRIVATE );
 	}
 
 	public function testCompanyDonorWithoutCompanyNameFailsValidation() {
 		$requestModel = $this->getValidRequestModel()
-			->withType( ValidateDonorRequest::PERSON_COMPANY )
+			->withType( DonorName::PERSON_COMPANY )
 			->withCompanyName( '' );
 
 		$this->assertConstraintWasViolated(
@@ -100,7 +101,7 @@ class ValidateDonorUseCaseTest extends TestCase {
 
 	public function testCompanyDonorWithCompanyNamePassesValidation() {
 		$requestModel = $this->getValidRequestModel()
-			->withType( ValidateDonorRequest::PERSON_COMPANY )
+			->withType( DonorName::PERSON_COMPANY )
 			->withCompanyName( 'Such Company' );
 
 		$this->assertPassesValidation( $requestModel );
@@ -110,17 +111,16 @@ class ValidateDonorUseCaseTest extends TestCase {
 		$longText = str_repeat( 'Cats ', 500 );
 
 		$requestModel = ValidateDonorRequest::newInstance()
-			->withCity( $longText )
-			->withCompanyName( $longText )
-			->withCountryCode( $longText )
-			->withEmailAddress( $longText . '@example.com' )
 			->withFirstName( $longText )
 			->withLastName( $longText )
-			->withPostalCode( $longText )
 			->withSalutation( $longText )
-			->withStreetAddress( $longText )
 			->withTitle( $longText )
-			->withType( $longText );
+			->withCity( $longText )
+			->withCountryCode( $longText )
+			->withEmailAddress( $longText . '@example.com' )
+			->withPostalCode( $longText )
+			->withStreetAddress( $longText )
+			->withType( DonorName::PERSON_PRIVATE );
 
 		$result = $this->donorValidator->validateDonor( $requestModel );
 
@@ -137,6 +137,17 @@ class ValidateDonorUseCaseTest extends TestCase {
 				  ] as $fieldName ) {
 			$this->assertConstraintWasViolated( $result, $fieldName, ValidateDonorResponse::VIOLATION_WRONG_LENGTH );
 		}
+
+		$result = $this->donorValidator->validateDonor( $requestModel
+			->withType( DonorName::PERSON_COMPANY )
+			->withCompanyName( $longText )
+		);
+
+		$this->assertConstraintWasViolated(
+			$result,
+			ValidateDonorResponse::SOURCE_COMPANY,
+			ValidateDonorResponse::VIOLATION_WRONG_LENGTH
+		);
 	}
 
 	/**
@@ -168,6 +179,15 @@ class ValidateDonorUseCaseTest extends TestCase {
 		$this->assertPassesValidation( $this->getValidRequestModel()->withPostalCode( '12345' ) );
 	}
 
+	public function testGivenInvalidDonorType_validationFails() {
+		$requestModel = $this->getValidRequestModel()
+			->withType( 'Goat' );
 
+		$this->assertConstraintWasViolated(
+			$this->donorValidator->validateDonor( $requestModel ),
+			ValidateDonorResponse::SOURCE_ADDRESS_TYPE,
+			ValidateDonorResponse::VIOLATION_WRONG_TYPE
+		);
+	}
 
 }

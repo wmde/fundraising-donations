@@ -15,6 +15,8 @@ class AddDonationValidationResult extends ValidationResult {
 
 	public const SOURCE_PAYMENT_TYPE = 'zahlweise';
 	public const SOURCE_PAYMENT_AMOUNT = 'amount';
+
+	public const SOURCE_DONOR_ADDRESS_TYPE = ValidateDonorResponse::SOURCE_ADDRESS_TYPE;
 	public const SOURCE_DONOR_EMAIL = ValidateDonorResponse::SOURCE_EMAIL;
 	public const SOURCE_DONOR_COMPANY = ValidateDonorResponse::SOURCE_COMPANY;
 	public const SOURCE_DONOR_FIRST_NAME = ValidateDonorResponse::SOURCE_FIRST_NAME;

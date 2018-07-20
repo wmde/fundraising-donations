@@ -109,6 +109,19 @@ class DonationTest extends \PHPUnit\Framework\TestCase {
 		$donation->confirmBooked();
 	}
 
+	public function testNewDonationsAreNotExported() {
+		$donation = new Donation(
+			null,
+			Donation::STATUS_NEW,
+			ValidDonation::newDonor(),
+			ValidDonation::newDirectDebitPayment(),
+			Donation::OPTS_INTO_NEWSLETTER,
+			ValidDonation::newTrackingInfo(),
+			null
+		);
+		$this->assertFalse( $donation->isExported() );
+	}
+
 	/**
 	 * @dataProvider statusesThatDoNotAllowForBookingProvider
 	 */

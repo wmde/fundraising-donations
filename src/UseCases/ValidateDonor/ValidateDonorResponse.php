@@ -8,13 +8,13 @@ use WMDE\FunValidators\ValidationResult;
 
 /**
  * @licence GNU GPL v2+
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class ValidateDonorResponse extends ValidationResult {
 
 	public const VIOLATION_MISSING = 'missing';
 	public const VIOLATION_NOT_POSTCODE = 'not-postcode';
 	public const VIOLATION_WRONG_LENGTH = 'wrong-length';
+	public const VIOLATION_WRONG_TYPE = 'wrong_donor_type';
 
 	public const SOURCE_EMAIL = 'email';
 	public const SOURCE_COMPANY = 'companyName';
@@ -26,5 +26,6 @@ class ValidateDonorResponse extends ValidationResult {
 	public const SOURCE_POSTAL_CODE = 'postcode';
 	public const SOURCE_CITY = 'city';
 	public const SOURCE_COUNTRY = 'country';
+	public const SOURCE_ADDRESS_TYPE = 'addressType';
 
 }
