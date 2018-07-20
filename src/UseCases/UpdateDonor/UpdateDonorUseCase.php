@@ -53,7 +53,7 @@ class UpdateDonorUseCase {
 		if ( $validationResult->getViolations() ) {
 			// We don't need to return the full validation result since we rely on the client-side validation to catch
 			// invalid input and don't output individual field violations in the PHP template
-			return UpdateDonorResponse::newFailureResponse( $validationResult->getFirstViolation()->getMessageIdentifier() );
+			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_VALIDATION_FAILED, $donation );
 		}
 
 		$donor = new Donor(
@@ -88,7 +88,7 @@ class UpdateDonorUseCase {
 			$donorName->setLastName( $updateDonorRequest->getLastName() );
 			$donorName->setSalutation( $updateDonorRequest->getSalutation() );
 			$donorName->setTitle( $updateDonorRequest->getTitle() );
-		} elseif ( $updateDonorRequest->getDonorType() === DonorName::PERSON_PRIVATE ) {
+		} elseif ( $updateDonorRequest->getDonorType() === DonorName::PERSON_COMPANY ) {
 			$donorName = DonorName::newCompanyName();
 			$donorName->setCompanyName( $updateDonorRequest->getCompanyName() );
 		} else {
