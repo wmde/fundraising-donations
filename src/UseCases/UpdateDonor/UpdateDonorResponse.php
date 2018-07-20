@@ -15,6 +15,7 @@ class UpdateDonorResponse {
 	public const ERROR_ACCESS_DENIED = 'donor_change_failure_access_denied';
 	public const ERROR_DONATION_IS_EXPORTED = 'donor_change_failure_exported';
 	public const ERROR_DONATION_HAS_ADDRESS = 'donor_change_failure_has_address';
+	public const ERROR_VALIDATION_FAILED = 'donor_change_failure_validation_error';
 
 
 	private $donation;
@@ -23,8 +24,8 @@ class UpdateDonorResponse {
 		return new self( '', $successMessage, $donation );
 	}
 
-	public static function newFailureResponse( string $errorMessage ): self {
-		return new self( $errorMessage, '' );
+	public static function newFailureResponse( string $errorMessage, Donation $donation = null ): self {
+		return new self( $errorMessage, '', $donation );
 	}
 
 	private $errorMessage;

@@ -146,7 +146,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 		$response = $useCase->updateDonor( $this->newUpdateDonorRequest( $donationId ) );
 
 		$this->assertFalse( $response->isSuccessful() );
-		$this->assertEquals( 'invalid_first_name', $response->getErrorMessage() );
+		$this->assertEquals( 'donor_change_failure_validation_error', $response->getErrorMessage() );
 	}
 
 	private function newRepository(): DonationRepository {
