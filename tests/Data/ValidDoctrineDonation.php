@@ -23,6 +23,12 @@ class ValidDoctrineDonation {
 		return ( new self() )->createDonation();
 	}
 
+	public static function newExportedirectDebitDoctrineDonation(): Donation {
+		$donation = ( new self() )->createDonation();
+		$donation->setDtGruen( new \DateTime() );
+		return $donation;
+	}
+
 	private function createDonation(): Donation {
 		$donation = new Donation();
 

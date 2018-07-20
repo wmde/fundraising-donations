@@ -2,15 +2,16 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\DonationContext\UseCases\ValidateDonor;
+namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Domain\Validation\DonorDataInterface;
 
 /**
  * @license GNU GPL v2+
  */
-class ValidateDonorRequest implements DonorDataInterface {
+class UpdateDonorRequest implements DonorDataInterface {
 
+	private $donationId;
 	private $donorType;
 	private $firstName;
 	private $lastName;
@@ -93,6 +94,12 @@ class ValidateDonorRequest implements DonorDataInterface {
 		return $request;
 	}
 
+	public function withDonationId( int $donationId ): self {
+		$request = clone $this;
+		$request->donationId = $donationId;
+		return $request;
+	}
+
 	public function getDonorType(): string {
 		return $this->donorType;
 	}
@@ -137,4 +144,7 @@ class ValidateDonorRequest implements DonorDataInterface {
 		return $this->emailAddress;
 	}
 
+	public function getDonationId(): int {
+		return $this->donationId;
+	}
 }

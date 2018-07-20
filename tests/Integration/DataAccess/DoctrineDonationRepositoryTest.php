@@ -383,4 +383,15 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$repository->storeDonation( $donation );
 	}
 
+	public function testExportedDonationsAreMarked() {
+		$doctrineDonation = ValidDoctrineDonation::newExportedirectDebitDoctrineDonation();
+		$this->entityManager->persist( $doctrineDonation );
+		$this->entityManager->flush();
+
+		$repository = $this->newRepository();
+		$donation = $repository->getDonationById( $doctrineDonation->getId() );
+
+		$this->assertTrue( $donation->isExported() );
+	}
+
 }

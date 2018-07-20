@@ -12,8 +12,6 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
  * @licence GNU GPL v2+
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class Donation {
 
@@ -35,6 +33,7 @@ class Donation {
 	private $payment;
 	private $optsIntoNewsletter;
 	private $comment;
+	private $exported;
 
 	/**
 	 * If the user wants to receive a donation receipt
@@ -46,7 +45,7 @@ class Donation {
 	private $optsIntoDonationReceipt;
 
 	/**
-	 * TODO: move out of Donation
+	 * TODO: move out of Donation when database model is refactored
 	 */
 	private $trackingInfo;
 
@@ -71,6 +70,7 @@ class Donation {
 		$this->optsIntoNewsletter = $optsIntoNewsletter;
 		$this->trackingInfo = $trackingInfo;
 		$this->comment = $comment;
+		$this->exported = false;
 	}
 
 	private function setStatus( string $status ): void {
@@ -138,6 +138,10 @@ class Donation {
 	 */
 	public function getDonor(): ?Donor {
 		return $this->donor;
+	}
+
+	public function setDonor( Donor $donor ): void {
+		$this->donor = $donor;
 	}
 
 	/**
@@ -271,6 +275,14 @@ class Donation {
 
 	public function isBooked(): bool {
 		return $this->status === self::STATUS_EXTERNAL_BOOKED;
+	}
+
+	public function isExported(): bool {
+		return $this->exported;
+	}
+
+	public function markAsExported(): void {
+		$this->exported = true;
 	}
 
 	public function isCancelled(): bool {
