@@ -27,7 +27,7 @@ Individual commands like PHPUnit with a filter can be run like
 
 ## Architecture
 
-This Bounded context follows the architecture rules outlined in [Clean Architecture + Bounded Contexts](https://www.entropywins.wtf/blog/2018/08/14/clean-architecture-bounded-contexts/).
+This Bounded Context follows the architecture rules outlined in [Clean Architecture + Bounded Contexts](https://www.entropywins.wtf/blog/2018/08/14/clean-architecture-bounded-contexts/).
 
 With the exception that the persistance is still (mostly) in [FundraisingStore](https://github.com/wmde/FundraisingStore/), and thus not private to this Bounded Context.
 
