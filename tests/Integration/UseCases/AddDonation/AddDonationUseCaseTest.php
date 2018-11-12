@@ -23,6 +23,7 @@ use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationR
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\ReferrerGeneralizer;
+use WMDE\Fundraising\PaymentContext\Domain\LessSimpleTransferCodeGenerator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
 use WMDE\FunValidators\ConstraintViolation;
@@ -54,6 +55,33 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertTrue( $useCase->addDonation( $this->newMinimumDonationRequest() )->isSuccessful() );
 	}
 
+	public function testWhenAnonymousDonationIsMade_correctBankTransferPrefixIsAdded(): void {
+		$useCase = $this->newActiveBankTransferCodeGeneratorUseCase();
+		$donationRequest = $this->newMinimumDonationRequest();
+
+		$response = $useCase->addDonation( $donationRequest );
+
+		self::assertStringStartsWith( 'XR', $response->getDonation()->getPaymentMethod()->getBankTransferCode() );
+	}
+
+	public function testWhenPrivateDonationIsMade_correctBankTransferPrefixIsAdded(): void {
+		$useCase = $this->newActiveBankTransferCodeGeneratorUseCase();
+		$donationRequest = $this->newValidAddDonationRequestWithEmail( 'bill.gates@wikimedia.de' );
+
+		$response = $useCase->addDonation( $donationRequest );
+
+		self::assertStringStartsWith( 'XW', $response->getDonation()->getPaymentMethod()->getBankTransferCode() );
+	}
+
+	public function testWhenCompanyDonationIsMade_correctBankTransferPrefixIsAdded(): void {
+		$useCase = $this->newActiveBankTransferCodeGeneratorUseCase();
+		$donationRequest = $this->newValidCompanyDonationRequest();
+
+		$response = $useCase->addDonation( $donationRequest );
+
+		self::assertStringStartsWith( 'XW', $response->getDonation()->getPaymentMethod()->getBankTransferCode() );
+	}
+
 	private function newValidationSucceedingUseCase(): AddDonationUseCase {
 		return new AddDonationUseCase(
 			$this->newRepository(),
@@ -62,6 +90,19 @@ class AddDonationUseCaseTest extends TestCase {
 			new ReferrerGeneralizer( 'http://foo.bar', [] ),
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
+			$this->newTokenFetcher(),
+			new InitialDonationStatusPicker()
+		);
+	}
+
+	private function newActiveBankTransferCodeGeneratorUseCase(): AddDonationUseCase {
+		return new AddDonationUseCase(
+			$this->newRepository(),
+			$this->getSucceedingValidatorMock(),
+			$this->getSucceedingPolicyValidatorMock(),
+			new ReferrerGeneralizer( 'http://foo.bar', [] ),
+			$this->newMailer(),
+			LessSimpleTransferCodeGenerator::newRandomGenerator(),
 			$this->newTokenFetcher(),
 			new InitialDonationStatusPicker()
 		);
