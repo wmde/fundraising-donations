@@ -24,10 +24,11 @@ use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
 
 /**
  * @license GNU GPL v2+
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class AddDonationUseCase {
+
+	const PREFIX_BANK_TRANSACTION_KNOWN_DONOR = 'XW';
+	const PREFIX_BANK_TRANSACTION_ANONYNMOUS_DONOR = 'XR';
 
 	private $donationRepository;
 	private $donationValidator;
@@ -146,16 +147,31 @@ class AddDonationUseCase {
 
 		switch ( $paymentType ) {
 			case PaymentMethod::BANK_TRANSFER:
-				return new BankTransferPayment( $this->transferCodeGenerator->generateTransferCode( 'W-Q-' ) );
+				return new BankTransferPayment(
+					$this->transferCodeGenerator->generateTransferCode(
+						$this->getTransferCodePrefixForDonorType( $donationRequest->getDonorType() )
+					)
+				);
 			case PaymentMethod::DIRECT_DEBIT:
 				return new DirectDebitPayment( $donationRequest->getBankData() );
 			case PaymentMethod::PAYPAL:
 				return new PayPalPayment( new PayPalData() );
 			case PaymentMethod::SOFORT:
-				return new SofortPayment( $this->transferCodeGenerator->generateTransferCode( 'W-Q-' ) );
+				return new SofortPayment(
+					$this->transferCodeGenerator->generateTransferCode(
+						$this->getTransferCodePrefixForDonorType( $donationRequest->getDonorType() )
+					)
+				);
 			default:
 				return new PaymentWithoutAssociatedData( $paymentType );
 		}
+	}
+
+	private function getTransferCodePrefixForDonorType( string $donorType ): string {
+		if ( $donorType === DonorName::PERSON_PRIVATE || $donorType === DonorName::PERSON_COMPANY ) {
+			return self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
+		}
+		return self::PREFIX_BANK_TRANSACTION_ANONYNMOUS_DONOR;
 	}
 
 	private function newTrackingInfoFromRequest( AddDonationRequest $request ): DonationTrackingInfo {
