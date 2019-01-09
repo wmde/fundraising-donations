@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
+use WMDE\Fundraising\Entities\AddressChange;
 use WMDE\Fundraising\Entities\Donation;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
@@ -42,6 +43,8 @@ class ValidDoctrineDonation {
 		$donation->setDonorEmail( ValidDonation::DONOR_EMAIL_ADDRESS );
 		$donation->setDonorFullName( ValidDonation::DONOR_FULL_NAME );
 		$donation->setDonorOptsIntoNewsletter( ValidDonation::OPTS_INTO_NEWSLETTER );
+
+		$donation->setAddressChange( new AddressChange( AddressChange::ADDRESS_TYPE_PERSON ) );
 
 		$donation->encodeAndSetData(
 			array_merge(
