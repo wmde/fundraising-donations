@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\Entities\AddressChange;
 use WMDE\Fundraising\Entities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -55,6 +56,16 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertDoctrineEntityIsInDatabase( $expectedDoctrineEntity );
 	}
 
+	public function testValidCompanyDonationGetsPersistedWithCorrectAddressChangeType(): void {
+		$donation = ValidDonation::newCompanyBankTransferDonation();
+
+		$this->newRepository()->storeDonation( $donation );
+
+		$actual = $this->getDoctrineDonationById( $donation->getId() );
+
+		$this->assertSame( AddressChange::ADDRESS_TYPE_COMPANY, $actual->getAddressChange()->getAddressType() );
+	}
+
 	private function newRepository(): DoctrineDonationRepository {
 		return new DoctrineDonationRepository( $this->entityManager );
 	}
@@ -64,9 +75,8 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 		$this->assertNotNull( $actual->getCreationTime() );
 
-		//UUID identifiers would mismatch so we have to overwrite them
 		$actual->setCreationTime( null );
-		$actual->setAddressChange( $expected->getAddressChange() );
+		$this->adaptAddressChangeUUID( $actual->getAddressChange(), $expected->getAddressChange() );
 
 		$this->assertEquals( $expected->getDecodedData(), $actual->getDecodedData() );
 		$this->assertEquals( $expected, $actual );
@@ -383,7 +393,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$repository->storeDonation( $donation );
 	}
 
-	public function testExportedDonationsAreMarked() {
+	public function testExportedDonationsAreMarked(): void {
 		$doctrineDonation = ValidDoctrineDonation::newExportedirectDebitDoctrineDonation();
 		$this->entityManager->persist( $doctrineDonation );
 		$this->entityManager->flush();
@@ -392,6 +402,22 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$donation = $repository->getDonationById( $doctrineDonation->getId() );
 
 		$this->assertTrue( $donation->isExported() );
+	}
+
+	/**
+	 * Use Reflection to change an AddressChange instance
+	 *
+	 * Background: AddressChange does not have a setter for id and UUID but instead creates a new one in the constructor.
+	 * In the donation fixtures, a new AddressChange instance is created.
+	 */
+	private function adaptAddressChangeUUID( AddressChange $source, AddressChange $target ): void {
+		$uuid = new \ReflectionProperty( AddressChange::class, 'identifier' );
+		$uuid->setAccessible( true );
+		$uuid->setValue( $target, $source->getCurrentIdentifier() );
+
+		$id = new \ReflectionProperty( AddressChange::class, 'id' );
+		$id->setAccessible( true );
+		$id->setValue( $target, $id->getValue( $source ) );
 	}
 
 }

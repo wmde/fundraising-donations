@@ -35,6 +35,7 @@ class ValidDonation {
 	public const DONOR_SALUTATION = 'nyan';
 	public const DONOR_TITLE = 'nyan';
 	public const DONOR_FULL_NAME = 'nyan Jeroen De Dauw';
+	public const DONOR_COMPANY = 'Fluffy Beings Ltd.';
 
 	public const DONOR_CITY = 'Berlin';
 	public const DONOR_POSTAL_CODE = '1234';
@@ -187,6 +188,16 @@ class ValidDonation {
 		);
 	}
 
+	public static function newCompanyBankTransferDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation(
+			new BankTransferPayment( self::PAYMENT_BANK_TRANSFER_CODE ),
+			Donation::STATUS_NEW
+		);
+		$donation->setDonor( $self->newCompanyDonor() );
+		return $donation;
+	}
+
 	private function createDonation( PaymentMethod $paymentMethod, string $status ): Donation {
 		return new Donation(
 			null,
@@ -296,6 +307,23 @@ class ValidDonation {
 			self::COMMENT_IS_PUBLIC,
 			self::COMMENT_AUTHOR_DISPLAY_NAME
 		);
+	}
+
+	private function newCompanyDonor(): Donor {
+		$self = new self();
+		return new Donor(
+			$self->newCompanyName(),
+			$self->newAddress(),
+			self::DONOR_EMAIL_ADDRESS
+		);
+	}
+
+	private function newCompanyName(): DonorName {
+		$companyName = DonorName::newCompanyName();
+
+		$companyName->setCompanyName( self::DONOR_COMPANY );
+
+		return $companyName->freeze()->assertNoNullFields();
 	}
 
 }
