@@ -276,6 +276,22 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertSame( $donation->getDonor()->getName()->getFullName(), $doctrineDonation->getDonorFullName() );
 	}
 
+	public function testGivenAnonymousDonation_noAddressChangeEntryIsCreated(): void {
+		$donation = ValidDonation::newBookedAnonymousPayPalDonation();
+		$this->newRepository()->storeDonation( $donation );
+
+		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
+		$this->assertNull( $doctrineDonation->getAddressChange() );
+	}
+
+	public function testGivenPersonalDonation_addressChangeEntryIsCreated(): void {
+		$donation = ValidDonation::newBookedPayPalDonation();
+		$this->newRepository()->storeDonation( $donation );
+
+		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
+		$this->assertNotNull( $doctrineDonation->getAddressChange() );
+	}
+
 	private function getNewlyCreatedDoctrineDonation(): DoctrineDonation {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$this->newRepository()->storeDonation( $donation );

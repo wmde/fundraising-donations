@@ -45,7 +45,7 @@ class DoctrineDonationRepository implements DonationRepository {
 	}
 
 	public function storeDonation( Donation $donation ): void {
-		if ( $donation->getId() === null ) {
+		if ( $donation->getId() == null ) {
 			$this->insertDonation( $donation );
 		} else {
 			$this->updateDonation( $donation );
@@ -54,9 +54,11 @@ class DoctrineDonationRepository implements DonationRepository {
 
 	private function insertDonation( Donation $donation ): void {
 		$doctrineDonation = new DoctrineDonation();
-		$doctrineDonation->setAddressChange(
-			new AddressChange( $this->getAddressChangeType( $donation->getDonor() ) )
-		);
+		if ( ! $donation->donorIsAnonymous() ) {
+			$doctrineDonation->setAddressChange(
+				new AddressChange( $this->getAddressChangeType( $donation->getDonor() ) )
+			);
+		}
 		$this->updateDonationEntity( $doctrineDonation, $donation );
 
 		try {
