@@ -301,4 +301,8 @@ class Donation {
 		return $this->optsIntoDonationReceipt;
 	}
 
+	public function donorIsAnonymous(): bool {
+		return $this->donor === null;
+	}
+
 }
