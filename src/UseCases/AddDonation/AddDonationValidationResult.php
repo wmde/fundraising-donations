@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
-use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressResponse;
 use WMDE\FunValidators\ValidationResult;
 
 /**
@@ -16,17 +16,17 @@ class AddDonationValidationResult extends ValidationResult {
 	public const SOURCE_PAYMENT_TYPE = 'zahlweise';
 	public const SOURCE_PAYMENT_AMOUNT = 'amount';
 
-	public const SOURCE_DONOR_ADDRESS_TYPE = ValidateDonorResponse::SOURCE_ADDRESS_TYPE;
-	public const SOURCE_DONOR_EMAIL = ValidateDonorResponse::SOURCE_EMAIL;
-	public const SOURCE_DONOR_COMPANY = ValidateDonorResponse::SOURCE_COMPANY;
-	public const SOURCE_DONOR_FIRST_NAME = ValidateDonorResponse::SOURCE_FIRST_NAME;
-	public const SOURCE_DONOR_LAST_NAME = ValidateDonorResponse::SOURCE_LAST_NAME;
-	public const SOURCE_DONOR_SALUTATION = ValidateDonorResponse::SOURCE_SALUTATION;
-	public const SOURCE_DONOR_TITLE = ValidateDonorResponse::SOURCE_TITLE;
-	public const SOURCE_DONOR_STREET_ADDRESS = ValidateDonorResponse::SOURCE_STREET_ADDRESS;
-	public const SOURCE_DONOR_POSTAL_CODE = ValidateDonorResponse::SOURCE_POSTAL_CODE;
-	public const SOURCE_DONOR_CITY = ValidateDonorResponse::SOURCE_CITY;
-	public const SOURCE_DONOR_COUNTRY = ValidateDonorResponse::SOURCE_COUNTRY;
+	public const SOURCE_DONOR_ADDRESS_TYPE = ValidateDonorAddressResponse::SOURCE_ADDRESS_TYPE;
+	public const SOURCE_DONOR_EMAIL = 'email';
+	public const SOURCE_DONOR_COMPANY = ValidateDonorAddressResponse::SOURCE_COMPANY;
+	public const SOURCE_DONOR_FIRST_NAME = ValidateDonorAddressResponse::SOURCE_FIRST_NAME;
+	public const SOURCE_DONOR_LAST_NAME = ValidateDonorAddressResponse::SOURCE_LAST_NAME;
+	public const SOURCE_DONOR_SALUTATION = ValidateDonorAddressResponse::SOURCE_SALUTATION;
+	public const SOURCE_DONOR_TITLE = ValidateDonorAddressResponse::SOURCE_TITLE;
+	public const SOURCE_DONOR_STREET_ADDRESS = ValidateDonorAddressResponse::SOURCE_STREET_ADDRESS;
+	public const SOURCE_DONOR_POSTAL_CODE = ValidateDonorAddressResponse::SOURCE_POSTAL_CODE;
+	public const SOURCE_DONOR_CITY = ValidateDonorAddressResponse::SOURCE_CITY;
+	public const SOURCE_DONOR_COUNTRY = ValidateDonorAddressResponse::SOURCE_COUNTRY;
 	public const SOURCE_TRACKING_SOURCE = 'source';
 
 	public const VIOLATION_TOO_LOW = 'too-low';
