@@ -5,16 +5,13 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Domain\Validation;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorResponse as Response;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressResponse as Response;
 use WMDE\FunValidators\ConstraintViolation;
-use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
  * @license GNU GPL v2+
  */
-class DonorValidator {
-
-	private $emailValidator;
+class DonorAddressValidator {
 
 	/**
 	 * @var ConstraintViolation[]
@@ -22,7 +19,6 @@ class DonorValidator {
 	private $violations;
 
 	private $maximumFieldLengths = [
-		Response::SOURCE_EMAIL => 250,
 		Response::SOURCE_COMPANY => 100,
 		Response::SOURCE_FIRST_NAME => 50,
 		Response::SOURCE_LAST_NAME => 50,
@@ -34,35 +30,13 @@ class DonorValidator {
 		Response::SOURCE_COUNTRY => 8,
 	];
 
-	public function __construct( EmailValidator $mailValidator ) {
-		$this->emailValidator = $mailValidator;
+	public function __construct() {
 		$this->violations = [];
 	}
 
 	public function validate( DonorDataInterface $donorData ) {
 		$this->validateDonorName( $donorData );
-		$this->validateDonorEmail( $donorData );
 		$this->validateDonorAddress( $donorData );
-	}
-
-	private function validateDonorEmail( DonorDataInterface $donorData ): void {
-		if ( $this->donorIsAnonymous( $donorData ) ) {
-			return;
-		}
-
-		if ( $this->emailValidator->validate( $donorData->getEmailAddress() )->hasViolations() ) {
-			$this->addViolations(
-				[
-					new ConstraintViolation(
-						$donorData->getEmailAddress(),
-						Response::VIOLATION_MISSING,
-						Response::SOURCE_EMAIL
-					)
-				]
-			);
-		} else {
-			$this->validateFieldLength( $donorData->getEmailAddress(), Response::SOURCE_EMAIL );
-		}
 	}
 
 	private function validateDonorName( DonorDataInterface $donorData ): void {

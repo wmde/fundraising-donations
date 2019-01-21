@@ -5,8 +5,8 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
-use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorRequest;
-use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorUseCase;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressRequest;
+use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressUseCase;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidationResult;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
 use WMDE\Fundraising\PaymentContext\Domain\IbanBlocklist;
@@ -27,6 +27,7 @@ class AddDonationValidator {
 	private $bankDataValidator;
 	private $ibanBlocklist;
 	private $donorValidator;
+	private $emailValidator;
 
 	/**
 	 * @var AddDonationRequest
@@ -39,7 +40,8 @@ class AddDonationValidator {
 	private $violations;
 
 	private $maximumFieldLengths = [
-		Result::SOURCE_TRACKING_SOURCE => 250
+		Result::SOURCE_TRACKING_SOURCE => 250,
+		Result::SOURCE_DONOR_EMAIL => 250
 	];
 
 	public function __construct( PaymentDataValidator $paymentDataValidator, BankDataValidator $bankDataValidator,
@@ -48,7 +50,8 @@ class AddDonationValidator {
 		$this->paymentDataValidator = $paymentDataValidator;
 		$this->bankDataValidator = $bankDataValidator;
 		$this->ibanBlocklist = $ibanBlocklist;
-		$this->donorValidator = new ValidateDonorUseCase( $emailValidator );
+		$this->donorValidator = new ValidateDonorAddressUseCase();
+		$this->emailValidator = $emailValidator;
 	}
 
 	public function validate( AddDonationRequest $addDonationRequest ): Result {
@@ -119,12 +122,13 @@ class AddDonationValidator {
 	}
 
 	private function validateDonor(): void {
+		$this->validateFieldLength( $this->request->getDonorEmailAddress(), Result::SOURCE_DONOR_EMAIL );
+
 		$validateDonorRequest =
-			ValidateDonorRequest::newInstance()
+			ValidateDonorAddressRequest::newInstance()
 				->withCity( $this->request->getDonorCity() )
 				->withCompanyName( $this->request->getDonorCompany() )
 				->withCountryCode( $this->request->getDonorCountryCode() )
-				->withEmailAddress( $this->request->getDonorEmailAddress() )
 				->withFirstName( $this->request->getDonorFirstName() )
 				->withLastName( $this->request->getDonorLastName() )
 				->withPostalCode( $this->request->getDonorPostalCode() )
@@ -135,7 +139,8 @@ class AddDonationValidator {
 
 		$this->violations = array_merge(
 			$this->violations,
-			$this->donorValidator->validateDonor( $validateDonorRequest )->getViolations()
+			$this->donorValidator->validateDonor( $validateDonorRequest )->getViolations(),
+			$this->emailValidator->validate( $this->request->getDonorEmailAddress() )->getViolations()
 		);
 	}
 
