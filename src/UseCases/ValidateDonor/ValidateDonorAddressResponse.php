@@ -9,14 +9,13 @@ use WMDE\FunValidators\ValidationResult;
 /**
  * @licence GNU GPL v2+
  */
-class ValidateDonorResponse extends ValidationResult {
+class ValidateDonorAddressResponse extends ValidationResult {
 
 	public const VIOLATION_MISSING = 'missing';
 	public const VIOLATION_NOT_POSTCODE = 'not-postcode';
 	public const VIOLATION_WRONG_LENGTH = 'wrong-length';
 	public const VIOLATION_WRONG_TYPE = 'wrong_donor_type';
 
-	public const SOURCE_EMAIL = 'email';
 	public const SOURCE_COMPANY = 'companyName';
 	public const SOURCE_FIRST_NAME = 'firstName';
 	public const SOURCE_LAST_NAME = 'lastName';
