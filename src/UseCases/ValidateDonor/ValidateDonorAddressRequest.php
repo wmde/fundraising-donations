@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Domain\Validation\DonorDataInterface;
 /**
  * @license GNU GPL v2+
  */
-class ValidateDonorRequest implements DonorDataInterface {
+class ValidateDonorAddressRequest implements DonorDataInterface {
 
 	private $donorType;
 	private $firstName;

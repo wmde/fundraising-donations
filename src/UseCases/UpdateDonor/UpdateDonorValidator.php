@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
-use WMDE\Fundraising\DonationContext\Domain\Validation\DonorValidator;
+use WMDE\Fundraising\DonationContext\Domain\Validation\DonorAddressValidator;
 use WMDE\FunValidators\ConstraintViolation;
 
 /**
@@ -17,7 +17,7 @@ class UpdateDonorValidator {
 
 	private $donorValidator;
 
-	public function __construct( DonorValidator $donorValidator ) {
+	public function __construct( DonorAddressValidator $donorValidator ) {
 		$this->donorValidator = $donorValidator;
 	}
 

@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\Domain\Validation\DonorValidator;
+use WMDE\Fundraising\DonationContext\Domain\Validation\DonorAddressValidator;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidator;
 use PHPUnit\Framework\TestCase;
@@ -17,7 +17,7 @@ use WMDE\FunValidators\ConstraintViolation;
 class UpdateDonorValidatorTest extends TestCase {
 
 	public function testGivenAnonymousDonor_validationFails() {
-		$donorValidator = $this->createPartialMock( DonorValidator::class, ['getViolations'] );
+		$donorValidator = $this->createPartialMock( DonorAddressValidator::class, ['getViolations'] );
 		$donorValidator->method( 'getViolations' )->willReturn( [] );
 		$validator = new UpdateDonorValidator( $donorValidator );
 		$request = ( new UpdateDonorRequest() )->withType( DonorName::PERSON_ANONYMOUS );
@@ -37,7 +37,7 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	public function testGivenFailingDonorValidator_validationFails() {
 		$addressViolation = new ConstraintViolation( '', 'donor_name_missing', 'first_name' );
-		$donorValidator = $this->createPartialMock( DonorValidator::class, ['getViolations', 'validate' ] );
+		$donorValidator = $this->createPartialMock( DonorAddressValidator::class, ['getViolations', 'validate' ] );
 		$donorValidator->method( 'getViolations' )->willReturn( [ $addressViolation ] );
 		$validator = new UpdateDonorValidator( $donorValidator );
 		$request = ( new UpdateDonorRequest() )->withType( DonorName::PERSON_PRIVATE );
