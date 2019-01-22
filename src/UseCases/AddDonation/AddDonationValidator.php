@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
 use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressRequest;
 use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressUseCase;
@@ -15,11 +16,11 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethods;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
+use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
  * @license GNU GPL v2+
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
 class AddDonationValidator {
 
@@ -140,7 +141,7 @@ class AddDonationValidator {
 		$this->violations = array_merge(
 			$this->violations,
 			$this->donorValidator->validateDonor( $validateDonorRequest )->getViolations(),
-			$this->emailValidator->validate( $this->request->getDonorEmailAddress() )->getViolations()
+			$this->validateEmail()->getViolations()
 		);
 	}
 
@@ -158,6 +159,13 @@ class AddDonationValidator {
 				BankDataValidationResult::SOURCE_IBAN
 			) ] );
 		}
+	}
+
+	private function validateEmail(): ValidationResult {
+		if ( $this->request->getDonorType() === DonorName::PERSON_ANONYMOUS ) {
+			return new ValidationResult();
+		}
+		return $this->emailValidator->validate( $this->request->getDonorEmailAddress() );
 	}
 
 }
