@@ -4,12 +4,10 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
-use WMDE\Fundraising\DonationContext\Domain\Validation\DonorDataInterface;
-
 /**
  * @license GNU GPL v2+
  */
-class UpdateDonorRequest implements DonorDataInterface {
+class UpdateDonorRequest {
 
 	private $donationId;
 	private $donorType;
