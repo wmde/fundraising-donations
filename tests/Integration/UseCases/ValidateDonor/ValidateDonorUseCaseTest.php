@@ -12,7 +12,6 @@ use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddress
 use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressUseCase;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
-use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressUseCase
