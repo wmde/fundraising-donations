@@ -16,7 +16,7 @@
 		"wmde/euro": "~1.0",
 		"wmde/email-address": "~1.0",
 		"wmde/freezable-value-object": "~1.0",
-		"wmde/fun-validators": "~1.0"
+		"wmde/fun-validators": "~1.2"
 	},
 	"repositories": [
 		{

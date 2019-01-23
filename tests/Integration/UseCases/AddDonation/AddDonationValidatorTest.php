@@ -18,6 +18,7 @@ use WMDE\Fundraising\PaymentContext\Domain\IbanValidator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
+use WMDE\FunValidators\SucceedingDomainNameValidator;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\EmailValidator;
 
@@ -110,7 +111,7 @@ class AddDonationValidatorTest extends TestCase {
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
 			$bankDataValidator,
 			$this->newEmptyIbanBlocklist(),
-			$this->newMockEmailValidator()
+			$this->newEmailValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
 
@@ -127,7 +128,7 @@ class AddDonationValidatorTest extends TestCase {
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::BANK_TRANSFER ] ),
 			$bankDataValidator,
 			$this->newEmptyIbanBlocklist(),
-			$this->newMockEmailValidator()
+			$this->newEmailValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setPaymentType( PaymentMethod::BANK_TRANSFER );
@@ -141,7 +142,7 @@ class AddDonationValidatorTest extends TestCase {
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
 			$this->newBankDataValidator(),
 			new IbanBlocklist( [ ValidDonation::PAYMENT_IBAN ] ),
-			$this->newMockEmailValidator()
+			$this->newEmailValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
 
@@ -203,7 +204,7 @@ class AddDonationValidatorTest extends TestCase {
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
 			$this->newBankDataValidator(),
 			$this->newEmptyIbanBlocklist(),
-			$this->newMockEmailValidator()
+			$this->newEmailValidator()
 		);
 	}
 
@@ -215,10 +216,8 @@ class AddDonationValidatorTest extends TestCase {
 		return new BankDataValidator( $ibanValidatorMock );
 	}
 
-	private function newMockEmailValidator(): EmailValidator {
-		$validator = $this->getMockBuilder( EmailValidator::class )->disableOriginalConstructor()->getMock();
-		$validator->method( 'validate' )->willReturn( new ValidationResult() );
-		return $validator;
+	private function newEmailValidator(): EmailValidator {
+		return new EmailValidator( new SucceedingDomainNameValidator() );
 	}
 
 	private function assertConstraintWasViolated( ValidationResult $result, string $fieldName ): void {
