@@ -1,0 +1,13 @@
+version: '3.4'
+
+services:
+  app_debug:
+    build:
+      context: .
+      target: app_debug
+    environment:
+      - XDEBUG_CONFIG=remote_host=${LOCAL_IP}
+      - PHP_IDE_CONFIG=serverName=donation.spenden.wikimedia.de
+    volumes:
+      - ./:/usr/src/app
+    working_dir: /usr/src/app
