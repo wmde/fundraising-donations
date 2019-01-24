@@ -20,6 +20,7 @@ use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\SucceedingDomainNameValidator;
 use WMDE\FunValidators\ValidationResult;
+use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
@@ -111,7 +112,8 @@ class AddDonationValidatorTest extends TestCase {
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
 			$bankDataValidator,
 			$this->newEmptyIbanBlocklist(),
-			$this->newEmailValidator()
+			$this->newEmailValidator(),
+			$this->newAddressValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
 
@@ -128,7 +130,8 @@ class AddDonationValidatorTest extends TestCase {
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::BANK_TRANSFER ] ),
 			$bankDataValidator,
 			$this->newEmptyIbanBlocklist(),
-			$this->newEmailValidator()
+			$this->newEmailValidator(),
+			$this->newAddressValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setPaymentType( PaymentMethod::BANK_TRANSFER );
@@ -142,7 +145,8 @@ class AddDonationValidatorTest extends TestCase {
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
 			$this->newBankDataValidator(),
 			new IbanBlocklist( [ ValidDonation::PAYMENT_IBAN ] ),
-			$this->newEmailValidator()
+			$this->newEmailValidator(),
+			$this->newAddressValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
 
@@ -204,7 +208,8 @@ class AddDonationValidatorTest extends TestCase {
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
 			$this->newBankDataValidator(),
 			$this->newEmptyIbanBlocklist(),
-			$this->newEmailValidator()
+			$this->newEmailValidator(),
+			$this->newAddressValidator()
 		);
 	}
 
@@ -238,6 +243,10 @@ class AddDonationValidatorTest extends TestCase {
 
 	private function newEmptyIbanBlocklist(): IbanBlocklist {
 		return new IbanBlocklist( [] );
+	}
+
+	private function newAddressValidator(): AddressValidator {
+		return new AddressValidator();
 	}
 
 }

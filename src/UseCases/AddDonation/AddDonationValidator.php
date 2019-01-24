@@ -6,8 +6,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
-use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressRequest;
-use WMDE\Fundraising\DonationContext\UseCases\ValidateDonor\ValidateDonorAddressUseCase;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidationResult;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
 use WMDE\Fundraising\PaymentContext\Domain\IbanBlocklist;
@@ -17,6 +15,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethods;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
+use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
@@ -27,7 +26,7 @@ class AddDonationValidator {
 	private $paymentDataValidator;
 	private $bankDataValidator;
 	private $ibanBlocklist;
-	private $donorValidator;
+	private $addressValidator;
 	private $emailValidator;
 
 	/**
@@ -46,12 +45,12 @@ class AddDonationValidator {
 	];
 
 	public function __construct( PaymentDataValidator $paymentDataValidator, BankDataValidator $bankDataValidator,
-		IbanBlocklist $ibanBlocklist, EmailValidator $emailValidator ) {
+		IbanBlocklist $ibanBlocklist, EmailValidator $emailValidator, AddressValidator $addressValidator ) {
 
 		$this->paymentDataValidator = $paymentDataValidator;
 		$this->bankDataValidator = $bankDataValidator;
 		$this->ibanBlocklist = $ibanBlocklist;
-		$this->donorValidator = new ValidateDonorAddressUseCase();
+		$this->addressValidator = $addressValidator;
 		$this->emailValidator = $emailValidator;
 	}
 
@@ -76,7 +75,7 @@ class AddDonationValidator {
 		);
 
 		$violations = array_map(
-			function( ConstraintViolation $violation ) {
+			function ( ConstraintViolation $violation ) {
 				$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
 				return $violation;
 			},
@@ -124,25 +123,45 @@ class AddDonationValidator {
 
 	private function validateDonor(): void {
 		$this->validateFieldLength( $this->request->getDonorEmailAddress(), Result::SOURCE_DONOR_EMAIL );
+		if ( $this->request->getDonorType() === DonorName::PERSON_PRIVATE ) {
+			$this->violations = array_merge(
+				$this->violations,
+				$this->getPersonNameViolations(),
+				$this->getAddressViolations(),
+				$this->validateEmail()->getViolations()
+			);
+		} elseif ( $this->request->getDonorType() === DonorName::PERSON_COMPANY ) {
+			$this->violations = array_merge(
+				$this->violations,
+				$this->getCompanyNameViolations(),
+				$this->getAddressViolations(),
+				$this->validateEmail()->getViolations()
+			);
+		}
+	}
 
-		$validateDonorRequest =
-			ValidateDonorAddressRequest::newInstance()
-				->withCity( $this->request->getDonorCity() )
-				->withCompanyName( $this->request->getDonorCompany() )
-				->withCountryCode( $this->request->getDonorCountryCode() )
-				->withFirstName( $this->request->getDonorFirstName() )
-				->withLastName( $this->request->getDonorLastName() )
-				->withPostalCode( $this->request->getDonorPostalCode() )
-				->withSalutation( $this->request->getDonorSalutation() )
-				->withStreetAddress( $this->request->getDonorStreetAddress() )
-				->withTitle( $this->request->getDonorTitle() )
-				->withType( $this->request->getDonorType() );
+	private function getPersonNameViolations(): array {
+		return $this->addressValidator->validatePersonName(
+			$this->request->getDonorSalutation(),
+			$this->request->getDonorTitle(),
+			$this->request->getDonorFirstName(),
+			$this->request->getDonorLastName()
+		)->getViolations();
+	}
 
-		$this->violations = array_merge(
-			$this->violations,
-			$this->donorValidator->validateDonor( $validateDonorRequest )->getViolations(),
-			$this->validateEmail()->getViolations()
-		);
+	private function getCompanyNameViolations(): array {
+		return $this->addressValidator->validateCompanyName(
+			$this->request->getDonorCompany()
+		)->getViolations();
+	}
+
+	private function getAddressViolations(): array {
+		return $this->addressValidator->validatePostalAddress(
+			$this->request->getDonorStreetAddress(),
+			$this->request->getDonorPostalCode(),
+			$this->request->getDonorCity(),
+			$this->request->getDonorCountryCode()
+		)->getViolations();
 	}
 
 	private function validateTrackingData(): void {
@@ -153,11 +172,14 @@ class AddDonationValidator {
 
 	private function validateIban( Iban $iban ): void {
 		if ( $this->ibanBlocklist->isIbanBlocked( $iban ) ) {
-			$this->addViolations( [ new ConstraintViolation(
-				$iban->toString(),
-				Result::VIOLATION_IBAN_BLOCKED,
-				BankDataValidationResult::SOURCE_IBAN
-			) ] );
+			$this->addViolations(
+				[
+					new ConstraintViolation(
+						$iban->toString(),
+						Result::VIOLATION_IBAN_BLOCKED,
+						BankDataValidationResult::SOURCE_IBAN
+					) ]
+			);
 		}
 	}
 
