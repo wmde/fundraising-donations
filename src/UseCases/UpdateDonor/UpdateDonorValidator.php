@@ -14,7 +14,7 @@ use WMDE\FunValidators\Validators\EmailValidator;
  */
 class UpdateDonorValidator {
 
-	public const VIOLATION_ANONYMOUS_ADDRESS = 'donor_change_failure_anonymous_address';
+	public const VIOLATION_ANONYMOUS_ADDRESS = 'address_form_error';
 	public const SOURCE_ADDRESS_TYPE = 'addressType';
 
 	private $addressValidator;
