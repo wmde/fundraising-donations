@@ -42,7 +42,7 @@
 		"phpmd/phpmd": "~2.6",
 		"slevomat/coding-standard": "^2.3",
 
-		"mikey179/vfsStream": "~1.6",
+		"mikey179/vfsstream": "~1.6",
 		"wmde/psr-log-test-doubles": "~2.1"
 	},
 	"autoload": {
