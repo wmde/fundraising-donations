@@ -76,7 +76,12 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertNotNull( $actual->getCreationTime() );
 
 		$actual->setCreationTime( null );
-		$this->adaptAddressChangeUUID( $actual->getAddressChange(), $expected->getAddressChange() );
+
+		// AddressChange does not have a setter for id and UUID but instead creates a new one in the
+		// constructor.
+		// In the donation fixtures, a new AddressChange instance is created.
+		// This leads to errors when comparing UUID and dates.
+		$actual->setAddressChange( $expected->getAddressChange() );
 
 		$this->assertEquals( $expected->getDecodedData(), $actual->getDecodedData() );
 		$this->assertEquals( $expected, $actual );
@@ -420,20 +425,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertTrue( $donation->isExported() );
 	}
 
-	/**
-	 * Use Reflection to change an AddressChange instance
-	 *
-	 * Background: AddressChange does not have a setter for id and UUID but instead creates a new one in the constructor.
-	 * In the donation fixtures, a new AddressChange instance is created.
-	 */
-	private function adaptAddressChangeUUID( AddressChange $source, AddressChange $target ): void {
-		$uuid = new \ReflectionProperty( AddressChange::class, 'identifier' );
-		$uuid->setAccessible( true );
-		$uuid->setValue( $target, $source->getCurrentIdentifier() );
 
-		$id = new \ReflectionProperty( AddressChange::class, 'id' );
-		$id->setAccessible( true );
-		$id->setValue( $target, $id->getValue( $source ) );
-	}
 
 }
