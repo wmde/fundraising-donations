@@ -42,6 +42,7 @@ class DonationConfirmationMailer {
 				'needsModeration' => $donation->needsModeration(),
 				'paymentType' => $donation->getPaymentMethodId(),
 				'bankTransferCode' => $this->getBankTransferCode( $donation->getPaymentMethod() ),
+				'receiptOptIn' => $donation->getOptsIntoDonationReceipt(),
 			]
 		];
 	}
