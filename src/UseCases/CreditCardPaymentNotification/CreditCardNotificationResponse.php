@@ -4,41 +4,39 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification;
 
+use Exception;
+
 /**
  * @license GNU GPL v2+
- * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
 class CreditCardNotificationResponse {
 
-	private $donationId;
-	private $accessToken;
+	public const PAYMENT_TYPE_MISMATCH = 'payment type mismatch';
+	public const DONATION_NOT_FOUND = 'donation not found';
+	public const DATABASE_ERROR = 'data set could not be retrieved from database';
+	public const AMOUNT_MISMATCH = 'amount mismatch';
+	public const AUTHORIZATION_FAILED = 'invalid or expired token';
+	public const DOMAIN_ERROR = 'data set could not be updated';
+
 	private $errorMessage;
 	private $isSuccess;
+	private $lowLevelError;
 
-	public const IS_SUCCESS = true;
-	public const IS_FAILURE = false;
+	private const IS_SUCCESS = true;
+	private const IS_FAILURE = false;
 
-	public function __construct( int $donationId, string $accessToken, string $errorMessage, bool $isSuccess ) {
-		$this->donationId = $donationId;
-		$this->accessToken = $accessToken;
+	public function __construct( bool $isSuccess, string $errorMessage, ?Exception $mailerError = null ) {
 		$this->errorMessage = $errorMessage;
 		$this->isSuccess = $isSuccess;
+		$this->lowLevelError = $mailerError;
 	}
 
-	public static function newFailureResponse( string $errorMessage ): self {
-		return new self( 0, '', $errorMessage, false );
+	public static function newFailureResponse( string $errorMessage, ?Exception $error = null ): self {
+		return new self( self::IS_FAILURE, $errorMessage, $error );
 	}
 
-	public static function newSuccessResponse( int $donationId, string $accessToken ): self {
-		return new self( $donationId, $accessToken, '', true );
-	}
-
-	public function getDonationId(): int {
-		return $this->donationId;
-	}
-
-	public function getAccessToken(): string {
-		return $this->accessToken;
+	public static function newSuccessResponse( ?Exception $mailerError ): self {
+		return new self( self::IS_SUCCESS, '', $mailerError );
 	}
 
 	public function getErrorMessage(): string {
@@ -49,4 +47,7 @@ class CreditCardNotificationResponse {
 		return $this->isSuccess;
 	}
 
+	public function getLowLevelError(): ?Exception {
+		return $this->lowLevelError;
+	}
 }
