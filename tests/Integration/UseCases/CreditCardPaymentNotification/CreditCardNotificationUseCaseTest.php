@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CreditCardPaymentNotification;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Log\NullLogger;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
@@ -198,7 +197,6 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 			$this->authorizer,
 			$this->creditCardService,
 			$this->mailer,
-			new NullLogger(),
 			$this->eventLogger
 		);
 	}
