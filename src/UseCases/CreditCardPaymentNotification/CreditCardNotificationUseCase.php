@@ -26,17 +26,15 @@ class CreditCardNotificationUseCase {
 	private $authorizationService;
 	private $creditCardService;
 	private $mailer;
-	private $logger;
 	private $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
 		CreditCardService $creditCardService, DonationConfirmationMailer $mailer,
-		LoggerInterface $logger, DonationEventLogger $donationEventLogger ) {
+		DonationEventLogger $donationEventLogger ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->creditCardService = $creditCardService;
 		$this->mailer = $mailer;
-		$this->logger = $logger;
 		$this->donationEventLogger = $donationEventLogger;
 	}
 
