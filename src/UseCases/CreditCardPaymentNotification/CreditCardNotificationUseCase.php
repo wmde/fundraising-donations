@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification;
 
-use Psr\Log\LoggerInterface;
+use Exception;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -26,81 +26,76 @@ class CreditCardNotificationUseCase {
 	private $authorizationService;
 	private $creditCardService;
 	private $mailer;
-	private $logger;
 	private $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
 		CreditCardService $creditCardService, DonationConfirmationMailer $mailer,
-		LoggerInterface $logger, DonationEventLogger $donationEventLogger ) {
+		DonationEventLogger $donationEventLogger ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->creditCardService = $creditCardService;
 		$this->mailer = $mailer;
-		$this->logger = $logger;
 		$this->donationEventLogger = $donationEventLogger;
 	}
 
-	/**
-	 * @param CreditCardPaymentNotificationRequest $request
-	 *
-	 * @throws CreditCardPaymentHandlerException
-	 */
-	public function handleNotification( CreditCardPaymentNotificationRequest $request ): void {
+	public function handleNotification( CreditCardPaymentNotificationRequest $request ): CreditCardNotificationResponse {
 		try {
 			$donation = $this->repository->getDonationById( $request->getDonationId() );
 		}
 		catch ( GetDonationException $ex ) {
-			throw new CreditCardPaymentHandlerException( 'data set could not be retrieved from database', $ex );
+			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::DATABASE_ERROR, $ex );
 		}
 
 		if ( $donation === null ) {
-			throw new CreditCardPaymentHandlerException( 'donation not found' );
+			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::DONATION_NOT_FOUND );
 		}
 
 		if ( $donation->getPaymentMethodId() !== PaymentMethod::CREDIT_CARD ) {
-			throw new CreditCardPaymentHandlerException( 'payment type mismatch' );
+			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::PAYMENT_TYPE_MISMATCH );
 		}
 
 		if ( !$donation->getAmount()->equals( $request->getAmount() ) ) {
-			throw new CreditCardPaymentHandlerException( 'amount mismatch' );
+			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::AMOUNT_MISMATCH );
 		}
 
 		if ( !$this->authorizationService->systemCanModifyDonation( $request->getDonationId() ) ) {
-			throw new CreditCardPaymentHandlerException( 'invalid or expired token' );
+			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::AUTHORIZATION_FAILED );
 		}
 
-		$this->handleRequest( $request, $donation );
+		return $this->handleRequest( $request, $donation );
 	}
 
-	private function handleRequest( CreditCardPaymentNotificationRequest $request, Donation $donation ): void {
+	private function handleRequest( CreditCardPaymentNotificationRequest $request, Donation $donation ): CreditCardNotificationResponse {
 		try {
 			$donation->addCreditCardData( $this->newCreditCardDataFromRequest( $request ) );
 			$donation->confirmBooked();
 		}
 		catch ( \RuntimeException $e ) {
-			throw new CreditCardPaymentHandlerException( 'data set could not be updated', $e );
+			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::DOMAIN_ERROR, $e );
 		}
 
 		try {
 			$this->repository->storeDonation( $donation );
 		}
 		catch ( StoreDonationException $ex ) {
-			throw new CreditCardPaymentHandlerException( 'updated data set could not be stored', $ex );
+			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::DOMAIN_ERROR, $ex );
 		}
 
-		$this->sendConfirmationEmail( $donation );
 		$this->donationEventLogger->log( $donation->getId(), 'mcp_handler: booked' );
+
+		return CreditCardNotificationResponse::newSuccessResponse( $this->sendConfirmationEmail( $donation ) );
 	}
 
-	private function sendConfirmationEmail( Donation $donation ): void {
+	private function sendConfirmationEmail( Donation $donation ): ?Exception {
 		if ( $donation->getDonor() !== null ) {
 			try {
 				$this->mailer->sendConfirmationMailFor( $donation );
 			}
-			catch ( \RuntimeException $ex ) {
-				// no need to re-throw or return false, this is not a fatal error, only a minor inconvenience
+			catch ( Exception $ex ) {
+				return $ex;
 			}
 		}
+		return null;
 	}
 
 	private function newCreditCardDataFromRequest( CreditCardPaymentNotificationRequest $request ): CreditCardTransactionData {
