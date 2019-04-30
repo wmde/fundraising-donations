@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CreditCardPaymentNotification;
 
 use PHPUnit\Framework\TestCase;
-use Psr\Log\NullLogger;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
@@ -19,6 +18,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
+use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardPaymentHandlerException;
 use WMDE\Fundraising\PaymentContext\Infrastructure\FakeCreditCardService;
@@ -49,17 +49,20 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$this->creditCardService = new FakeCreditCardService();
 	}
 
-	public function testWhenRepositoryThrowsException_handlerThrowsException(): void {
+	public function testWhenRepositoryThrowsException_handlerReturnsFailure(): void {
 		$this->repository = new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ) );
 		$this->authorizer = new FailingDonationAuthorizer();
 		$useCase = $this->newCreditCardNotificationUseCase();
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 
-		$this->expectException( CreditCardPaymentHandlerException::class );
-		$useCase->handleNotification( $request );
+		$response = $useCase->handleNotification( $request );
+
+		$this->assertFalse( $response->isSuccessful() );
+		$this->assertSame( CreditCardNotificationResponse::DATABASE_ERROR, $response->getErrorMessage() );
+		$this->assertNotNull( $response->getLowLevelError() );
 	}
 
-	public function testWhenAuthorizationFails_handlerThrowsException(): void {
+	public function testWhenAuthorizationFails_handlerReturnsFailure(): void {
 		$this->authorizer = new FailingDonationAuthorizer();
 		$this->repository->storeDonation( ValidDonation::newIncompleteCreditCardDonation() );
 
@@ -67,49 +70,48 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 
-		$this->expectException( CreditCardPaymentHandlerException::class );
-		$useCase->handleNotification( $request );
+		$response = $useCase->handleNotification( $request );
+
+		$this->assertFalse( $response->isSuccessful() );
+		$this->assertContains( CreditCardNotificationResponse::AUTHORIZATION_FAILED, $response->getErrorMessage() );
+		$this->assertNull( $response->getLowLevelError() );
 	}
 
-	public function testWhenAuthorizationSucceeds_handlerDoesNotThrowException(): void {
+	public function testWhenAuthorizationSucceeds_handlerReturnsSuccess(): void {
 		$this->repository->storeDonation( ValidDonation::newIncompleteCreditCardDonation() );
-
 		$useCase = $this->newCreditCardNotificationUseCase();
-
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 
-		try {
-			$useCase->handleNotification( $request );
-			$this->assertTrue( true );
-		}
-		catch ( \Exception $e ) {
-			$this->fail();
-		}
+		$response = $useCase->handleNotification( $request );
+
+		$this->assertTrue( $response->isSuccessful() );
 	}
 
-	public function testWhenPaymentTypeIsIncorrect_handlerThrowsException(): void {
+	public function testWhenPaymentTypeIsIncorrect_handlerReturnsFailure(): void {
 		$this->repository->storeDonation( ValidDonation::newDirectDebitDonation() );
-
 		$useCase = $this->newCreditCardNotificationUseCase();
-
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 
-		$this->expectException( CreditCardPaymentHandlerException::class );
-		$useCase->handleNotification( $request );
+		$response = $useCase->handleNotification( $request );
+
+		$this->assertFalse( $response->isSuccessful() );
+		$this->assertContains( CreditCardNotificationResponse::PAYMENT_TYPE_MISMATCH, $response->getErrorMessage() );
+		$this->assertNull( $response->getLowLevelError(), 'Payment verification does not create an exception' );
 	}
 
 	public function testWhenAuthorizationSucceeds_confirmationMailIsSent(): void {
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
 		$this->repository->storeDonation( $donation );
-
 		$this->mailer->expects( $this->once() )
 			->method( 'sendConfirmationMailFor' )
 			->with( $donation );
-
 		$useCase = $this->newCreditCardNotificationUseCase();
-
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
-		$useCase->handleNotification( $request );
+
+		$response = $useCase->handleNotification( $request );
+
+		$this->assertTrue( $response->isSuccessful() );
+		$this->assertNull( $response->getLowLevelError() );
 	}
 
 	public function testWhenAuthorizationSucceedsForAnonymousDonation_confirmationMailIsNotSent(): void {
@@ -160,22 +162,18 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$this->assertEventLogContainsExpression( $this->eventLogger, $donation->getId(), '/booked/' );
 	}
 
-	public function testWhenSendingConfirmationMailFails_handlerDoesNotThrowException(): void {
+	public function testWhenSendingConfirmationMailFails_handlerReturnsSuccessResultContainingException(): void {
 		$this->repository->storeDonation( ValidDonation::newIncompleteCreditCardDonation() );
-
 		$this->mailer->expects( $this->once() )
 			->method( 'sendConfirmationMailFor' )
 			->willThrowException( new \RuntimeException( 'Oh noes!' ) );
-
 		$useCase = $this->newCreditCardNotificationUseCase();
-
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
-		try {
-			$useCase->handleNotification( $request );
-		}
-		catch ( \Exception $e ) {
-			$this->fail();
-		}
+
+		$response = $useCase->handleNotification( $request );
+
+		$this->assertTrue( $response->isSuccessful() );
+		$this->assertNotNull( $response->getLowLevelError() );
 	}
 
 	/**
@@ -198,21 +196,21 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 			$this->authorizer,
 			$this->creditCardService,
 			$this->mailer,
-			new NullLogger(),
 			$this->eventLogger
 		);
 	}
 
-	public function testWhenPaymentAmountMismatches_handlerThreepwoodsException(): void {
+	public function testWhenPaymentAmountMismatches_handlerReturnsFailure(): void {
 		$this->repository->storeDonation( ValidDonation::newIncompleteCreditCardDonation() );
-
 		$useCase = $this->newCreditCardNotificationUseCase();
-
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 		$request->setAmount( Euro::newFromInt( 35505 ) );
 
-		$this->expectException( CreditCardPaymentHandlerException::class );
-		$useCase->handleNotification( $request );
+		$response = $useCase->handleNotification( $request );
+
+		$this->assertFalse( $response->isSuccessful() );
+		$this->assertContains( CreditCardNotificationResponse::AMOUNT_MISMATCH, $response->getErrorMessage() );
+		$this->assertNull( $response->getLowLevelError(), 'Amount verification does not create an exception' );
 	}
 
 }
