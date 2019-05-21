@@ -2,9 +2,7 @@ version: '3.4'
 
 services:
   app:
-    build:
-      context: .
-      target: app
+    image: "wikimediade/fundraising-frontend:latest"
     volumes:
       - ./:/usr/src/app
     working_dir: /usr/src/app
