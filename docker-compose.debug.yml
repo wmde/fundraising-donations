@@ -2,9 +2,7 @@ version: '3.4'
 
 services:
   app_debug:
-    build:
-      context: .
-      target: app_debug
+    image: "wikimediade/fundraising-frontend:xdebug"
     environment:
       - XDEBUG_CONFIG=remote_host=${LOCAL_IP}
       - PHP_IDE_CONFIG=serverName=donation.spenden.wikimedia.de
