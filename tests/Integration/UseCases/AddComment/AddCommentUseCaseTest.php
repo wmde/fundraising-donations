@@ -76,6 +76,13 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 		return new FakeDonationRepository( $donation );
 	}
 
+	private function newFakeRepositoryWithAnonDonation(): FakeDonationRepository {
+		$donation = ValidDonation::newBookedAnonymousPayPalDonation();
+		$donation->assignId( self::DONATION_ID );
+
+		return new FakeDonationRepository( $donation );
+	}
+
 	private function newUseCase(): AddCommentUseCase {
 		return new AddCommentUseCase(
 			$this->donationRepository,
@@ -205,6 +212,27 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 		$addCommentRequest = new AddCommentRequest();
 
 		$addCommentRequest->setIsAnonymous();
+		$addCommentRequest->setCommentText( self::COMMENT_TEXT );
+		$addCommentRequest->setIsPublic( self::COMMENT_IS_PUBLIC );
+		$addCommentRequest->setDonationId( self::DONATION_ID );
+
+		$response = $this->newUseCase()->addComment( $addCommentRequest );
+
+		$this->assertSame(
+			'Anonym',
+			$this->donationRepository->getDonationById( self::DONATION_ID )->getComment()->getAuthorDisplayName()
+		);
+
+		$this->assertTrue( $response->isSuccessful() );
+	}
+
+	public function testGivenMaliciousAnonymousRequest_authorDisplayNameIsAnonymous(): void {
+		$this->donationRepository = $this->newFakeRepositoryWithAnonDonation();
+
+		$addCommentRequest = new AddCommentRequest();
+
+		// Request is set to be named but donation is actually anonymous
+		$addCommentRequest->setIsNamed();
 		$addCommentRequest->setCommentText( self::COMMENT_TEXT );
 		$addCommentRequest->setIsPublic( self::COMMENT_IS_PUBLIC );
 		$addCommentRequest->setDonationId( self::DONATION_ID );
