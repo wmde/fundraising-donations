@@ -85,10 +85,14 @@ class AddCommentUseCase {
 	}
 
 	private function newComment( Donation $donation, AddCommentRequest $request ): DonationComment {
+		$authorName = 'Anonym';
+		if ( !$request->isAnonymous() && $donation->getDonor() !== null ) {
+			$authorName = $donation->getDonor()->getName()->getFullName();
+		}
 		return new DonationComment(
 			$request->getCommentText(),
 			$this->commentCanBePublic( $request ),
-			$request->isAnonymous() ? 'Anonym' : $donation->getDonor()->getName()->getFullName()
+			$authorName
 		);
 	}
 
