@@ -241,6 +241,7 @@ class SerializedDataHandlingTest extends \PHPUnit\Framework\TestCase {
 					'paypal_settle_amount' => '1.23',
 					'paypal_address_name' => 'Max Muster',
 					'paypal_address_status' => 'unconfirmed',
+					'transactionIds' => [],
 
 					// these values were stored as strings
 					'impCount' => 0,
@@ -300,6 +301,7 @@ class SerializedDataHandlingTest extends \PHPUnit\Framework\TestCase {
 					'paypal_settle_amount' => '1.23',
 					'paypal_address_name' => 'Max Muster',
 					'paypal_address_status' => 'unconfirmed',
+					'transactionIds' => [],
 
 					// these values were stored as strings
 					'impCount' => 0,

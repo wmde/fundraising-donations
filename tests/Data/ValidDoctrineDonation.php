@@ -30,6 +30,19 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
+	public static function newPaypalDoctrineDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->encodeAndSetData(
+			array_merge(
+				$donation->getDecodedData(),
+				$self->getPaypalDataArray()
+			)
+		);
+		return $donation;
+	}
+
 	private function createDonation(): Donation {
 		$donation = new Donation();
 
@@ -104,6 +117,26 @@ class ValidDoctrineDonation {
 			'plz' => ValidDonation::DONOR_POSTAL_CODE,
 			'ort' => ValidDonation::DONOR_CITY,
 			'country' => ValidDonation::DONOR_COUNTRY_CODE,
+		];
+	}
+
+	private function getPaypalDataArray(): array {
+		return [
+			'ext_payment_id' => '72171T32A6H345906',
+			'ext_subscr_id' => 'I-DYP3HRBE7WUA',
+			'ext_payment_status' => 'Completed/subscr_payment',
+			'ext_payment_account' => 'QEEMF34KV3ECL',
+			'ext_payment_type' => 'instant',
+			'ext_payment_timestamp' => '05:10:30 May 17, 2016 PDT',
+			'paypal_payer_id' => 'QEEMF34KV3ECL',
+			'paypal_subscr_id' => 'I-DYP3HRBE7WUA',
+			'paypal_payer_status' => 'verified',
+			'paypal_first_name' => 'Max',
+			'paypal_last_name' => 'Muster',
+			'paypal_mc_gross' => '10.00',
+			'paypal_mc_currency' => 'EUR',
+			'paypal_mc_fee' => '0.47',
+			'user_agent' => 'PayPal IPN ( https://www.paypal.com/ipn )',
 		];
 	}
 

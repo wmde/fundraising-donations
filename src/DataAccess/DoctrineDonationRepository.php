@@ -227,7 +227,8 @@ class DoctrineDonationRepository implements DonationRepository {
 			'ext_payment_type' => $payPalData->getPaymentType(),
 			'ext_payment_status' => $payPalData->getPaymentStatus(),
 			'ext_payment_account' => $payPalData->getPayerId(),
-			'ext_payment_timestamp' => $payPalData->getPaymentTimestamp()
+			'ext_payment_timestamp' => $payPalData->getPaymentTimestamp(),
+			'transactionIds' => $payPalData->getAllChildPayments()
 		];
 	}
 
@@ -454,27 +455,35 @@ class DoctrineDonationRepository implements DonationRepository {
 	private function getPayPalDataFromEntity( DoctrineDonation $dd ): ?PayPalData {
 		$data = $dd->getDecodedData();
 
-		if ( array_key_exists( 'paypal_payer_id', $data ) ) {
-			return ( new PayPalData() )
-				->setPayerId( $data['paypal_payer_id'] )
-				->setSubscriberId( $data['paypal_subscr_id'] ?? '' )
-				->setPayerStatus( $data['paypal_payer_status'] ?? '' )
-				->setAddressStatus( $data['paypal_address_status'] ?? '' )
-				->setAmount( Euro::newFromString( $data['paypal_mc_gross'] ?? '0' ) )
-				->setCurrencyCode( $data['paypal_mc_currency'] ?? '' )
-				->setFee( Euro::newFromString( $data['paypal_mc_fee'] ?? '0' ) )
-				->setSettleAmount( Euro::newFromString( $data['paypal_settle_amount'] ?? '0' ) )
-				->setFirstName( $data['paypal_first_name'] ?? '' )
-				->setLastName( $data['paypal_last_name'] ?? '' )
-				->setAddressName( $data['paypal_address_name'] ?? '' )
-				->setPaymentId( $data['ext_payment_id'] ?? '' )
-				->setPaymentType( $data['ext_payment_type'] ?? '' )
-				->setPaymentStatus( $data['ext_payment_status'] ?? '' )
-				->setPaymentTimestamp( $data['ext_payment_timestamp'] ?? '' )
-				->freeze()->assertNoNullFields();
+		if ( !array_key_exists( 'paypal_payer_id', $data ) ) {
+			return null;
 		}
 
-		return null;
+		$payPalData = ( new PayPalData() )
+			->setPayerId( $data['paypal_payer_id'] )
+			->setSubscriberId( $data['paypal_subscr_id'] ?? '' )
+			->setPayerStatus( $data['paypal_payer_status'] ?? '' )
+			->setAddressStatus( $data['paypal_address_status'] ?? '' )
+			->setAmount( Euro::newFromString( $data['paypal_mc_gross'] ?? '0' ) )
+			->setCurrencyCode( $data['paypal_mc_currency'] ?? '' )
+			->setFee( Euro::newFromString( $data['paypal_mc_fee'] ?? '0' ) )
+			->setSettleAmount( Euro::newFromString( $data['paypal_settle_amount'] ?? '0' ) )
+			->setFirstName( $data['paypal_first_name'] ?? '' )
+			->setLastName( $data['paypal_last_name'] ?? '' )
+			->setAddressName( $data['paypal_address_name'] ?? '' )
+			->setPaymentId( $data['ext_payment_id'] ?? '' )
+			->setPaymentType( $data['ext_payment_type'] ?? '' )
+			->setPaymentStatus( $data['ext_payment_status'] ?? '' )
+			->setPaymentTimestamp( $data['ext_payment_timestamp'] ?? '' )
+			->freeze()->assertNoNullFields();
+
+		if ( !empty( $data['transactionIds'] ) ) {
+			foreach ( $data['transactionIds'] as $transactionId => $entityId ) {
+				$payPalData->addChildPayment( $transactionId, (int) $entityId );
+			}
+		}
+
+		return $payPalData;
 	}
 
 	private function getCreditCardDataFromEntity( DoctrineDonation $dd ): CreditCardTransactionData {
