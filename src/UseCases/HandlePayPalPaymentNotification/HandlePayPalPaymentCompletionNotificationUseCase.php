@@ -83,7 +83,15 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		if ( !$this->authorizationService->systemCanModifyDonation( $request->getInternalId() ) ) {
 			return $this->createUnhandledResponse( 'Wrong access code for donation' );
 		}
-		if ( $this->donationWasBookedWithDifferentTransactionId( $donation, $request ) ) {
+		if ( $this->donationWasBookedWithSameTransactionId( $donation, $request->getTransactionId() ) ) {
+			return $this->createUnhandledresponse(
+				sprintf(
+					'Transaction id "%s" already booked for donation id %d',
+					$request->getTransactionId(),
+					$donation->getId()
+				) );
+		}
+		if ( $this->isFollowupPaymentForRecurringDonation( $donation ) ) {
 			return $this->createChildDonation( $donation, $request );
 		}
 
@@ -147,26 +155,8 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			->setPaymentTimestamp( $request->getPaymentTimestamp()->format( 'Y-m-d H:i:s' ) );
 	}
 
-	private function donationWasBookedWithDifferentTransactionId( Donation $donation,
-		PayPalPaymentNotificationRequest $request ): bool {
-		/**
-		 * @var PayPalPayment $payment
-		 */
-		$payment = $donation->getPaymentMethod();
-
-		if ( !$donation->isBooked() ) {
-			return false;
-		}
-
-		if ( $request->getTransactionId() === $payment->getPayPalData()->getPaymentId() ) {
-			return false;
-		}
-
-		if ( $payment->getPayPalData()->hasChildPayment( $request->getTransactionId() ) ) {
-			return false;
-		}
-
-		return true;
+	private function isFollowupPaymentForRecurringDonation( Donation $donation ): bool {
+		return $donation->getPayment()->getIntervalInMonths() > 0 && $donation->isBooked();
 	}
 
 	private function createChildDonation( Donation $donation, PayPalPaymentNotificationRequest $request ): PaypalNotificationResponse {
@@ -261,6 +251,20 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 				'stackTrace' => $ex->getTraceAsString()
 			]
 		);
+	}
+
+	// TODO Move this check to the payment domain use case, see https://phabricator.wikimedia.org/T192323
+	private function donationWasBookedWithSameTransactionId( Donation $donation, string $transactionId ): bool {
+		/**
+		 * @var PayPalPayment $payment
+		 */
+		$payment = $donation->getPaymentMethod();
+
+		if ( $payment->getPayPalData()->getPaymentId() === $transactionId ) {
+			return true;
+		}
+
+		return $payment->getPayPalData()->hasChildPayment( $transactionId );
 	}
 
 }

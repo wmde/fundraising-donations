@@ -425,6 +425,37 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertTrue( $donation->isExported() );
 	}
 
+	public function testPaypalDonationWithChildPaymentsIsSaved(): void {
+		$transactionId = '16R12136PU8783961';
+		$fakeChildId = 2;
+		$donation = ValidDonation::newBookedPayPalDonation();
+		$donation->getPaymentMethod()->getPayPalData()->addChildPayment( $transactionId, $fakeChildId );
+		$repository = $this->newRepository();
 
+		$repository->storeDonation( $donation );
+
+		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
+		$data = $doctrineDonation->getDecodedData();
+		$this->assertSame( ['16R12136PU8783961' => 2], $data['transactionIds'] );
+	}
+
+	public function testPapalDonationWithChildPaymentIsLoaded(): void {
+		$transactionIds = [
+			'16R12136PU8783961' => 2,
+			'1A412136PU8783961' => 3
+		];
+		$doctrineDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
+		$doctrineDonation->encodeAndSetData( array_merge(
+			$doctrineDonation->getDecodedData(),
+			['transactionIds' => $transactionIds]
+		));
+		$this->entityManager->persist( $doctrineDonation );
+		$this->entityManager->flush();
+
+		$repository = $this->newRepository();
+		$donation = $repository->getDonationById( $doctrineDonation->getId() );
+
+		$this->assertEquals( $transactionIds, $donation->getPaymentMethod()->getPaypalData()->getAllChildPayments() );
+	}
 
 }
