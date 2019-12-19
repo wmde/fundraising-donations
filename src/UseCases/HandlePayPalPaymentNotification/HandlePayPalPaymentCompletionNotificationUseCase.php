@@ -144,7 +144,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			->setPaymentId( $request->getTransactionId() )
 			->setPaymentType( $request->getPaymentType() )
 			->setPaymentStatus( implode( '/', [ $request->getPaymentStatus(), $request->getTransactionType() ] ) )
-			->setPaymentTimestamp( $request->getPaymentTimestamp()->format( 'Y-m-d H:i:s' ) );
+			->setPaymentTimestamp( $request->getPaymentTimestamp() );
 	}
 
 	private function donationWasBookedWithDifferentTransactionId( Donation $donation,
