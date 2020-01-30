@@ -33,7 +33,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 	 */
 	private $templateMailer;
 
-	protected function setUp() {
+	protected function setUp(): void {
 		$this->templateMailer = new TemplateBasedMailerSpy( $this );
 	}
 

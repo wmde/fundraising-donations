@@ -171,7 +171,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	/**
 	 * @return DonationConfirmationMailer|\PHPUnit_Framework_MockObject_MockObject
 	 */
-	private function newThrowingMailer() {
+	private function newThrowingMailer(): DonationConfirmationMailer {
 		$mailer = $this->getMailer();
 
 		$mailer->expects( $this->once() )

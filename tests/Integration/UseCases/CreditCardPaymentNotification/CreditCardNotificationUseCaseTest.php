@@ -73,7 +73,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$response = $useCase->handleNotification( $request );
 
 		$this->assertFalse( $response->isSuccessful() );
-		$this->assertContains( CreditCardNotificationResponse::AUTHORIZATION_FAILED, $response->getErrorMessage() );
+		$this->assertStringContainsString( CreditCardNotificationResponse::AUTHORIZATION_FAILED, $response->getErrorMessage() );
 		$this->assertNull( $response->getLowLevelError() );
 	}
 
@@ -95,7 +95,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$response = $useCase->handleNotification( $request );
 
 		$this->assertFalse( $response->isSuccessful() );
-		$this->assertContains( CreditCardNotificationResponse::PAYMENT_TYPE_MISMATCH, $response->getErrorMessage() );
+		$this->assertStringContainsString( CreditCardNotificationResponse::PAYMENT_TYPE_MISMATCH, $response->getErrorMessage() );
 		$this->assertNull( $response->getLowLevelError(), 'Payment verification does not create an exception' );
 	}
 
@@ -209,7 +209,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$response = $useCase->handleNotification( $request );
 
 		$this->assertFalse( $response->isSuccessful() );
-		$this->assertContains( CreditCardNotificationResponse::AMOUNT_MISMATCH, $response->getErrorMessage() );
+		$this->assertStringContainsString( CreditCardNotificationResponse::AMOUNT_MISMATCH, $response->getErrorMessage() );
 		$this->assertNull( $response->getLowLevelError(), 'Amount verification does not create an exception' );
 	}
 
