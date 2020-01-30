@@ -168,7 +168,7 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 		$response = $this->newUseCase()->addComment( $this->newValidRequest() );
 		$this->assertTrue( $response->isSuccessful() );
 
-		$this->assertNotContains( 'ok', $response->getSuccessMessage() );
+		$this->assertStringNotContainsString( 'ok', $response->getSuccessMessage() );
 	}
 
 	public function testWhenDonationIsMarkedForModeration_responseMessageDoesNotContainOK(): void {
@@ -182,7 +182,7 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 		$response = $this->newUseCase()->addComment( $this->newValidRequest() );
 		$this->assertTrue( $response->isSuccessful() );
 
-		$this->assertNotContains( 'ok', $response->getSuccessMessage() );
+		$this->assertStringNotContainsString( 'ok', $response->getSuccessMessage() );
 	}
 
 	public function testWhenValidationFails_failureResponseIsReturned(): void {
