@@ -12,3 +12,5 @@ res/blz.lut2f
 
 .vagrant/
 ubuntu-xenial-16.04-cloudimg-console.log
+
+.phpunit.result.cache
