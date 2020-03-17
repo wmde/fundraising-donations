@@ -6,7 +6,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\Entities\AddressChange;
 use WMDE\Fundraising\Entities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -56,16 +55,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertDoctrineEntityIsInDatabase( $expectedDoctrineEntity );
 	}
 
-	public function testValidCompanyDonationGetsPersistedWithCorrectAddressChangeType(): void {
-		$donation = ValidDonation::newCompanyBankTransferDonation();
-
-		$this->newRepository()->storeDonation( $donation );
-
-		$actual = $this->getDoctrineDonationById( $donation->getId() );
-
-		$this->assertSame( AddressChange::ADDRESS_TYPE_COMPANY, $actual->getAddressChange()->getAddressType() );
-	}
-
 	private function newRepository(): DoctrineDonationRepository {
 		return new DoctrineDonationRepository( $this->entityManager );
 	}
@@ -76,12 +65,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertNotNull( $actual->getCreationTime() );
 
 		$actual->setCreationTime( null );
-
-		// AddressChange does not have a setter for id and UUID but instead creates a new one in the
-		// constructor.
-		// In the donation fixtures, a new AddressChange instance is created.
-		// This leads to errors when comparing UUID and dates.
-		$actual->setAddressChange( $expected->getAddressChange() );
 
 		$this->assertEquals( $expected->getDecodedData(), $actual->getDecodedData() );
 		$this->assertEquals( $expected, $actual );
@@ -279,22 +262,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
 
 		$this->assertSame( $donation->getDonor()->getName()->getFullName(), $doctrineDonation->getDonorFullName() );
-	}
-
-	public function testGivenAnonymousDonation_noAddressChangeEntryIsCreated(): void {
-		$donation = ValidDonation::newBookedAnonymousPayPalDonation();
-		$this->newRepository()->storeDonation( $donation );
-
-		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
-		$this->assertNull( $doctrineDonation->getAddressChange() );
-	}
-
-	public function testGivenPersonalDonation_addressChangeEntryIsCreated(): void {
-		$donation = ValidDonation::newBookedPayPalDonation();
-		$this->newRepository()->storeDonation( $donation );
-
-		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
-		$this->assertNotNull( $doctrineDonation->getAddressChange() );
 	}
 
 	private function getNewlyCreatedDoctrineDonation(): DoctrineDonation {
