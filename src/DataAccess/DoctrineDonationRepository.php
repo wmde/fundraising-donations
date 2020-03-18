@@ -7,7 +7,6 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\Entities\AddressChange;
 use WMDE\Fundraising\Entities\Donation as DoctrineDonation;
 use WMDE\Fundraising\Entities\DonationPayments\SofortPayment as DoctrineSofortPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -54,11 +53,6 @@ class DoctrineDonationRepository implements DonationRepository {
 
 	private function insertDonation( Donation $donation ): void {
 		$doctrineDonation = new DoctrineDonation();
-		if ( ! $donation->donorIsAnonymous() ) {
-			$doctrineDonation->setAddressChange(
-				new AddressChange( $this->getAddressChangeType( $donation->getDonor() ) )
-			);
-		}
 		$this->updateDonationEntity( $doctrineDonation, $donation );
 
 		try {
@@ -70,15 +64,6 @@ class DoctrineDonationRepository implements DonationRepository {
 		}
 
 		$donation->assignId( $doctrineDonation->getId() );
-	}
-
-	private function getAddressChangeType( Donor $donor ): string {
-		if ( $donor->getName()->isPrivatePerson() ) {
-			return AddressChange::ADDRESS_TYPE_PERSON;
-		}
-		if ( $donor->getName()->isCompany() ) {
-			return AddressChange::ADDRESS_TYPE_COMPANY;
-		}
 	}
 
 	private function updateDonationEntity( DoctrineDonation $doctrineDonation, Donation $donation ): void {
