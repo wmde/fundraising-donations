@@ -7,9 +7,9 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\Common\Persistence\Event\LifecycleEventArgs;
 use Doctrine\ORM\Events;
-use WMDE\Fundraising\Entities\Donation;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
+use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
 use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
-use WMDE\Fundraising\Store\DonationData;
 
 /**
  * @license GNU GPL v2+

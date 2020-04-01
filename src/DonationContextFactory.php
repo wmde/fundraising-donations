@@ -4,15 +4,13 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext;
 
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\EntityManager;
+use Doctrine\Common\EventSubscriber;
+use Doctrine\ORM\Tools\Setup;
 use Pimple\Container;
 use WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator;
 use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationPrePersistSubscriber;
-use WMDE\Fundraising\Store\Factory as StoreFactory;
-use WMDE\Fundraising\Store\Installer;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineSetupFactory;
 
 /**
  * @licence GNU GPL v2+
@@ -20,7 +18,8 @@ use WMDE\Fundraising\Store\Installer;
  */
 class DonationContextFactory {
 
-	private $config;
+	protected array $config;
+	protected string $environment;
 
 	/**
 	 * @var Container
@@ -29,28 +28,19 @@ class DonationContextFactory {
 
 	private $addDoctrineSubscribers = true;
 
-	public function __construct( array $config ) {
+	public function __construct( array $config, string $environment = 'dev' ) {
 		$this->config = $config;
 		$this->pimple = $this->newPimple();
+		$this->environment = $environment;
 	}
 
 	private function newPimple(): Container {
 		$pimple = new Container();
 
-		$pimple['dbal_connection'] = function() {
-			return DriverManager::getConnection( $this->config['db'] );
-		};
-
-		$pimple['entity_manager'] = function() {
-			$entityManager = ( new StoreFactory( $this->getConnection(), $this->getVarPath() . '/doctrine_proxies' ) )
-				->getEntityManager();
-			if ( $this->addDoctrineSubscribers ) {
-				$entityManager->getEventManager()->addEventSubscriber(
-					$this->newDoctrineDonationPrePersistSubscriber()
-				);
-			}
-
-			return $entityManager;
+		$pimple['entity_manager_factory'] = function () {
+			return new DoctrineSetupFactory(
+				Setup::createConfiguration( $this->isDevEnvironment(), $this->getVarPath() . '/doctrine_proxies' )
+			);
 		};
 
 		$pimple['token_generator'] = function() {
@@ -63,20 +53,23 @@ class DonationContextFactory {
 		return $pimple;
 	}
 
-	public function getConnection(): Connection {
-		return $this->pimple['dbal_connection'];
-	}
-
-	public function getEntityManager(): EntityManager {
-		return $this->pimple['entity_manager'];
-	}
-
-	public function newInstaller(): Installer {
-		return ( new StoreFactory( $this->getConnection() ) )->newInstaller();
-	}
-
 	private function getVarPath(): string {
 		return $this->config['var-path'];
+	}
+
+	/**
+	 * @return EventSubscriber[]
+	 */
+	public function newDoctrineEventSubscribers(): array {
+		if ( !$this->addDoctrineSubscribers ) {
+			return [];
+		}
+		return array_merge(
+			$this->getEntityManagerFactory()->newEventSubscribers(),
+			[
+				DoctrineDonationPrePersistSubscriber::class => $this->newDoctrineDonationPrePersistSubscriber()
+			]
+		);
 	}
 
 	private function newDoctrineDonationPrePersistSubscriber(): DoctrineDonationPrePersistSubscriber {
@@ -93,6 +86,14 @@ class DonationContextFactory {
 
 	public function disableDoctrineSubscribers(): void {
 		$this->addDoctrineSubscribers = false;
+	}
+
+	public function getEntityManagerFactory(): DoctrineSetupFactory {
+		return $this->pimple['entity_manager_factory'];
+	}
+
+	protected function isDevEnvironment(): bool {
+		return $this->environment === 'dev' || $this->environment === 'test';
 	}
 
 }
