@@ -4,8 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests;
 
-use WMDE\Fundraising\DonationContext\DonationContextFactory;
-
 /**
  * @licence GNU GPL v2+
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
@@ -35,22 +33,22 @@ class TestEnvironment {
 
 	private function __construct( array $config ) {
 		$this->config = $config;
-		$this->factory = new DonationContextFactory( $this->config );
+		$this->factory = new TestDonationContextFactory( $this->config );
 	}
 
 	private function install(): void {
-		$installer = $this->factory->newInstaller();
+		$schemaCreator = $this->getFactory()->newSchemaCreator();
 
 		try {
-			$installer->uninstall();
+			$schemaCreator->dropSchema();
 		}
 		catch ( \Exception $ex ) {
 		}
 
-		$installer->install();
+		$schemaCreator->createSchema();
 	}
 
-	public function getFactory(): DonationContextFactory {
+	public function getFactory(): TestDonationContextFactory {
 		return $this->factory;
 	}
 
