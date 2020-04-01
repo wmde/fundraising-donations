@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
-use WMDE\Fundraising\Entities\Donation;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;

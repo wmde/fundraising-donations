@@ -4,7 +4,7 @@ services:
   - docker
 
 php:
-  - 7.2
+  - 7.4
 
 install:
   - travis_retry composer install

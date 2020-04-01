@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use Codeception\Specify;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
-use WMDE\Fundraising\Entities\Donation;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;

@@ -4,14 +4,14 @@
 	"homepage": "https://github.com/wmde/FundraisingDonations",
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"php": ">=7.2",
+		"php": ">=7.4",
 		"ext-curl": "*",
 
-		"doctrine/orm": "~2.5",
+		"doctrine/orm": "~2.7",
+		"gedmo/doctrine-extensions": "^2.4",
 		"psr/log": "~1.0",
 		"pimple/pimple": "~3.0",
 
-		"wmde/fundraising-store": "@dev",
 		"wmde/fundraising-payments": "@dev",
 		"wmde/euro": "~1.0",
 		"wmde/email-address": "~1.0",
