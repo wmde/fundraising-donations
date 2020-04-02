@@ -230,6 +230,8 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		);
 	}
 
+	// This test should be removed once we have Payments as their own domain,
+	// see https://phabricator.wikimedia.org/T192323
 	public function testGivenNewTransactionIdForBookedDonation_childTransactionWithSameDataIsCreated(): void {
 		$donation = ValidDonation::newBookedPayPalDonation();
 		$donation->setOptsIntoDonationReceipt( true );
@@ -266,7 +268,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertTrue( $childDonation->getOptsIntoDonationReceipt() );
 	}
 
-	public function testGivenNewTransactionIdForBookedDonation_childCreationeventIsLogged(): void {
+	public function testGivenNewTransactionIdForBookedDonation_childCreationEventIsLogged(): void {
 		$donation = ValidDonation::newBookedPayPalDonation();
 		$transactionId = '16R12136PU8783961';
 
@@ -319,17 +321,12 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertFalse( $useCase->handleNotification( $request )->notificationWasHandled() );
 	}
 
-	public function testGivenTransactionIdInBookedChildDonation_noNewDonationIsCreated(): void {
+	public function testGivenTransactionIsAlreadyBookedForDonation_notificationIsNotHandled(): void {
 		$transactionId = '16R12136PU8783961';
-		$fakeChildEntityId = 2;
-		$donation = ValidDonation::newBookedPayPalDonation();
-		$donation->getPaymentMethod()->getPaypalData()->addChildPayment( $transactionId, $fakeChildEntityId );
-
+		$donation = ValidDonation::newBookedPayPalDonation( $transactionId );
 		$fakeRepository = new FakeDonationRepository();
 		$fakeRepository->storeDonation( $donation );
-
 		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
-
 		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
@@ -337,7 +334,33 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 			$this->getEventLogger()
 		);
 
-		$this->assertFalse( $useCase->handleNotification( $request )->notificationWasHandled() );
+		$result = $useCase->handleNotification( $request );
+
+		$this->assertFalse( $result->notificationWasHandled() );
+		$this->assertNotEmpty( $result->getContext()['message'] );
+		$this->assertContains( 'already booked', $result->getContext()['message'] );
+	}
+
+	public function testGivenTransactionIdInBookedChildDonation_notificationIsNotHandled(): void {
+		$transactionId = '16R12136PU8783961';
+		$fakeChildEntityId = 2;
+		$donation = ValidDonation::newBookedPayPalDonation();
+		$donation->getPaymentMethod()->getPaypalData()->addChildPayment( $transactionId, $fakeChildEntityId );
+		$fakeRepository = new FakeDonationRepository();
+		$fakeRepository->storeDonation( $donation );
+		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
+		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
+			$fakeRepository,
+			new SucceedingDonationAuthorizer(),
+			$this->getMailer(),
+			$this->getEventLogger()
+		);
+
+		$result = $useCase->handleNotification( $request );
+
+		$this->assertFalse( $result->notificationWasHandled() );
+		$this->assertNotEmpty( $result->getContext()['message'] );
+		$this->assertContains( 'already booked', $result->getContext()['message'] );
 	}
 
 	public function testWhenNotificationIsForNonExistingDonation_newDonationIsCreated(): void {
