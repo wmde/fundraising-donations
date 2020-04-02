@@ -96,9 +96,9 @@ class ValidDonation {
 		);
 	}
 
-	public static function newBookedPayPalDonation(): Donation {
+	public static function newBookedPayPalDonation( string $transactionId = self::PAYPAL_TRANSACTION_ID ): Donation {
 		$payPalData = new PayPalData();
-		$payPalData->setPaymentId( self::PAYPAL_TRANSACTION_ID );
+		$payPalData->setPaymentId( $transactionId );
 
 		return ( new self() )->createDonation(
 			new PayPalPayment( $payPalData ),
