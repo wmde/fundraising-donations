@@ -6,7 +6,6 @@ namespace WMDE\Fundraising\DonationContext;
 
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Tools\Setup;
-use Pimple\Container;
 use WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator;
 use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationPrePersistSubscriber;
@@ -14,43 +13,34 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineSetupFactory;
 
 /**
  * @licence GNU GPL v2+
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DonationContextFactory {
 
 	protected array $config;
 	protected string $environment;
+	private bool $addDoctrineSubscribers = true;
 
-	/**
-	 * @var Container
-	 */
-	private $pimple;
-
-	private $addDoctrineSubscribers = true;
+	// Singleton instances
+	protected ?DoctrineSetupFactory $doctrineSetupFactory;
+	protected ?TokenGenerator $tokenGenerator;
 
 	public function __construct( array $config, string $environment = 'dev' ) {
 		$this->config = $config;
-		$this->pimple = $this->newPimple();
 		$this->environment = $environment;
+		$this->doctrineSetupFactory = null;
+		$this->tokenGenerator = null;
 	}
 
-	private function newPimple(): Container {
-		$pimple = new Container();
-
-		$pimple['entity_manager_factory'] = function () {
-			return new DoctrineSetupFactory(
-				Setup::createConfiguration( $this->isDevEnvironment(), $this->getVarPath() . '/doctrine_proxies' )
+	public function getDoctrineSetupFactory(): DoctrineSetupFactory {
+		if ( is_null( $this->doctrineSetupFactory ) ) {
+			$this->doctrineSetupFactory = new DoctrineSetupFactory(
+				Setup::createConfiguration(
+					$this->isDevEnvironment(),
+					$this->getVarPath() . '/doctrine_proxies'
+				)
 			);
-		};
-
-		$pimple['token_generator'] = function() {
-			return new RandomTokenGenerator(
-				$this->config['token-length'],
-				new \DateInterval( $this->config['token-validity-timestamp'] )
-			);
-		};
-
-		return $pimple;
+		}
+		return $this->doctrineSetupFactory;
 	}
 
 	private function getVarPath(): string {
@@ -65,7 +55,7 @@ class DonationContextFactory {
 			return [];
 		}
 		return array_merge(
-			$this->getEntityManagerFactory()->newEventSubscribers(),
+			$this->getDoctrineSetupFactory()->newEventSubscribers(),
 			[
 				DoctrineDonationPrePersistSubscriber::class => $this->newDoctrineDonationPrePersistSubscriber()
 			]
@@ -81,15 +71,17 @@ class DonationContextFactory {
 	}
 
 	public function getTokenGenerator(): TokenGenerator {
-		return $this->pimple['token_generator'];
+		if ( is_null( $this->tokenGenerator ) ) {
+			$this->tokenGenerator = new RandomTokenGenerator(
+				$this->config['token-length'],
+				new \DateInterval( $this->config['token-validity-timestamp'] )
+			);
+		}
+		return $this->tokenGenerator;
 	}
 
 	public function disableDoctrineSubscribers(): void {
 		$this->addDoctrineSubscribers = false;
-	}
-
-	public function getEntityManagerFactory(): DoctrineSetupFactory {
-		return $this->pimple['entity_manager_factory'];
 	}
 
 	protected function isDevEnvironment(): bool {
