@@ -1,7 +1,7 @@
 {
 	"name": "wmde/fundraising-donations",
 	"description": "Bounded Context for the Wikimedia Deutschland fundraising donation subdomain",
-	"homepage": "https://github.com/wmde/FundraisingDonations",
+	"homepage": "https://github.com/wmde/fundraising-donations",
 	"license": "GPL-2.0-or-later",
 	"require": {
 		"php": ">=7.4",
@@ -10,13 +10,12 @@
 		"doctrine/orm": "~2.7",
 		"gedmo/doctrine-extensions": "^2.4",
 		"psr/log": "~1.0",
-		"pimple/pimple": "~3.0",
 
-		"wmde/fundraising-payments": "@dev",
-		"wmde/euro": "~1.0",
 		"wmde/email-address": "~1.0",
+		"wmde/euro": "~1.0",
 		"wmde/freezable-value-object": "~1.0",
-		"wmde/fun-validators": "~1.2"
+		"wmde/fun-validators": "~1.2",
+		"wmde/fundraising-payments": "@dev"
 	},
 	"repositories": [
 		{
