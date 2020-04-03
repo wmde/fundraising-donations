@@ -43,7 +43,7 @@ class TestDonationContextFactory extends DonationContextFactory {
 
 	private function newEntityManager( array $eventSubscribers = [] ): EntityManager {
 		AnnotationRegistry::registerLoader( 'class_exists' );
-		$factory = $this->getEntityManagerFactory();
+		$factory = $this->getDoctrineSetupFactory();
 		$this->doctrineConfig->setMetadataDriverImpl( $factory->newMappingDriver() );
 
 		$entityManager = EntityManager::create( $this->getConnection(), $this->doctrineConfig );
@@ -61,7 +61,7 @@ class TestDonationContextFactory extends DonationContextFactory {
 	}
 
 	public function newSchemaCreator(): SchemaCreator {
-		return new SchemaCreator( $this->newEntityManager( $this->getEntityManagerFactory()->newEventSubscribers() ) );
+		return new SchemaCreator( $this->newEntityManager( $this->getDoctrineSetupFactory()->newEventSubscribers() ) );
 	}
 
 }
