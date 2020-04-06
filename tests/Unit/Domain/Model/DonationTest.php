@@ -105,7 +105,7 @@ class DonationTest extends \PHPUnit\Framework\TestCase {
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$this->expectException( RuntimeException::class );
-		$this->expectExceptionMessageRegExp( '/Only external payments/' );
+		$this->expectExceptionMessageMatches( '/Only external payments/' );
 		$donation->confirmBooked();
 	}
 
