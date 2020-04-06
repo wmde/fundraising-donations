@@ -35,10 +35,10 @@ class DonationContextFactory {
 	// Singleton instances
 	protected ?TokenGenerator $tokenGenerator;
 
-	public function __construct( array $config, Configuration $doctrineConfiguration ) {
+	public function __construct( array $config, Configuration $doctrineConfiguration, ?TokenGenerator $tokenGenerator = null ) {
 		$this->config = $config;
 		$this->doctrineConfiguration = $doctrineConfiguration;
-		$this->tokenGenerator = null;
+		$this->tokenGenerator = $tokenGenerator;
 		$this->annotationReader = new AnnotationReader();
 	}
 
