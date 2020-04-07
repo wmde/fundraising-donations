@@ -338,7 +338,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		$this->assertFalse( $result->notificationWasHandled() );
 		$this->assertNotEmpty( $result->getContext()['message'] );
-		$this->assertContains( 'already booked', $result->getContext()['message'] );
+		$this->assertStringContainsString( 'already booked', $result->getContext()['message'] );
 	}
 
 	public function testGivenTransactionIdInBookedChildDonation_notificationIsNotHandled(): void {
@@ -360,7 +360,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		$this->assertFalse( $result->notificationWasHandled() );
 		$this->assertNotEmpty( $result->getContext()['message'] );
-		$this->assertContains( 'already booked', $result->getContext()['message'] );
+		$this->assertStringContainsString( 'already booked', $result->getContext()['message'] );
 	}
 
 	public function testWhenNotificationIsForNonExistingDonation_newDonationIsCreated(): void {
