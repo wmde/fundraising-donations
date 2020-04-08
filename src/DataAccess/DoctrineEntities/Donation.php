@@ -434,13 +434,13 @@ class Donation {
 		return $this->deletionTime;
 	}
 
-	public function setDtExp( \DateTime $dtExp ): self {
+	public function setDtExp( ?\DateTime $dtExp ): self {
 		$this->dtExp = $dtExp;
 
 		return $this;
 	}
 
-	public function getDtExp(): \DateTime {
+	public function getDtExp(): ?\DateTime {
 		return $this->dtExp;
 	}
 
