@@ -42,7 +42,7 @@ class TestDonationContextFactory {
 
 	public function getEntityManager(): EntityManager {
 		if ( is_null( $this->entityManager ) ) {
-			$this->entityManager = $this->newEntityManager( $this->contextFactory->newDoctrineEventSubscribers() );
+			$this->entityManager = $this->newEntityManager( $this->contextFactory->newEventSubscribers() );
 		}
 		return $this->entityManager;
 	}

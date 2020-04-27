@@ -45,7 +45,7 @@ class DonationContextFactory {
 	/**
 	 * @return EventSubscriber[]
 	 */
-	public function newDoctrineEventSubscribers(): array {
+	public function newEventSubscribers(): array {
 		if ( !$this->addDoctrineSubscribers ) {
 			return [];
 		}
