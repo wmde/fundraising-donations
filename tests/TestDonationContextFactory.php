@@ -14,6 +14,7 @@ use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Tools\Setup;
 use Gedmo\Timestampable\TimestampableListener;
 use WMDE\Fundraising\DonationContext\DonationContextFactory;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
 
 class TestDonationContextFactory {
 
@@ -28,7 +29,11 @@ class TestDonationContextFactory {
 	public function __construct( array $config ) {
 		$this->config = $config;
 		$this->doctrineConfig = Setup::createConfiguration( true );
-		$this->contextFactory = new DonationContextFactory( $config, $this->doctrineConfig );
+		$this->contextFactory = new DonationContextFactory(
+			$config,
+			$this->doctrineConfig
+		);
+		$this->contextFactory->setTokenGenerator( new FixedTokenGenerator() );
 		$this->entityManager = null;
 		$this->connection = null;
 	}
@@ -75,10 +80,6 @@ class TestDonationContextFactory {
 		$timestampableListener = new TimestampableListener;
 		$timestampableListener->setAnnotationReader( new AnnotationReader() );
 		return $timestampableListener;
-	}
-
-	public function disableDoctrineSubscribers(): void {
-		$this->contextFactory->disableDoctrineSubscribers();
 	}
 
 }
