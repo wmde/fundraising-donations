@@ -15,7 +15,7 @@
 		"wmde/euro": "~1.0",
 		"wmde/freezable-value-object": "~1.0",
 		"wmde/fun-validators": "~1.2",
-		"wmde/fundraising-payments": "@dev"
+		"wmde/fundraising-payments": "^1.0.0"
 	},
 	"repositories": [
 		{
