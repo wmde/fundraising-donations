@@ -236,7 +236,7 @@ class Donation {
 		return $this;
 	}
 
-	public function getDonorEmail(): string {
+	public function getDonorEmail(): ?string {
 		return $this->donorEmail;
 	}
 
