@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
+use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
@@ -12,6 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
@@ -30,19 +32,24 @@ class AddDonationUseCase {
 	const PREFIX_BANK_TRANSACTION_KNOWN_DONOR = 'XW';
 	const PREFIX_BANK_TRANSACTION_ANONYNMOUS_DONOR = 'XR';
 
-	private $donationRepository;
-	private $donationValidator;
-	private $policyValidator;
-	private $referrerGeneralizer;
-	private $mailer;
-	private $transferCodeGenerator;
-	private $tokenFetcher;
-	private $initialDonationStatusPicker;
+	private DonationRepository $donationRepository;
+	private AddDonationValidator $donationValidator;
+	private AddDonationPolicyValidator $policyValidator;
+	/** @var ReferrerGeneralizer
+	 * @deprecated See https://phabricator.wikimedia.org/T253765
+	 */
+	private ReferrerGeneralizer $referrerGeneralizer;
+	private DonationConfirmationMailer $mailer;
+	private TransferCodeGenerator $transferCodeGenerator;
+	private DonationTokenFetcher $tokenFetcher;
+	private InitialDonationStatusPicker $initialDonationStatusPicker;
+	private EventEmitter $eventEmitter;
 
 	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
 		AddDonationPolicyValidator $policyValidator, ReferrerGeneralizer $referrerGeneralizer,
 		DonationConfirmationMailer $mailer, TransferCodeGenerator $transferCodeGenerator,
-		DonationTokenFetcher $tokenFetcher, InitialDonationStatusPicker $initialDonationStatusPicker ) {
+		DonationTokenFetcher $tokenFetcher, InitialDonationStatusPicker $initialDonationStatusPicker,
+		EventEmitter $eventEmitter ) {
 		$this->donationRepository = $donationRepository;
 		$this->donationValidator = $donationValidator;
 		$this->policyValidator = $policyValidator;
@@ -51,6 +58,7 @@ class AddDonationUseCase {
 		$this->transferCodeGenerator = $transferCodeGenerator;
 		$this->tokenFetcher = $tokenFetcher;
 		$this->initialDonationStatusPicker = $initialDonationStatusPicker;
+		$this->eventEmitter = $eventEmitter;
 	}
 
 	public function addDonation( AddDonationRequest $donationRequest ): AddDonationResponse {
@@ -75,6 +83,8 @@ class AddDonationUseCase {
 
 		// TODO: handle exceptions
 		$tokens = $this->tokenFetcher->getTokens( $donation->getId() );
+
+		$this->eventEmitter->emit( new DonationCreatedEvent( $donation->getId(), $donation->getDonor() ) );
 
 		// TODO: handle exceptions
 		$this->sendDonationConfirmationEmail( $donation );
