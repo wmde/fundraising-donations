@@ -9,12 +9,15 @@ use PHPUnit_Framework_MockObject_MockObject;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
+use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeEventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
@@ -30,6 +33,7 @@ use WMDE\FunValidators\ConstraintViolation;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent
  *
  * @license GNU GPL v2+
  * @author Kai Nissen < kai.nissen@wikimedia.de >
@@ -91,7 +95,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new EventEmitterSpy()
 		);
 	}
 
@@ -104,7 +109,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			LessSimpleTransferCodeGenerator::newRandomGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 	}
 
@@ -143,7 +149,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 
 		$result = $useCase->addDonation( $this->newMinimumDonationRequest() );
@@ -159,7 +166,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 
 		$request = $this->newInvalidDonationRequest();
@@ -246,7 +254,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$mailer,
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 
 		$useCase->addDonation( $this->newMinimumDonationRequest() );
@@ -290,7 +299,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 
 		$response = $useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
@@ -306,7 +316,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
@@ -324,7 +335,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$mailer,
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 	}
 
@@ -384,6 +396,31 @@ class AddDonationUseCaseTest extends TestCase {
 		);
 	}
 
+	// TODO move @covers tag for DonationCreatedEvent here when we've improved the PHPCS definitions
+	public function testWhenValidationSucceeds_eventIsEmitted(): void {
+		$eventEmitter = new EventEmitterSpy();
+		$useCase = new AddDonationUseCase(
+			$this->newRepository(),
+			$this->getSucceedingValidatorMock(),
+			$this->getSucceedingPolicyValidatorMock(),
+			new ReferrerGeneralizer( 'http://foo.bar', [] ),
+			$this->newMailer(),
+			$this->newTransferCodeGenerator(),
+			$this->newTokenFetcher(),
+			new InitialDonationStatusPicker(),
+			$eventEmitter
+		);
+
+		$useCase->addDonation( $this->newValidCompanyDonationRequest() );
+
+		/** @var DonationCreatedEvent[] $events */
+		$events = $eventEmitter->getEvents();
+		$this->assertCount( 1, $events, 'Only 1 event should be emitted' );
+		$this->assertInstanceOf( DonationCreatedEvent::class, $events[0] );
+		$this->assertTrue( $events[0]->getDonor()->getName()->isCompany() );
+	}
+
+
 	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsDeleted(): void {
 		$repository = $this->newRepository();
 		$useCase = new AddDonationUseCase(
@@ -394,7 +431,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 
 		$useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
@@ -411,7 +449,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
@@ -432,7 +471,8 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker()
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
 		);
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
