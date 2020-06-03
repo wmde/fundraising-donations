@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidator;
 use PHPUnit\Framework\TestCase;
@@ -21,7 +22,7 @@ use WMDE\FunValidators\Validators\SucceedingEmailValidator;
 class UpdateDonorValidatorTest extends TestCase {
 
 	public function testGivenAnonymousDonor_validationFails() {
-		$validator = new UpdateDonorValidator( new AddressValidator(), new SucceedingEmailValidator() );
+		$validator = new UpdateDonorValidator( new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE ), new SucceedingEmailValidator() );
 		$request = ( new UpdateDonorRequest() )->withType( DonorName::PERSON_ANONYMOUS );
 
 		$result = $validator->validateDonorData( $request );
@@ -57,7 +58,7 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	public function testgivenEmptyDonorRequestValues_validationFails() {
 		$validator = new UpdateDonorValidator(
-			new AddressValidator(),
+			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE ),
 			new EmailValidator( new SucceedingDomainNameValidator() )
 		);
 		$result = $validator->validateDonorData( $this->newEmptyUpdateDonorRequest() );
@@ -75,7 +76,7 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	public function testGivenInvalidCompanyDonor_validationFails() {
 		$validator = new UpdateDonorValidator(
-			new AddressValidator(),
+			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE ),
 			new EmailValidator( new SucceedingDomainNameValidator() )
 		);
 		$result = $validator->validateDonorData( $this->newInvalidUpdateCompanyDonorRequest() );
@@ -108,7 +109,7 @@ class UpdateDonorValidatorTest extends TestCase {
 			->withType( DonorName::PERSON_COMPANY )
 			->withCompanyName( str_repeat( 'TEST', 26 ) )
 			->withStreetAddress( str_repeat( 'TEST', 26 ) )
-			->withPostalCode( str_repeat( '1', 10 ) )
+			->withPostalCode( str_repeat( '1', 17 ) )
 			->withCity( str_repeat( 'TEST', 26 ) )
 			->withCountryCode( str_repeat( 'TEST', 26 ) )
 			->withEmailAddress( '' );
