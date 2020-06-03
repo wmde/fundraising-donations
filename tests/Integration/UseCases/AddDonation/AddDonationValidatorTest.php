@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
@@ -246,7 +247,7 @@ class AddDonationValidatorTest extends TestCase {
 	}
 
 	private function newAddressValidator(): AddressValidator {
-		return new AddressValidator();
+		return new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE );
 	}
 
 }

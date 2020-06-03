@@ -38,7 +38,7 @@ class ValidDonation {
 	public const DONOR_COMPANY = 'Fluffy Beings Ltd.';
 
 	public const DONOR_CITY = 'Berlin';
-	public const DONOR_POSTAL_CODE = '1234';
+	public const DONOR_POSTAL_CODE = '12345';
 	public const DONOR_COUNTRY_CODE = 'DE';
 	public const DONOR_STREET_ADDRESS = 'Nyan Street';
 
