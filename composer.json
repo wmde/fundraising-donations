@@ -43,7 +43,7 @@
 		"phpstan/phpstan": "^0.12",
 		"squizlabs/php_codesniffer": "~3.5",
 		"phpmd/phpmd": "~2.6",
-		"slevomat/coding-standard": "^3.0",
+		"slevomat/coding-standard": "^6.3",
 
 		"mikey179/vfsstream": "~1.6",
 		"wmde/psr-log-test-doubles": "~2.1"
