@@ -22,7 +22,10 @@ use WMDE\FunValidators\Validators\SucceedingEmailValidator;
 class UpdateDonorValidatorTest extends TestCase {
 
 	public function testGivenAnonymousDonor_validationFails() {
-		$validator = new UpdateDonorValidator( new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE ), new SucceedingEmailValidator() );
+		$validator = new UpdateDonorValidator(
+			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS ),
+			new SucceedingEmailValidator()
+		);
 		$request = ( new UpdateDonorRequest() )->withType( DonorName::PERSON_ANONYMOUS );
 
 		$result = $validator->validateDonorData( $request );
@@ -58,7 +61,7 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	public function testgivenEmptyDonorRequestValues_validationFails() {
 		$validator = new UpdateDonorValidator(
-			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE ),
+			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS ),
 			new EmailValidator( new SucceedingDomainNameValidator() )
 		);
 		$result = $validator->validateDonorData( $this->newEmptyUpdateDonorRequest() );
@@ -76,7 +79,7 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	public function testGivenInvalidCompanyDonor_validationFails() {
 		$validator = new UpdateDonorValidator(
-			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE ),
+			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS ),
 			new EmailValidator( new SucceedingDomainNameValidator() )
 		);
 		$result = $validator->validateDonorData( $this->newInvalidUpdateCompanyDonorRequest() );
