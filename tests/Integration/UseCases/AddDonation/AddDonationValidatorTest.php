@@ -247,7 +247,7 @@ class AddDonationValidatorTest extends TestCase {
 	}
 
 	private function newAddressValidator(): AddressValidator {
-		return new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE );
+		return new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS );
 	}
 
 }
