@@ -37,7 +37,7 @@
 	"require-dev": {
 		"ext-pdo_sqlite": "*",
 
-		"phpunit/phpunit": "~8.0",
+		"phpunit/phpunit": "~9.2",
 		"codeception/specify": "~1.0",
 		"ockcyp/covers-validator": "@dev",
 		"phpstan/phpstan": "^0.12",
