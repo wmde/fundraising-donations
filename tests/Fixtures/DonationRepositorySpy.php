@@ -18,11 +18,12 @@ class DonationRepositorySpy extends FakeDonationRepository {
 
 	public function __construct( Donation ...$donations ) {
 		parent::__construct( ...$donations );
-		$this->storeDonationCalls = []; // remove calls coming from initialization
+		$this->storeDonationCalls = [];
 	}
 
 	public function storeDonation( Donation $donation ): void {
-		$this->storeDonationCalls[] = clone $donation; // protect against the donation being changed later
+		// protect against the donation being changed later
+		$this->storeDonationCalls[] = clone $donation;
 		parent::storeDonation( $donation );
 	}
 

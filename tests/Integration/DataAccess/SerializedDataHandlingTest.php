@@ -11,8 +11,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
  */
 class SerializedDataHandlingTest extends \PHPUnit\Framework\TestCase {
 

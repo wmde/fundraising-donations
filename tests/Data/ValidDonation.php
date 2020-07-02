@@ -44,7 +44,8 @@ class ValidDonation {
 
 	public const DONOR_EMAIL_ADDRESS = 'foo@bar.baz';
 
-	public const DONATION_AMOUNT = 13.37; // Keep fractional to detect floating point issues
+	// Use fractional value to detect floating point issues
+	public const DONATION_AMOUNT = 13.37;
 	public const PAYMENT_INTERVAL_IN_MONTHS = 3;
 
 	public const PAYMENT_BANK_ACCOUNT = '0648489890';
@@ -63,7 +64,8 @@ class ValidDonation {
 	public const TRACKING_SKIN = 'default';
 	public const TRACKING_SOURCE = 'web';
 	public const TRACKING_TOTAL_IMPRESSION_COUNT = 3;
-	public const TRACKING_TRACKING = 'test/gelb'; // WTF name?
+	// "tracking" is the name of the property on the object, "TRACKING" is our prefix, hence TRACKING_TRACKING
+	public const TRACKING_TRACKING = 'test/gelb';
 
 	public const PAYPAL_TRANSACTION_ID = '61E67681CH3238416';
 

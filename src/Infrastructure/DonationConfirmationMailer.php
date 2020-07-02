@@ -37,7 +37,7 @@ class DonationConfirmationMailer {
 			],
 			'donation' => [
 				'id' => $donation->getId(),
-				'amount' => $donation->getAmount()->getEuroFloat(), // number is formatted in template
+				'amount' => $donation->getAmount()->getEuroFloat(),
 				'interval' => $donation->getPaymentIntervalInMonths(),
 				'needsModeration' => $donation->needsModeration(),
 				'paymentType' => $donation->getPaymentMethodId(),

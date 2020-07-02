@@ -59,7 +59,7 @@ class UpdateDonorValidatorTest extends TestCase {
 		);
 	}
 
-	public function testgivenEmptyDonorRequestValues_validationFails() {
+	public function testGivenEmptyDonorRequestValues_validationFails() {
 		$validator = new UpdateDonorValidator(
 			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS ),
 			new EmailValidator( new SucceedingDomainNameValidator() )

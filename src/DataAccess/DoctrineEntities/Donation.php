@@ -28,10 +28,17 @@ use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
  */
 class Donation {
 
-	public const STATUS_NEW = 'N'; // status for direct debit
-	public const STATUS_PROMISE = 'Z'; // status for bank transfer
-	public const STATUS_EXTERNAL_INCOMPLETE = 'X'; // status for external payments
-	public const STATUS_EXTERNAL_BOOKED = 'B'; // status for external payments
+	// direct debit
+	public const STATUS_NEW = 'N';
+
+	// bank transfer
+	public const STATUS_PROMISE = 'Z';
+
+	// external payment, not notified by payment provider
+	public const STATUS_EXTERNAL_INCOMPLETE = 'X';
+
+	// external payment, notified by payment provider
+	public const STATUS_EXTERNAL_BOOKED = 'B';
 	public const STATUS_MODERATION = 'P';
 	public const STATUS_CANCELLED = 'D';
 
