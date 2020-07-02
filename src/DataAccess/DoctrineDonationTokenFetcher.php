@@ -5,13 +5,13 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\ORM\EntityManager;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetchingException;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 
 /**
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineDonationTokenFetcher implements DonationTokenFetcher {

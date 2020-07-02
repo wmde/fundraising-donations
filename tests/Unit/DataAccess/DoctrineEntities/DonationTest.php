@@ -12,7 +12,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonationData
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DonationTest extends TestCase {
@@ -142,7 +142,7 @@ class DonationTest extends TestCase {
 			'pink' => 'fluffy',
 		] );
 
-		$donation->modifyDataObject( function( DonationData $data ) {
+		$donation->modifyDataObject( function ( DonationData $data ) {
 			$data->setAccessToken( 'foo' );
 			$data->setUpdateToken( 'bar' );
 		} );

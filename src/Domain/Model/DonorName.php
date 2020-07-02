@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
 use WMDE\FreezableValueObject\FreezableValueObject;
 
 /**
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
 class DonorName {
@@ -91,7 +91,7 @@ class DonorName {
 	}
 
 	public function getFullName(): string {
-		return join(
+		return implode(
 			', ',
 			array_filter(
 				[
@@ -103,7 +103,7 @@ class DonorName {
 	}
 
 	private function getFullPrivatePersonName(): string {
-		return join(
+		return implode(
 			' ',
 			array_filter(
 				[

@@ -13,7 +13,7 @@ trait DonationEventLoggerAsserter {
 			1,
 			array_filter(
 				$eventLoggerSpy->getLogCalls(),
-				function( $call ) use ( $donationId, $expr ) {
+				function ( $call ) use ( $donationId, $expr ) {
 					return $call[0] == $donationId && preg_match( $expr, $call[1] );
 				}
 			),

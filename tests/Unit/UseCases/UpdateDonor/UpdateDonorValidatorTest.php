@@ -4,11 +4,11 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\UpdateDonor;
 
+use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidator;
-use PHPUnit\Framework\TestCase;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\SucceedingDomainNameValidator;
 use WMDE\FunValidators\ValidationResult;

@@ -14,7 +14,7 @@ use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 
 /**
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class CancelDonationUseCase {
@@ -28,7 +28,6 @@ class CancelDonationUseCase {
 
 	public function __construct( DonationRepository $donationRepository, TemplateMailerInterface $mailer,
 		DonationAuthorizer $authorizationService, DonationEventLogger $donationLogger ) {
-
 		$this->donationRepository = $donationRepository;
 		$this->mailer = $mailer;
 		$this->authorizationService = $authorizationService;

@@ -6,11 +6,11 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 
 /**
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineDonationAuthorizer implements DonationAuthorizer {

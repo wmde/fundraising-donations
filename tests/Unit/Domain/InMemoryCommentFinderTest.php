@@ -10,7 +10,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\InMemoryCommentFinder;
 /**
  * @covers WMDE\Fundraising\DonationContext\Tests\Fixtures\InMemoryCommentFinder
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class InMemoryCommentFinderTest extends \PHPUnit\Framework\TestCase {

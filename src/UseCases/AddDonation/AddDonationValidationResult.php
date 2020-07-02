@@ -4,11 +4,11 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
-use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\ValidationResult;
+use WMDE\FunValidators\Validators\AddressValidator;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
 class AddDonationValidationResult extends ValidationResult {

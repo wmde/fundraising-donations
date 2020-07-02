@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
 class DonationEventLoggerSpy implements DonationEventLogger {

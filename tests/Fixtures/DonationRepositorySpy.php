@@ -8,7 +8,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
 /**
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
 class DonationRepositorySpy extends FakeDonationRepository {
@@ -22,7 +22,7 @@ class DonationRepositorySpy extends FakeDonationRepository {
 	}
 
 	public function storeDonation( Donation $donation ): void {
-		$this->storeDonationCalls[] = clone( $donation ); // protect against the donation being changed later
+		$this->storeDonationCalls[] = clone $donation; // protect against the donation being changed later
 		parent::storeDonation( $donation );
 	}
 

@@ -33,7 +33,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardExpiry;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  */
 class DoctrineDonationRepository implements DonationRepository {
 
@@ -434,7 +434,6 @@ class DoctrineDonationRepository implements DonationRepository {
 		$bankData->setBankName( $data['bankname'] ?? '' );
 
 		return $bankData->freeze()->assertNoNullFields();
-
 	}
 
 	private function getPayPalDataFromEntity( DoctrineDonation $dd ): ?PayPalData {
@@ -464,7 +463,7 @@ class DoctrineDonationRepository implements DonationRepository {
 
 		if ( !empty( $data['transactionIds'] ) ) {
 			foreach ( $data['transactionIds'] as $transactionId => $entityId ) {
-				$payPalData->addChildPayment( $transactionId, (int) $entityId );
+				$payPalData->addChildPayment( $transactionId, (int)$entityId );
 			}
 		}
 

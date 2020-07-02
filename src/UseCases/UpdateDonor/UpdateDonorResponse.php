@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  */
 class UpdateDonorResponse {
 
@@ -16,7 +16,6 @@ class UpdateDonorResponse {
 	public const ERROR_DONATION_IS_EXPORTED = 'donor_change_failure_exported';
 	public const ERROR_DONATION_HAS_ADDRESS = 'donor_change_failure_has_address';
 	public const ERROR_VALIDATION_FAILED = 'donor_change_failure_validation_error';
-
 
 	private $donation;
 

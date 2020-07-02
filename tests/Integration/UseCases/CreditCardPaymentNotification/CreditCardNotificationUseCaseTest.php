@@ -26,7 +26,7 @@ use WMDE\Fundraising\PaymentContext\Infrastructure\FakeCreditCardService;
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
 class CreditCardNotificationUseCaseTest extends TestCase {

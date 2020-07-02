@@ -13,7 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
@@ -26,7 +26,6 @@ class AddCommentUseCase {
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
 		TextPolicyValidator $textPolicyValidator, AddCommentValidator $commentValidator ) {
-
 		$this->donationRepository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->textPolicyValidator = $textPolicyValidator;

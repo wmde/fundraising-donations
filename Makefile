@@ -22,6 +22,9 @@ phpunit:
 cs:
 	docker-compose run --rm app ./vendor/bin/phpcs
 
+fix-cs:
+	docker-compose run --rm app ./vendor/bin/phpcbf
+
 stan:
 	docker-compose run --rm app ./vendor/bin/phpstan analyse --level=1 --no-progress src/ tests/
 

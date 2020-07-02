@@ -25,7 +25,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  */
 class AddDonationUseCase {
 

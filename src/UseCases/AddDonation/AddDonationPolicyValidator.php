@@ -10,7 +10,7 @@ use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
 class AddDonationPolicyValidator {
@@ -74,7 +74,7 @@ class AddDonationPolicyValidator {
 
 	private function getAmountViolations( AddDonationRequest $request ): array {
 		return array_map(
-			function( ConstraintViolation $violation ) {
+			function ( ConstraintViolation $violation ) {
 				$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
 				return $violation;
 			},

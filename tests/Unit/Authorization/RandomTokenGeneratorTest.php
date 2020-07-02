@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator;
 /**
  * @covers \WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class RandomTokenGeneratorTest extends \PHPUnit\Framework\TestCase {
