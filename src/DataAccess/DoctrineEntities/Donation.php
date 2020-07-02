@@ -253,7 +253,7 @@ class Donation {
 	/**
 	 * Set donation receipt state
 	 *
-	 * @param boolean $donationReceipt
+	 * @param bool $donationReceipt
 	 * @return self
 	 */
 	public function setDonationReceipt( ?bool $donationReceipt ): self {
@@ -265,7 +265,7 @@ class Donation {
 	/**
 	 * Get donation receipt state
 	 *
-	 * @return boolean
+	 * @return bool
 	 */
 	public function getDonationReceipt(): ?bool {
 		return $this->donationReceipt;
@@ -397,7 +397,7 @@ class Donation {
 
 	/**
 	 * Sets if the donations comment should be public or private.
-	 * @param boolean $isPublic
+	 * @param bool $isPublic
 	 * @return self
 	 */
 	public function setIsPublic( bool $isPublic ): self {
@@ -408,7 +408,7 @@ class Donation {
 
 	/**
 	 * Gets if the donations comment is public or private.
-	 * @return boolean
+	 * @return bool
 	 */
 	public function getIsPublic(): bool {
 		return $this->isPublic;
@@ -485,7 +485,6 @@ class Donation {
 	public function setPayment( DonationPayment $payment ) {
 		$this->payment = $payment;
 	}
-
 
 	public function setId( ?int $id ) {
 		$this->id = $id;
@@ -594,7 +593,7 @@ class Donation {
 		);
 
 		foreach ( [ 'token', 'utoken', 'uexpiry' ] as $keyName ) {
-			if ( is_null( $dataArray[$keyName] ) ) {
+			if ( $dataArray[$keyName] === null ) {
 				unset( $dataArray[$keyName] );
 			}
 		}

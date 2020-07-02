@@ -7,8 +7,8 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
@@ -16,7 +16,7 @@ use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 /**
  * @covers WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineCommentFinderTest extends \PHPUnit\Framework\TestCase {

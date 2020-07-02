@@ -150,7 +150,6 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 
 		$request = ValidSofortNotificationRequest::newInstantPayment( 1 );
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
-
 	}
 
 	public function testWhenSendingConfirmationMailFails_handlerReturnsTrue(): void {
@@ -182,7 +181,6 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	}
 
 	public function testGivenSetConfirmedAtForBookedDonation_unhandledResponseIsReturned(): void {
-
 		$fakeRepository = new FakeDonationRepository();
 		$fakeRepository->storeDonation( ValidDonation::newCompletedSofortDonation() );
 

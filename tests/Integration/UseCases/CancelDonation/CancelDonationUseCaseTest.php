@@ -20,7 +20,7 @@ use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCa
 /**
  * @covers WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase
  *
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {

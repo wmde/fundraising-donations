@@ -12,7 +12,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
 
 /**
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineCommentFinder implements CommentFinder {
@@ -33,7 +33,7 @@ class DoctrineCommentFinder implements CommentFinder {
 	 */
 	public function getPublicComments( int $limit, int $offset = 0 ): array {
 		return array_map(
-			function( Donation $donation ) {
+			function ( Donation $donation ) {
 				return CommentWithAmount::newInstance()
 					->setAuthorName( $donation->getPublicRecord() )
 					->setCommentText( $donation->getComment() )

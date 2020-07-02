@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\UseCases\AddDonation\ReferrerGeneralizer;
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\ReferrerGeneralizer
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
 class ReferrerGeneralizerTest extends \PHPUnit\Framework\TestCase {

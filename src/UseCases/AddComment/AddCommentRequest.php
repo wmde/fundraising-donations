@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddComment;
 use WMDE\FreezableValueObject\FreezableValueObject;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */

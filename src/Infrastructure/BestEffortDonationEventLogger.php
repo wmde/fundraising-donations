@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Infrastructure;
 use Psr\Log\LoggerInterface;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
 class BestEffortDonationEventLogger implements DonationEventLogger {

@@ -16,7 +16,7 @@ use WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationUseCase;
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationUseCase
  *
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class GetDonationUseCaseTest extends \PHPUnit\Framework\TestCase {

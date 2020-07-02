@@ -15,7 +15,7 @@ use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationPrePersistSubscriber;
 
 /**
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  */
 class DonationContextFactory {
 
@@ -76,7 +76,7 @@ class DonationContextFactory {
 	}
 
 	private function getTokenGenerator(): TokenGenerator {
-		if ( is_null( $this->tokenGenerator ) ) {
+		if ( $this->tokenGenerator === null ) {
 			$this->tokenGenerator = new RandomTokenGenerator(
 				$this->config['token-length'],
 				new DateInterval( $this->config['token-validity-timestamp'] )
