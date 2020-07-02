@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use Codeception\Specify;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
+use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
@@ -18,7 +19,7 @@ use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
  * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
+class DoctrineDonationAuthorizerTest extends TestCase {
 	use Specify;
 
 	private const CORRECT_UPDATE_TOKEN = 'CorrectUpdateToken';
@@ -29,17 +30,19 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 	private const MEANINGLESS_DONATION_ID = 1337;
 	private const ID_OF_WRONG_DONATION = 42;
 
-	private function newAuthorizationServiceWithDonations( string $updateToken = null,
-		string $accessToken = null, Donation ...$donations ): DonationAuthorizer {
-		$entityManager = TestEnvironment::newInstance()->getFactory()->getEntityManager();
+	private EntityManager $entityManager;
 
-		foreach ( $donations as $donation ) {
-			$entityManager->persist( $donation );
-		}
+	protected function setUp(): void {
+		$this->entityManager = TestEnvironment::newInstance()->getFactory()->getEntityManager();
+	}
 
-		$entityManager->flush();
+	private function newAuthorizationService( string $updateToken = null, string $accessToken = null ): DonationAuthorizer {
+		return new DoctrineDonationAuthorizer( $this->entityManager, $updateToken, $accessToken );
+	}
 
-		return new DoctrineDonationAuthorizer( $entityManager, $updateToken, $accessToken );
+	private function storeDonation( Donation $donation ) {
+		$this->entityManager->persist( $donation );
+		$this->entityManager->flush();
 	}
 
 	/**
@@ -49,7 +52,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 		$this->specify(
 			'update authorization fails',
 			function (): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations( self::CORRECT_UPDATE_TOKEN );
+				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
 				$this->assertFalse( $authorizer->userCanModifyDonation( self::MEANINGLESS_DONATION_ID ) );
 			}
 		);
@@ -57,7 +60,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 		$this->specify(
 			'access authorization fails',
 			function (): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations( self::CORRECT_ACCESS_TOKEN );
+				$authorizer = $this->newAuthorizationService( self::CORRECT_ACCESS_TOKEN );
 				$this->assertFalse( $authorizer->canAccessDonation( self::MEANINGLESS_DONATION_ID ) );
 			}
 		);
@@ -73,27 +76,20 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 		$donationData->setUpdateTokenExpiry( $this->getExpiryTimeInTheFuture() );
 		$donationData->setAccessToken( self::CORRECT_ACCESS_TOKEN );
 		$donation->setDataObject( $donationData );
+		$this->storeDonation( $donation );
 
 		$this->specify(
 			'given correct donation id and correct token, update authorization succeeds',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations(
-					self::CORRECT_UPDATE_TOKEN,
-					null,
-					$donation
-				);
+				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
 				$this->assertTrue( $authorizer->userCanModifyDonation( $donation->getId() ) );
 			}
 		);
 
 		$this->specify(
 			'given wrong donation id and correct token, update authorization fails',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations(
-					self::CORRECT_UPDATE_TOKEN,
-					null,
-					$donation
-				);
+			function (): void {
+				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
 				$this->assertFalse( $authorizer->userCanModifyDonation( self::ID_OF_WRONG_DONATION ) );
 			}
 		);
@@ -101,7 +97,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 		$this->specify(
 			'given correct donation id and wrong token, update authorization fails',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations( self::WRONG__UPDATE_TOKEN, null, $donation );
+				$authorizer = $this->newAuthorizationService( self::WRONG__UPDATE_TOKEN, null );
 				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 			}
 		);
@@ -109,23 +105,15 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 		$this->specify(
 			'given correct donation id and correct token, access authorization succeeds',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations(
-					null,
-					self::CORRECT_ACCESS_TOKEN,
-					$donation
-				);
+				$authorizer = $this->newAuthorizationService( null, self::CORRECT_ACCESS_TOKEN );
 				$this->assertTrue( $authorizer->canAccessDonation( $donation->getId() ) );
 			}
 		);
 
 		$this->specify(
 			'given wrong donation id and correct token, access authorization fails',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations(
-					null,
-					self::CORRECT_ACCESS_TOKEN,
-					$donation
-				);
+			function (): void {
+				$authorizer = $this->newAuthorizationService( null, self::CORRECT_ACCESS_TOKEN );
 				$this->assertFalse( $authorizer->canAccessDonation( self::ID_OF_WRONG_DONATION ) );
 			}
 		);
@@ -133,7 +121,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 		$this->specify(
 			'given correct donation id and wrong token, access authorization fails',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations( null, self::WRONG_ACCESS_TOKEN, $donation );
+				$authorizer = $this->newAuthorizationService( null, self::WRONG_ACCESS_TOKEN );
 				$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
 			}
 		);
@@ -148,11 +136,12 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 	 */
 	public function testWhenDonationWithoutTokenExists(): void {
 		$donation = new Donation();
+		$this->storeDonation( $donation );
 
 		$this->specify(
 			'given correct donation id and a token, update authorization fails',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations( self::MEANINGLESS_TOKEN, null, $donation );
+				$authorizer = $this->newAuthorizationService( self::MEANINGLESS_TOKEN );
 				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 			}
 		);
@@ -160,7 +149,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 		$this->specify(
 			'given correct donation id and a token, access authorization fails',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations( null, self::MEANINGLESS_TOKEN, $donation );
+				$authorizer = $this->newAuthorizationService( null, self::MEANINGLESS_TOKEN );
 				$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
 			}
 		);
@@ -175,15 +164,12 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 		$donationData->setUpdateToken( self::CORRECT_UPDATE_TOKEN );
 		$donationData->setUpdateTokenExpiry( $this->getExpiryTimeInThePast() );
 		$donation->setDataObject( $donationData );
+		$this->storeDonation( $donation );
 
 		$this->specify(
 			'given correct donation id and a token, update authorization fails for users',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations(
-					self::CORRECT_UPDATE_TOKEN,
-					null,
-					$donation
-				);
+				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
 				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 			}
 		);
@@ -191,11 +177,7 @@ class DoctrineDonationAuthorizerTest extends \PHPUnit\Framework\TestCase {
 		$this->specify(
 			'given correct donation id and a token, update authorization succeeds for system',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationServiceWithDonations(
-					self::CORRECT_UPDATE_TOKEN,
-					null,
-					$donation
-				);
+				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
 				$this->assertTrue( $authorizer->systemCanModifyDonation( $donation->getId() ) );
 			}
 		);
