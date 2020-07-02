@@ -39,7 +39,8 @@ class GetDonationUseCase {
 		}
 
 		return GetDonationResponse::newValidResponse(
-			$donation, // TODO: create a DTO to not expose the Donation Entity beyond the UC layer
+			// TODO: create a DTO to not expose the Donation Entity beyond the UC layer
+			$donation,
 			$this->tokenFetcher->getTokens( $request->getDonationId() )->getUpdateToken()
 		);
 	}

@@ -15,17 +15,22 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
  */
 class Donation {
 
-	public const STATUS_NEW = 'N'; // status for direct debit
-	public const STATUS_PROMISE = 'Z'; // status for bank transfer
-	public const STATUS_EXTERNAL_INCOMPLETE = 'X'; // status for external payments
-	public const STATUS_EXTERNAL_BOOKED = 'B'; // status for external payments
+	// direct debit
+	public const STATUS_NEW = 'N';
+
+	// bank transfer
+	public const STATUS_PROMISE = 'Z';
+
+	// external payment, not notified by payment provider
+	public const STATUS_EXTERNAL_INCOMPLETE = 'X';
+
+	// external payment, notified by payment provider
+	public const STATUS_EXTERNAL_BOOKED = 'B';
 	public const STATUS_MODERATION = 'P';
 	public const STATUS_CANCELLED = 'D';
 
 	public const OPTS_INTO_NEWSLETTER = true;
 	public const DOES_NOT_OPT_INTO_NEWSLETTER = false;
-
-	public const NO_APPLICANT = null;
 
 	private $id;
 	private $status;
@@ -134,6 +139,10 @@ class Donation {
 
 	/**
 	 * Returns the Donor or null for anonymous donations.
+	 *
+	 * @todo Return AnonymousDonor instead
+	 *
+	 * @return Donor|null
 	 */
 	public function getDonor(): ?Donor {
 		return $this->donor;
@@ -143,9 +152,6 @@ class Donation {
 		$this->donor = $donor;
 	}
 
-	/**
-	 * Returns the DonationComment or null for when there is none.
-	 */
 	public function getComment(): ?DonationComment {
 		return $this->comment;
 	}
@@ -170,9 +176,6 @@ class Donation {
 		return $this->optsIntoNewsletter;
 	}
 
-	/**
-	 * @throws RuntimeException
-	 */
 	public function cancel(): void {
 		if ( $this->getPaymentMethodId() !== PaymentMethod::DIRECT_DEBIT ) {
 			throw new RuntimeException( 'Can only cancel direct debit' );

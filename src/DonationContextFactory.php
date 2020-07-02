@@ -85,8 +85,11 @@ class DonationContextFactory {
 		return $this->tokenGenerator;
 	}
 
-	// Setters for switching out classes in tests
-
+	/**
+	 * Should only be called in tests for switching out the default implementation
+	 *
+	 * @param TokenGenerator|null $tokenGenerator
+	 */
 	public function setTokenGenerator( ?TokenGenerator $tokenGenerator ): void {
 		$this->tokenGenerator = $tokenGenerator;
 	}

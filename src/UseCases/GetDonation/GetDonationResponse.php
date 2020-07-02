@@ -30,6 +30,12 @@ class GetDonationResponse {
 
 	/**
 	 * Returns the Donation when @see accessIsPermitted returns true, or null otherwise.
+	 *
+	 * ATTENTION: We're returning the domain object in order to avoid a verbose read-only response model.
+	 * Keep in mind that your presenters should only query the domain object
+	 * and NOT call any of its state-changing methods
+	 *
+	 * @return Donation|null
 	 */
 	public function getDonation(): ?Donation {
 		return $this->donation;
