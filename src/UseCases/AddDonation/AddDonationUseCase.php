@@ -29,8 +29,8 @@ use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
  */
 class AddDonationUseCase {
 
-	const PREFIX_BANK_TRANSACTION_KNOWN_DONOR = 'XW';
-	const PREFIX_BANK_TRANSACTION_ANONYNMOUS_DONOR = 'XR';
+	private const PREFIX_BANK_TRANSACTION_KNOWN_DONOR = 'XW';
+	private const PREFIX_BANK_TRANSACTION_ANONYNMOUS_DONOR = 'XR';
 
 	private DonationRepository $donationRepository;
 	private AddDonationValidator $donationValidator;

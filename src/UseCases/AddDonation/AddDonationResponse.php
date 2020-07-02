@@ -62,9 +62,10 @@ class AddDonationResponse {
 	}
 
 	/**
-	 * WARNING: we're returning the domain object to not have to create a  more verbose response model.
-	 * Keep in mind that you should not use domain logic in the presenter, or put presentation helpers
-	 * in the domain object!
+	 * ATTENTION: We're returning the domain object in order to avoid a verbose read-only response model.
+	 * Keep in mind that your presenters should only query the domain object
+	 * and NOT call any of its state-changing methods!
+	 * @return Donation|null
 	 */
 	public function getDonation(): ?Donation {
 		return $this->donation;

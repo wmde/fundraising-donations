@@ -44,7 +44,7 @@ class AddDonationRequest {
 
 	# tracking
 	private $tracking = '';
-	private $source = ''; # TODO: generated from referer
+	private $source = '';
 	private $totalImpressionCount = 0;
 	private $singleBannerImpressionCount = 0;
 	// Legacy values, will be deprecated in the future
@@ -126,21 +126,21 @@ class AddDonationRequest {
 		$this->singleBannerImpressionCount = $singleBannerImpressionCount;
 	}
 
-	/*
+	/**
 	 * @deprecated
 	 */
 	public function getColor(): string {
 		return $this->color;
 	}
 
-	/*
+	/**
 	 * @deprecated
 	 */
 	public function getSkin(): string {
 		return $this->skin;
 	}
 
-	/*
+	/**
 	 * @deprecated
 	 */
 	public function getLayout(): string {

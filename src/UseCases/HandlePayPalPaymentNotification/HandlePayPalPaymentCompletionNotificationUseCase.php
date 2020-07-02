@@ -244,16 +244,14 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		);
 	}
 
-	private function createErrorResponse( \Exception $ex ): PaypalNotificationResponse {
-		return PaypalNotificationResponse::newFailureResponse(
-			[
-				'message' => $ex->getMessage(),
-				'stackTrace' => $ex->getTraceAsString()
-			]
-		);
-	}
-
-	// TODO Move this check to the payment domain use case, see https://phabricator.wikimedia.org/T192323
+	/**
+	 * @todo Move this check to the payment domain use case, see https://phabricator.wikimedia.org/T192323
+	 *
+	 * @param Donation $donation
+	 * @param string $transactionId
+	 *
+	 * @return bool
+	 */
 	private function donationWasBookedWithSameTransactionId( Donation $donation, string $transactionId ): bool {
 		/**
 		 * @var PayPalPayment $payment
@@ -265,6 +263,15 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		}
 
 		return $payment->getPayPalData()->hasChildPayment( $transactionId );
+	}
+
+	private function createErrorResponse( \Exception $ex ): PaypalNotificationResponse {
+		return PaypalNotificationResponse::newFailureResponse(
+			[
+				'message' => $ex->getMessage(),
+				'stackTrace' => $ex->getTraceAsString()
+			]
+		);
 	}
 
 }
