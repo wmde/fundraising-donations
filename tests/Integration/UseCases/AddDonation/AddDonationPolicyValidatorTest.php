@@ -14,7 +14,7 @@ use WMDE\FunValidators\Validators\TextPolicyValidator;
 /**
  * @covers WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
 class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {

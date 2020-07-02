@@ -8,7 +8,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Gabriel Birke <gabriel.birke@wikimedia.de>
  */
 class IncompleteDoctrineDonation {

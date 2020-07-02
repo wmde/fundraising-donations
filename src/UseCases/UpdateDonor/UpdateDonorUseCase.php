@@ -12,7 +12,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  */
 class UpdateDonorUseCase {
 

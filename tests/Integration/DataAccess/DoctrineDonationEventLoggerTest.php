@@ -5,8 +5,8 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationEventLogger;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogException;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
@@ -93,7 +93,7 @@ class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
 
 	// always return fixed date
 	private function getDefaultTimeFunction(): callable {
-		return function() {
+		return function () {
 			return self::LOG_TIMESTAMP;
 		};
 	}

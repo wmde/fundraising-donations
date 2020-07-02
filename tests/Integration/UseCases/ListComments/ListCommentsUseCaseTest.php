@@ -13,7 +13,7 @@ use WMDE\Fundraising\DonationContext\UseCases\ListComments\ListCommentsUseCase;
 /**
  * @covers WMDE\Fundraising\DonationContext\UseCases\ListComments\ListCommentsUseCase
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {

@@ -6,8 +6,8 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -26,7 +26,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
  *
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineDonationRepositoryTest extends TestCase {
@@ -411,7 +411,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
 		$data = $doctrineDonation->getDecodedData();
-		$this->assertSame( ['16R12136PU8783961' => 2], $data['transactionIds'] );
+		$this->assertSame( [ '16R12136PU8783961' => 2 ], $data['transactionIds'] );
 	}
 
 	public function testPapalDonationWithChildPaymentIsLoaded(): void {
@@ -422,8 +422,8 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$doctrineDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
 		$doctrineDonation->encodeAndSetData( array_merge(
 			$doctrineDonation->getDecodedData(),
-			['transactionIds' => $transactionIds]
-		));
+			[ 'transactionIds' => $transactionIds ]
+		) );
 		$this->entityManager->persist( $doctrineDonation );
 		$this->entityManager->flush();
 

@@ -35,7 +35,7 @@ use WMDE\FunValidators\ConstraintViolation;
  * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase
  * @covers \WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent
  *
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
@@ -419,7 +419,6 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertInstanceOf( DonationCreatedEvent::class, $events[0] );
 		$this->assertTrue( $events[0]->getDonor()->getName()->isCompany() );
 	}
-
 
 	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsDeleted(): void {
 		$repository = $this->newRepository();

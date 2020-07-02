@@ -11,7 +11,7 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 /**
  * @covers WMDE\Fundraising\DonationContext\Domain\Model\Donation
  *
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DonationTest extends \PHPUnit\Framework\TestCase {

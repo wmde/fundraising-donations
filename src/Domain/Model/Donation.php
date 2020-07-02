@@ -11,7 +11,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
- * @licence GNU GPL v2+
+ * @license GPL-2.0-or-later
  */
 class Donation {
 
@@ -62,7 +62,6 @@ class Donation {
 	 */
 	public function __construct( ?int $id, string $status, ?Donor $donor, DonationPayment $payment,
 		bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
-
 		$this->id = $id;
 		$this->setStatus( $status );
 		$this->donor = $donor;

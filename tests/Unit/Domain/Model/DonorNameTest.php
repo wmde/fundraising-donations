@@ -10,7 +10,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 /**
  * @covers \WMDE\Fundraising\DonationContext\Domain\Model\DonorName
  *
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */

@@ -19,7 +19,7 @@ use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
 
 /**
- * @license GNU GPL v2+
+ * @license GPL-2.0-or-later
  */
 class AddDonationValidator {
 
@@ -46,7 +46,6 @@ class AddDonationValidator {
 
 	public function __construct( PaymentDataValidator $paymentDataValidator, BankDataValidator $bankDataValidator,
 		IbanBlocklist $ibanBlocklist, EmailValidator $emailValidator, AddressValidator $addressValidator ) {
-
 		$this->paymentDataValidator = $paymentDataValidator;
 		$this->bankDataValidator = $bankDataValidator;
 		$this->ibanBlocklist = $ibanBlocklist;
