@@ -5,15 +5,16 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
 
 /**
  * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class AddDonationRequest {
+
+	public const TYPE_PERSON = 'person';
+	public const TYPE_COMPANY = 'company';
+	public const TYPE_ANONYMOUS = 'anonymous';
 
 	private $donorType;
 	private $donorFirstName;
@@ -236,11 +237,11 @@ class AddDonationRequest {
 	}
 
 	public function donorIsAnonymous(): bool {
-		return $this->getDonorType() === LegacyDonorName::PERSON_ANONYMOUS;
+		return $this->getDonorType() === self::TYPE_ANONYMOUS;
 	}
 
 	public function donorIsCompany(): bool {
-		return $this->getDonorType() === LegacyDonorName::PERSON_COMPANY;
+		return $this->getDonorType() === self::TYPE_COMPANY;
 	}
 
 	public function setOptsIntoDonationReceipt( bool $optIn ): void {

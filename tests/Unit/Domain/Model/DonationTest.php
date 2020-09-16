@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
+use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -12,9 +13,8 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
  * @covers WMDE\Fundraising\DonationContext\Domain\Model\Donation
  *
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class DonationTest extends \PHPUnit\Framework\TestCase {
+class DonationTest extends TestCase {
 
 	public function testGivenNonDirectDebitDonation_cancellationFails(): void {
 		$donation = ValidDonation::newBankTransferDonation();

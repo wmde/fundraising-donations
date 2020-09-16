@@ -10,8 +10,8 @@ use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
+use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -229,7 +229,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$donationRequest = new AddDonationRequest();
 		$donationRequest->setAmount( Euro::newFromString( '1.00' ) );
 		$donationRequest->setPaymentType( PaymentMethod::BANK_TRANSFER );
-		$donationRequest->setDonorType( LegacyDonorName::PERSON_ANONYMOUS );
+		$donationRequest->setDonorType( AddDonationRequest::TYPE_ANONYMOUS );
 		return $donationRequest;
 	}
 
@@ -237,7 +237,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$donationRequest = new AddDonationRequest();
 		$donationRequest->setPaymentType( PaymentMethod::DIRECT_DEBIT );
 		$donationRequest->setAmount( Euro::newFromInt( 0 ) );
-		$donationRequest->setDonorType( LegacyDonorName::PERSON_ANONYMOUS );
+		$donationRequest->setDonorType( AddDonationRequest::TYPE_ANONYMOUS );
 		return $donationRequest;
 	}
 
@@ -343,7 +343,7 @@ class AddDonationUseCaseTest extends TestCase {
 	private function newValidAddDonationRequestWithEmail( string $email ): AddDonationRequest {
 		$request = $this->newMinimumDonationRequest();
 
-		$request->setDonorType( LegacyDonorName::PERSON_PRIVATE );
+		$request->setDonorType( AddDonationRequest::TYPE_PERSON );
 		$request->setDonorFirstName( ValidDonation::DONOR_FIRST_NAME );
 		$request->setDonorLastName( ValidDonation::DONOR_LAST_NAME );
 		$request->setDonorCompany( '' );
@@ -361,7 +361,7 @@ class AddDonationUseCaseTest extends TestCase {
 	private function newValidCompanyDonationRequest(): AddDonationRequest {
 		$request = $this->newMinimumDonationRequest();
 
-		$request->setDonorType( LegacyDonorName::PERSON_COMPANY );
+		$request->setDonorType( AddDonationRequest::TYPE_COMPANY );
 		$request->setDonorFirstName( '' );
 		$request->setDonorLastName( '' );
 		$request->setDonorCompany( ValidDonation::DONOR_LAST_NAME );
@@ -385,17 +385,6 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertSame( self::ACCESS_TOKEN, $response->getAccessToken() );
 	}
 
-	public function testWhenAddingCompanyDonation_salutationFieldIsSet(): void {
-		$useCase = $this->newValidationSucceedingUseCase();
-
-		$response = $useCase->addDonation( $this->newValidCompanyDonationRequest() );
-
-		$this->assertSame(
-			LegacyDonorName::COMPANY_SALUTATION,
-			$response->getDonation()->getDonor()->getName()->getSalutation()
-		);
-	}
-
 	// TODO move @covers tag for DonationCreatedEvent here when we've improved the PHPCS definitions
 	public function testWhenValidationSucceeds_eventIsEmitted(): void {
 		$eventEmitter = new EventEmitterSpy();
@@ -417,7 +406,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$events = $eventEmitter->getEvents();
 		$this->assertCount( 1, $events, 'Only 1 event should be emitted' );
 		$this->assertInstanceOf( DonationCreatedEvent::class, $events[0] );
-		$this->assertTrue( $events[0]->getDonor()->getName()->isCompany() );
+		$this->assertInstanceOf( CompanyName::class, $events[0]->getDonor()->getName() );
 	}
 
 	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsDeleted(): void {

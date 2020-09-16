@@ -5,10 +5,13 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\NoName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
 
 class DonorFactory {
 	public static function createDonorFromEntity( DoctrineDonation $donation ): ?Donor {
@@ -24,20 +27,17 @@ class DonorFactory {
 		);
 	}
 
-	private static function getPersonNameFromEntity( DoctrineDonation $donation ): LegacyDonorName {
+	private static function getPersonNameFromEntity( DoctrineDonation $donation ): DonorName {
 		$data = $donation->getDecodedData();
 
-		// TODO cater to more address types
-		$name = $data['adresstyp'] === LegacyDonorName::PERSON_COMPANY
-			? LegacyDonorName::newCompanyName() : LegacyDonorName::newPrivatePersonName();
-
-		$name->setSalutation( $data['anrede'] );
-		$name->setTitle( $data['titel'] );
-		$name->setFirstName( $data['vorname'] );
-		$name->setLastName( $data['nachname'] );
-		$name->setCompanyName( $data['firma'] );
-
-		return $name->freeze()->assertNoNullFields();
+		switch ( $data['adresstyp'] ) {
+			case 'person':
+				return new PersonName( $data['vorname'], $data['nachname'], $data['anrede'], $data['titel'] );
+			case 'firma':
+				return new CompanyName( $data['firma'] );
+			default:
+				return new NoName();
+		}
 	}
 
 	private static function getPhysicalAddressFromEntity( DoctrineDonation $donation ): LegacyDonorAddress {
@@ -59,6 +59,6 @@ class DonorFactory {
 
 		$data = $dd->getDecodedData();
 
-		return isset( $data['adresstyp'] ) && $data['adresstyp'] !== LegacyDonorName::PERSON_ANONYMOUS;
+		return isset( $data['adresstyp'] ) && $data['adresstyp'] !== 'anonym';
 	}
 }

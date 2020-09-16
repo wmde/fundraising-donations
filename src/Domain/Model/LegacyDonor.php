@@ -6,22 +6,21 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
 
 /**
  * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
 class LegacyDonor implements Donor {
 
-	private $personName;
+	private DonorName $name;
 	private $physicalAddress;
 	private $emailAddress;
 
-	public function __construct( LegacyDonorName $name, LegacyDonorAddress $address, string $emailAddress ) {
-		$this->personName = $name;
+	public function __construct( DonorName $name, LegacyDonorAddress $address, string $emailAddress ) {
+		$this->name = $name;
 		$this->physicalAddress = $address;
 		$this->emailAddress = $emailAddress;
 	}
 
-	public function getName(): LegacyDonorName {
-		return $this->personName;
+	public function getName(): DonorName {
+		return $this->name;
 	}
 
 	public function getPhysicalAddress(): LegacyDonorAddress {
@@ -30,6 +29,14 @@ class LegacyDonor implements Donor {
 
 	public function getEmailAddress(): string {
 		return $this->emailAddress;
+	}
+
+	public function isPrivatePerson(): bool {
+		return $this->name instanceof PersonName;
+	}
+
+	public function isCompany(): bool {
+		return $this->name instanceof CompanyName;
 	}
 
 }
