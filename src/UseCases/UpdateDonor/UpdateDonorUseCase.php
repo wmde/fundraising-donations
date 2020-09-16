@@ -71,14 +71,12 @@ class UpdateDonorUseCase {
 	}
 
 	private function getDonorAddressFromRequest( UpdateDonorRequest $updateDonorRequest ): LegacyDonorAddress {
-		$donorAddress = new LegacyDonorAddress();
-		$donorAddress->setCity( $updateDonorRequest->getCity() );
-		$donorAddress->setPostalCode( $updateDonorRequest->getPostalCode() );
-		$donorAddress->setStreetAddress( $updateDonorRequest->getStreetAddress() );
-		$donorAddress->setCountryCode( $updateDonorRequest->getCountryCode() );
-		$donorAddress->assertNoNullFields();
-		$donorAddress->freeze();
-		return $donorAddress;
+		return new LegacyDonorAddress(
+			$updateDonorRequest->getStreetAddress(),
+			$updateDonorRequest->getPostalCode(),
+			$updateDonorRequest->getCity(),
+			$updateDonorRequest->getCountryCode()
+		);
 	}
 
 	private function getDonorNameFromRequest( UpdateDonorRequest $updateDonorRequest ): LegacyDonorName {

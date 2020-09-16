@@ -267,14 +267,12 @@ class ValidDonation {
 	}
 
 	private function newAddress(): LegacyDonorAddress {
-		$address = new LegacyDonorAddress();
-
-		$address->setCity( self::DONOR_CITY );
-		$address->setCountryCode( self::DONOR_COUNTRY_CODE );
-		$address->setPostalCode( self::DONOR_POSTAL_CODE );
-		$address->setStreetAddress( self::DONOR_STREET_ADDRESS );
-
-		return $address->freeze()->assertNoNullFields();
+		return new LegacyDonorAddress(
+			self::DONOR_STREET_ADDRESS,
+			self::DONOR_POSTAL_CODE,
+			self::DONOR_CITY,
+			self::DONOR_COUNTRY_CODE
+		);
 	}
 
 	public static function newTrackingInfo(): DonationTrackingInfo {
