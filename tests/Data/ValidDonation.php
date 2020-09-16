@@ -10,7 +10,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
@@ -233,10 +233,10 @@ class ValidDonation {
 		);
 	}
 
-	public static function newDonor(): Donor {
+	public static function newDonor(): LegacyDonor {
 		$self = new self();
 
-		return new Donor(
+		return new LegacyDonor(
 			$self->newPersonName(),
 			$self->newAddress(),
 			self::DONOR_EMAIL_ADDRESS
@@ -311,9 +311,9 @@ class ValidDonation {
 		);
 	}
 
-	private function newCompanyDonor(): Donor {
+	private function newCompanyDonor(): LegacyDonor {
 		$self = new self();
-		return new Donor(
+		return new LegacyDonor(
 			$self->newCompanyName(),
 			$self->newAddress(),
 			self::DONOR_EMAIL_ADDRESS

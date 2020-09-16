@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -110,11 +110,11 @@ class AddDonationUseCase {
 		return $donation;
 	}
 
-	private function getPersonalInfoFromRequest( AddDonationRequest $request ): ?Donor {
+	private function getPersonalInfoFromRequest( AddDonationRequest $request ): ?LegacyDonor {
 		if ( $request->donorIsAnonymous() ) {
 			return null;
 		}
-		return new Donor(
+		return new LegacyDonor(
 			$this->getNameFromRequest( $request ),
 			$this->getPhysicalAddressFromRequest( $request ),
 			$request->getDonorEmailAddress()

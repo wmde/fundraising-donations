@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -56,7 +56,7 @@ class UpdateDonorUseCase {
 			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_VALIDATION_FAILED, $donation );
 		}
 
-		$donor = new Donor(
+		$donor = new LegacyDonor(
 			$this->getDonorNameFromRequest( $updateDonorRequest ),
 			$this->getDonorAddressFromRequest( $updateDonorRequest ),
 			$updateDonorRequest->getEmailAddress()

@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -201,8 +201,8 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		);
 	}
 
-	private function newDonorFromRequest( PayPalPaymentNotificationRequest $request ): Donor {
-		return new Donor(
+	private function newDonorFromRequest( PayPalPaymentNotificationRequest $request ): LegacyDonor {
+		return new LegacyDonor(
 			$this->newPersonNameFromRequest( $request ),
 			$this->newPhysicalAddressFromRequest( $request ),
 			$request->getPayerEmail()
