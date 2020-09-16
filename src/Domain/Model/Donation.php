@@ -57,7 +57,7 @@ class Donation {
 	/**
 	 * @param int|null $id
 	 * @param string $status Must be one of the Donation::STATUS_ constants
-	 * @param Donor|null $donor
+	 * @param LegacyDonor|null $donor
 	 * @param DonationPayment $payment
 	 * @param bool $optsIntoNewsletter
 	 * @param DonationTrackingInfo $trackingInfo
@@ -65,7 +65,7 @@ class Donation {
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( ?int $id, string $status, ?Donor $donor, DonationPayment $payment,
+	public function __construct( ?int $id, string $status, ?LegacyDonor $donor, DonationPayment $payment,
 		bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 		$this->id = $id;
 		$this->setStatus( $status );
@@ -140,15 +140,15 @@ class Donation {
 	/**
 	 * Returns the Donor or null for anonymous donations.
 	 *
-	 * @todo Return AnonymousDonor instead
+	 * @return LegacyDonor|null
+	 *@todo Return AnonymousDonor instead
 	 *
-	 * @return Donor|null
 	 */
-	public function getDonor(): ?Donor {
+	public function getDonor(): ?LegacyDonor {
 		return $this->donor;
 	}
 
-	public function setDonor( Donor $donor ): void {
+	public function setDonor( LegacyDonor $donor ): void {
 		$this->donor = $donor;
 	}
 

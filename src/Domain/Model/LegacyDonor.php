@@ -8,7 +8,7 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
  * @license GPL-2.0-or-later
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
-class Donor {
+class LegacyDonor {
 
 	private $personName;
 	private $physicalAddress;
