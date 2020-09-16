@@ -330,7 +330,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		$donation = new Donation(
 			$dd->getId(),
 			$dd->getStatus(),
-			$this->getDonorFromEntity( $dd ),
+			DonorFactory::createDonorFromEntity( $dd ),
 			$this->getPaymentFromEntity( $dd ),
 			(bool)$dd->getDonorOptsIntoNewsletter(),
 			$this->getTrackingInfoFromEntity( $dd ),
@@ -339,57 +339,6 @@ class DoctrineDonationRepository implements DonationRepository {
 		$donation->setOptsIntoDonationReceipt( $dd->getDonationReceipt() );
 		$this->getExportState( $dd ) ? $donation->markAsExported() : null;
 		return $donation;
-	}
-
-	private function getDonorFromEntity( DoctrineDonation $dd ): ?LegacyDonor {
-		if ( !$this->entityHasDonorInformation( $dd ) ) {
-			return null;
-		}
-
-		return new LegacyDonor(
-			$this->getPersonNameFromEntity( $dd ),
-			$this->getPhysicalAddressFromEntity( $dd ),
-			$dd->getDonorEmail()
-		);
-	}
-
-	private function entityHasDonorInformation( DoctrineDonation $dd ): bool {
-		// If entity was backed up, its information was purged
-		if ( $dd->getDtBackup() !== null ) {
-			return false;
-		}
-
-		$data = $dd->getDecodedData();
-
-		return isset( $data['adresstyp'] ) && $data['adresstyp'] !== LegacyDonorName::PERSON_ANONYMOUS;
-	}
-
-	private function getPersonNameFromEntity( DoctrineDonation $dd ): LegacyDonorName {
-		$data = $dd->getDecodedData();
-
-		$name = $data['adresstyp'] === LegacyDonorName::PERSON_COMPANY
-			? LegacyDonorName::newCompanyName() : LegacyDonorName::newPrivatePersonName();
-
-		$name->setSalutation( $data['anrede'] );
-		$name->setTitle( $data['titel'] );
-		$name->setFirstName( $data['vorname'] );
-		$name->setLastName( $data['nachname'] );
-		$name->setCompanyName( $data['firma'] );
-
-		return $name->freeze()->assertNoNullFields();
-	}
-
-	private function getPhysicalAddressFromEntity( DoctrineDonation $dd ): LegacyDonorAddress {
-		$data = $dd->getDecodedData();
-
-		$address = new LegacyDonorAddress();
-
-		$address->setStreetAddress( $data['strasse'] );
-		$address->setCity( $data['ort'] );
-		$address->setPostalCode( $data['plz'] );
-		$address->setCountryCode( $data['country'] );
-
-		return $address->freeze()->assertNoNullFields();
 	}
 
 	private function getPaymentFromEntity( DoctrineDonation $dd ): DonationPayment {

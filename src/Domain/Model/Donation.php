@@ -32,13 +32,13 @@ class Donation {
 	public const OPTS_INTO_NEWSLETTER = true;
 	public const DOES_NOT_OPT_INTO_NEWSLETTER = false;
 
-	private $id;
-	private $status;
-	private $donor;
-	private $payment;
-	private $optsIntoNewsletter;
-	private $comment;
-	private $exported;
+	private ?int $id;
+	private string $status;
+	private ?Donor $donor;
+	private DonationPayment $payment;
+	private bool $optsIntoNewsletter;
+	private ?DonationComment $comment;
+	private bool $exported;
 
 	/**
 	 * If the user wants to receive a donation receipt
@@ -47,17 +47,18 @@ class Donation {
 	 *
 	 * @var bool|null
 	 */
-	private $optsIntoDonationReceipt;
+	private ?bool $optsIntoDonationReceipt;
 
 	/**
 	 * TODO: move out of Donation when database model is refactored
+	 * https://phabricator.wikimedia.org/T203679
 	 */
-	private $trackingInfo;
+	private DonationTrackingInfo $trackingInfo;
 
 	/**
 	 * @param int|null $id
 	 * @param string $status Must be one of the Donation::STATUS_ constants
-	 * @param LegacyDonor|null $donor
+	 * @param Donor|null $donor
 	 * @param DonationPayment $payment
 	 * @param bool $optsIntoNewsletter
 	 * @param DonationTrackingInfo $trackingInfo
@@ -65,7 +66,7 @@ class Donation {
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( ?int $id, string $status, ?LegacyDonor $donor, DonationPayment $payment,
+	public function __construct( ?int $id, string $status, ?Donor $donor, DonationPayment $payment,
 		bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 		$this->id = $id;
 		$this->setStatus( $status );
@@ -75,6 +76,7 @@ class Donation {
 		$this->trackingInfo = $trackingInfo;
 		$this->comment = $comment;
 		$this->exported = false;
+		$this->optsIntoDonationReceipt = null;
 	}
 
 	private function setStatus( string $status ): void {
@@ -141,7 +143,7 @@ class Donation {
 	 * Returns the Donor or null for anonymous donations.
 	 *
 	 * @return LegacyDonor|null
-	 *@todo Return AnonymousDonor instead
+	 * @todo Return AnonymousDonor instead
 	 *
 	 */
 	public function getDonor(): ?LegacyDonor {
