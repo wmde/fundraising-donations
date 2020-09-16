@@ -10,8 +10,8 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
@@ -121,8 +121,8 @@ class AddDonationUseCase {
 		);
 	}
 
-	private function getPhysicalAddressFromRequest( AddDonationRequest $request ): DonorAddress {
-		$address = new DonorAddress();
+	private function getPhysicalAddressFromRequest( AddDonationRequest $request ): LegacyDonorAddress {
+		$address = new LegacyDonorAddress();
 
 		$address->setStreetAddress( $request->getDonorStreetAddress() );
 		$address->setPostalCode( $request->getDonorPostalCode() );
@@ -132,8 +132,8 @@ class AddDonationUseCase {
 		return $address->freeze()->assertNoNullFields();
 	}
 
-	private function getNameFromRequest( AddDonationRequest $request ): DonorName {
-		$name = $request->donorIsCompany() ? DonorName::newCompanyName() : DonorName::newPrivatePersonName();
+	private function getNameFromRequest( AddDonationRequest $request ): LegacyDonorName {
+		$name = $request->donorIsCompany() ? LegacyDonorName::newCompanyName() : LegacyDonorName::newPrivatePersonName();
 
 		$name->setSalutation( $request->getDonorSalutation() );
 		$name->setTitle( $request->getDonorTitle() );
@@ -178,7 +178,7 @@ class AddDonationUseCase {
 	}
 
 	private function getTransferCodePrefixForDonorType( string $donorType ): string {
-		if ( $donorType === DonorName::PERSON_PRIVATE || $donorType === DonorName::PERSON_COMPANY ) {
+		if ( $donorType === LegacyDonorName::PERSON_PRIVATE || $donorType === LegacyDonorName::PERSON_COMPANY ) {
 			return self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
 		}
 		return self::PREFIX_BANK_TRANSACTION_ANONYNMOUS_DONOR;

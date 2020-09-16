@@ -6,8 +6,8 @@ namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 
@@ -70,8 +70,8 @@ class UpdateDonorUseCase {
 		return UpdateDonorResponse::newSuccessResponse( UpdateDonorResponse::SUCCESS_TEXT, $donation );
 	}
 
-	private function getDonorAddressFromRequest( UpdateDonorRequest $updateDonorRequest ): DonorAddress {
-		$donorAddress = new DonorAddress();
+	private function getDonorAddressFromRequest( UpdateDonorRequest $updateDonorRequest ): LegacyDonorAddress {
+		$donorAddress = new LegacyDonorAddress();
 		$donorAddress->setCity( $updateDonorRequest->getCity() );
 		$donorAddress->setPostalCode( $updateDonorRequest->getPostalCode() );
 		$donorAddress->setStreetAddress( $updateDonorRequest->getStreetAddress() );
@@ -81,15 +81,15 @@ class UpdateDonorUseCase {
 		return $donorAddress;
 	}
 
-	private function getDonorNameFromRequest( UpdateDonorRequest $updateDonorRequest ): DonorName {
-		if ( $updateDonorRequest->getDonorType() === DonorName::PERSON_PRIVATE ) {
-			$donorName = DonorName::newPrivatePersonName();
+	private function getDonorNameFromRequest( UpdateDonorRequest $updateDonorRequest ): LegacyDonorName {
+		if ( $updateDonorRequest->getDonorType() === LegacyDonorName::PERSON_PRIVATE ) {
+			$donorName = LegacyDonorName::newPrivatePersonName();
 			$donorName->setFirstName( $updateDonorRequest->getFirstName() );
 			$donorName->setLastName( $updateDonorRequest->getLastName() );
 			$donorName->setSalutation( $updateDonorRequest->getSalutation() );
 			$donorName->setTitle( $updateDonorRequest->getTitle() );
-		} elseif ( $updateDonorRequest->getDonorType() === DonorName::PERSON_COMPANY ) {
-			$donorName = DonorName::newCompanyName();
+		} elseif ( $updateDonorRequest->getDonorType() === LegacyDonorName::PERSON_COMPANY ) {
+			$donorName = LegacyDonorName::newCompanyName();
 			$donorName->setCompanyName( $updateDonorRequest->getCompanyName() );
 		} else {
 			// This should only happen if the UpdateDonorValidator does not catch invalid address types
