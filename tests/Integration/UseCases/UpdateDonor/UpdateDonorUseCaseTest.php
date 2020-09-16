@@ -6,7 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\UpdateDono
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -166,7 +166,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 	private function newUpdateDonorRequest( int $donationId ): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
 			->withDonationId( $donationId )
-			->withType( DonorName::PERSON_PRIVATE )
+			->withType( LegacyDonorName::PERSON_PRIVATE )
 			->withFirstName( ValidDonation::DONOR_FIRST_NAME )
 			->withLastName( ValidDonation::DONOR_LAST_NAME )
 			->withSalutation( ValidDonation::DONOR_SALUTATION )

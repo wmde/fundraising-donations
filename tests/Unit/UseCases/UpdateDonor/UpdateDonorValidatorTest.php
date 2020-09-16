@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\UpdateDonor;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidator;
@@ -26,14 +26,14 @@ class UpdateDonorValidatorTest extends TestCase {
 			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS ),
 			new SucceedingEmailValidator()
 		);
-		$request = ( new UpdateDonorRequest() )->withType( DonorName::PERSON_ANONYMOUS );
+		$request = ( new UpdateDonorRequest() )->withType( LegacyDonorName::PERSON_ANONYMOUS );
 
 		$result = $validator->validateDonorData( $request );
 
 		$this->assertFalse( $result->isSuccessful() );
 		$this->assertEquals(
 			new ConstraintViolation(
-				DonorName::PERSON_ANONYMOUS,
+				LegacyDonorName::PERSON_ANONYMOUS,
 				UpdateDonorValidator::VIOLATION_ANONYMOUS_ADDRESS,
 				UpdateDonorValidator::SOURCE_ADDRESS_TYPE
 			),
@@ -95,7 +95,7 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	private function newEmptyUpdateDonorRequest(): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
-			->withType( DonorName::PERSON_PRIVATE )
+			->withType( LegacyDonorName::PERSON_PRIVATE )
 			->withStreetAddress( '' )
 			->withPostalCode( '' )
 			->withCity( '' )
@@ -109,7 +109,7 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	private function newInvalidUpdateCompanyDonorRequest(): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
-			->withType( DonorName::PERSON_COMPANY )
+			->withType( LegacyDonorName::PERSON_COMPANY )
 			->withCompanyName( str_repeat( 'TEST', 26 ) )
 			->withStreetAddress( str_repeat( 'TEST', 26 ) )
 			->withPostalCode( str_repeat( '1', 17 ) )

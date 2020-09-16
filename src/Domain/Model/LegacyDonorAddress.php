@@ -8,10 +8,8 @@ use WMDE\FreezableValueObject\FreezableValueObject;
 
 /**
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
-class DonorAddress {
+class LegacyDonorAddress {
 	use FreezableValueObject;
 
 	private $streetAddress = '';

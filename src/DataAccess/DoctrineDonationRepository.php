@@ -14,8 +14,8 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -253,7 +253,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		);
 	}
 
-	private function getDataFieldsFromPersonName( DonorName $name ): array {
+	private function getDataFieldsFromPersonName( LegacyDonorName $name ): array {
 		return [
 			'adresstyp' => $name->getPersonType(),
 			'anrede' => $name->getSalutation(),
@@ -264,7 +264,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		];
 	}
 
-	private function getDataFieldsFromAddress( DonorAddress $address ): array {
+	private function getDataFieldsFromAddress( LegacyDonorAddress $address ): array {
 		return [
 			'strasse' => $address->getStreetAddress(),
 			'plz' => $address->getPostalCode(),
@@ -361,14 +361,14 @@ class DoctrineDonationRepository implements DonationRepository {
 
 		$data = $dd->getDecodedData();
 
-		return isset( $data['adresstyp'] ) && $data['adresstyp'] !== DonorName::PERSON_ANONYMOUS;
+		return isset( $data['adresstyp'] ) && $data['adresstyp'] !== LegacyDonorName::PERSON_ANONYMOUS;
 	}
 
-	private function getPersonNameFromEntity( DoctrineDonation $dd ): DonorName {
+	private function getPersonNameFromEntity( DoctrineDonation $dd ): LegacyDonorName {
 		$data = $dd->getDecodedData();
 
-		$name = $data['adresstyp'] === DonorName::PERSON_COMPANY
-			? DonorName::newCompanyName() : DonorName::newPrivatePersonName();
+		$name = $data['adresstyp'] === LegacyDonorName::PERSON_COMPANY
+			? LegacyDonorName::newCompanyName() : LegacyDonorName::newPrivatePersonName();
 
 		$name->setSalutation( $data['anrede'] );
 		$name->setTitle( $data['titel'] );
@@ -379,10 +379,10 @@ class DoctrineDonationRepository implements DonationRepository {
 		return $name->freeze()->assertNoNullFields();
 	}
 
-	private function getPhysicalAddressFromEntity( DoctrineDonation $dd ): DonorAddress {
+	private function getPhysicalAddressFromEntity( DoctrineDonation $dd ): LegacyDonorAddress {
 		$data = $dd->getDecodedData();
 
-		$address = new DonorAddress();
+		$address = new LegacyDonorAddress();
 
 		$address->setStreetAddress( $data['strasse'] );
 		$address->setCity( $data['ort'] );
