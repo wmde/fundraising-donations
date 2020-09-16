@@ -13,9 +13,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -69,7 +66,7 @@ class DoctrineDonationRepository implements DonationRepository {
 	private function updateDonationEntity( DoctrineDonation $doctrineDonation, Donation $donation ): void {
 		$doctrineDonation->setId( $donation->getId() );
 		$this->updatePaymentInformation( $doctrineDonation, $donation );
-		$this->updateDonorInformation( $doctrineDonation, $donation->getDonor() );
+		DonorFieldMapper::updateDonorInformation( $doctrineDonation, $donation->getDonor() );
 		$this->updateComment( $doctrineDonation, $donation->getComment() );
 		$doctrineDonation->setDonorOptsIntoNewsletter( $donation->getOptsIntoNewsletter() );
 		$doctrineDonation->setDonationReceipt( $donation->getOptsIntoDonationReceipt() );
@@ -124,18 +121,6 @@ class DoctrineDonationRepository implements DonationRepository {
 		$doctrineDonation->setPayment( $doctrineSofortPayment );
 	}
 
-	private function updateDonorInformation( DoctrineDonation $doctrineDonation, LegacyDonor $donor = null ): void {
-		if ( $donor === null ) {
-			if ( $doctrineDonation->getId() === null ) {
-				$doctrineDonation->setDonorFullName( 'Anonym' );
-			}
-		} else {
-			$doctrineDonation->setDonorCity( $donor->getPhysicalAddress()->getCity() );
-			$doctrineDonation->setDonorEmail( $donor->getEmailAddress() );
-			$doctrineDonation->setDonorFullName( $donor->getName()->getFullName() );
-		}
-	}
-
 	private function updateComment( DoctrineDonation $doctrineDonation, DonationComment $comment = null ): void {
 		if ( $comment === null ) {
 			$doctrineDonation->setIsPublic( false );
@@ -152,7 +137,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		return array_merge(
 			$this->getDataFieldsFromTrackingInfo( $donation->getTrackingInfo() ),
 			$this->getDataFieldsForPaymentData( $donation->getPaymentMethod() ),
-			$this->getDataFieldsFromDonor( $donation->getDonor() )
+			DonorFieldMapper::getPersonalDataFields( $donation->getDonor() )
 		);
 	}
 
@@ -239,38 +224,6 @@ class DoctrineDonationRepository implements DonationRepository {
 		}
 
 		return implode( '/', [ $cardExpiry->getMonth(), $cardExpiry->getYear() ] );
-	}
-
-	private function getDataFieldsFromDonor( LegacyDonor $personalInfo = null ): array {
-		if ( $personalInfo === null ) {
-			return [ 'adresstyp' => 'anonym' ];
-		}
-
-		return array_merge(
-			$this->getDataFieldsFromPersonName( $personalInfo->getName() ),
-			$this->getDataFieldsFromAddress( $personalInfo->getPhysicalAddress() ),
-			[ 'email' => $personalInfo->getEmailAddress() ]
-		);
-	}
-
-	private function getDataFieldsFromPersonName( LegacyDonorName $name ): array {
-		return [
-			'adresstyp' => $name->getPersonType(),
-			'anrede' => $name->getSalutation(),
-			'titel' => $name->getTitle(),
-			'vorname' => $name->getFirstName(),
-			'nachname' => $name->getLastName(),
-			'firma' => $name->getCompanyName(),
-		];
-	}
-
-	private function getDataFieldsFromAddress( LegacyDonorAddress $address ): array {
-		return [
-			'strasse' => $address->getStreetAddress(),
-			'plz' => $address->getPostalCode(),
-			'ort' => $address->getCity(),
-			'country' => $address->getCountryCode(),
-		];
 	}
 
 	private function updateDonation( Donation $donation ): void {
