@@ -40,17 +40,15 @@ class DonorFactory {
 		return $name->freeze()->assertNoNullFields();
 	}
 
-	private static function getPhysicalAddressFromEntity( DoctrineDonation $ddonation ): LegacyDonorAddress {
-		$data = $ddonation->getDecodedData();
+	private static function getPhysicalAddressFromEntity( DoctrineDonation $donation ): LegacyDonorAddress {
+		$data = $donation->getDecodedData();
 
-		$address = new LegacyDonorAddress();
-
-		$address->setStreetAddress( $data['strasse'] );
-		$address->setCity( $data['ort'] );
-		$address->setPostalCode( $data['plz'] );
-		$address->setCountryCode( $data['country'] );
-
-		return $address->freeze()->assertNoNullFields();
+		return new LegacyDonorAddress(
+			$data['strasse'],
+			$data['plz'],
+			$data['ort'],
+			$data['country']
+		);
 	}
 
 	private static function entityHasDonorInformation( DoctrineDonation $dd ): bool {

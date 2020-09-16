@@ -122,14 +122,12 @@ class AddDonationUseCase {
 	}
 
 	private function getPhysicalAddressFromRequest( AddDonationRequest $request ): LegacyDonorAddress {
-		$address = new LegacyDonorAddress();
-
-		$address->setStreetAddress( $request->getDonorStreetAddress() );
-		$address->setPostalCode( $request->getDonorPostalCode() );
-		$address->setCity( $request->getDonorCity() );
-		$address->setCountryCode( $request->getDonorCountryCode() );
-
-		return $address->freeze()->assertNoNullFields();
+		return new LegacyDonorAddress(
+			$request->getDonorStreetAddress(),
+			$request->getDonorPostalCode(),
+			$request->getDonorCity(),
+			$request->getDonorCountryCode()
+		);
 	}
 
 	private function getNameFromRequest( AddDonationRequest $request ): LegacyDonorName {

@@ -218,13 +218,12 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 	}
 
 	private function newPhysicalAddressFromRequest( PayPalPaymentNotificationRequest $request ): LegacyDonorAddress {
-		$address = new LegacyDonorAddress();
-		$address->setStreetAddress( $request->getPayerAddressStreet() );
-		$address->setCity( $request->getPayerAddressCity() );
-		$address->setPostalCode( $request->getPayerAddressPostalCode() );
-		$address->setCountryCode( $request->getPayerAddressCountryCode() );
-		$address->freeze();
-		return $address;
+		return new LegacyDonorAddress(
+			$request->getPayerAddressStreet(),
+			$request->getPayerAddressPostalCode(),
+			$request->getPayerAddressCity(),
+			$request->getPayerAddressCountryCode()
+		);
 	}
 
 	private function newDonationFromRequest( PayPalPaymentNotificationRequest $request ): Donation {
