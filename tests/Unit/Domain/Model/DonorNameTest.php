@@ -5,10 +5,10 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 
 /**
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\DonorName
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName
  *
  * @license GPL-2.0-or-later
  * @author Kai Nissen < kai.nissen@wikimedia.de >
@@ -17,7 +17,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 class DonorNameTest extends TestCase {
 
 	public function testGivenPersonNameWithoutSalutation_getFullNameReturnsNameWithoutSalutation(): void {
-		$personName = DonorName::newPrivatePersonName();
+		$personName = LegacyDonorName::newPrivatePersonName();
 
 		$personName->setFirstName( 'Ebenezer' );
 		$personName->setLastName( 'Scrooge' );
@@ -26,7 +26,7 @@ class DonorNameTest extends TestCase {
 	}
 
 	public function testGivenPersonNameWithSalutation_getFullNameReturnsNameWithoutSalutation(): void {
-		$personName = DonorName::newPrivatePersonName();
+		$personName = LegacyDonorName::newPrivatePersonName();
 
 		$personName->setFirstName( 'Ebenezer' );
 		$personName->setLastName( 'Scrooge' );
@@ -36,7 +36,7 @@ class DonorNameTest extends TestCase {
 	}
 
 	public function testGivenPersonNameWithTitle_getFullNameReturnsNameWithTitle(): void {
-		$personName = DonorName::newPrivatePersonName();
+		$personName = LegacyDonorName::newPrivatePersonName();
 
 		$personName->setFirstName( 'Friedemann' );
 		$personName->setLastName( 'Schulz von Thun' );
@@ -46,7 +46,7 @@ class DonorNameTest extends TestCase {
 	}
 
 	public function testGivenPersonNameWithTitleAndSalutation_getFullNameReturnsNameWithTitle(): void {
-		$personName = DonorName::newPrivatePersonName();
+		$personName = LegacyDonorName::newPrivatePersonName();
 
 		$personName->setFirstName( 'Friedemann' );
 		$personName->setLastName( 'Schulz von Thun' );
@@ -57,7 +57,7 @@ class DonorNameTest extends TestCase {
 	}
 
 	public function testGivenPersonNameWithTitleAndCompay_getFullNameReturnsNameWithTitleAndCompany(): void {
-		$personName = DonorName::newPrivatePersonName();
+		$personName = LegacyDonorName::newPrivatePersonName();
 
 		$personName->setFirstName( 'Hank' );
 		$personName->setLastName( 'Scorpio' );
@@ -69,7 +69,7 @@ class DonorNameTest extends TestCase {
 	}
 
 	public function testGivenCompanyNameWithPerson_getFullNameReturnsPersonAndCompanyName(): void {
-		$companyName = DonorName::newCompanyName();
+		$companyName = LegacyDonorName::newCompanyName();
 
 		$companyName->setFirstName( 'Hank' );
 		$companyName->setLastName( 'Scorpio' );
@@ -81,7 +81,7 @@ class DonorNameTest extends TestCase {
 	}
 
 	public function testGivenCompanyNameOnly_getFullNameReturnsCompanyName(): void {
-		$companyName = DonorName::newCompanyName();
+		$companyName = LegacyDonorName::newCompanyName();
 
 		$companyName->setCompanyName( 'Globex Corp.' );
 
@@ -89,14 +89,14 @@ class DonorNameTest extends TestCase {
 	}
 
 	public function testPrivatePersonNameCanBeIdentified(): void {
-		$personName = DonorName::newPrivatePersonName();
+		$personName = LegacyDonorName::newPrivatePersonName();
 
 		$this->assertTrue( $personName->isPrivatePerson() );
 		$this->assertFalse( $personName->isCompany() );
 	}
 
 	public function testCompanyNameCanBeIdentified(): void {
-		$personName = DonorName::newCompanyName();
+		$personName = LegacyDonorName::newCompanyName();
 
 		$this->assertFalse( $personName->isPrivatePerson() );
 		$this->assertTrue( $personName->isCompany() );

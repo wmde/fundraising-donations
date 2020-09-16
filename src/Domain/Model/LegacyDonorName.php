@@ -10,7 +10,7 @@ use WMDE\FreezableValueObject\FreezableValueObject;
  * @license GPL-2.0-or-later
  * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
-class DonorName {
+class LegacyDonorName {
 	use FreezableValueObject;
 
 	// FIXME: these constants are used in request models and the getPersonType result is stuffed in the db

@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidationResult;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
@@ -122,14 +122,14 @@ class AddDonationValidator {
 
 	private function validateDonor(): void {
 		$this->validateFieldLength( $this->request->getDonorEmailAddress(), Result::SOURCE_DONOR_EMAIL );
-		if ( $this->request->getDonorType() === DonorName::PERSON_PRIVATE ) {
+		if ( $this->request->getDonorType() === LegacyDonorName::PERSON_PRIVATE ) {
 			$this->violations = array_merge(
 				$this->violations,
 				$this->getPersonNameViolations(),
 				$this->getAddressViolations(),
 				$this->validateEmail()->getViolations()
 			);
-		} elseif ( $this->request->getDonorType() === DonorName::PERSON_COMPANY ) {
+		} elseif ( $this->request->getDonorType() === LegacyDonorName::PERSON_COMPANY ) {
 			$this->violations = array_merge(
 				$this->violations,
 				$this->getCompanyNameViolations(),
@@ -183,7 +183,7 @@ class AddDonationValidator {
 	}
 
 	private function validateEmail(): ValidationResult {
-		if ( $this->request->getDonorType() === DonorName::PERSON_ANONYMOUS ) {
+		if ( $this->request->getDonorType() === LegacyDonorName::PERSON_ANONYMOUS ) {
 			return new ValidationResult();
 		}
 		return $this->emailValidator->validate( $this->request->getDonorEmailAddress() );

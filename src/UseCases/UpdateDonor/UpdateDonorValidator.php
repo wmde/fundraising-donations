@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
@@ -26,9 +26,9 @@ class UpdateDonorValidator {
 	}
 
 	public function validateDonorData( UpdateDonorRequest $donorRequest ): UpdateDonorValidationResult {
-		if ( $donorRequest->getDonorType() === DonorName::PERSON_PRIVATE ) {
+		if ( $donorRequest->getDonorType() === LegacyDonorName::PERSON_PRIVATE ) {
 			$nameViolations = $this->getPersonViolations( $donorRequest );
-		} elseif ( $donorRequest->getDonorType() === DonorName::PERSON_COMPANY ) {
+		} elseif ( $donorRequest->getDonorType() === LegacyDonorName::PERSON_COMPANY ) {
 			$nameViolations = $this->getCompanyViolations( $donorRequest );
 		} else {
 			return new UpdateDonorValidationResult( $this->getAnonymousViolation( $donorRequest ) );

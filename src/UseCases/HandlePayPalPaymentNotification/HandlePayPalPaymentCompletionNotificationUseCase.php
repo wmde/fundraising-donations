@@ -10,8 +10,8 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -209,16 +209,16 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		);
 	}
 
-	private function newPersonNameFromRequest( PayPalPaymentNotificationRequest $request ): DonorName {
-		$name = DonorName::newPrivatePersonName();
+	private function newPersonNameFromRequest( PayPalPaymentNotificationRequest $request ): LegacyDonorName {
+		$name = LegacyDonorName::newPrivatePersonName();
 		$name->setFirstName( $request->getPayerFirstName() );
 		$name->setLastName( $request->getPayerLastName() );
 		$name->freeze();
 		return $name;
 	}
 
-	private function newPhysicalAddressFromRequest( PayPalPaymentNotificationRequest $request ): DonorAddress {
-		$address = new DonorAddress();
+	private function newPhysicalAddressFromRequest( PayPalPaymentNotificationRequest $request ): LegacyDonorAddress {
+		$address = new LegacyDonorAddress();
 		$address->setStreetAddress( $request->getPayerAddressStreet() );
 		$address->setCity( $request->getPayerAddressCity() );
 		$address->setPostalCode( $request->getPayerAddressPostalCode() );

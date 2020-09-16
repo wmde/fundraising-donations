@@ -11,8 +11,8 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
@@ -255,8 +255,8 @@ class ValidDonation {
 		return self::newDonationPayment( new DirectDebitPayment( self::newBankData() ) );
 	}
 
-	private function newPersonName(): DonorName {
-		$personName = DonorName::newPrivatePersonName();
+	private function newPersonName(): LegacyDonorName {
+		$personName = LegacyDonorName::newPrivatePersonName();
 
 		$personName->setFirstName( self::DONOR_FIRST_NAME );
 		$personName->setLastName( self::DONOR_LAST_NAME );
@@ -266,8 +266,8 @@ class ValidDonation {
 		return $personName->freeze()->assertNoNullFields();
 	}
 
-	private function newAddress(): DonorAddress {
-		$address = new DonorAddress();
+	private function newAddress(): LegacyDonorAddress {
+		$address = new LegacyDonorAddress();
 
 		$address->setCity( self::DONOR_CITY );
 		$address->setCountryCode( self::DONOR_COUNTRY_CODE );
@@ -320,8 +320,8 @@ class ValidDonation {
 		);
 	}
 
-	private function newCompanyName(): DonorName {
-		$companyName = DonorName::newCompanyName();
+	private function newCompanyName(): LegacyDonorName {
+		$companyName = LegacyDonorName::newCompanyName();
 
 		$companyName->setCompanyName( self::DONOR_COMPANY );
 

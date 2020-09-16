@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\HandlePayP
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -441,7 +441,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertTrue( $donation->isBooked() );
 
 		$donorName = $donation->getDonor()->getName();
-		$this->assertSame( DonorName::PERSON_PRIVATE, $donorName->getPersonType(), 'Person is always private' );
+		$this->assertSame( LegacyDonorName::PERSON_PRIVATE, $donorName->getPersonType(), 'Person is always private' );
 		$this->assertSame( ValidPayPalNotificationRequest::PAYER_ADDRESS_NAME, $donorName->getFullName() );
 
 		$this->assertSame( ValidPayPalNotificationRequest::PAYER_EMAIL, $donation->getDonor()->getEmailAddress() );
