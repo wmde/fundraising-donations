@@ -13,7 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -124,7 +124,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		$doctrineDonation->setPayment( $doctrineSofortPayment );
 	}
 
-	private function updateDonorInformation( DoctrineDonation $doctrineDonation, Donor $donor = null ): void {
+	private function updateDonorInformation( DoctrineDonation $doctrineDonation, LegacyDonor $donor = null ): void {
 		if ( $donor === null ) {
 			if ( $doctrineDonation->getId() === null ) {
 				$doctrineDonation->setDonorFullName( 'Anonym' );
@@ -241,7 +241,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		return implode( '/', [ $cardExpiry->getMonth(), $cardExpiry->getYear() ] );
 	}
 
-	private function getDataFieldsFromDonor( Donor $personalInfo = null ): array {
+	private function getDataFieldsFromDonor( LegacyDonor $personalInfo = null ): array {
 		if ( $personalInfo === null ) {
 			return [ 'adresstyp' => 'anonym' ];
 		}
@@ -341,12 +341,12 @@ class DoctrineDonationRepository implements DonationRepository {
 		return $donation;
 	}
 
-	private function getDonorFromEntity( DoctrineDonation $dd ): ?Donor {
+	private function getDonorFromEntity( DoctrineDonation $dd ): ?LegacyDonor {
 		if ( !$this->entityHasDonorInformation( $dd ) ) {
 			return null;
 		}
 
-		return new Donor(
+		return new LegacyDonor(
 			$this->getPersonNameFromEntity( $dd ),
 			$this->getPhysicalAddressFromEntity( $dd ),
 			$dd->getDonorEmail()
