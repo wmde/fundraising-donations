@@ -9,6 +9,10 @@ namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
  */
 class UpdateDonorRequest {
 
+	public const TYPE_PERSON = 'person';
+	public const TYPE_COMPANY = 'company';
+	public const TYPE_ANONYMOUS = 'anonymous';
+
 	private $donationId;
 	private $donorType;
 	private $firstName;

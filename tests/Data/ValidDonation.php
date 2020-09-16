@@ -6,13 +6,14 @@ namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use DateTime;
 use WMDE\Euro\Euro;
+use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
@@ -255,15 +256,13 @@ class ValidDonation {
 		return self::newDonationPayment( new DirectDebitPayment( self::newBankData() ) );
 	}
 
-	private function newPersonName(): LegacyDonorName {
-		$personName = LegacyDonorName::newPrivatePersonName();
-
-		$personName->setFirstName( self::DONOR_FIRST_NAME );
-		$personName->setLastName( self::DONOR_LAST_NAME );
-		$personName->setSalutation( self::DONOR_SALUTATION );
-		$personName->setTitle( self::DONOR_TITLE );
-
-		return $personName->freeze()->assertNoNullFields();
+	private function newPersonName(): PersonName {
+		return new PersonName(
+			self::DONOR_FIRST_NAME,
+			self::DONOR_LAST_NAME,
+			self::DONOR_SALUTATION,
+			self::DONOR_TITLE
+		);
 	}
 
 	private function newAddress(): LegacyDonorAddress {
@@ -318,12 +317,8 @@ class ValidDonation {
 		);
 	}
 
-	private function newCompanyName(): LegacyDonorName {
-		$companyName = LegacyDonorName::newCompanyName();
-
-		$companyName->setCompanyName( self::DONOR_COMPANY );
-
-		return $companyName->freeze()->assertNoNullFields();
+	private function newCompanyName(): CompanyName {
+		return new CompanyName( self::DONOR_COMPANY );
 	}
 
 }

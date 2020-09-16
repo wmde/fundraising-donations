@@ -5,9 +5,11 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 
@@ -16,10 +18,10 @@ use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
  */
 class UpdateDonorUseCase {
 
-	private $authorizationService;
-	private $donationRepository;
-	private $updateDonorValidator;
-	private $donationConfirmationMailer;
+	private DonationAuthorizer $authorizationService;
+	private DonationRepository $donationRepository;
+	private UpdateDonorValidator $updateDonorValidator;
+	private DonationConfirmationMailer $donationConfirmationMailer;
 
 	public function __construct(
 		DonationAuthorizer $authorizationService,
@@ -79,23 +81,20 @@ class UpdateDonorUseCase {
 		);
 	}
 
-	private function getDonorNameFromRequest( UpdateDonorRequest $updateDonorRequest ): LegacyDonorName {
-		if ( $updateDonorRequest->getDonorType() === LegacyDonorName::PERSON_PRIVATE ) {
-			$donorName = LegacyDonorName::newPrivatePersonName();
-			$donorName->setFirstName( $updateDonorRequest->getFirstName() );
-			$donorName->setLastName( $updateDonorRequest->getLastName() );
-			$donorName->setSalutation( $updateDonorRequest->getSalutation() );
-			$donorName->setTitle( $updateDonorRequest->getTitle() );
-		} elseif ( $updateDonorRequest->getDonorType() === LegacyDonorName::PERSON_COMPANY ) {
-			$donorName = LegacyDonorName::newCompanyName();
-			$donorName->setCompanyName( $updateDonorRequest->getCompanyName() );
-		} else {
-			// This should only happen if the UpdateDonorValidator does not catch invalid address types
-			throw new \UnexpectedValueException( 'Donor must be a known PersonType' );
+	private function getDonorNameFromRequest( UpdateDonorRequest $updateDonorRequest ): DonorName {
+		if ( $updateDonorRequest->getDonorType() === UpdateDonorRequest::TYPE_PERSON ) {
+			return new PersonName(
+				$updateDonorRequest->getFirstName(),
+				$updateDonorRequest->getLastName(),
+				$updateDonorRequest->getSalutation(),
+				$updateDonorRequest->getTitle()
+			);
+		} elseif ( $updateDonorRequest->getDonorType() === UpdateDonorRequest::TYPE_ANONYMOUS ) {
+			return new CompanyName( $updateDonorRequest->getCompanyName() );
 		}
-		$donorName->assertNoNullFields();
-		$donorName->freeze();
-		return $donorName;
+
+		// This should only happen if the UpdateDonorValidator does not catch invalid address types
+		throw new \UnexpectedValueException( 'Donor must be a known PersonType' );
 	}
 
 	private function requestIsAllowed( UpdateDonorRequest $updateDonorRequest ): bool {

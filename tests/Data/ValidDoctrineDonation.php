@@ -104,7 +104,6 @@ class ValidDoctrineDonation {
 			'titel' => ValidDonation::DONOR_TITLE,
 			'vorname' => ValidDonation::DONOR_FIRST_NAME,
 			'nachname' => ValidDonation::DONOR_LAST_NAME,
-			'firma' => '',
 		];
 	}
 

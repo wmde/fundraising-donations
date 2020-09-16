@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
@@ -17,21 +16,23 @@ class UpdateDonorValidator {
 	public const VIOLATION_ANONYMOUS_ADDRESS = 'address_form_error';
 	public const SOURCE_ADDRESS_TYPE = 'addressType';
 
-	private $addressValidator;
-	private $emailValidator;
+	private AddressValidator $addressValidator;
+	private EmailValidator $emailValidator;
 
-	public function __construct( AddressValidator $donorValidator, EmailValidator $emailValidator ) {
-		$this->addressValidator = $donorValidator;
+	public function __construct( AddressValidator $addressValidator, EmailValidator $emailValidator ) {
+		$this->addressValidator = $addressValidator;
 		$this->emailValidator = $emailValidator;
 	}
 
 	public function validateDonorData( UpdateDonorRequest $donorRequest ): UpdateDonorValidationResult {
-		if ( $donorRequest->getDonorType() === LegacyDonorName::PERSON_PRIVATE ) {
+		if ( $donorRequest->getDonorType() === UpdateDonorRequest::TYPE_PERSON ) {
 			$nameViolations = $this->getPersonViolations( $donorRequest );
-		} elseif ( $donorRequest->getDonorType() === LegacyDonorName::PERSON_COMPANY ) {
+		} elseif ( $donorRequest->getDonorType() === UpdateDonorRequest::TYPE_COMPANY ) {
 			$nameViolations = $this->getCompanyViolations( $donorRequest );
-		} else {
+		} elseif ( $donorRequest->getDonorType() === UpdateDonorRequest::TYPE_ANONYMOUS ) {
 			return new UpdateDonorValidationResult( $this->getAnonymousViolation( $donorRequest ) );
+		} else {
+			throw new \InvalidArgumentException( sprintf( ' Unknown donor type: %s', $donorRequest->getDonorType() ) );
 		}
 
 		$violations = array_merge(
