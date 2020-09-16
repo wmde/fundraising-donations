@@ -5,10 +5,13 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\NoName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
 
 /**
  * Convert a Donor into an array of fields for the legacy database schema that
@@ -22,13 +25,20 @@ class DonorFieldMapper {
 		}
 
 		return array_merge(
+			// Order of the fields is the same as the resulting array of ValidDoctrineDonation,
+			// otherwise comparing the serialized data will fail
+			[
+				'adresstyp' => self::getAddressType( $donor ),
+			],
 			self::getDataFieldsFromPersonName( $donor->getName() ),
 			self::getDataFieldsFromAddress( $donor->getPhysicalAddress() ),
-			[ 'email' => $donor->getEmailAddress() ]
+			[
+				'email' => $donor->getEmailAddress()
+			]
 		);
 	}
 
-	private static function getDataFieldsFromPersonName( LegacyDonorName $name ): array {
+	private static function getDataFieldsFromPersonName( DonorName $name ): array {
 		$keyToDbFieldMap = [
 			'salutation' => 'anrede',
 			'title' => 'titel',
@@ -36,9 +46,7 @@ class DonorFieldMapper {
 			'lastName' => 'nachname',
 			'companyName' => 'firma',
 		];
-		$result = [
-			'adresstyp' => $name->getPersonType(),
-		];
+		$result = [];
 		foreach ( $name->toArray() as $k => $v ) {
 			if ( empty( $keyToDbFieldMap[$k] ) ) {
 				throw new \UnexpectedValueException( sprintf( 'Name class returned unexpected value with key %s', $k ) );
@@ -72,6 +80,20 @@ class DonorFieldMapper {
 			// TODO alway set
 			$doctrineDonation->setDonorFullName( $donor->getName()->getFullName() );
 		}
+	}
+
+	private static function getAddressType( Donor $donor ): string {
+		// TODO use donor type instead of name
+		$donorTypeMap = [
+			PersonName::class => 'person',
+			CompanyName::class => 'firma',
+			NoName::class => 'anonym'
+		];
+		$donorNameClass = get_class( $donor->getName() );
+		if ( empty( $donorTypeMap[$donorNameClass] ) ) {
+			throw new \UnexpectedValueException( sprintf( 'Could not determine address type, unexpected donor name class "%s"', $donorNameClass ) );
+		}
+		return $donorTypeMap[$donorNameClass];
 	}
 
 }
