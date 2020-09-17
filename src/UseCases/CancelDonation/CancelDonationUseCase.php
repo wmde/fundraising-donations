@@ -106,11 +106,7 @@ class CancelDonationUseCase {
 		return [
 			'donationId' => $donation->getId(),
 
-			'recipient' => [
-				'lastName' => $donation->getDonor()->getName()->getLastName(),
-				'salutation' => $donation->getDonor()->getName()->getSalutation(),
-				'title' => $donation->getDonor()->getName()->getTitle()
-			],
+			'recipient' => $donation->getDonor()->getName()->toArray(),
 		];
 	}
 

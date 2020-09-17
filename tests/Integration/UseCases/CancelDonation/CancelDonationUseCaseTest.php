@@ -101,7 +101,7 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 		return ValidDonation::newDirectDebitDonation();
 	}
 
-	public function testWhenDonationGetsCancelled_cancellationConfirmationEmailIsSend(): void {
+	public function testWhenDonationGetsCancelled_cancellationConfirmationEmailIsSent(): void {
 		$donation = $this->newCancelableDonation();
 		$this->repository->storeDonation( $donation );
 
@@ -114,9 +114,11 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 			new EmailAddress( $donation->getDonor()->getEmailAddress() ),
 			[
 				'recipient' => [
-					'lastName' => ValidDonation::DONOR_LAST_NAME,
 					'salutation' => ValidDonation::DONOR_SALUTATION,
-					'title' => ValidDonation::DONOR_TITLE
+					'title' => ValidDonation::DONOR_TITLE,
+					'firstName' => ValidDonation::DONOR_FIRST_NAME,
+					'lastName' => ValidDonation::DONOR_LAST_NAME,
+					'companyName' => ''
 				],
 				'donationId' => 1
 			]

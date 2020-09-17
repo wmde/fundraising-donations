@@ -90,6 +90,19 @@ class LegacyDonorName {
 		$this->lastName = $lastName;
 	}
 
+	/**
+	 * @return string[]
+	 */
+	public function toArray(): array {
+		return [
+			'salutation' => $this->salutation,
+			'title' => $this->title,
+			'firstName' => $this->firstName,
+			'lastName' => $this->lastName,
+			'companyName' => $this->companyName
+		];
+	}
+
 	public function getFullName(): string {
 		return implode(
 			', ',
