@@ -10,7 +10,10 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 
 /**
- * @covers WMDE\Fundraising\DonationContext\Domain\Model\Donation
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donation
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor
  *
  * @license GPL-2.0-or-later
  */

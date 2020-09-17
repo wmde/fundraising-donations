@@ -6,14 +6,15 @@ namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use DateTime;
 use WMDE\Euro\Euro;
+use WMDE\Fundraising\DonationContext\Domain\Model\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PostalAddress;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
@@ -79,21 +80,21 @@ class ValidDonation {
 	public const SOFORT_DONATION_CONFIRMED_AT = '-1 hour';
 
 	public static function newBankTransferDonation(): Donation {
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			new BankTransferPayment( self::PAYMENT_BANK_TRANSFER_CODE ),
 			Donation::STATUS_NEW
 		);
 	}
 
 	public static function newSofortDonation(): Donation {
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			new SofortPayment( self::PAYMENT_BANK_TRANSFER_CODE ),
 			Donation::STATUS_PROMISE
 		);
 	}
 
 	public static function newDirectDebitDonation(): Donation {
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			new DirectDebitPayment( self::newBankData() ),
 			Donation::STATUS_NEW
 		);
@@ -103,21 +104,21 @@ class ValidDonation {
 		$payPalData = new PayPalData();
 		$payPalData->setPaymentId( $transactionId );
 
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			new PayPalPayment( $payPalData ),
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
 	public static function newIncompletePayPalDonation(): Donation {
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			new PayPalPayment( new PayPalData() ),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
 	public static function newIncompleteSofortDonation(): Donation {
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			new SofortPayment( self::PAYMENT_BANK_TRANSFER_CODE ),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
@@ -126,14 +127,14 @@ class ValidDonation {
 	public static function newCompletedSofortDonation(): Donation {
 		$payment = new SofortPayment( self::PAYMENT_BANK_TRANSFER_CODE );
 		$payment->setConfirmedAt( new DateTime( self::SOFORT_DONATION_CONFIRMED_AT ) );
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			$payment,
 			Donation::STATUS_PROMISE
 		);
 	}
 
 	public static function newIncompleteAnonymousPayPalDonation(): Donation {
-		return ( new self() )->createAnonymousDonation(
+		return self::createAnonymousDonation(
 			new PayPalPayment( new PayPalData() ),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
@@ -143,7 +144,7 @@ class ValidDonation {
 		$payPalData = new PayPalData();
 		$payPalData->setPaymentId( self::PAYPAL_TRANSACTION_ID );
 
-		return ( new self() )->createAnonymousDonation(
+		return self::createAnonymousDonation(
 			new PayPalPayment( $payPalData ),
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
@@ -153,7 +154,7 @@ class ValidDonation {
 		$payPalData = new PayPalData();
 		$payPalData->setPaymentId( self::PAYPAL_TRANSACTION_ID );
 
-		return ( new self() )->createAnonymousDonationWithId(
+		return self::createAnonymousDonationWithId(
 			$donationId,
 			new PayPalPayment( $payPalData ),
 			Donation::STATUS_EXTERNAL_BOOKED
@@ -164,82 +165,79 @@ class ValidDonation {
 		$creditCardData = new CreditCardTransactionData();
 		$creditCardData->setTransactionId( self::CREDIT_CARD_TRANSACTION_ID );
 
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			new CreditCardPayment( $creditCardData ),
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
 	public static function newIncompleteCreditCardDonation(): Donation {
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			new CreditCardPayment( new CreditCardTransactionData() ),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
 	public static function newIncompleteAnonymousCreditCardDonation(): Donation {
-		return ( new self() )->createAnonymousDonation(
+		return self::createAnonymousDonation(
 			new CreditCardPayment( new CreditCardTransactionData() ),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
 	public static function newCancelledPayPalDonation(): Donation {
-		return ( new self() )->createDonation(
+		return self::createDonation(
 			new PayPalPayment( new PayPalData() ),
 			Donation::STATUS_CANCELLED
 		);
 	}
 
 	public static function newCompanyBankTransferDonation(): Donation {
-		$self = new self();
-		$donation = $self->createDonation(
+		$donation = self::createDonation(
 			new BankTransferPayment( self::PAYMENT_BANK_TRANSFER_CODE ),
 			Donation::STATUS_NEW
 		);
-		$donation->setDonor( $self->newCompanyDonor() );
+		$donation->setDonor( self::newCompanyDonor() );
 		return $donation;
 	}
 
-	private function createDonation( PaymentMethod $paymentMethod, string $status ): Donation {
+	private static function createDonation( PaymentMethod $paymentMethod, string $status ): Donation {
 		return new Donation(
 			null,
 			$status,
-			$this->newDonor(),
-			$this->newDonationPayment( $paymentMethod ),
+			self::newDonor(),
+			self::newDonationPayment( $paymentMethod ),
 			self::OPTS_INTO_NEWSLETTER,
-			$this->newTrackingInfo()
+			self::newTrackingInfo()
 		);
 	}
 
-	private function createAnonymousDonation( PaymentMethod $paymentMethod, string $status ): Donation {
+	private static function createAnonymousDonation( PaymentMethod $paymentMethod, string $status ): Donation {
 		return new Donation(
 			null,
 			$status,
 			null,
-			$this->newDonationPayment( $paymentMethod ),
+			self::newDonationPayment( $paymentMethod ),
 			false,
-			$this->newTrackingInfo()
+			self::newTrackingInfo()
 		);
 	}
 
-	private function createAnonymousDonationWithId( int $donationId, PaymentMethod $paymentMethod, string $status ): Donation {
+	private static function createAnonymousDonationWithId( int $donationId, PaymentMethod $paymentMethod, string $status ): Donation {
 		return new Donation(
 			$donationId,
 			$status,
 			null,
-			$this->newDonationPayment( $paymentMethod ),
+			self::newDonationPayment( $paymentMethod ),
 			false,
-			$this->newTrackingInfo()
+			self::newTrackingInfo()
 		);
 	}
 
-	public static function newDonor(): LegacyDonor {
-		$self = new self();
-
-		return new LegacyDonor(
-			$self->newPersonName(),
-			$self->newAddress(),
+	public static function newDonor(): PersonDonor {
+		return new PersonDonor(
+			self::newPersonName(),
+			self::newAddress(),
 			self::DONOR_EMAIL_ADDRESS
 		);
 	}
@@ -256,7 +254,7 @@ class ValidDonation {
 		return self::newDonationPayment( new DirectDebitPayment( self::newBankData() ) );
 	}
 
-	private function newPersonName(): PersonName {
+	private static function newPersonName(): PersonName {
 		return new PersonName(
 			self::DONOR_FIRST_NAME,
 			self::DONOR_LAST_NAME,
@@ -265,8 +263,8 @@ class ValidDonation {
 		);
 	}
 
-	private function newAddress(): LegacyDonorAddress {
-		return new LegacyDonorAddress(
+	private static function newAddress(): PostalAddress {
+		return new PostalAddress(
 			self::DONOR_STREET_ADDRESS,
 			self::DONOR_POSTAL_CODE,
 			self::DONOR_CITY,
@@ -308,16 +306,15 @@ class ValidDonation {
 		);
 	}
 
-	private function newCompanyDonor(): LegacyDonor {
-		$self = new self();
-		return new LegacyDonor(
-			$self->newCompanyName(),
-			$self->newAddress(),
+	public static function newCompanyDonor(): CompanyDonor {
+		return new CompanyDonor(
+			self::newCompanyName(),
+			self::newAddress(),
 			self::DONOR_EMAIL_ADDRESS
 		);
 	}
 
-	private function newCompanyName(): CompanyName {
+	private static function newCompanyName(): CompanyName {
 		return new CompanyName( self::DONOR_COMPANY );
 	}
 

@@ -5,13 +5,12 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\Domain\Model\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\NoName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PostalAddress;
 
 class DonorFactory {
 	public static function createDonorFromEntity( DoctrineDonation $donation ): ?Donor {
@@ -20,30 +19,30 @@ class DonorFactory {
 			return null;
 		}
 
-		return new LegacyDonor(
-			self::getPersonNameFromEntity( $donation ),
-			self::getPhysicalAddressFromEntity( $donation ),
-			$donation->getDonorEmail()
-		);
-	}
-
-	private static function getPersonNameFromEntity( DoctrineDonation $donation ): DonorName {
 		$data = $donation->getDecodedData();
 
 		switch ( $data['adresstyp'] ) {
 			case 'person':
-				return new PersonName( $data['vorname'], $data['nachname'], $data['anrede'], $data['titel'] );
+				return new PersonDonor(
+					new PersonName( $data['vorname'], $data['nachname'], $data['anrede'], $data['titel'] ),
+					self::getPhysicalAddressFromEntity( $donation ),
+					$donation->getDonorEmail()
+				);
 			case 'firma':
-				return new CompanyName( $data['firma'] );
+				return new CompanyDonor(
+					new CompanyName( $data['firma'] ),
+					self::getPhysicalAddressFromEntity( $donation ),
+					$donation->getDonorEmail()
+				);
 			default:
-				return new NoName();
+				throw new \UnexpectedValueException( sprintf( 'Unknown address type: %s', $data['adresstyp'] ) );
 		}
 	}
 
-	private static function getPhysicalAddressFromEntity( DoctrineDonation $donation ): LegacyDonorAddress {
+	private static function getPhysicalAddressFromEntity( DoctrineDonation $donation ): PostalAddress {
 		$data = $donation->getDecodedData();
 
-		return new LegacyDonorAddress(
+		return new PostalAddress(
 			$data['strasse'],
 			$data['plz'],
 			$data['ort'],

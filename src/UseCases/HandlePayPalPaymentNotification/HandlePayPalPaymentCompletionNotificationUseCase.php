@@ -9,10 +9,9 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -202,20 +201,16 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		);
 	}
 
-	private function newDonorFromRequest( PayPalPaymentNotificationRequest $request ): LegacyDonor {
-		return new LegacyDonor(
-			$this->newPersonNameFromRequest( $request ),
+	private function newDonorFromRequest( PayPalPaymentNotificationRequest $request ): PersonDonor {
+		return new PersonDonor(
+			new PersonName( $request->getPayerFirstName(), $request->getPayerLastName(), '', '' ),
 			$this->newPhysicalAddressFromRequest( $request ),
 			$request->getPayerEmail()
 		);
 	}
 
-	private function newPersonNameFromRequest( PayPalPaymentNotificationRequest $request ): DonorName {
-		return new PersonName( $request->getPayerFirstName(), $request->getPayerLastName(), '', '' );
-	}
-
-	private function newPhysicalAddressFromRequest( PayPalPaymentNotificationRequest $request ): LegacyDonorAddress {
-		return new LegacyDonorAddress(
+	private function newPhysicalAddressFromRequest( PayPalPaymentNotificationRequest $request ): PostalAddress {
+		return new PostalAddress(
 			$request->getPayerAddressStreet(),
 			$request->getPayerAddressPostalCode(),
 			$request->getPayerAddressCity(),

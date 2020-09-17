@@ -5,11 +5,11 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\Domain\Model\Address;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\NoAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\NoName;
 use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
 
@@ -56,8 +56,10 @@ class DonorFieldMapper {
 		return $result;
 	}
 
-	private static function getDataFieldsFromAddress( LegacyDonorAddress $address ): array {
-		// TODO check for null address
+	private static function getDataFieldsFromAddress( Address $address ): array {
+		if ( $address instanceof NoAddress ) {
+			return [];
+		}
 		return [
 			'strasse' => $address->getStreetAddress(),
 			'plz' => $address->getPostalCode(),
@@ -66,7 +68,7 @@ class DonorFieldMapper {
 		];
 	}
 
-	public static function updateDonorInformation( DoctrineDonation $doctrineDonation, LegacyDonor $donor = null ): void {
+	public static function updateDonorInformation( DoctrineDonation $doctrineDonation, Donor $donor = null ): void {
 		// TODO remove this check when we have an anonymous donor
 		if ( $donor === null ) {
 			if ( $doctrineDonation->getId() === null ) {

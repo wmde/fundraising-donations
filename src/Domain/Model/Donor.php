@@ -11,7 +11,7 @@ interface Donor {
 
 	public function getName(): DonorName;
 
-	public function getPhysicalAddress(): LegacyDonorAddress;
+	public function getPhysicalAddress(): Address;
 
 	public function getEmailAddress(): string;
 

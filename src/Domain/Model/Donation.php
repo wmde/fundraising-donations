@@ -142,15 +142,15 @@ class Donation {
 	/**
 	 * Returns the Donor or null for anonymous donations.
 	 *
-	 * @return LegacyDonor|null
+	 * @return Donor|null
 	 * @todo Return AnonymousDonor instead
 	 *
 	 */
-	public function getDonor(): ?LegacyDonor {
+	public function getDonor(): ?Donor {
 		return $this->donor;
 	}
 
-	public function setDonor( LegacyDonor $donor ): void {
+	public function setDonor( Donor $donor ): void {
 		$this->donor = $donor;
 	}
 
