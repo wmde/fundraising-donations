@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\Domain\Model\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
@@ -13,12 +14,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\PostalAddress;
 
 class DonorFactory {
-	public static function createDonorFromEntity( DoctrineDonation $donation ): ?Donor {
-		// TODO always return a donor
-		if ( !self::entityHasDonorInformation( $donation ) ) {
-			return null;
-		}
-
+	public static function createDonorFromEntity( DoctrineDonation $donation ): Donor {
 		$data = $donation->getDecodedData();
 
 		switch ( $data['adresstyp'] ) {
@@ -34,6 +30,8 @@ class DonorFactory {
 					self::getPhysicalAddressFromEntity( $donation ),
 					$donation->getDonorEmail()
 				);
+			case 'anonym':
+				return new AnonymousDonor();
 			default:
 				throw new \UnexpectedValueException( sprintf( 'Unknown address type: %s', $data['adresstyp'] ) );
 		}
@@ -48,16 +46,5 @@ class DonorFactory {
 			$data['ort'],
 			$data['country']
 		);
-	}
-
-	private static function entityHasDonorInformation( DoctrineDonation $dd ): bool {
-		// If entity was backed up, its information was purged
-		if ( $dd->getDtBackup() !== null ) {
-			return false;
-		}
-
-		$data = $dd->getDecodedData();
-
-		return isset( $data['adresstyp'] ) && $data['adresstyp'] !== 'anonym';
 	}
 }

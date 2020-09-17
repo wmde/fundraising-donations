@@ -18,4 +18,6 @@ interface Donor {
 	public function isPrivatePerson(): bool;
 
 	public function isCompany(): bool;
+
+	public function hasEmailAddress(): bool;
 }

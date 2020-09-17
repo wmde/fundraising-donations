@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\Domain\Model\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -27,7 +28,6 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
  *
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineDonationRepositoryTest extends TestCase {
 
@@ -244,20 +244,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertSame( 'value', $data['untouched'] );
 		$this->assertNotSame( 'potato', $data['vorname'] );
 		$this->assertSame( 'untouched', $data['another'] );
-	}
-
-	/**
-	 * The backend application data purge script sets the personal information to empty strings
-	 */
-	public function testGivenPurgedDonationNoDonorIsCreated(): void {
-		$doctrineDonation = $this->getNewlyCreatedDoctrineDonation();
-		$doctrineDonation->setDtBackup( new \DateTime() );
-		$this->entityManager->persist( $doctrineDonation );
-		$this->entityManager->flush();
-
-		$donation = $this->newRepository()->getDonationById( $doctrineDonation->getId() );
-
-		$this->assertNull( $donation->getDonor() );
 	}
 
 	public function testGivenDonationUpdateWithoutDonorInformation_DonorNameStaysTheSame(): void {

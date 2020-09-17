@@ -88,13 +88,14 @@ class SofortPaymentNotificationUseCase {
 	}
 
 	private function sendConfirmationEmailFor( Donation $donation ): void {
-		if ( $donation->getDonor() !== null ) {
-			try {
-				$this->mailer->sendConfirmationMailFor( $donation );
-			}
-			catch ( RuntimeException $ex ) {
-				// no need to re-throw or return false, this is not a fatal error, only a minor inconvenience
-			}
+		if ( !$donation->getDonor()->hasEmailAddress() ) {
+			return;
+		}
+		try {
+			$this->mailer->sendConfirmationMailFor( $donation );
+		}
+		catch ( \Exception $ex ) {
+			// no need to re-throw or return false, this is not a fatal error, only a minor inconvenience
 		}
 	}
 

@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
+use WMDE\Fundraising\DonationContext\Domain\Model\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -113,12 +114,7 @@ class AddDonationUseCase {
 		return $donation;
 	}
 
-	private function getPersonalInfoFromRequest( AddDonationRequest $request ): ?Donor {
-		if ( $request->donorIsAnonymous() ) {
-			// TODO change to AnonymousDonor
-			return null;
-		}
-
+	private function getPersonalInfoFromRequest( AddDonationRequest $request ): Donor {
 		switch ( $request->getDonorType() ) {
 			case AddDonationRequest::TYPE_PERSON:
 				return new PersonDonor(
@@ -137,6 +133,8 @@ class AddDonationUseCase {
 					$this->getPhysicalAddressFromRequest( $request ),
 					$request->getDonorEmailAddress()
 				);
+			case AddDonationRequest::TYPE_ANONYMOUS:
+				return new AnonymousDonor();
 			default:
 				throw new \InvalidArgumentException( sprintf( 'Unknown donor type: %s', $request->getDonorType() ) );
 		}
@@ -205,13 +203,8 @@ class AddDonationUseCase {
 		return $trackingInfo->freeze()->assertNoNullFields();
 	}
 
-	/**
-	 * @param Donation $donation
-	 *
-	 * @throws \RuntimeException
-	 */
 	private function sendDonationConfirmationEmail( Donation $donation ): void {
-		if ( $donation->getDonor() !== null && !$donation->hasExternalPayment() ) {
+		if ( $donation->getDonor()->hasEmailAddress() && !$donation->hasExternalPayment() ) {
 			$this->mailer->sendConfirmationMailFor( $donation );
 		}
 	}
