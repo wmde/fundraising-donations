@@ -5,11 +5,12 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Model\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 
@@ -58,13 +59,7 @@ class UpdateDonorUseCase {
 			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_VALIDATION_FAILED, $donation );
 		}
 
-		$donor = new LegacyDonor(
-			$this->getDonorNameFromRequest( $updateDonorRequest ),
-			$this->getDonorAddressFromRequest( $updateDonorRequest ),
-			$updateDonorRequest->getEmailAddress()
-		);
-
-		$donation->setDonor( $donor );
+		$donation->setDonor( $this->getDonorFromRequest( $updateDonorRequest ) );
 		$this->donationRepository->storeDonation( $donation );
 
 		$this->donationConfirmationMailer->sendConfirmationMailFor( $donation );
@@ -72,8 +67,8 @@ class UpdateDonorUseCase {
 		return UpdateDonorResponse::newSuccessResponse( UpdateDonorResponse::SUCCESS_TEXT, $donation );
 	}
 
-	private function getDonorAddressFromRequest( UpdateDonorRequest $updateDonorRequest ): LegacyDonorAddress {
-		return new LegacyDonorAddress(
+	private function getDonorAddressFromRequest( UpdateDonorRequest $updateDonorRequest ): PostalAddress {
+		return new PostalAddress(
 			$updateDonorRequest->getStreetAddress(),
 			$updateDonorRequest->getPostalCode(),
 			$updateDonorRequest->getCity(),
@@ -81,20 +76,29 @@ class UpdateDonorUseCase {
 		);
 	}
 
-	private function getDonorNameFromRequest( UpdateDonorRequest $updateDonorRequest ): DonorName {
+	private function getDonorFromRequest( UpdateDonorRequest $updateDonorRequest ): Donor {
 		if ( $updateDonorRequest->getDonorType() === UpdateDonorRequest::TYPE_PERSON ) {
-			return new PersonName(
-				$updateDonorRequest->getFirstName(),
-				$updateDonorRequest->getLastName(),
-				$updateDonorRequest->getSalutation(),
-				$updateDonorRequest->getTitle()
+			return new PersonDonor(
+				new PersonName(
+					$updateDonorRequest->getFirstName(),
+					$updateDonorRequest->getLastName(),
+					$updateDonorRequest->getSalutation(),
+					$updateDonorRequest->getTitle()
+				),
+				$this->getDonorAddressFromRequest( $updateDonorRequest ),
+				$updateDonorRequest->getEmailAddress()
 			);
-		} elseif ( $updateDonorRequest->getDonorType() === UpdateDonorRequest::TYPE_ANONYMOUS ) {
-			return new CompanyName( $updateDonorRequest->getCompanyName() );
+
+		} elseif ( $updateDonorRequest->getDonorType() === UpdateDonorRequest::TYPE_COMPANY ) {
+			return new CompanyDonor(
+				new CompanyName( $updateDonorRequest->getCompanyName() ),
+				$this->getDonorAddressFromRequest( $updateDonorRequest ),
+				$updateDonorRequest->getEmailAddress()
+			);
 		}
 
 		// This should only happen if the UpdateDonorValidator does not catch invalid address types
-		throw new \UnexpectedValueException( 'Donor must be a known PersonType' );
+		throw new \UnexpectedValueException( 'Donor must be a company or person' );
 	}
 
 	private function requestIsAllowed( UpdateDonorRequest $updateDonorRequest ): bool {

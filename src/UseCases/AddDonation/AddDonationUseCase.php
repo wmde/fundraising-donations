@@ -6,15 +6,15 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
+use WMDE\Fundraising\DonationContext\Domain\Model\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\LegacyDonorAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\NoName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
+use WMDE\Fundraising\DonationContext\Domain\Model\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
@@ -113,42 +113,42 @@ class AddDonationUseCase {
 		return $donation;
 	}
 
-	private function getPersonalInfoFromRequest( AddDonationRequest $request ): ?LegacyDonor {
+	private function getPersonalInfoFromRequest( AddDonationRequest $request ): ?Donor {
 		if ( $request->donorIsAnonymous() ) {
+			// TODO change to AnonymousDonor
 			return null;
 		}
-		return new LegacyDonor(
-			$this->getNameFromRequest( $request ),
-			$this->getPhysicalAddressFromRequest( $request ),
-			$request->getDonorEmailAddress()
-		);
+
+		switch ( $request->getDonorType() ) {
+			case AddDonationRequest::TYPE_PERSON:
+				return new PersonDonor(
+						new PersonName(
+						$request->getDonorFirstName(),
+						$request->getDonorLastName(),
+						$request->getDonorSalutation(),
+						$request->getDonorTitle()
+					),
+					$this->getPhysicalAddressFromRequest( $request ),
+					$request->getDonorEmailAddress()
+				);
+			case AddDonationRequest::TYPE_COMPANY:
+				return new CompanyDonor(
+					new CompanyName( $request->getDonorCompany() ),
+					$this->getPhysicalAddressFromRequest( $request ),
+					$request->getDonorEmailAddress()
+				);
+			default:
+				throw new \InvalidArgumentException( sprintf( 'Unknown donor type: %s', $request->getDonorType() ) );
+		}
 	}
 
-	private function getPhysicalAddressFromRequest( AddDonationRequest $request ): LegacyDonorAddress {
-		return new LegacyDonorAddress(
+	private function getPhysicalAddressFromRequest( AddDonationRequest $request ): PostalAddress {
+		return new PostalAddress(
 			$request->getDonorStreetAddress(),
 			$request->getDonorPostalCode(),
 			$request->getDonorCity(),
 			$request->getDonorCountryCode()
 		);
-	}
-
-	private function getNameFromRequest( AddDonationRequest $request ): DonorName {
-		switch ( $request->getDonorType() ) {
-			case AddDonationRequest::TYPE_PERSON:
-				return new PersonName(
-					$request->getDonorFirstName(),
-					$request->getDonorLastName(),
-					$request->getDonorSalutation(),
-					$request->getDonorTitle()
-				);
-			case AddDonationRequest::TYPE_COMPANY:
-				return new CompanyName( $request->getDonorCompany() );
-			case AddDonationRequest::TYPE_ANONYMOUS:
-				return new NoName();
-			default:
-				throw new \InvalidArgumentException( sprintf( 'Unknown donor type: %s', $request->getDonorType() ) );
-		}
 	}
 
 	private function getPaymentFromRequest( AddDonationRequest $donationRequest ): DonationPayment {
