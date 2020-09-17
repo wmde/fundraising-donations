@@ -25,4 +25,8 @@ abstract class AbstractDonor implements Donor {
 		return $this->emailAddress;
 	}
 
+	public function hasEmailAddress(): bool {
+		return !empty( $this->getEmailAddress() );
+	}
+
 }

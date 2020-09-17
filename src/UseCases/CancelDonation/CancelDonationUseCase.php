@@ -94,12 +94,13 @@ class CancelDonationUseCase {
 	}
 
 	private function sendConfirmationEmail( Donation $donation ): void {
-		if ( $donation->getDonor() !== null ) {
-			$this->mailer->sendMail(
-				new EmailAddress( $donation->getDonor()->getEmailAddress() ),
-				$this->getConfirmationMailTemplateArguments( $donation )
-			);
+		if ( !$donation->getDonor()->hasEmailAddress() ) {
+			return;
 		}
+		$this->mailer->sendMail(
+			new EmailAddress( $donation->getDonor()->getEmailAddress() ),
+			$this->getConfirmationMailTemplateArguments( $donation )
+		);
 	}
 
 	private function getConfirmationMailTemplateArguments( Donation $donation ): array {

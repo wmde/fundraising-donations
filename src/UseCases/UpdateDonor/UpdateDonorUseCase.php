@@ -15,6 +15,10 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 
 /**
+ * This use case is for adding donor information to a donation after it was created.
+ *
+ * This allows for "quick" anonymous donations that the donor updates later in the funnel.
+ *
  * @license GPL-2.0-or-later
  */
 class UpdateDonorUseCase {
@@ -48,7 +52,7 @@ class UpdateDonorUseCase {
 			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_DONATION_IS_EXPORTED );
 		}
 
-		if ( $donation->getDonor() !== null ) {
+		if ( $donation->getDonor()->getPhysicalAddress() instanceof PostalAddress ) {
 			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_DONATION_HAS_ADDRESS );
 		}
 
