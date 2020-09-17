@@ -29,15 +29,23 @@ class DonorFieldMapper {
 	}
 
 	private static function getDataFieldsFromPersonName( LegacyDonorName $name ): array {
-		// TODO check for null name
-		return [
-			'adresstyp' => $name->getPersonType(),
-			'anrede' => $name->getSalutation(),
-			'titel' => $name->getTitle(),
-			'vorname' => $name->getFirstName(),
-			'nachname' => $name->getLastName(),
-			'firma' => $name->getCompanyName(),
+		$keyToDbFieldMap = [
+			'salutation' => 'anrede',
+			'title' => 'titel',
+			'firstName' => 'vorname',
+			'lastName' => 'nachname',
+			'companyName' => 'firma',
 		];
+		$result = [
+			'adresstyp' => $name->getPersonType(),
+		];
+		foreach ( $name->toArray() as $k => $v ) {
+			if ( empty( $keyToDbFieldMap[$k] ) ) {
+				throw new \UnexpectedValueException( sprintf( 'Name class returned unexpected value with key %s', $k ) );
+			}
+			$result[$keyToDbFieldMap[$k]] = $v;
+		}
+		return $result;
 	}
 
 	private static function getDataFieldsFromAddress( LegacyDonorAddress $address ): array {
