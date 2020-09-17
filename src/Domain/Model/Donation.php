@@ -34,7 +34,7 @@ class Donation {
 
 	private ?int $id;
 	private string $status;
-	private ?Donor $donor;
+	private Donor $donor;
 	private DonationPayment $payment;
 	private bool $optsIntoNewsletter;
 	private ?DonationComment $comment;
@@ -58,7 +58,7 @@ class Donation {
 	/**
 	 * @param int|null $id
 	 * @param string $status Must be one of the Donation::STATUS_ constants
-	 * @param Donor|null $donor
+	 * @param Donor $donor
 	 * @param DonationPayment $payment
 	 * @param bool $optsIntoNewsletter
 	 * @param DonationTrackingInfo $trackingInfo
@@ -66,7 +66,7 @@ class Donation {
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( ?int $id, string $status, ?Donor $donor, DonationPayment $payment,
+	public function __construct( ?int $id, string $status, Donor $donor, DonationPayment $payment,
 		bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 		$this->id = $id;
 		$this->setStatus( $status );
@@ -139,14 +139,7 @@ class Donation {
 		return $this->getPaymentMethod()->getId();
 	}
 
-	/**
-	 * Returns the Donor or null for anonymous donations.
-	 *
-	 * @return Donor|null
-	 * @todo Return AnonymousDonor instead
-	 *
-	 */
-	public function getDonor(): ?Donor {
+	public function getDonor(): Donor {
 		return $this->donor;
 	}
 
@@ -306,7 +299,7 @@ class Donation {
 	}
 
 	public function donorIsAnonymous(): bool {
-		return $this->donor === null;
+		return $this->donor instanceof AnonymousDonor;
 	}
 
 }

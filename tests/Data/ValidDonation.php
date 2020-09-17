@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use DateTime;
 use WMDE\Euro\Euro;
+use WMDE\Fundraising\DonationContext\Domain\Model\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -216,7 +217,7 @@ class ValidDonation {
 		return new Donation(
 			null,
 			$status,
-			null,
+			new AnonymousDonor(),
 			self::newDonationPayment( $paymentMethod ),
 			false,
 			self::newTrackingInfo()
@@ -227,7 +228,7 @@ class ValidDonation {
 		return new Donation(
 			$donationId,
 			$status,
-			null,
+			new AnonymousDonor(),
 			self::newDonationPayment( $paymentMethod ),
 			false,
 			self::newTrackingInfo()

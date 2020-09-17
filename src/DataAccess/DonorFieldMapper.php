@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Address;
+use WMDE\Fundraising\DonationContext\Domain\Model\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
@@ -18,12 +19,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
  * stores all personal information in a serialized blob.
  */
 class DonorFieldMapper {
-	public static function getPersonalDataFields( ?Donor $donor ): array {
-		// TODO make it non-nullable, useDonorType map instead
-		if ( $donor === null ) {
-			return [ 'adresstyp' => 'anonym' ];
-		}
-
+	public static function getPersonalDataFields( Donor $donor ): array {
 		return array_merge(
 			// Order of the fields is the same as the resulting array of ValidDoctrineDonation,
 			// otherwise comparing the serialized data will fail
@@ -32,9 +28,7 @@ class DonorFieldMapper {
 			],
 			self::getDataFieldsFromPersonName( $donor->getName() ),
 			self::getDataFieldsFromAddress( $donor->getPhysicalAddress() ),
-			[
-				'email' => $donor->getEmailAddress()
-			]
+			$donor instanceof AnonymousDonor ? [] : [ 'email' => $donor->getEmailAddress() ]
 		);
 	}
 
@@ -68,24 +62,28 @@ class DonorFieldMapper {
 		];
 	}
 
-	public static function updateDonorInformation( DoctrineDonation $doctrineDonation, Donor $donor = null ): void {
-		// TODO remove this check when we have an anonymous donor
-		if ( $donor === null ) {
-			if ( $doctrineDonation->getId() === null ) {
-				$doctrineDonation->setDonorFullName( 'Anonym' );
-			}
-		} else {
-			// TODO set when city is available (not anon/email-only)
-			$doctrineDonation->setDonorCity( $donor->getPhysicalAddress()->getCity() );
-			// TODO set when email is available (not anon)
-			$doctrineDonation->setDonorEmail( $donor->getEmailAddress() );
-			// TODO alway set
-			$doctrineDonation->setDonorFullName( $donor->getName()->getFullName() );
+	/**
+	 * Update donation information if the Donor is not anonymous
+	 *
+	 * @param DoctrineDonation $doctrineDonation
+	 * @param Donor $donor
+	 */
+	public static function updateDonorInformation( DoctrineDonation $doctrineDonation, Donor $donor ): void {
+		if ( $donor instanceof AnonymousDonor ) {
+			return;
 		}
+		$doctrineDonation->setDonorFullName( $donor->getName()->getFullName() );
+		$doctrineDonation->setDonorEmail( $donor->getEmailAddress() );
+
+		// protect against email-only updates accidentally overwriting city information
+		if ( $donor->getPhysicalAddress() instanceof NoAddress ) {
+			return;
+		}
+
+		$doctrineDonation->setDonorCity( $donor->getPhysicalAddress()->getCity() );
 	}
 
 	private static function getAddressType( Donor $donor ): string {
-		// TODO use donor type instead of name
 		$donorTypeMap = [
 			PersonName::class => 'person',
 			CompanyName::class => 'firma',

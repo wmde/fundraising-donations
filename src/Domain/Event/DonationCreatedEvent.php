@@ -9,9 +9,9 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 
 class DonationCreatedEvent implements Event {
 	private int $donationId;
-	private ?Donor $donor;
+	private Donor $donor;
 
-	public function __construct( int $donationId, ?Donor $donor ) {
+	public function __construct( int $donationId, Donor $donor ) {
 		$this->donationId = $donationId;
 		$this->donor = $donor;
 	}
@@ -20,7 +20,7 @@ class DonationCreatedEvent implements Event {
 		return $this->donationId;
 	}
 
-	public function getDonor(): ?Donor {
+	public function getDonor(): Donor {
 		return $this->donor;
 	}
 }

@@ -56,7 +56,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForCompany( $donationId ) );
 
 		$this->assertTrue( $response->isSuccessful() );
-		$this->assertNotNull( $repository->getDonationById( $donationId )->getDonor() );
+		$this->assertFalse( $repository->getDonationById( $donationId )->donorIsAnonymous() );
 	}
 
 	public function testGivenAnonymousDonationAndValidAddressData_confirmationMailIsSent() {

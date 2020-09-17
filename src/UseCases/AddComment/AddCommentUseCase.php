@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddComment;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
+use WMDE\Fundraising\DonationContext\Domain\Model\NoName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -84,9 +85,9 @@ class AddCommentUseCase {
 	}
 
 	private function newComment( Donation $donation, AddCommentRequest $request ): DonationComment {
-		$authorName = 'Anonym';
-		if ( !$request->isAnonymous() && $donation->getDonor() !== null ) {
-			$authorName = $donation->getDonor()->getName()->getFullName();
+		$authorName = $donation->getDonor()->getName()->getFullName();
+		if ( $request->isAnonymous() ) {
+			$authorName = ( new NoName() )->getFullName();
 		}
 		return new DonationComment(
 			$request->getCommentText(),

@@ -87,13 +87,14 @@ class CreditCardNotificationUseCase {
 	}
 
 	private function sendConfirmationEmail( Donation $donation ): ?Exception {
-		if ( $donation->getDonor() !== null ) {
-			try {
-				$this->mailer->sendConfirmationMailFor( $donation );
-			}
-			catch ( Exception $ex ) {
-				return $ex;
-			}
+		if ( !$donation->getDonor()->hasEmailAddress() ) {
+			return null;
+		}
+		try {
+			$this->mailer->sendConfirmationMailFor( $donation );
+		}
+		catch ( Exception $ex ) {
+			return $ex;
 		}
 		return null;
 	}
