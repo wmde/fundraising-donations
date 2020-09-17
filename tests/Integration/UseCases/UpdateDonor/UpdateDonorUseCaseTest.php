@@ -27,28 +27,33 @@ use WMDE\FunValidators\ConstraintViolation;
  */
 class UpdateDonorUseCaseTest extends TestCase {
 
-	/**
-	 * @var TemplateBasedMailerSpy
-	 */
-	private $templateMailer;
+	private TemplateBasedMailerSpy $templateMailer;
 
 	protected function setUp(): void {
 		$this->templateMailer = new TemplateBasedMailerSpy( $this );
 	}
 
-	public function testGivenAnonymousDonationAndValidAddressData_donationIsUpdated() {
+	public function testGivenAnonymousDonationAndValidAddressPersonalData_donationIsUpdated() {
 		$repository = $this->newRepository();
-		$useCase = new UpdateDonorUseCase(
-			$this->newDonationAuthorizer(),
-			$this->newDonorValidator(),
-			$repository,
-			$this->newConfirmationMailer()
-		);
-
+		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
-		$response = $useCase->updateDonor( $this->newUpdateDonorRequest( $donationId ) );
+
+		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
+
+		$this->assertTrue( $response->isSuccessful() );
+		$this->assertNotNull( $repository->getDonationById( $donationId )->getDonor() );
+	}
+
+	public function testGivenAnonymousDonationAndValidCompanyAddressData_donationIsUpdated() {
+		$repository = $this->newRepository();
+		$useCase = $this->newUpdateDonorUseCase( $repository );
+		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
+		$repository->storeDonation( $donation );
+		$donationId = $donation->getId();
+
+		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForCompany( $donationId ) );
 
 		$this->assertTrue( $response->isSuccessful() );
 		$this->assertNotNull( $repository->getDonationById( $donationId )->getDonor() );
@@ -56,34 +61,24 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 	public function testGivenAnonymousDonationAndValidAddressData_confirmationMailIsSent() {
 		$repository = $this->newRepository();
-		$useCase = new UpdateDonorUseCase(
-			$this->newDonationAuthorizer(),
-			$this->newDonorValidator(),
-			$repository,
-			$this->newConfirmationMailer()
-		);
-
+		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
-		$useCase->updateDonor( $this->newUpdateDonorRequest( $donationId ) );
+
+		$useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
 		$this->templateMailer->assertCalledOnce();
 	}
 
 	public function testGivenDonationWithAddressData_donationUpdateFails() {
 		$repository = $this->newRepository();
-		$useCase = new UpdateDonorUseCase(
-			$this->newDonationAuthorizer(),
-			$this->newDonorValidator(),
-			$repository,
-			$this->newConfirmationMailer()
-		);
-
+		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newDirectDebitDonation();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
-		$response = $useCase->updateDonor( $this->newUpdateDonorRequest( $donationId ) );
+
+		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
 		$this->assertFalse( $response->isSuccessful() );
 		$this->assertEquals( UpdateDonorResponse::ERROR_DONATION_HAS_ADDRESS, $response->getErrorMessage() );
@@ -97,11 +92,11 @@ class UpdateDonorUseCaseTest extends TestCase {
 			$repository,
 			$this->newConfirmationMailer()
 		);
-
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
-		$response = $useCase->updateDonor( $this->newUpdateDonorRequest( $donationId ) );
+
+		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
 		$this->assertFalse( $response->isSuccessful() );
 		$this->assertEquals( UpdateDonorResponse::ERROR_ACCESS_DENIED, $response->getErrorMessage() );
@@ -109,18 +104,13 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 	public function testGivenExportedDonation_donationUpdateFails() {
 		$repository = $this->newRepository();
-		$useCase = new UpdateDonorUseCase(
-			$this->newDonationAuthorizer(),
-			$this->newDonorValidator(),
-			$repository,
-			$this->newConfirmationMailer()
-		);
-
+		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$donation->markAsExported();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
-		$response = $useCase->updateDonor( $this->newUpdateDonorRequest( $donationId ) );
+
+		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
 		$this->assertFalse( $response->isSuccessful() );
 		$this->assertEquals( UpdateDonorResponse::ERROR_DONATION_IS_EXPORTED, $response->getErrorMessage() );
@@ -138,11 +128,11 @@ class UpdateDonorUseCaseTest extends TestCase {
 			$repository,
 			$this->newConfirmationMailer()
 		);
-
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
-		$response = $useCase->updateDonor( $this->newUpdateDonorRequest( $donationId ) );
+
+		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
 		$this->assertFalse( $response->isSuccessful() );
 		$this->assertEquals( 'donor_change_failure_validation_error', $response->getErrorMessage() );
@@ -162,7 +152,16 @@ class UpdateDonorUseCaseTest extends TestCase {
 		return $validator;
 	}
 
-	private function newUpdateDonorRequest( int $donationId ): UpdateDonorRequest {
+	private function newUpdateDonorUseCase( DonationRepository $repository ): UpdateDonorUseCase {
+		return new UpdateDonorUseCase(
+			$this->newDonationAuthorizer(),
+			$this->newDonorValidator(),
+			$repository,
+			$this->newConfirmationMailer()
+		);
+	}
+
+	private function newUpdateDonorRequestForPerson( int $donationId ): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
 			->withDonationId( $donationId )
 			->withType( UpdateDonorRequest::TYPE_PERSON )
@@ -170,6 +169,18 @@ class UpdateDonorUseCaseTest extends TestCase {
 			->withLastName( ValidDonation::DONOR_LAST_NAME )
 			->withSalutation( ValidDonation::DONOR_SALUTATION )
 			->withTitle( '' )
+			->withStreetAddress( ValidDonation::DONOR_STREET_ADDRESS )
+			->withPostalCode( ValidDonation::DONOR_POSTAL_CODE )
+			->withCity( ValidDonation::DONOR_CITY )
+			->withCountryCode( ValidDonation::DONOR_COUNTRY_CODE )
+			->withEmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS );
+	}
+
+	private function newUpdateDonorRequestForCompany( int $donationId ): UpdateDonorRequest {
+		return ( new UpdateDonorRequest() )
+			->withDonationId( $donationId )
+			->withType( UpdateDonorRequest::TYPE_COMPANY )
+			->withCompanyName( ValidDonation::DONOR_COMPANY )
 			->withStreetAddress( ValidDonation::DONOR_STREET_ADDRESS )
 			->withPostalCode( ValidDonation::DONOR_POSTAL_CODE )
 			->withCity( ValidDonation::DONOR_CITY )
