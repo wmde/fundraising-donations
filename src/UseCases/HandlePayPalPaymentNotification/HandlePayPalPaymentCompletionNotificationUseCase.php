@@ -67,7 +67,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			return $this->createErrorResponse( $ex );
 		}
 
-		$this->sendConfirmationEmailFor( $donation );
+		$this->mailer->sendConfirmationMailFor( $donation );
 		$this->donationEventLogger->log( $donation->getId(), 'paypal_handler: booked' );
 
 		return PaypalNotificationResponse::newSuccessResponse();
@@ -111,7 +111,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			return $this->createErrorResponse( $ex );
 		}
 
-		$this->sendConfirmationEmailFor( $donation );
+		$this->mailer->sendConfirmationMailFor( $donation );
 		$this->donationEventLogger->log( $donation->getId(), 'paypal_handler: booked' );
 
 		return PaypalNotificationResponse::newSuccessResponse();
@@ -123,18 +123,6 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 				'message' => $reason
 			]
 		);
-	}
-
-	private function sendConfirmationEmailFor( Donation $donation ): void {
-		if ( !$donation->getDonor()->hasEmailAddress() ) {
-			return;
-		}
-		try {
-			$this->mailer->sendConfirmationMailFor( $donation );
-		}
-		catch ( \Exception $ex ) {
-			// no need to re-throw or return false, this is not a fatal error, only a minor inconvenience
-		}
 	}
 
 	private function newPayPalDataFromRequest( PayPalPaymentNotificationRequest $request ): PayPalData {
