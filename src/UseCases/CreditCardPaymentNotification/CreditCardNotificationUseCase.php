@@ -83,20 +83,9 @@ class CreditCardNotificationUseCase {
 
 		$this->donationEventLogger->log( $donation->getId(), 'mcp_handler: booked' );
 
-		return CreditCardNotificationResponse::newSuccessResponse( $this->sendConfirmationEmail( $donation ) );
-	}
+		$this->mailer->sendConfirmationMailFor( $donation );
 
-	private function sendConfirmationEmail( Donation $donation ): ?Exception {
-		if ( !$donation->getDonor()->hasEmailAddress() ) {
-			return null;
-		}
-		try {
-			$this->mailer->sendConfirmationMailFor( $donation );
-		}
-		catch ( Exception $ex ) {
-			return $ex;
-		}
-		return null;
+		return CreditCardNotificationResponse::newSuccessResponse( null );
 	}
 
 	private function newCreditCardDataFromRequest( CreditCardPaymentNotificationRequest $request ): CreditCardTransactionData {

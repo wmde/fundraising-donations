@@ -11,17 +11,19 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
  * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
 class DonationConfirmationMailer {
 
-	private $mailer;
+	private TemplateMailerInterface $mailer;
 
 	public function __construct( TemplateMailerInterface $mailer ) {
-		$this->mailer = $mailer;
+		$this->mailer = new BestEffortTemplateMailer( $mailer );
 	}
 
 	public function sendConfirmationMailFor( Donation $donation ): void {
+		if ( !$donation->getDonor()->hasEmailAddress() ) {
+			return;
+		}
 		$this->mailer->sendMail(
 			new EmailAddress( $donation->getDonor()->getEmailAddress() ),
 			$this->getConfirmationMailTemplateArguments( $donation )
@@ -44,6 +46,8 @@ class DonationConfirmationMailer {
 	}
 
 	private function getBankTransferCode( PaymentMethod $paymentMethod ): string {
+		// TODO convert this `if` statement into an interface where every payment method except BankTransfer returns empty string
+		// See https://phabricator.wikimedia.org/T192323
 		if ( $paymentMethod instanceof BankTransferPayment ) {
 			return $paymentMethod->getBankTransferCode();
 		}

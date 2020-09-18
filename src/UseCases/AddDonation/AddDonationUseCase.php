@@ -82,15 +82,12 @@ class AddDonationUseCase {
 			$donation->markAsDeleted();
 		}
 
-		// TODO: handle exceptions
 		$this->donationRepository->storeDonation( $donation );
 
-		// TODO: handle exceptions
 		$tokens = $this->tokenFetcher->getTokens( $donation->getId() );
 
 		$this->eventEmitter->emit( new DonationCreatedEvent( $donation->getId(), $donation->getDonor() ) );
 
-		// TODO: handle exceptions
 		$this->sendDonationConfirmationEmail( $donation );
 
 		return AddDonationResponse::newSuccessResponse(

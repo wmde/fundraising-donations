@@ -112,26 +112,6 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 	}
 
-	public function testWhenAuthorizationSucceedsForAnonymousDonation_confirmationMailIsNotSent(): void {
-		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( $donation );
-
-		$mailer = $this->getMailer();
-		$mailer->expects( $this->never() )
-			->method( 'sendConfirmationMailFor' );
-
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$mailer,
-			$this->getEventLogger()
-		);
-
-		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
-	}
-
 	public function testWhenAuthorizationSucceeds_donationIsStored(): void {
 		$donation = ValidDonation::newIncompletePayPalDonation();
 		$repositorySpy = new DonationRepositorySpy( $donation );
@@ -181,26 +161,6 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 
 		$this->assertEventLogContainsExpression( $eventLogger, $donation->getId(), '/booked/' );
-	}
-
-	public function testWhenSendingConfirmationMailFails_handlerReturnsTrue(): void {
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( ValidDonation::newIncompletePayPalDonation() );
-
-		$mailer = $this->getMailer();
-		$mailer->expects( $this->once() )
-			->method( 'sendConfirmationMailFor' )
-			->willThrowException( new \RuntimeException( 'Oh noes!' ) );
-
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$mailer,
-			$this->getEventLogger()
-		);
-
-		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 	}
 
 	public function testGivenNewTransactionIdForBookedDonation_transactionIdShowsUpInChildPayments(): void {

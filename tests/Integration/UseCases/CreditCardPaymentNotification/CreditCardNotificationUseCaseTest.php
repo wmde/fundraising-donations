@@ -114,19 +114,6 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$this->assertNull( $response->getLowLevelError() );
 	}
 
-	public function testWhenAuthorizationSucceedsForAnonymousDonation_confirmationMailIsNotSent(): void {
-		$donation = ValidDonation::newIncompleteAnonymousCreditCardDonation();
-		$this->repository->storeDonation( $donation );
-
-		$this->mailer->expects( $this->never() )
-			->method( 'sendConfirmationMailFor' );
-
-		$useCase = $this->newCreditCardNotificationUseCase();
-
-		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
-		$useCase->handleNotification( $request );
-	}
-
 	public function testWhenAuthorizationSucceeds_donationIsStored(): void {
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
 		$this->repository = new DonationRepositorySpy( $donation );
@@ -160,20 +147,6 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$useCase->handleNotification( $request );
 
 		$this->assertEventLogContainsExpression( $this->eventLogger, $donation->getId(), '/booked/' );
-	}
-
-	public function testWhenSendingConfirmationMailFails_handlerReturnsSuccessResultContainingException(): void {
-		$this->repository->storeDonation( ValidDonation::newIncompleteCreditCardDonation() );
-		$this->mailer->expects( $this->once() )
-			->method( 'sendConfirmationMailFor' )
-			->willThrowException( new \RuntimeException( 'Oh noes!' ) );
-		$useCase = $this->newCreditCardNotificationUseCase();
-		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
-
-		$response = $useCase->handleNotification( $request );
-
-		$this->assertTrue( $response->isSuccessful() );
-		$this->assertNotNull( $response->getLowLevelError() );
 	}
 
 	/**

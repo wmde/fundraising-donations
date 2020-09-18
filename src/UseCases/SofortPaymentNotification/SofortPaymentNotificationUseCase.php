@@ -74,7 +74,7 @@ class SofortPaymentNotificationUseCase {
 			return $this->createFailureResponse( $ex );
 		}
 
-		$this->sendConfirmationEmailFor( $donation );
+		$this->mailer->sendConfirmationMailFor( $donation );
 
 		return SofortNotificationResponse::newSuccessResponse();
 	}
@@ -85,18 +85,6 @@ class SofortPaymentNotificationUseCase {
 				'message' => $reason
 			]
 		);
-	}
-
-	private function sendConfirmationEmailFor( Donation $donation ): void {
-		if ( !$donation->getDonor()->hasEmailAddress() ) {
-			return;
-		}
-		try {
-			$this->mailer->sendConfirmationMailFor( $donation );
-		}
-		catch ( \Exception $ex ) {
-			// no need to re-throw or return false, this is not a fatal error, only a minor inconvenience
-		}
 	}
 
 	private function createFailureResponse( RuntimeException $ex ): SofortNotificationResponse {
