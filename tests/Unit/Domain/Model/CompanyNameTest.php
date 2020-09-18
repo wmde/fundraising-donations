@@ -3,10 +3,10 @@
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 
 /**
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\CompanyName
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName
  */
 class CompanyNameTest extends TestCase {
 	public function testGivenCompanyNameOnly_getFullNameReturnsCompanyName(): void {

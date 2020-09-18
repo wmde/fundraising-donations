@@ -6,13 +6,13 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Address;
-use WMDE\Fundraising\DonationContext\Domain\Model\AnonymousDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\NoAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\NoName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\Domain\Model\NoAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\NoName;
-use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
 
 /**
  * Convert a Donor into an array of fields for the legacy database schema that

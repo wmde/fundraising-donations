@@ -3,10 +3,10 @@
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 
 /**
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\PersonName
+ * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName
  */
 class PersonNameTest extends TestCase {
 

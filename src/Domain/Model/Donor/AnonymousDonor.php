@@ -2,7 +2,10 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\DonationContext\Domain\Model;
+namespace WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\NoAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\NoName;
 
 class AnonymousDonor extends AbstractDonor {
 
