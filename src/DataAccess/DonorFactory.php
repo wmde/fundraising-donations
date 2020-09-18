@@ -5,13 +5,13 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
-use WMDE\Fundraising\DonationContext\Domain\Model\AnonymousDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\CompanyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
-use WMDE\Fundraising\DonationContext\Domain\Model\PersonDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\PersonName;
-use WMDE\Fundraising\DonationContext\Domain\Model\PostalAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 
 class DonorFactory {
 	public static function createDonorFromEntity( DoctrineDonation $donation ): Donor {
