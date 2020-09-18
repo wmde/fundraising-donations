@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddComment;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
-use WMDE\Fundraising\DonationContext\Domain\Model\NoName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\NoName;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;

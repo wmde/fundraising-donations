@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
 
 use RuntimeException;
 use WMDE\Euro\Euro;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;

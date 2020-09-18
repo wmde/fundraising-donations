@@ -2,7 +2,9 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\DonationContext\Domain\Model;
+namespace WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name;
+
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 
 class CompanyName implements DonorName {
 
