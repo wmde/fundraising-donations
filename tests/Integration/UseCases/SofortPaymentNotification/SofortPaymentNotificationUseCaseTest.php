@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\SofortPaymentNotification;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -37,7 +38,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationMailer|\PHPUnit_Framework_MockObject_MockObject
+	 * @return DonationConfirmationMailer&MockObject
 	 */
 	private function getMailer(): DonationConfirmationMailer {
 		return $this->createMock( DonationConfirmationMailer::class );
@@ -150,34 +151,6 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 
 		$request = ValidSofortNotificationRequest::newInstantPayment( 1 );
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
-	}
-
-	public function testWhenSendingConfirmationMailFails_handlerReturnsTrue(): void {
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( ValidDonation::newIncompleteSofortDonation() );
-
-		$useCase = new SofortPaymentNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$this->newThrowingMailer()
-		);
-
-		$request = ValidSofortNotificationRequest::newInstantPayment();
-
-		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
-	}
-
-	/**
-	 * @return DonationConfirmationMailer|\PHPUnit_Framework_MockObject_MockObject
-	 */
-	private function newThrowingMailer(): DonationConfirmationMailer {
-		$mailer = $this->getMailer();
-
-		$mailer->expects( $this->once() )
-			->method( 'sendConfirmationMailFor' )
-			->willThrowException( new \RuntimeException( 'Oh noes!' ) );
-
-		return $mailer;
 	}
 
 	public function testGivenSetConfirmedAtForBookedDonation_unhandledResponseIsReturned(): void {

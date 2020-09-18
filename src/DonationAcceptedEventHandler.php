@@ -51,7 +51,6 @@ class DonationAcceptedEventHandler {
 			return self::UNKNOWN_ID_PROVIDED;
 		}
 
-		// TODO: handle exceptions
 		$this->mailer->sendConfirmationMailFor( $donation );
 
 		return self::SUCCESS;
