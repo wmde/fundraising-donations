@@ -9,6 +9,8 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\NoName;
 
 class AnonymousDonor extends AbstractDonor {
 
+	private const DONOR_TYPE = 'anonymous';
+
 	public function __construct() {
 		$this->name = new NoName();
 		$this->physicalAddress = new NoAddress();
@@ -22,4 +24,9 @@ class AnonymousDonor extends AbstractDonor {
 	public function isCompany(): bool {
 		return false;
 	}
+
+	public function getDonorType(): string {
+		return self::DONOR_TYPE;
+	}
+
 }
