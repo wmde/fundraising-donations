@@ -11,25 +11,20 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Address;
  */
 class NoAddress implements Address {
 
-	private string $streetAddress = '';
-	private string $postalCode = '';
-	private string $city = '';
-	private string $countryCode = '';
-
 	public function getStreetAddress(): string {
-		return $this->streetAddress;
+		return '';
 	}
 
 	public function getPostalCode(): string {
-		return $this->postalCode;
+		return '';
 	}
 
 	public function getCity(): string {
-		return $this->city;
+		return '';
 	}
 
 	public function getCountryCode(): string {
-		return $this->countryCode;
+		return '';
 	}
 
 }
