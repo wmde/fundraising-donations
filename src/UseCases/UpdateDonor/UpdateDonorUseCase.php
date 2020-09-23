@@ -11,6 +11,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 
@@ -81,7 +82,7 @@ class UpdateDonorUseCase {
 	}
 
 	private function getDonorFromRequest( UpdateDonorRequest $updateDonorRequest ): Donor {
-		if ( $updateDonorRequest->getDonorType() === UpdateDonorRequest::TYPE_PERSON ) {
+		if ( $updateDonorRequest->getDonorType()->is( DonorType::PERSON() ) ) {
 			return new PersonDonor(
 				new PersonName(
 					$updateDonorRequest->getFirstName(),
@@ -93,7 +94,7 @@ class UpdateDonorUseCase {
 				$updateDonorRequest->getEmailAddress()
 			);
 
-		} elseif ( $updateDonorRequest->getDonorType() === UpdateDonorRequest::TYPE_COMPANY ) {
+		} elseif ( $updateDonorRequest->getDonorType()->is( DonorType::COMPANY() ) ) {
 			return new CompanyDonor(
 				new CompanyName( $updateDonorRequest->getCompanyName() ),
 				$this->getDonorAddressFromRequest( $updateDonorRequest ),

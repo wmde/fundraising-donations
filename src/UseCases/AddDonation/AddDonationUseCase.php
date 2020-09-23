@@ -16,6 +16,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
@@ -112,29 +113,29 @@ class AddDonationUseCase {
 	}
 
 	private function getPersonalInfoFromRequest( AddDonationRequest $request ): Donor {
-		switch ( $request->getDonorType() ) {
-			case AddDonationRequest::TYPE_PERSON:
-				return new PersonDonor(
-						new PersonName(
-						$request->getDonorFirstName(),
-						$request->getDonorLastName(),
-						$request->getDonorSalutation(),
-						$request->getDonorTitle()
-					),
-					$this->getPhysicalAddressFromRequest( $request ),
-					$request->getDonorEmailAddress()
-				);
-			case AddDonationRequest::TYPE_COMPANY:
-				return new CompanyDonor(
-					new CompanyName( $request->getDonorCompany() ),
-					$this->getPhysicalAddressFromRequest( $request ),
-					$request->getDonorEmailAddress()
-				);
-			case AddDonationRequest::TYPE_ANONYMOUS:
-				return new AnonymousDonor();
-			default:
-				throw new \InvalidArgumentException( sprintf( 'Unknown donor type: %s', $request->getDonorType() ) );
+		$donorType = $request->getDonorType();
+		if ( $donorType->is( DonorType::PERSON() ) ) {
+
+			return new PersonDonor(
+				new PersonName(
+					$request->getDonorFirstName(),
+					$request->getDonorLastName(),
+					$request->getDonorSalutation(),
+					$request->getDonorTitle()
+				),
+				$this->getPhysicalAddressFromRequest( $request ),
+				$request->getDonorEmailAddress()
+			);
+		} elseif ( $donorType->is( DonorType::COMPANY() ) ) {
+			return new CompanyDonor(
+				new CompanyName( $request->getDonorCompany() ),
+				$this->getPhysicalAddressFromRequest( $request ),
+				$request->getDonorEmailAddress()
+			);
+		} elseif ( $donorType->is( DonorType::ANONYMOUS() ) ) {
+			return new AnonymousDonor();
 		}
+		throw new \InvalidArgumentException( sprintf( 'Unknown donor type: %s', $request->getDonorType() ) );
 	}
 
 	private function getPhysicalAddressFromRequest( AddDonationRequest $request ): PostalAddress {

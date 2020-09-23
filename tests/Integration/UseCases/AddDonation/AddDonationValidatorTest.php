@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonatio
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -47,7 +48,7 @@ class AddDonationValidatorTest extends TestCase {
 	public function testGivenAnonymousDonorAndEmptyAddressFields_validatorReturnsNoViolations(): void {
 		$request = ValidAddDonationRequest::getRequest();
 
-		$request->setDonorType( AddDonationRequest::TYPE_ANONYMOUS );
+		$request->setDonorType( DonorType::ANONYMOUS() );
 		$request->setDonorSalutation( '' );
 		$request->setDonorTitle( '' );
 		$request->setDonorCompany( '' );
@@ -88,7 +89,7 @@ class AddDonationValidatorTest extends TestCase {
 
 	public function testPersonalInfoValidationFails_validatorReturnsFalse(): void {
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setDonorType( AddDonationRequest::TYPE_COMPANY );
+		$request->setDonorType( DonorType::COMPANY() );
 		$request->setDonorCompany( '' );
 
 		$this->assertFalse( $this->donationValidator->validate( $request )->isSuccessful() );

@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\UpdateDono
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -164,7 +165,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 	private function newUpdateDonorRequestForPerson( int $donationId ): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
 			->withDonationId( $donationId )
-			->withType( UpdateDonorRequest::TYPE_PERSON )
+			->withType( DonorType::PERSON() )
 			->withFirstName( ValidDonation::DONOR_FIRST_NAME )
 			->withLastName( ValidDonation::DONOR_LAST_NAME )
 			->withSalutation( ValidDonation::DONOR_SALUTATION )
@@ -179,7 +180,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 	private function newUpdateDonorRequestForCompany( int $donationId ): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
 			->withDonationId( $donationId )
-			->withType( UpdateDonorRequest::TYPE_COMPANY )
+			->withType( DonorType::COMPANY() )
 			->withCompanyName( ValidDonation::DONOR_COMPANY )
 			->withStreetAddress( ValidDonation::DONOR_STREET_ADDRESS )
 			->withPostalCode( ValidDonation::DONOR_POSTAL_CODE )

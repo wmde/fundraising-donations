@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
@@ -25,14 +26,15 @@ class UpdateDonorValidator {
 	}
 
 	public function validateDonorData( UpdateDonorRequest $donorRequest ): UpdateDonorValidationResult {
-		if ( $donorRequest->getDonorType() === UpdateDonorRequest::TYPE_PERSON ) {
+		$donorType = $donorRequest->getDonorType();
+		if ( $donorType->is( DonorType::PERSON() ) ) {
 			$nameViolations = $this->getPersonViolations( $donorRequest );
-		} elseif ( $donorRequest->getDonorType() === UpdateDonorRequest::TYPE_COMPANY ) {
+		} elseif ( $donorType->is( DonorType::COMPANY() ) ) {
 			$nameViolations = $this->getCompanyViolations( $donorRequest );
-		} elseif ( $donorRequest->getDonorType() === UpdateDonorRequest::TYPE_ANONYMOUS ) {
+		} elseif ( $donorType->is( DonorType::ANONYMOUS() ) ) {
 			return new UpdateDonorValidationResult( $this->getAnonymousViolation( $donorRequest ) );
 		} else {
-			throw new \InvalidArgumentException( sprintf( ' Unknown donor type: %s', $donorRequest->getDonorType() ) );
+			throw new \InvalidArgumentException( sprintf( ' Unknown donor type: %s', $donorType ) );
 		}
 
 		$violations = array_merge(

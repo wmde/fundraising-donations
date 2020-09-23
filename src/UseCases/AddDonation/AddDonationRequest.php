@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
 
 /**
@@ -12,48 +13,50 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
  */
 class AddDonationRequest {
 
-	public const TYPE_PERSON = 'person';
-	public const TYPE_COMPANY = 'company';
-	public const TYPE_ANONYMOUS = 'anonymous';
-
-	private $donorType;
-	private $donorFirstName;
-	private $donorLastName;
-	private $donorSalutation;
-	private $donorTitle;
-	private $donorCompany;
-	private $donorStreetAddress;
-	private $donorPostalCode;
-	private $donorCity;
-	private $donorCountryCode;
-	private $donorEmailAddress;
+	private DonorType $donorType;
+	private string $donorFirstName = '';
+	private string $donorLastName = '';
+	private string $donorSalutation = '';
+	private string $donorTitle = '';
+	private string $donorCompany = '';
+	private string $donorStreetAddress = '';
+	private string $donorPostalCode = '';
+	private string $donorCity = '';
+	private string $donorCountryCode = '';
+	private string $donorEmailAddress = '';
 
 	/**
 	 * Newsletter subscription
-	 *
-	 * @var string
 	 */
-	private $optIn = '';
+	private string $optIn = '';
 
 	# donation
-	private $amount;
-	private $paymentType = '';
-	private $interval = 0;
+	private Euro $amount;
+	private string $paymentType = '';
+	private int $interval = 0;
 
 	# direct debit related
-	private $bankData;
+	private ?BankData $bankData;
 
 	# tracking
-	private $tracking = '';
-	private $source = '';
-	private $totalImpressionCount = 0;
-	private $singleBannerImpressionCount = 0;
+	private string $tracking = '';
+	private string $source = '';
+	private int $totalImpressionCount = 0;
+	private int $singleBannerImpressionCount = 0;
 	// Legacy values, will be deprecated in the future
-	private $color = '';
-	private $skin = '';
-	private $layout = '';
+	private string $color = '';
+	private string $skin = '';
+	private string $layout = '';
 
-	private $optsIntoDonationReceipt = true;
+	private bool $optsIntoDonationReceipt = true;
+
+	/**
+	 * AddDonationRequest constructor.
+	 */
+	public function __construct() {
+		$this->amount = Euro::newFromCents( 0 );
+		$this->donorType = DonorType::ANONYMOUS();
+	}
 
 	public function getOptIn(): string {
 		return $this->optIn;
@@ -148,11 +151,11 @@ class AddDonationRequest {
 		return $this->layout;
 	}
 
-	public function getDonorType(): string {
+	public function getDonorType(): DonorType {
 		return $this->donorType;
 	}
 
-	public function setDonorType( string $donorType ): void {
+	public function setDonorType( DonorType $donorType ): void {
 		$this->donorType = $donorType;
 	}
 
@@ -237,11 +240,7 @@ class AddDonationRequest {
 	}
 
 	public function donorIsAnonymous(): bool {
-		return $this->getDonorType() === self::TYPE_ANONYMOUS;
-	}
-
-	public function donorIsCompany(): bool {
-		return $this->getDonorType() === self::TYPE_COMPANY;
+		return $this->getDonorType()->is( DonorType::ANONYMOUS() );
 	}
 
 	public function setOptsIntoDonationReceipt( bool $optIn ): void {
