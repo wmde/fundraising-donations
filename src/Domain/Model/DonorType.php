@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
 /**
  * @method static DonorType PERSON()
  * @method static DonorType COMPANY()
+ * @method static DonorType EMAIL()
  * @method static DonorType ANONYMOUS()
  */
 class DonorType {
@@ -16,6 +17,7 @@ class DonorType {
 	private const TYPES = [
 		'PERSON' => 'person',
 		'COMPANY' => 'company',
+		'EMAIL' => 'email',
 		'ANONYMOUS' => 'anonymous'
 	];
 
