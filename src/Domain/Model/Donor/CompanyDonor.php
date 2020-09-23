@@ -6,10 +6,9 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
 class CompanyDonor extends AbstractDonor {
-
-	private const DONOR_TYPE = 'company';
 
 	public function __construct( CompanyName $name, PostalAddress $address, string $emailAddress ) {
 		$this->name = $name;
@@ -26,6 +25,6 @@ class CompanyDonor extends AbstractDonor {
 	}
 
 	public function getDonorType(): string {
-		return self::DONOR_TYPE;
+		return (string)DonorType::COMPANY();
 	}
 }

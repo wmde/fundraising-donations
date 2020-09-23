@@ -6,10 +6,9 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\NoAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\NoName;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
 class AnonymousDonor extends AbstractDonor {
-
-	private const DONOR_TYPE = 'anonymous';
 
 	public function __construct() {
 		$this->name = new NoName();
@@ -26,7 +25,7 @@ class AnonymousDonor extends AbstractDonor {
 	}
 
 	public function getDonorType(): string {
-		return self::DONOR_TYPE;
+		return (string)DonorType::ANONYMOUS();
 	}
 
 }
