@@ -42,6 +42,39 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
+	public static function newCompanyDonation(): Donation {
+		$self = new self();
+		$donation = ( new self() )->createDonation();
+		$donation->setDonorFullName( ValidDonation::DONOR_COMPANY );
+		$donation->encodeAndSetData(
+			array_merge(
+				$self->getTrackingInfoArray(),
+				$self->getBankDataArray(),
+				[
+					'adresstyp' => 'firma',
+					'firma' => ValidDonation::DONOR_COMPANY
+				],
+				$self->getAddressArray(),
+				[ 'email' => ValidDonation::DONOR_EMAIL_ADDRESS ]
+			)
+		);
+		return $donation;
+	}
+
+	public static function newAnonymousDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->encodeAndSetData(
+			array_merge(
+				[ 'adresstyp' => 'anonym' ],
+				$self->getTrackingInfoArray(),
+				$self->getPaypalDataArray()
+			)
+		);
+		return $donation;
+	}
+
 	private function createDonation(): Donation {
 		$donation = new Donation();
 

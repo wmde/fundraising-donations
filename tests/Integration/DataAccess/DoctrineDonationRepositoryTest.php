@@ -26,6 +26,9 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonorFactory
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation
  *
  * @license GPL-2.0-or-later
  */
