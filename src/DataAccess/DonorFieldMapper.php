@@ -85,13 +85,14 @@ class DonorFieldMapper {
 
 	private static function getAddressType( Donor $donor ): string {
 		$donorTypeMap = [
-			PersonName::class => 'person',
-			CompanyName::class => 'firma',
-			NoName::class => 'anonym'
+			Donor\PersonDonor::class => 'person',
+			Donor\CompanyDonor::class => 'firma',
+			Donor\EmailDonor::class => 'email',
+			AnonymousDonor::class => 'anonym'
 		];
-		$donorNameClass = get_class( $donor->getName() );
+		$donorNameClass = get_class( $donor );
 		if ( empty( $donorTypeMap[$donorNameClass] ) ) {
-			throw new \UnexpectedValueException( sprintf( 'Could not determine address type, unexpected donor name class "%s"', $donorNameClass ) );
+			throw new \UnexpectedValueException( sprintf( 'Could not determine address type, unexpected donor class "%s"', $donorNameClass ) );
 		}
 		return $donorTypeMap[$donorNameClass];
 	}
