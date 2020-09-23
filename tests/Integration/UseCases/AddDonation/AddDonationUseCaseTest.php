@@ -12,6 +12,7 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -229,7 +230,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$donationRequest = new AddDonationRequest();
 		$donationRequest->setAmount( Euro::newFromString( '1.00' ) );
 		$donationRequest->setPaymentType( PaymentMethod::BANK_TRANSFER );
-		$donationRequest->setDonorType( AddDonationRequest::TYPE_ANONYMOUS );
+		$donationRequest->setDonorType( DonorType::ANONYMOUS() );
 		return $donationRequest;
 	}
 
@@ -237,7 +238,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$donationRequest = new AddDonationRequest();
 		$donationRequest->setPaymentType( PaymentMethod::DIRECT_DEBIT );
 		$donationRequest->setAmount( Euro::newFromInt( 0 ) );
-		$donationRequest->setDonorType( AddDonationRequest::TYPE_ANONYMOUS );
+		$donationRequest->setDonorType( DonorType::ANONYMOUS() );
 		return $donationRequest;
 	}
 
@@ -343,7 +344,7 @@ class AddDonationUseCaseTest extends TestCase {
 	private function newValidAddDonationRequestWithEmail( string $email ): AddDonationRequest {
 		$request = $this->newMinimumDonationRequest();
 
-		$request->setDonorType( AddDonationRequest::TYPE_PERSON );
+		$request->setDonorType( DonorType::PERSON() );
 		$request->setDonorFirstName( ValidDonation::DONOR_FIRST_NAME );
 		$request->setDonorLastName( ValidDonation::DONOR_LAST_NAME );
 		$request->setDonorCompany( '' );
@@ -361,7 +362,7 @@ class AddDonationUseCaseTest extends TestCase {
 	private function newValidCompanyDonationRequest(): AddDonationRequest {
 		$request = $this->newMinimumDonationRequest();
 
-		$request->setDonorType( AddDonationRequest::TYPE_COMPANY );
+		$request->setDonorType( DonorType::COMPANY() );
 		$request->setDonorFirstName( '' );
 		$request->setDonorLastName( '' );
 		$request->setDonorCompany( ValidDonation::DONOR_LAST_NAME );

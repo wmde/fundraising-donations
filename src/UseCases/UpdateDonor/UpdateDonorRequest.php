@@ -4,33 +4,35 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
+
 /**
  * @license GPL-2.0-or-later
  */
 class UpdateDonorRequest {
 
-	public const TYPE_PERSON = 'person';
-	public const TYPE_COMPANY = 'company';
-	public const TYPE_ANONYMOUS = 'anonymous';
+	private int $donationId = 0;
+	private DonorType $donorType;
+	private string $firstName = '';
+	private string $lastName = '';
+	private string $salutation = '';
+	private string $title = '';
+	private string $companyName = '';
+	private string $streetAddress = '';
+	private string $postalCode = '';
+	private string $city = '';
+	private string $countryCode = '';
+	private string $emailAddress = '';
 
-	private $donationId;
-	private $donorType;
-	private $firstName;
-	private $lastName;
-	private $salutation;
-	private $title;
-	private $companyName;
-	private $streetAddress;
-	private $postalCode;
-	private $city;
-	private $countryCode;
-	private $emailAddress;
+	public function __construct() {
+		$this->donorType = DonorType::PERSON();
+	}
 
 	public static function newInstance(): self {
 		return new self();
 	}
 
-	public function withType( string $donorType ): self {
+	public function withType( DonorType $donorType ): self {
 		$request = clone $this;
 		$request->donorType = $donorType;
 		return $request;
@@ -102,7 +104,7 @@ class UpdateDonorRequest {
 		return $request;
 	}
 
-	public function getDonorType(): string {
+	public function getDonorType(): DonorType {
 		return $this->donorType;
 	}
 
