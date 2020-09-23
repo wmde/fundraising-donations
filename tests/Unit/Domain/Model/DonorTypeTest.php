@@ -55,6 +55,7 @@ class DonorTypeTest extends TestCase {
 		return [
 			[ 'person', DonorType::PERSON() ],
 			[ 'company', DonorType::COMPANY() ],
+			[ 'email', DonorType::EMAIL() ],
 			[ 'anonymous', DonorType::ANONYMOUS() ],
 		];
 	}
