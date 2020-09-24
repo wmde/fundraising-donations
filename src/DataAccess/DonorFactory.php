@@ -30,6 +30,11 @@ class DonorFactory {
 					self::getPhysicalAddressFromEntity( $donation ),
 					$donation->getDonorEmail()
 				);
+			case 'email':
+				return new Donor\EmailDonor(
+					new PersonName( $data['vorname'], $data['nachname'], $data['anrede'], $data['titel'] ),
+					$donation->getDonorEmail()
+				);
 			case 'anonym':
 				return new AnonymousDonor();
 			default:

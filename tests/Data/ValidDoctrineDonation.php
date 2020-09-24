@@ -75,6 +75,24 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
+	public static function newEmailDonation() {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->encodeAndSetData(
+			array_merge(
+				[
+					'adresstyp' => 'email',
+					'email' => ValidDonation::DONOR_EMAIL_ADDRESS
+				],
+				$self->getPersonNameArray(),
+				$self->getTrackingInfoArray(),
+				$self->getPaypalDataArray()
+			)
+		);
+		return $donation;
+	}
+
 	private function createDonation(): Donation {
 		$donation = new Donation();
 
@@ -93,7 +111,7 @@ class ValidDoctrineDonation {
 			array_merge(
 				$this->getTrackingInfoArray(),
 				$this->getBankDataArray(),
-				$this->getDonorArray()
+				$this->getPrivateDonorArray()
 			)
 		);
 
@@ -122,8 +140,9 @@ class ValidDoctrineDonation {
 		];
 	}
 
-	private function getDonorArray(): array {
+	private function getPrivateDonorArray(): array {
 		return array_merge(
+			[ 'adresstyp' => 'person' ],
 			$this->getPersonNameArray(),
 			$this->getAddressArray(),
 			[ 'email' => ValidDonation::DONOR_EMAIL_ADDRESS ]
@@ -132,7 +151,6 @@ class ValidDoctrineDonation {
 
 	private function getPersonNameArray(): array {
 		return [
-			'adresstyp' => 'person',
 			'anrede' => ValidDonation::DONOR_SALUTATION,
 			'titel' => ValidDonation::DONOR_TITLE,
 			'vorname' => ValidDonation::DONOR_FIRST_NAME,
