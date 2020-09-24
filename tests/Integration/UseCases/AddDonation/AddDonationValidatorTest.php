@@ -204,6 +204,34 @@ class AddDonationValidatorTest extends TestCase {
 		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_TRACKING_SOURCE );
 	}
 
+	public function testGivenEmailOnlyDonorWithMissingNameParts_validationFails(): void {
+		$request = ValidAddDonationRequest::getRequest();
+
+		$request->setDonorType( DonorType::EMAIL() );
+		$request->setDonorSalutation( '' );
+		$request->setDonorFirstName( '' );
+		$request->setDonorLastName( '' );
+
+		$result = $this->donationValidator->validate( $request );
+		$this->assertFalse( $result->isSuccessful() );
+
+		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_DONOR_FIRST_NAME );
+		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_DONOR_LAST_NAME );
+		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_DONOR_SALUTATION );
+	}
+
+	public function testGivenCompleteEmailOnlyDonor_validationSucceeds(): void {
+		$request = ValidAddDonationRequest::getRequest();
+
+		$request->setDonorType( DonorType::EMAIL() );
+		$request->setDonorStreetAddress( '' );
+		$request->setDonorPostalCode( '' );
+		$request->setDonorCity( '' );
+		$request->setDonorCountryCode( '' );
+
+		$this->assertTrue( $this->donationValidator->validate( $request )->isSuccessful() );
+	}
+
 	private function newDonationValidator(): AddDonationValidator {
 		return new AddDonationValidator(
 			new PaymentDataValidator( 1.0, 100000, [ PaymentMethod::DIRECT_DEBIT ] ),
