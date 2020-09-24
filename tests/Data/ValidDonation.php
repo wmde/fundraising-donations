@@ -13,6 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\EmailDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
@@ -317,6 +318,10 @@ class ValidDonation {
 
 	private static function newCompanyName(): CompanyName {
 		return new CompanyName( self::DONOR_COMPANY );
+	}
+
+	public static function newEmailOnlyDonor(): EmailDonor {
+		return new EmailDonor( self::newPersonName(), self::DONOR_EMAIL_ADDRESS );
 	}
 
 }

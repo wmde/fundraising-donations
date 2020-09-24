@@ -8,6 +8,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Address;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 
 /**
@@ -66,5 +67,26 @@ class DonorFieldMapperTest extends TestCase {
 		$extendedDonor = new Donor\PersonDonor( $specialName, $validDonor->getPhysicalAddress(), $validDonor->getEmailAddress() );
 
 		DonorFieldMapper::getPersonalDataFields( $extendedDonor );
+	}
+
+	public function testGivenEmailOnlyDonorItConvertsAllNecessaryFields(): void {
+		$fields = DonorFieldMapper::getPersonalDataFields( ValidDonation::newEmailOnlyDonor() );
+
+		$this->assertSame( 'email', $fields['adresstyp'] );
+		$this->assertSame( ValidDonation::DONOR_SALUTATION, $fields['anrede'] );
+		$this->assertSame( ValidDonation::DONOR_TITLE, $fields['titel'] );
+		$this->assertSame( ValidDonation::DONOR_FIRST_NAME, $fields['vorname'] );
+		$this->assertSame( ValidDonation::DONOR_LAST_NAME, $fields['nachname'] );
+		$this->assertSame( ValidDonation::DONOR_EMAIL_ADDRESS, $fields['email'] );
+		$this->assertArrayNotHasKey( 'ort', $fields );
+		$this->assertArrayNotHasKey( 'firma', $fields );
+	}
+
+	public function testGivenPersonalDonationUpdatingWithEmailOnlyKeepsCity(): void {
+		$personalDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
+
+		DonorFieldMapper::updateDonorInformation( $personalDonation, ValidDonation::newEmailOnlyDonor() );
+
+		$this->assertSame( ValidDonation::DONOR_CITY, $personalDonation->getDonorCity() );
 	}
 }
