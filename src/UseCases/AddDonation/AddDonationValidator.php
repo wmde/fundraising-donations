@@ -134,6 +134,12 @@ class AddDonationValidator {
 				$this->getAddressViolations(),
 				$this->validateEmail()->getViolations()
 			);
+		} elseif ( $donorType->is( DonorType::EMAIL() ) ) {
+			$this->violations = array_merge(
+				$this->violations,
+				$this->getPersonNameViolations(),
+				$this->validateEmail()->getViolations()
+			);
 		}
 	}
 
