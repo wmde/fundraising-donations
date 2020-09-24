@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFactory;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\EmailDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -33,6 +34,13 @@ class DonorFactoryTest extends TestCase {
 		$donor = DonorFactory::createDonorFromEntity( ValidDoctrineDonation::newAnonymousDonation() );
 
 		$this->assertInstanceOf( AnonymousDonor::class, $donor );
+	}
+
+	public function testCreateEmailOnlyDonor(): void {
+		$donor = DonorFactory::createDonorFromEntity( ValidDoctrineDonation::newEmailDonation() );
+
+		$this->assertInstanceOf( EmailDonor::class, $donor );
+		$this->assertEquals( ValidDonation::newEmailOnlyDonor(), $donor );
 	}
 
 	public function testUnknownAddressTypeThrowsException(): void {
