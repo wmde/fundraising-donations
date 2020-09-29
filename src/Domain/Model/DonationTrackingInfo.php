@@ -33,10 +33,18 @@ class DonationTrackingInfo {
 		$this->tracking = $tracking;
 	}
 
+	/**
+	 * @deprecated See https://phabricator.wikimedia.org/T134327
+	 * @return string
+	 */
 	public function getSource(): string {
 		return $this->source;
 	}
 
+	/**
+	 * @deprecated See https://phabricator.wikimedia.org/T134327
+	 * @param string $source
+	 */
 	public function setSource( string $source ): void {
 		$this->assertIsWritable();
 		$this->source = $source;
@@ -60,10 +68,18 @@ class DonationTrackingInfo {
 		$this->singleBannerImpressionCount = $singleBannerImpressionCount;
 	}
 
+	/**
+	 * @deprecated See https://phabricator.wikimedia.org/T134327
+	 * @return string
+	 */
 	public function getColor(): string {
 		return $this->color;
 	}
 
+	/**
+	 * @deprecated See https://phabricator.wikimedia.org/T134327
+	 * @param string $color
+	 */
 	public function setColor( string $color ): void {
 		$this->assertIsWritable();
 		$this->color = $color;
@@ -73,15 +89,27 @@ class DonationTrackingInfo {
 		return $this->skin;
 	}
 
+	/**
+	 * @deprecated See https://phabricator.wikimedia.org/T134327
+	 * @param string $skin
+	 */
 	public function setSkin( string $skin ): void {
 		$this->assertIsWritable();
 		$this->skin = $skin;
 	}
 
+	/**
+	 * @deprecated See https://phabricator.wikimedia.org/T134327
+	 * @return string
+	 */
 	public function getLayout(): string {
 		return $this->layout;
 	}
 
+	/**
+	 * @deprecated See https://phabricator.wikimedia.org/T134327
+	 * @param string $layout
+	 */
 	public function setLayout( string $layout ): void {
 		$this->assertIsWritable();
 		$this->layout = $layout;
