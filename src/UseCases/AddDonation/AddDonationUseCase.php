@@ -132,6 +132,16 @@ class AddDonationUseCase {
 				$this->getPhysicalAddressFromRequest( $request ),
 				$request->getDonorEmailAddress()
 			);
+		} elseif ( $donorType->is( DonorType::EMAIL() ) ) {
+			return new Donor\EmailDonor(
+				new PersonName(
+					$request->getDonorFirstName(),
+					$request->getDonorLastName(),
+					$request->getDonorSalutation(),
+					$request->getDonorTitle()
+				),
+				$request->getDonorEmailAddress()
+			);
 		} elseif ( $donorType->is( DonorType::ANONYMOUS() ) ) {
 			return new AnonymousDonor();
 		}
