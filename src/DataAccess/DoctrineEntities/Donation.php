@@ -223,7 +223,7 @@ class Donation {
 		return $this;
 	}
 
-	public function getDonorFullName(): string {
+	public function getDonorFullName(): ?string {
 		return $this->donorFullName;
 	}
 
