@@ -106,14 +106,6 @@ class AddDonationRequest {
 		$this->tracking = $tracking;
 	}
 
-	public function getSource(): string {
-		return $this->source;
-	}
-
-	public function setSource( string $source ): void {
-		$this->source = $source;
-	}
-
 	public function getTotalImpressionCount(): int {
 		return $this->totalImpressionCount;
 	}

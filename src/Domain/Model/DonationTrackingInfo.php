@@ -16,13 +16,16 @@ use WMDE\FreezableValueObject\FreezableValueObject;
 class DonationTrackingInfo {
 	use FreezableValueObject;
 
-	private $tracking;
-	private $source;
-	private $totalImpressionCount;
-	private $singleBannerImpressionCount;
-	private $color;
-	private $skin;
-	private $layout;
+	private string $tracking;
+	private string $source = '';
+	private int $totalImpressionCount;
+	private int $singleBannerImpressionCount;
+	private string $color = '';
+	private string $skin = '';
+	private string $layout = '';
+
+	private function __construct() {
+	}
 
 	public function getTracking(): string {
 		return $this->tracking;

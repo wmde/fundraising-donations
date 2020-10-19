@@ -35,15 +35,11 @@ use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
 class AddDonationUseCase {
 
 	private const PREFIX_BANK_TRANSACTION_KNOWN_DONOR = 'XW';
-	private const PREFIX_BANK_TRANSACTION_ANONYNMOUS_DONOR = 'XR';
+	private const PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR = 'XR';
 
 	private DonationRepository $donationRepository;
 	private AddDonationValidator $donationValidator;
 	private AddDonationPolicyValidator $policyValidator;
-	/** @var ReferrerGeneralizer
-	 * @deprecated See https://phabricator.wikimedia.org/T253765
-	 */
-	private ReferrerGeneralizer $referrerGeneralizer;
 	private DonationConfirmationMailer $mailer;
 	private TransferCodeGenerator $transferCodeGenerator;
 	private DonationTokenFetcher $tokenFetcher;
@@ -51,14 +47,12 @@ class AddDonationUseCase {
 	private EventEmitter $eventEmitter;
 
 	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
-		AddDonationPolicyValidator $policyValidator, ReferrerGeneralizer $referrerGeneralizer,
-		DonationConfirmationMailer $mailer, TransferCodeGenerator $transferCodeGenerator,
-		DonationTokenFetcher $tokenFetcher, InitialDonationStatusPicker $initialDonationStatusPicker,
-		EventEmitter $eventEmitter ) {
+			AddDonationPolicyValidator $policyValidator, DonationConfirmationMailer $mailer,
+			TransferCodeGenerator $transferCodeGenerator, DonationTokenFetcher $tokenFetcher,
+			InitialDonationStatusPicker $initialDonationStatusPicker, EventEmitter $eventEmitter ) {
 		$this->donationRepository = $donationRepository;
 		$this->donationValidator = $donationValidator;
 		$this->policyValidator = $policyValidator;
-		$this->referrerGeneralizer = $referrerGeneralizer;
 		$this->mailer = $mailer;
 		$this->transferCodeGenerator = $transferCodeGenerator;
 		$this->tokenFetcher = $tokenFetcher;
@@ -192,21 +186,17 @@ class AddDonationUseCase {
 
 	private function getTransferCodePrefix( AddDonationRequest $request ): string {
 		if ( $request->donorIsAnonymous() ) {
-			return self::PREFIX_BANK_TRANSACTION_ANONYNMOUS_DONOR;
+			return self::PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR;
 		}
 		return self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
 	}
 
 	private function newTrackingInfoFromRequest( AddDonationRequest $request ): DonationTrackingInfo {
-		$trackingInfo = new DonationTrackingInfo();
+		$trackingInfo = DonationTrackingInfo::newBlankTrackingInfo();
 
 		$trackingInfo->setTracking( $request->getTracking() );
-		$trackingInfo->setSource( $this->referrerGeneralizer->generalize( $request->getSource() ) );
 		$trackingInfo->setTotalImpressionCount( $request->getTotalImpressionCount() );
 		$trackingInfo->setSingleBannerImpressionCount( $request->getSingleBannerImpressionCount() );
-		$trackingInfo->setColor( $request->getColor() );
-		$trackingInfo->setSkin( $request->getSkin() );
-		$trackingInfo->setLayout( $request->getLayout() );
 
 		return $trackingInfo->freeze()->assertNoNullFields();
 	}
