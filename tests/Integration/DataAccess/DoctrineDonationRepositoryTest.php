@@ -403,7 +403,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertSame( [ '16R12136PU8783961' => 2 ], $data['transactionIds'] );
 	}
 
-	public function testPapalDonationWithChildPaymentIsLoaded(): void {
+	public function testPaypalDonationWithChildPaymentIsLoaded(): void {
 		$transactionIds = [
 			'16R12136PU8783961' => 2,
 			'1A412136PU8783961' => 3
@@ -422,4 +422,21 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertEquals( $transactionIds, $donation->getPaymentMethod()->getPaypalData()->getAllChildPayments() );
 	}
 
+	public function testPaypalDonationWithNumericalChildPaymentTransactionIdIsFetched(): void {
+		$transactionIds = [
+			'123456789' => 2
+		];
+		$doctrineDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
+		$doctrineDonation->encodeAndSetData( array_merge(
+			$doctrineDonation->getDecodedData(),
+			[ 'transactionIds' => $transactionIds ]
+		) );
+		$this->entityManager->persist( $doctrineDonation );
+		$this->entityManager->flush();
+
+		$repository = $this->newRepository();
+		$donation = $repository->getDonationById( $doctrineDonation->getId() );
+
+		$this->assertNotNull( $donation );
+	}
 }
