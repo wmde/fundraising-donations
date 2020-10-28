@@ -365,7 +365,7 @@ class DoctrineDonationRepository implements DonationRepository {
 
 		if ( !empty( $data['transactionIds'] ) ) {
 			foreach ( $data['transactionIds'] as $transactionId => $entityId ) {
-				$payPalData->addChildPayment( $transactionId, (int)$entityId );
+				$payPalData->addChildPayment( (string)$transactionId, (int)$entityId );
 			}
 		}
 
