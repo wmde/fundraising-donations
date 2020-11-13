@@ -6,7 +6,10 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 /**
  * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
+ *
+ * @deprecated This class and functionality should be removed,
+ *              the "source" attribute of tracking set to an empty string.
+ *              See https://phabricator.wikimedia.org/T134327
  */
 class ReferrerGeneralizer {
 
