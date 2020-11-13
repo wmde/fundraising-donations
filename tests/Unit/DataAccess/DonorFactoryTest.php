@@ -43,6 +43,13 @@ class DonorFactoryTest extends TestCase {
 		$this->assertEquals( ValidDonation::newEmailOnlyDonor(), $donor );
 	}
 
+	public function testCreatePrivateAnonymizedDonor(): void {
+		$donor = DonorFactory::createDonorFromEntity( ValidDoctrineDonation::newAnyonymizedDonation() );
+
+		$this->assertInstanceOf( PersonDonor::class, $donor );
+		$this->assertSame( '', $donor->getName()->getFullName() );
+	}
+
 	public function testUnknownAddressTypeThrowsException(): void {
 		$doctrineDonation = ValidDoctrineDonation::newAnonymousDonation();
 		$doctrineDonation->encodeAndSetData( [ 'adresstyp' => 'unknown' ] );

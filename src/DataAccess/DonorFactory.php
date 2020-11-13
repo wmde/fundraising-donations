@@ -15,41 +15,49 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 
 class DonorFactory {
 	public static function createDonorFromEntity( DoctrineDonation $donation ): Donor {
-		$data = $donation->getDecodedData();
+		$data = new DataReaderWithDefault( $donation->getDecodedData() );
 
-		switch ( $data['adresstyp'] ) {
+		switch ( $data->getValue( 'adresstyp' ) ) {
 			case 'person':
 				return new PersonDonor(
-					new PersonName( $data['vorname'], $data['nachname'], $data['anrede'], $data['titel'] ),
-					self::getPhysicalAddressFromEntity( $donation ),
+					new PersonName(
+						$data->getValue( 'vorname' ),
+						$data->getValue( 'nachname' ),
+						$data->getValue( 'anrede' ),
+						$data->getValue( 'titel' )
+					),
+					self::createPhysicalAddress( $data ),
 					$donation->getDonorEmail()
 				);
 			case 'firma':
 				return new CompanyDonor(
-					new CompanyName( $data['firma'] ),
-					self::getPhysicalAddressFromEntity( $donation ),
+					new CompanyName( $data->getValue( 'firma' ) ),
+					self::createPhysicalAddress( $data ),
 					$donation->getDonorEmail()
 				);
 			case 'email':
 				return new Donor\EmailDonor(
-					new PersonName( $data['vorname'], $data['nachname'], $data['anrede'], $data['titel'] ),
+					new PersonName(
+						$data->getValue( 'vorname' ),
+						$data->getValue( 'nachname' ),
+						$data->getValue( 'anrede' ),
+						$data->getValue( 'titel' )
+					),
 					$donation->getDonorEmail()
 				);
 			case 'anonym':
 				return new AnonymousDonor();
 			default:
-				throw new \UnexpectedValueException( sprintf( 'Unknown address type: %s', $data['adresstyp'] ) );
+				throw new \UnexpectedValueException( sprintf( 'Unknown address type: %s', $data->getValue( 'adresstyp' ) ) );
 		}
 	}
 
-	private static function getPhysicalAddressFromEntity( DoctrineDonation $donation ): PostalAddress {
-		$data = $donation->getDecodedData();
-
+	private static function createPhysicalAddress( DataReaderWithDefault $data ): PostalAddress {
 		return new PostalAddress(
-			$data['strasse'],
-			$data['plz'],
-			$data['ort'],
-			$data['country']
+			$data->getValue( 'strasse' ),
+			$data->getValue( 'plz' ),
+			$data->getValue( 'ort' ),
+			$data->getValue( 'country' )
 		);
 	}
 }
