@@ -9,9 +9,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Address;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\NoAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\NoName;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 
 /**
