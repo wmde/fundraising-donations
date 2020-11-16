@@ -75,7 +75,7 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
-	public static function newEmailDonation() {
+	public static function newEmailDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
 		$donation->setPaymentType( PaymentMethod::PAYPAL );
@@ -90,6 +90,24 @@ class ValidDoctrineDonation {
 				$self->getPaypalDataArray()
 			)
 		);
+		return $donation;
+	}
+
+	public static function newAnyonymizedDonation() {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->encodeAndSetData(
+			array_merge(
+				[
+					'adresstyp' => 'person',
+				],
+				$self->getTrackingInfoArray(),
+				$self->getPaypalDataArray()
+			)
+		);
+		$donation->setDonorCity( '' );
+		$donation->setDonorEmail( '' );
 		return $donation;
 	}
 
