@@ -9,7 +9,6 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
