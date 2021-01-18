@@ -194,16 +194,6 @@ class AddDonationValidatorTest extends TestCase {
 		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_DONOR_EMAIL );
 	}
 
-	public function testLongSource_validationFails(): void {
-		$request = ValidAddDonationRequest::getRequest();
-		$request->setSource( 'http://catlady.com/#' . str_repeat( 'Cats ', 500 ) );
-
-		$result = $this->donationValidator->validate( $request );
-		$this->assertFalse( $result->isSuccessful() );
-
-		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_TRACKING_SOURCE );
-	}
-
 	public function testGivenEmailOnlyDonorWithMissingNameParts_validationFails(): void {
 		$request = ValidAddDonationRequest::getRequest();
 

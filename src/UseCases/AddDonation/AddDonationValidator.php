@@ -58,7 +58,6 @@ class AddDonationValidator {
 		$this->validatePayment();
 		$this->validateBankData();
 		$this->validateDonor();
-		$this->validateTrackingData();
 
 		return new Result( ...$this->violations );
 	}
@@ -165,12 +164,6 @@ class AddDonationValidator {
 			$this->request->getDonorCity(),
 			$this->request->getDonorCountryCode()
 		)->getViolations();
-	}
-
-	private function validateTrackingData(): void {
-		$this->validateFieldLength( $this->request->getSource(), Result::SOURCE_TRACKING_SOURCE );
-		// validation of impression counts is not needed because input is converted to int
-		// validation of skin, color and layout is not needed because they are static legacy values and empty.
 	}
 
 	private function validateIban( Iban $iban ): void {

@@ -393,15 +393,11 @@ class DoctrineDonationRepository implements DonationRepository {
 	private function getTrackingInfoFromEntity( DoctrineDonation $dd ): DonationTrackingInfo {
 		$data = $dd->getDecodedData();
 
-		$trackingInfo = new DonationTrackingInfo();
+		$trackingInfo = DonationTrackingInfo::newBlankTrackingInfo();
 
-		$trackingInfo->setLayout( $data['layout'] ?? '' );
 		$trackingInfo->setTotalImpressionCount( intval( $data['impCount'] ?? '0', 10 ) );
 		$trackingInfo->setSingleBannerImpressionCount( intval( $data['bImpCount'] ?? '0', 10 ) );
 		$trackingInfo->setTracking( $data['tracking'] ?? '' );
-		$trackingInfo->setSkin( $data['skin'] ?? '' );
-		$trackingInfo->setColor( $data['color'] ?? '' );
-		$trackingInfo->setSource( $data['source'] ?? '' );
 
 		return $trackingInfo->freeze()->assertNoNullFields();
 	}

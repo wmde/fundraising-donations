@@ -62,11 +62,7 @@ class ValidDonation {
 
 	public const OPTS_INTO_NEWSLETTER = Donation::OPTS_INTO_NEWSLETTER;
 
-	public const TRACKING_COLOR = 'blue';
-	public const TRACKING_LAYOUT = 'Default';
 	public const TRACKING_BANNER_IMPRESSION_COUNT = 1;
-	public const TRACKING_SKIN = 'default';
-	public const TRACKING_SOURCE = 'web';
 	public const TRACKING_TOTAL_IMPRESSION_COUNT = 3;
 	// "tracking" is the name of the property on the object, "TRACKING" is our prefix, hence TRACKING_TRACKING
 	public const TRACKING_TRACKING = 'test/gelb';
@@ -275,13 +271,9 @@ class ValidDonation {
 	}
 
 	public static function newTrackingInfo(): DonationTrackingInfo {
-		$trackingInfo = new DonationTrackingInfo();
+		$trackingInfo = DonationTrackingInfo::newBlankTrackingInfo();
 
-		$trackingInfo->setColor( self::TRACKING_COLOR );
-		$trackingInfo->setLayout( self::TRACKING_LAYOUT );
 		$trackingInfo->setSingleBannerImpressionCount( self::TRACKING_BANNER_IMPRESSION_COUNT );
-		$trackingInfo->setSkin( self::TRACKING_SKIN );
-		$trackingInfo->setSource( self::TRACKING_SOURCE );
 		$trackingInfo->setTotalImpressionCount( self::TRACKING_TOTAL_IMPRESSION_COUNT );
 		$trackingInfo->setTracking( self::TRACKING_TRACKING );
 
