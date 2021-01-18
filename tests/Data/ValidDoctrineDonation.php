@@ -138,13 +138,13 @@ class ValidDoctrineDonation {
 
 	private function getTrackingInfoArray(): array {
 		return [
-			'layout' => ValidDonation::TRACKING_LAYOUT,
+			'layout' => '',
 			'impCount' => ValidDonation::TRACKING_TOTAL_IMPRESSION_COUNT,
 			'bImpCount' => ValidDonation::TRACKING_BANNER_IMPRESSION_COUNT,
 			'tracking' => ValidDonation::TRACKING_TRACKING,
-			'skin' => ValidDonation::TRACKING_SKIN,
-			'color' => ValidDonation::TRACKING_COLOR,
-			'source' => ValidDonation::TRACKING_SOURCE,
+			'skin' => '',
+			'color' => '',
+			'source' => '',
 		];
 	}
 
