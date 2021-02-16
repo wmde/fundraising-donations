@@ -9,9 +9,7 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -29,10 +27,10 @@ use WMDE\Fundraising\PaymentContext\ResponseModel\PaypalNotificationResponse;
  */
 class HandlePayPalPaymentCompletionNotificationUseCase {
 
-	private $repository;
-	private $authorizationService;
-	private $mailer;
-	private $donationEventLogger;
+	private DonationRepository $repository;
+	private DonationAuthorizer $authorizationService;
+	private DonationConfirmationMailer $mailer;
+	private DonationEventLogger $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
 		DonationConfirmationMailer $mailer, DonationEventLogger $donationEventLogger ) {
@@ -190,23 +188,6 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		);
 	}
 
-	private function newDonorFromRequest( PayPalPaymentNotificationRequest $request ): PersonDonor {
-		return new PersonDonor(
-			new PersonName( $request->getPayerFirstName(), $request->getPayerLastName(), '', '' ),
-			$this->newPhysicalAddressFromRequest( $request ),
-			$request->getPayerEmail()
-		);
-	}
-
-	private function newPhysicalAddressFromRequest( PayPalPaymentNotificationRequest $request ): PostalAddress {
-		return new PostalAddress(
-			$request->getPayerAddressStreet(),
-			$request->getPayerAddressPostalCode(),
-			$request->getPayerAddressCity(),
-			$request->getPayerAddressCountryCode()
-		);
-	}
-
 	private function newDonationFromRequest( PayPalPaymentNotificationRequest $request ): Donation {
 		$payment = new DonationPayment(
 			$request->getAmountGross(),
@@ -217,7 +198,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		return new Donation(
 			null,
 			Donation::STATUS_EXTERNAL_BOOKED,
-			$this->newDonorFromRequest( $request ),
+			new AnonymousDonor(),
 			$payment,
 			Donation::DOES_NOT_OPT_INTO_NEWSLETTER,
 			DonationTrackingInfo::newBlankTrackingInfo()->freeze()->assertNoNullFields()
