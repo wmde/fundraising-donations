@@ -4,10 +4,11 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\HandlePayPalPaymentNotification;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -397,24 +398,15 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	}
 
 	private function assertDonationIsCreatedWithNotficationRequestData( Donation $donation ): void {
-		$this->assertSame( 0, $donation->getPaymentIntervalInMonths(), 'Payment interval is always empty' );
+		$this->assertSame( 0, $donation->getPaymentIntervalInMonths(), 'Direct payments should be always one-off donations' );
 		$this->assertTrue( $donation->isBooked() );
 
 		$donor = $donation->getDonor();
 		$this->assertInstanceOf(
-			PersonDonor::class,
+			AnonymousDonor::class,
 			$donor,
 			'Paypal payments without assigned donation assume a private person.'
 		);
-		$this->assertSame( ValidPayPalNotificationRequest::PAYER_ADDRESS_NAME, $donor->getName()->getFullName() );
-
-		$this->assertSame( ValidPayPalNotificationRequest::PAYER_EMAIL, $donor->getEmailAddress() );
-
-		$address = $donor->getPhysicalAddress();
-		$this->assertSame( ValidPayPalNotificationRequest::PAYER_ADDRESS_STREET, $address->getStreetAddress() );
-		$this->assertSame( ValidPayPalNotificationRequest::PAYER_ADDRESS_CITY, $address->getCity() );
-		$this->assertSame( ValidPayPalNotificationRequest::PAYER_ADDRESS_POSTAL_CODE, $address->getPostalCode() );
-		$this->assertSame( ValidPayPalNotificationRequest::PAYER_ADDRESS_COUNTRY_CODE, $address->getCountryCode() );
 
 		$payment = $donation->getPayment();
 		$this->assertSame( ValidPayPalNotificationRequest::AMOUNT_GROSS_CENTS, $payment->getAmount()->getEuroCents() );
@@ -427,14 +419,14 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationMailer|\PHPUnit_Framework_MockObject_MockObject
+	 * @return DonationConfirmationMailer|MockObject
 	 */
 	private function getMailer(): DonationConfirmationMailer {
 		return $this->getMockBuilder( DonationConfirmationMailer::class )->disableOriginalConstructor()->getMock();
 	}
 
 	/**
-	 * @return DonationEventLogger|\PHPUnit_Framework_MockObject_MockObject
+	 * @return DonationEventLogger|MockObject
 	 */
 	private function getEventLogger(): DonationEventLogger {
 		return $this->createMock( DonationEventLogger::class );
