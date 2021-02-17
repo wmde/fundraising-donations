@@ -91,7 +91,11 @@ class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
 		return $this->entityManager->find( Donation::class, $donationId );
 	}
 
-	// always return fixed date
+	/**
+	 * Return a function that always returns a fixed date
+	 *
+	 * @return callable
+	 */
 	private function getDefaultTimeFunction(): callable {
 		return function () {
 			return self::LOG_TIMESTAMP;

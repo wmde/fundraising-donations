@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use PHPUnit_Framework_MockObject_MockObject;
 use WMDE\Euro\Euro;
@@ -114,7 +115,7 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationMailer|PHPUnit_Framework_MockObject_MockObject
+	 * @return DonationConfirmationMailer|MockObject
 	 */
 	private function newMailer(): DonationConfirmationMailer {
 		return $this->getMockBuilder( DonationConfirmationMailer::class )
@@ -378,7 +379,9 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertSame( self::ACCESS_TOKEN, $response->getAccessToken() );
 	}
 
-	// TODO move @covers tag for DonationCreatedEvent here when we've improved the PHPCS definitions
+	/**
+	 * TODO move 'covers' tag for DonationCreatedEvent here when we've improved the PHPCS definitions
+	 */
 	public function testWhenValidationSucceeds_eventIsEmitted(): void {
 		$eventEmitter = new EventEmitterSpy();
 		$useCase = new AddDonationUseCase(

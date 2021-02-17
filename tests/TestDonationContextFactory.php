@@ -22,7 +22,6 @@ class TestDonationContextFactory {
 	private DonationContextFactory $contextFactory;
 	private array $config;
 
-	// Singleton instances
 	private ?EntityManager $entityManager;
 	private ?Connection $connection;
 

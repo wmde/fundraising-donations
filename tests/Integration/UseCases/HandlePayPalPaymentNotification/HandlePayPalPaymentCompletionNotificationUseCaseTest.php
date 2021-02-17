@@ -190,8 +190,12 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		);
 	}
 
-	// This test should be removed once we have Payments as their own domain,
-	// see https://phabricator.wikimedia.org/T192323
+	/**
+	 * This test should be removed once we have Payments as their own domain,
+	 * see https://phabricator.wikimedia.org/T192323
+	 *
+	 * @deprecated
+	 */
 	public function testGivenNewTransactionIdForBookedDonation_childTransactionWithSameDataIsCreated(): void {
 		$donation = ValidDonation::newBookedPayPalDonation();
 		$donation->setOptsIntoDonationReceipt( true );
