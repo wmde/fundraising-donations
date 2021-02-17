@@ -49,7 +49,7 @@ class Donation {
 	public const STATUS_EXPORTED = 'E';
 
 	/**
-	 * @var integer
+	 * @var int
 	 *
 	 * @ORM\Column(name="id", type="integer")
 	 * @ORM\Id
@@ -86,14 +86,14 @@ class Donation {
 	private $donorEmail;
 
 	/**
-	 * @var boolean
+	 * @var bool
 	 *
 	 * @ORM\Column(name="info", type="boolean", options={"default":0}, nullable=false)
 	 */
 	private $donorOptsIntoNewsletter = false;
 
 	/**
-	 * @var boolean
+	 * @var bool
 	 *
 	 * @ORM\Column(name="bescheinigung", type="boolean", nullable=true)
 	 */
@@ -114,7 +114,7 @@ class Donation {
 	private $amount;
 
 	/**
-	 * @var integer
+	 * @var int
 	 *
 	 * @ORM\Column(name="periode", type="smallint", options={"default":0}, nullable=false)
 	 */
@@ -170,7 +170,7 @@ class Donation {
 	private $hash;
 
 	/**
-	 * @var boolean
+	 * @var bool
 	 *
 	 * @ORM\Column(name="is_public", type="boolean", options={"default":0}, nullable=false)
 	 */
@@ -213,6 +213,8 @@ class Donation {
 	private $dtBackup;
 
 	/**
+	 * @var DonationPayment
+	 *
 	 * @ORM\OneToOne(targetEntity="WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationPayment", cascade={"all"}, fetch="EAGER")
 	 */
 	private $payment;

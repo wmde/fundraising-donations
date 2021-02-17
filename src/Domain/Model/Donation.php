@@ -53,6 +53,8 @@ class Donation {
 	/**
 	 * TODO: move out of Donation when database model is refactored
 	 * https://phabricator.wikimedia.org/T203679
+	 *
+	 * @var DonationTrackingInfo
 	 */
 	private DonationTrackingInfo $trackingInfo;
 
