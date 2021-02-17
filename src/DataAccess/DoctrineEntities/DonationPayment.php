@@ -18,7 +18,7 @@ use Doctrine\ORM\Mapping as ORM;
 abstract class DonationPayment {
 
 	/**
-	 * @var integer
+	 * @var int
 	 *
 	 * @ORM\Column(name="id", type="integer")
 	 * @ORM\GeneratedValue(strategy="IDENTITY")

@@ -27,25 +27,38 @@ class AddDonationRequest {
 
 	/**
 	 * Newsletter subscription
+	 *
+	 * @var string
 	 */
 	private string $optIn = '';
 
-	# donation
 	private Euro $amount;
 	private string $paymentType = '';
 	private int $interval = 0;
 
-	# direct debit related
 	private ?BankData $bankData;
 
-	# tracking
 	private string $tracking = '';
 	private string $source = '';
 	private int $totalImpressionCount = 0;
 	private int $singleBannerImpressionCount = 0;
-	// Legacy values, will be deprecated in the future
+
+	/**
+	 * @var string
+	 * @deprecated
+	 */
 	private string $color = '';
+
+	/**
+	 * @var string
+	 * @deprecated
+	 */
 	private string $skin = '';
+
+	/**
+	 * @var string
+	 * @deprecated
+	 */
 	private string $layout = '';
 
 	private bool $optsIntoDonationReceipt = true;
