@@ -1,8 +1,8 @@
-current_user  := $(shell id -u)
-current_group := $(shell id -g)
-BUILD_DIR     := $(PWD)
-DOCKER_FLAGS  := --interactive --tty
-DOCKER_IMAGE  := wikimediade/fundraising-frontend
+current_user    := $(shell id -u)
+current_group   := $(shell id -g)
+BUILD_DIR       := $(PWD)
+DOCKER_FLAGS    := --interactive --tty
+DOCKER_IMAGE    := registry.gitlab.com/fun-tech/fundraising-frontend-docker
 
 install-php:
 	docker run --rm $(DOCKER_FLAGS) --volume $(BUILD_DIR):/app -w /app --volume ~/.composer:/composer --user $(current_user):$(current_group) $(DOCKER_IMAGE):composer composer install $(COMPOSER_FLAGS)

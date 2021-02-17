@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   app_debug:
-    image: "wikimediade/fundraising-frontend:xdebug"
+    image: "registry.gitlab.com/fun-tech/fundraising-frontend-docker"
     environment:
       - XDEBUG_CONFIG=remote_host=${LOCAL_IP}
       - PHP_IDE_CONFIG=serverName=donation.spenden.wikimedia.de
