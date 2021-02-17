@@ -10,12 +10,9 @@ install-php:
 update-php:
 	docker run --rm $(DOCKER_FLAGS) --volume $(BUILD_DIR):/app -w /app --volume ~/.composer:/composer --user $(current_user):$(current_group) $(DOCKER_IMAGE):composer composer update $(COMPOSER_FLAGS)
 
-ci: covers phpunit cs stan
+ci: phpunit cs stan
 
-test: covers phpunit
-
-covers:
-	docker-compose run --rm app ./vendor/bin/covers-validator
+test: phpunit
 
 phpunit:
 	docker-compose run --rm -e XDEBUG_MODE=coverage app ./vendor/bin/phpunit
@@ -31,4 +28,4 @@ stan:
 
 setup: install-php
 
-.PHONY: install-php update-php ci test covers phpunit cs fix-cs stan setup
+.PHONY: install-php update-php ci test phpunit cs fix-cs stan setup
