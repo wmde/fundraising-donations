@@ -12,10 +12,15 @@ update-php:
 
 ci: phpunit cs stan
 
+ci-with-coverage: phpunit-with-coverage cs stan
+
 test: phpunit
 
 phpunit:
-	docker-compose run --rm --no-deps -e XDEBUG_MODE=coverage app ./vendor/bin/phpunit
+	docker-compose run --rm --no-deps app ./vendor/bin/phpunit
+
+phpunit-with-coverage:
+	docker-compose -f docker-compose.yml -f docker-compose.debug.yml run --rm --no-deps -e XDEBUG_MODE=coverage app ./vendor/bin/phpunit --coverage-clover coverage.clover
 
 cs:
 	docker-compose run --rm --no-deps app ./vendor/bin/phpcs
@@ -28,4 +33,4 @@ stan:
 
 setup: install-php
 
-.PHONY: install-php update-php ci test phpunit cs fix-cs stan setup
+.PHONY: install-php update-php ci ci-with-coverage test phpunit phpunit-with-coverage cs fix-cs stan setup
