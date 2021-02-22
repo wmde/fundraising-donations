@@ -26,3 +26,7 @@ build:
     tests:
         override:
         - true # Disable unit tests because they are handled by Travis
+
+build_failure_conditions:
+    - 'project.metric_change("scrutinizer.test_coverage", < 0)'
+    - 'project.metric_change("scrutinizer.quality", < 0.3)'
