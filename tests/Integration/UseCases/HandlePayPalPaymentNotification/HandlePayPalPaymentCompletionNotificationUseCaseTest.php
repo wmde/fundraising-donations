@@ -9,6 +9,7 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorNotificationType;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -111,6 +112,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
+		$this->assertEquals( [ DonorNotificationType::CONFIRMATION ], $donation->getTransmittedDonorNotifications() );
 	}
 
 	public function testWhenAuthorizationSucceeds_donationIsStored(): void {
@@ -368,10 +370,10 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertTrue( $donation->isBooked() );
 	}
 
-	public function testWhenNotificationIsForNonExistingDonation_confirmationMailIsSent(): void {
+	public function testWhenNotificationIsForNonExistingDonation_noConfirmationMailIsSent(): void {
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 12345 );
 		$mailer = $this->getMailer();
-		$mailer->expects( $this->once() )
+		$mailer->expects( $this->never() )
 			->method( 'sendConfirmationMailFor' )
 			->with( $this->anything() );
 		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(

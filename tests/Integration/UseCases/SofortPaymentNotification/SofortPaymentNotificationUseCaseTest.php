@@ -8,6 +8,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorNotificationType;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidSofortNotificationRequest;
@@ -151,6 +152,8 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 
 		$request = ValidSofortNotificationRequest::newInstantPayment( 1 );
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
+
+		$this->assertEquals( [ DonorNotificationType::CONFIRMATION ], $donation->getTransmittedDonorNotifications() );
 	}
 
 	public function testGivenSetConfirmedAtForBookedDonation_unhandledResponseIsReturned(): void {
@@ -170,5 +173,4 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$this->assertFalse( $response->hasErrors() );
 		$this->assertSame( 'Duplicate notification', $response->getContext()['message'] );
 	}
-
 }

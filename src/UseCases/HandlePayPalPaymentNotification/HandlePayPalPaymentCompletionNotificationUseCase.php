@@ -10,6 +10,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorNotificationType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -65,7 +66,6 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			return $this->createErrorResponse( $ex );
 		}
 
-		$this->mailer->sendConfirmationMailFor( $donation );
 		$this->donationEventLogger->log( $donation->getId(), 'paypal_handler: booked' );
 
 		return PaypalNotificationResponse::newSuccessResponse();
@@ -102,6 +102,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			return $this->createErrorResponse( $ex );
 		}
 
+		$donation->addDonorNotification( DonorNotificationType::CONFIRMATION );
 		try {
 			$this->repository->storeDonation( $donation );
 		}

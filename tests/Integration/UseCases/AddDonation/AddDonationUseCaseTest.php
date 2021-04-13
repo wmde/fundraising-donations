@@ -13,6 +13,7 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorNotificationType;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
@@ -239,7 +240,7 @@ class AddDonationUseCaseTest extends TestCase {
 		return $donationRequest;
 	}
 
-	public function testGivenInvalidRequest_noConfirmationEmailIsSend(): void {
+	public function testGivenInvalidRequest_noConfirmationEmailIsSent(): void {
 		$mailer = $this->newMailer();
 
 		$mailer->expects( $this->never() )->method( $this->anything() );
@@ -273,6 +274,33 @@ class AddDonationUseCaseTest extends TestCase {
 		$useCase = $this->newUseCaseWithMailer( $mailer );
 
 		$useCase->addDonation( $donation );
+	}
+
+	public function testGivenValidRequest_confirmationEmailTransmissionIsRecorded(): void {
+		$donation = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+
+		$useCase = $this->newUseCaseWithMailer( $this->newMailer() );
+
+		$response = $useCase->addDonation( $donation );
+		$this->assertEquals( [ DonorNotificationType::CONFIRMATION ], $response->getDonation()->getTransmittedDonorNotifications() );
+	}
+
+	public function testGivenRequestThatNeedsModeration_confirmationEmailTransmissionIsRecorded(): void {
+		$donation = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+
+		$useCase = new AddDonationUseCase(
+			$this->newRepository(),
+			$this->getSucceedingValidatorMock(),
+			$this->getFailingPolicyValidatorMock(),
+			$this->newMailer(),
+			LessSimpleTransferCodeGenerator::newRandomGenerator(),
+			$this->newTokenFetcher(),
+			new InitialDonationStatusPicker(),
+			new FakeEventEmitter()
+		);
+
+		$response = $useCase->addDonation( $donation );
+		$this->assertEquals( [ DonorNotificationType::PROVISIONAL_CONFIRMATION ], $response->getDonation()->getTransmittedDonorNotifications() );
 	}
 
 	public function testGivenValidRequestWithExternalPaymentType_confirmationEmailIsNotSent(): void {

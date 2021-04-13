@@ -16,6 +16,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorNotificationType;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
@@ -204,6 +205,12 @@ class AddDonationUseCase {
 	private function sendDonationConfirmationEmail( Donation $donation ): void {
 		if ( $donation->getDonor()->hasEmailAddress() && !$donation->hasExternalPayment() ) {
 			$this->mailer->sendConfirmationMailFor( $donation );
+
+			$notificationType = $donation->needsModeration() ?
+				DonorNotificationType::PROVISIONAL_CONFIRMATION : DonorNotificationType::CONFIRMATION;
+			$donation->addDonorNotification( $notificationType );
+
+			$this->donationRepository->storeDonation( $donation );
 		}
 	}
 

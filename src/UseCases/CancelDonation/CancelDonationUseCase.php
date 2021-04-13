@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\CancelDonation;
 use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorNotificationType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -101,6 +102,14 @@ class CancelDonationUseCase {
 			new EmailAddress( $donation->getDonor()->getEmailAddress() ),
 			$this->getConfirmationMailTemplateArguments( $donation )
 		);
+		$donation->addDonorNotification( DonorNotificationType::CANCEL_CONFIRMATION );
+		try {
+			$this->donationRepository->storeDonation( $donation );
+		}
+		catch ( StoreDonationException $ex ) {
+			// non-critical error
+			return;
+		}
 	}
 
 	private function getConfirmationMailTemplateArguments( Donation $donation ): array {

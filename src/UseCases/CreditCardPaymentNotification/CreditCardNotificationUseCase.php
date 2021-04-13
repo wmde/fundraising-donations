@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotificatio
 use Exception;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorNotificationType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -74,6 +75,7 @@ class CreditCardNotificationUseCase {
 			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::DOMAIN_ERROR, $e );
 		}
 
+		$donation->addDonorNotification( DonorNotificationType::CONFIRMATION );
 		try {
 			$this->repository->storeDonation( $donation );
 		}

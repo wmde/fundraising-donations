@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CreditCard
 use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorNotificationType;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidCreditCardNotificationRequest;
@@ -112,6 +113,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 
 		$this->assertTrue( $response->isSuccessful() );
 		$this->assertNull( $response->getLowLevelError() );
+		$this->assertEquals( [ DonorNotificationType::CONFIRMATION ], $donation->getTransmittedDonorNotifications() );
 	}
 
 	public function testWhenAuthorizationSucceeds_donationIsStored(): void {

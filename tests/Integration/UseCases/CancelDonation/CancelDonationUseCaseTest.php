@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CancelDona
 use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorNotificationType;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
@@ -122,6 +123,7 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 				'donationId' => 1
 			]
 		);
+		$this->assertEquals( [ DonorNotificationType::CANCEL_CONFIRMATION ], $donation->getTransmittedDonorNotifications() );
 	}
 
 	public function testWhenDonationGetsCancelled_logEntryNeededByBackendIsWritten(): void {
