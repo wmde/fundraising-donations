@@ -249,4 +249,25 @@ class DonationTest extends TestCase {
 		$this->assertFalse( $donation->needsModeration() );
 	}
 
+	public function testGivenANewDonation_itHasNoConfirmationEmailsSent(): void {
+		$donation = ValidDonation::newBankTransferDonation();
+		$this->assertCount( 0,  $donation->getTransmittedDonorNotifications() );
+	}
+
+	public function testDonorNotificationStateIsStored(): void {
+		$notificationType = 'fancyconfirmation';
+		$donation = ValidDonation::newBankTransferDonation();
+		$donation->addDonorNotification( $notificationType );
+		$this->assertContains( $notificationType, $donation->getTransmittedDonorNotifications() );
+	}
+
+	public function testDonorNotificationsAvoidDuplication(): void {
+		$notificationType = 'fancyconfirmation';
+		$donation = ValidDonation::newBankTransferDonation();
+		$donation->addDonorNotification( $notificationType );
+		$donation->addDonorNotification( $notificationType );
+
+		$this->assertEquals( [ $notificationType ], $donation->getTransmittedDonorNotifications() );
+	}
+
 }

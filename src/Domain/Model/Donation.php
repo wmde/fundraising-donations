@@ -57,6 +57,7 @@ class Donation {
 	 * @var DonationTrackingInfo
 	 */
 	private DonationTrackingInfo $trackingInfo;
+	private array $transmittedDonorNotifications;
 
 	/**
 	 * @param int|null $id
@@ -80,6 +81,7 @@ class Donation {
 		$this->comment = $comment;
 		$this->exported = false;
 		$this->optsIntoDonationReceipt = null;
+		$this->transmittedDonorNotifications = [];
 	}
 
 	private function setStatus( string $status ): void {
@@ -305,4 +307,18 @@ class Donation {
 		return $this->donor instanceof AnonymousDonor;
 	}
 
+	/**
+	 * @return string[]
+	 *
+	 */
+	public function getTransmittedDonorNotifications(): array {
+		return $this->transmittedDonorNotifications;
+	}
+
+	public function addDonorNotification( string $notificationType ): void {
+		if ( array_search( $notificationType, $this->transmittedDonorNotifications ) !== false ) {
+			return;
+		}
+		$this->transmittedDonorNotifications[] = $notificationType;
+	}
 }
