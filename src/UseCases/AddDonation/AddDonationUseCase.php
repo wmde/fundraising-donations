@@ -74,7 +74,7 @@ class AddDonationUseCase {
 		}
 
 		if ( $this->policyValidator->isAutoDeleted( $donationRequest ) ) {
-			$donation->markAsDeleted();
+			$donation->cancelWithoutChecks();
 		}
 
 		$this->donationRepository->storeDonation( $donation );
