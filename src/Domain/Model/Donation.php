@@ -255,7 +255,16 @@ class Donation {
 	}
 
 	private function statusIsCancellable(): bool {
-		return $this->status === self::STATUS_NEW || $this->status === self::STATUS_MODERATION;
+		if ( $this->hasExternalPayment() && $this->isBooked() ) {
+			return false;
+		}
+		if ( $this->isExported() ) {
+			return false;
+		}
+		if ( $this->getPaymentMethodId() === PaymentMethod::BANK_TRANSFER ) {
+			return false;
+		}
+		return true;
 	}
 
 	public function hasExternalPayment(): bool {
@@ -289,7 +298,11 @@ class Donation {
 		return $this->status === self::STATUS_CANCELLED;
 	}
 
-	public function markAsDeleted(): void {
+	/**
+	 * Code that reacts to user actions should use cancel()
+	 * This method is only for automated internal processes (deleting after failing policy checks,...)
+	 */
+	public function cancelWithoutChecks(): void {
 		$this->status = self::STATUS_CANCELLED;
 	}
 
