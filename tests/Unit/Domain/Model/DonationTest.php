@@ -30,7 +30,7 @@ class DonationTest extends TestCase {
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$donation->cancel();
-		$this->assertSame( Donation::STATUS_CANCELLED, $donation->getStatus() );
+		$this->assertTrue( $donation->isCancelled() );
 	}
 
 	/**
@@ -57,7 +57,7 @@ class DonationTest extends TestCase {
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$donation->cancel();
-		$this->assertSame( Donation::STATUS_CANCELLED, $donation->getStatus() );
+		$this->assertTrue( $donation->isCancelled() );
 	}
 
 	public function testModerationStatusCanBeQueried(): void {
@@ -72,7 +72,7 @@ class DonationTest extends TestCase {
 
 		$donation->markForModeration();
 		$donation->cancel();
-		$this->assertSame( Donation::STATUS_CANCELLED, $donation->getStatus() );
+		$this->assertTrue( $donation->isCancelled() );
 	}
 
 	public function testIdIsNullWhenNotAssigned(): void {
