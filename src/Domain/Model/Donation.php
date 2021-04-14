@@ -27,8 +27,9 @@ class Donation {
 
 	// external payment, notified by payment provider
 	public const STATUS_EXTERNAL_BOOKED = 'B';
-	public const STATUS_MODERATION = 'P';
-	public const STATUS_CANCELLED = 'D';
+
+	private bool $moderated;
+	private bool $cancelled;
 
 	public const OPTS_INTO_NEWSLETTER = true;
 	public const DOES_NOT_OPT_INTO_NEWSLETTER = false;
@@ -80,6 +81,8 @@ class Donation {
 		$this->comment = $comment;
 		$this->exported = false;
 		$this->optsIntoDonationReceipt = null;
+		$this->moderated = false;
+		$this->cancelled = false;
 	}
 
 	private function setStatus( string $status ): void {
@@ -98,8 +101,6 @@ class Donation {
 				self::STATUS_PROMISE,
 				self::STATUS_EXTERNAL_INCOMPLETE,
 				self::STATUS_EXTERNAL_BOOKED,
-				self::STATUS_MODERATION,
-				self::STATUS_CANCELLED,
 			]
 		);
 	}
@@ -175,15 +176,14 @@ class Donation {
 	}
 
 	public function cancel(): void {
-		if ( $this->getPaymentMethodId() !== PaymentMethod::DIRECT_DEBIT ) {
-			throw new RuntimeException( 'Can only cancel direct debit' );
-		}
-
-		if ( !$this->statusIsCancellable() ) {
+		if ( !$this->isCancellable() ) {
 			throw new RuntimeException( 'Can only cancel new donations' );
 		}
+		$this->cancelled = true;
+	}
 
-		$this->status = self::STATUS_CANCELLED;
+	public function revokeCancellation(): void {
+		$this->cancelled = false;
 	}
 
 	/**
@@ -222,7 +222,11 @@ class Donation {
 	}
 
 	public function markForModeration(): void {
-		$this->status = self::STATUS_MODERATION;
+		$this->moderated = true;
+	}
+
+	public function markAsApproved(): void {
+		$this->moderated = false;
 	}
 
 	public function notifyOfPolicyValidationFailure(): void {
@@ -254,14 +258,11 @@ class Donation {
 		$paymentMethod->addCreditCardTransactionData( $creditCardData );
 	}
 
-	private function statusIsCancellable(): bool {
-		if ( $this->hasExternalPayment() && $this->isBooked() ) {
+	private function isCancellable(): bool {
+		if ( $this->getPaymentMethodId() !== PaymentMethod::DIRECT_DEBIT ) {
 			return false;
 		}
 		if ( $this->isExported() ) {
-			return false;
-		}
-		if ( $this->getPaymentMethodId() === PaymentMethod::BANK_TRANSFER ) {
 			return false;
 		}
 		return true;
@@ -279,7 +280,7 @@ class Donation {
 	}
 
 	public function needsModeration(): bool {
-		return $this->status === self::STATUS_MODERATION;
+		return $this->moderated;
 	}
 
 	public function isBooked(): bool {
@@ -295,7 +296,7 @@ class Donation {
 	}
 
 	public function isCancelled(): bool {
-		return $this->status === self::STATUS_CANCELLED;
+		return $this->cancelled;
 	}
 
 	/**
@@ -303,7 +304,7 @@ class Donation {
 	 * This method is only for automated internal processes (deleting after failing policy checks,...)
 	 */
 	public function cancelWithoutChecks(): void {
-		$this->status = self::STATUS_CANCELLED;
+		$this->cancelled = true;
 	}
 
 	public function setOptsIntoDonationReceipt( ?bool $optOut ): void {

@@ -188,9 +188,8 @@ class ValidDonation {
 	}
 
 	public static function newCancelledPayPalDonation(): Donation {
-		return self::createDonation(
-			new PayPalPayment( new PayPalData() ),
-			Donation::STATUS_CANCELLED
+		return self::createCancelledDonation(
+			new PayPalPayment( new PayPalData() )
 		);
 	}
 
@@ -212,6 +211,19 @@ class ValidDonation {
 			self::OPTS_INTO_NEWSLETTER,
 			self::newTrackingInfo()
 		);
+	}
+
+	private static function createCancelledDonation( PaymentMethod $paymentMethod ): Donation {
+		$donation = new Donation(
+			null,
+			Donation::STATUS_NEW,
+			self::newDonor(),
+			self::newDonationPayment( $paymentMethod ),
+			self::OPTS_INTO_NEWSLETTER,
+			self::newTrackingInfo()
+		);
+		$donation->cancelWithoutChecks();
+		return $donation;
 	}
 
 	private static function createAnonymousDonation( PaymentMethod $paymentMethod, string $status ): Donation {
