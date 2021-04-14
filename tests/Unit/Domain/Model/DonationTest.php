@@ -34,32 +34,22 @@ class DonationTest extends TestCase {
 	}
 
 	/**
-	 * @dataProvider nonCancellableStatusProvider
+	 * @dataProvider nonCancellableDonationProvider
 	 */
-	public function testGivenNonNewStatus_cancellationFails( string $nonCancellableStatus ): void {
-		$donation = $this->newDirectDebitDonationWithStatus( $nonCancellableStatus );
-
+	public function testGivenNonCancellableDonation_cancellationFails( Donation $donation ): void {
 		$this->expectException( RuntimeException::class );
 		$donation->cancel();
 	}
 
-	private function newDirectDebitDonationWithStatus( string $status ): Donation {
-		return new Donation(
-			null,
-			$status,
-			ValidDonation::newDonor(),
-			ValidDonation::newDirectDebitPayment(),
-			Donation::OPTS_INTO_NEWSLETTER,
-			ValidDonation::newTrackingInfo()
-		);
-	}
-
-	public function nonCancellableStatusProvider(): array {
+	public function nonCancellableDonationProvider(): array {
+		$exportedDonation = ValidDonation::newDirectDebitDonation();
+		$exportedDonation->markAsExported();
 		return [
-			[ Donation::STATUS_CANCELLED ],
-			[ Donation::STATUS_EXTERNAL_BOOKED ],
-			[ Donation::STATUS_EXTERNAL_INCOMPLETE ],
-			[ Donation::STATUS_PROMISE ],
+			[ ValidDonation::newBankTransferDonation() ],
+			[ ValidDonation::newSofortDonation() ],
+			[ ValidDonation::newBookedPayPalDonation() ],
+			[ $exportedDonation ],
+			[ ValidDonation::newCancelledPayPalDonation() ]
 		];
 	}
 

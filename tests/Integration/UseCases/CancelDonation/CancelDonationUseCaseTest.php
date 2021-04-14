@@ -87,8 +87,7 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testGivenIdOfNonCancellableDonation_cancellationIsNotSuccessful(): void {
-		$donation = $this->newCancelableDonation();
-		$donation->cancel();
+		$donation = ValidDonation::newCancelledPayPalDonation();
 		$this->repository->storeDonation( $donation );
 
 		$request = new CancelDonationRequest( $donation->getId() );
