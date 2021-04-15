@@ -144,8 +144,8 @@ class LegacyToDomainConverter {
 
 		$trackingInfo = DonationTrackingInfo::newBlankTrackingInfo();
 
-		$trackingInfo->setTotalImpressionCount( intval( $data['impCount'] ?? '0', 10 ) );
-		$trackingInfo->setSingleBannerImpressionCount( intval( $data['bImpCount'] ?? '0', 10 ) );
+		$trackingInfo->setTotalImpressionCount( intval( $data['impCount'] ?? '0' ) );
+		$trackingInfo->setSingleBannerImpressionCount( intval( $data['bImpCount'] ?? '0' ) );
 		$trackingInfo->setTracking( $data['tracking'] ?? '' );
 
 		return $trackingInfo->freeze()->assertNoNullFields();

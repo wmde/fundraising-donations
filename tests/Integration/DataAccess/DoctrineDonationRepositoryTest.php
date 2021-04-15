@@ -11,16 +11,12 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as Doc
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 
 /**
@@ -29,6 +25,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonorFactory
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter
  *
  * @license GPL-2.0-or-later
  */
@@ -36,10 +33,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 	private const ID_OF_DONATION_NOT_IN_DB = 35505;
 
-	/**
-	 * @var EntityManager
-	 */
-	private $entityManager;
+	private EntityManager $entityManager;
 
 	public function setUp(): void {
 		$factory = TestEnvironment::newInstance()->getFactory();
@@ -197,6 +191,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testWhenDeletionDateGetsSet_repositoryNoLongerReturnsEntity(): void {
+		// TODO: We might need to change or move this behavior when implementing undelete use case
 		$donation = $this->createDeletedDonation();
 		$repository = $this->newRepository();
 
@@ -214,6 +209,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testWhenDeletionDateGetsSet_repositoryNoLongerPersistsEntity(): void {
+		// TODO: We might need to change or move this behavior when implementing undelete use case
 		$donation = $this->createDeletedDonation();
 		$repository = $this->newRepository();
 
@@ -266,74 +262,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertDoctrineEntityIsInDatabase( $expectedDoctrineEntity );
 	}
 
-	public function testDonationWithIncompletePaypalDataCanBeLoaded(): void {
-		$donationId = $this->createPaypalDonationWithMissingFields();
-		$repository = $this->newRepository();
-		$donation = $repository->getDonationById( $donationId );
-		/** @var PayPalPayment $paypalPayment */
-		$paypalPayment = $donation->getPaymentMethod();
-		$this->assertNotNull( $paypalPayment->getPayPalData() );
-		$this->assertSame( '', $paypalPayment->getPayPalData()->getFirstName() );
-	}
-
-	private function createPaypalDonationWithMissingFields(): int {
-		$doctrineDonation = IncompleteDoctrineDonation::newPaypalDonationWithMissingFields();
-		$this->entityManager->persist( $doctrineDonation );
-		$this->entityManager->flush();
-		return $doctrineDonation->getId();
-	}
-
-	public function testDonationWithMissingTrackingInformationDataCanBeLoaded(): void {
-		$donationId = $this->createPaypalDonationWithMissingTracking();
-		$repository = $this->newRepository();
-		$donation = $repository->getDonationById( $donationId );
-		$info = $donation->getTrackingInfo();
-		$this->assertNotNull( $info );
-		$this->assertSame( '', $info->getColor() );
-		$this->assertSame( 0, $info->getTotalImpressionCount() );
-	}
-
-	private function createPaypalDonationWithMissingTracking(): int {
-		$doctrineDonation = IncompleteDoctrineDonation::newPaypalDonationWithMissingTrackingData();
-		$this->entityManager->persist( $doctrineDonation );
-		$this->entityManager->flush();
-		return $doctrineDonation->getId();
-	}
-
-	public function testDonationWithIncompleteBankDataCanBeLoaded(): void {
-		$donationId = $this->createDonationWithIncompleteBankData();
-		$repository = $this->newRepository();
-		$donation = $repository->getDonationById( $donationId );
-		/** @var DirectDebitPayment $paymentMethod */
-		$paymentMethod = $donation->getPaymentMethod();
-		$this->assertNotNull( $paymentMethod->getBankData() );
-		$this->assertSame( '', $paymentMethod->getBankData()->getIban()->toString() );
-	}
-
-	private function createDonationWithIncompleteBankData(): ?int {
-		$doctrineDonation = IncompleteDoctrineDonation::newDirectDebitDonationWithMissingFields();
-		$this->entityManager->persist( $doctrineDonation );
-		$this->entityManager->flush();
-		return $doctrineDonation->getId();
-	}
-
-	public function testDonationWithIncompleteCreditcardDataCanBeLoaded(): void {
-		$donationId = $this->createDonationWithIncompleteCreditcardData();
-		$repository = $this->newRepository();
-		$donation = $repository->getDonationById( $donationId );
-		/** @var CreditCardPayment $paymentMethod */
-		$paymentMethod = $donation->getPaymentMethod();
-		$this->assertNotNull( $paymentMethod->getCreditCardData() );
-		$this->assertSame( '', $paymentMethod->getCreditCardData()->getTitle() );
-	}
-
-	private function createDonationWithIncompleteCreditcardData(): ?int {
-		$doctrineDonation = IncompleteDoctrineDonation::newCreditcardDonationWithMissingFields();
-		$this->entityManager->persist( $doctrineDonation );
-		$this->entityManager->flush();
-		return $doctrineDonation->getId();
-	}
-
 	public function testWhenUpdateFails_domainExceptionIsThrown(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->assignId( 42 );
@@ -342,71 +270,5 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 		$this->expectException( StoreDonationException::class );
 		$repository->storeDonation( $donation );
-	}
-
-	public function testExportedDonationsAreMarked(): void {
-		// TODO move to test for LegacyToDomainConverter
-		$doctrineDonation = ValidDoctrineDonation::newExportedirectDebitDoctrineDonation();
-		$this->entityManager->persist( $doctrineDonation );
-		$this->entityManager->flush();
-
-		$repository = $this->newRepository();
-		$donation = $repository->getDonationById( $doctrineDonation->getId() );
-
-		$this->assertTrue( $donation->isExported() );
-	}
-
-	public function testPaypalDonationWithChildPaymentsIsSaved(): void {
-		// TODO remove this when LegacyToDomainComnverter is finished
-		$transactionId = '16R12136PU8783961';
-		$fakeChildId = 2;
-		$donation = ValidDonation::newBookedPayPalDonation();
-		$donation->getPaymentMethod()->getPayPalData()->addChildPayment( $transactionId, $fakeChildId );
-		$repository = $this->newRepository();
-
-		$repository->storeDonation( $donation );
-
-		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
-		$data = $doctrineDonation->getDecodedData();
-		$this->assertSame( [ '16R12136PU8783961' => 2 ], $data['transactionIds'] );
-	}
-
-	public function testPaypalDonationWithChildPaymentIsLoaded(): void {
-		// TODO move to test for LegacyToDomainConverter
-		$transactionIds = [
-			'16R12136PU8783961' => 2,
-			'1A412136PU8783961' => 3
-		];
-		$doctrineDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
-		$doctrineDonation->encodeAndSetData( array_merge(
-			$doctrineDonation->getDecodedData(),
-			[ 'transactionIds' => $transactionIds ]
-		) );
-		$this->entityManager->persist( $doctrineDonation );
-		$this->entityManager->flush();
-
-		$repository = $this->newRepository();
-		$donation = $repository->getDonationById( $doctrineDonation->getId() );
-
-		$this->assertEquals( $transactionIds, $donation->getPaymentMethod()->getPaypalData()->getAllChildPayments() );
-	}
-
-	public function testPaypalDonationWithNumericalChildPaymentTransactionIdIsFetched(): void {
-		// TODO move to test for LegacyToDomainConverter
-		$transactionIds = [
-			'123456789' => 2
-		];
-		$doctrineDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
-		$doctrineDonation->encodeAndSetData( array_merge(
-			$doctrineDonation->getDecodedData(),
-			[ 'transactionIds' => $transactionIds ]
-		) );
-		$this->entityManager->persist( $doctrineDonation );
-		$this->entityManager->flush();
-
-		$repository = $this->newRepository();
-		$donation = $repository->getDonationById( $doctrineDonation->getId() );
-
-		$this->assertNotNull( $donation );
 	}
 }
