@@ -93,6 +93,14 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
+	public static function newBankTransferDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::BANK_TRANSFER );
+		$donation->setBankTransferCode( ValidDonation::PAYMENT_BANK_TRANSFER_CODE );
+		return $donation;
+	}
+
 	public static function newAnyonymizedDonation() {
 		$self = new self();
 		$donation = $self->createDonation();

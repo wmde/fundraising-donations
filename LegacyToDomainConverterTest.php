@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
@@ -49,6 +51,17 @@ class LegacyToDomainConverterTest extends TestCase {
 
 		$this->assertNotNull( $paymentMethod->getBankData() );
 		$this->assertSame( '', $paymentMethod->getBankData()->getIban()->toString() );
+	}
+
+	public function testGivenCompleteBankData_converterAddsTransferCode(): void {
+		$doctrineDonation = ValidDoctrineDonation::newBankTransferDonation();
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		/** @var BankTransferPayment $paymentMethod */
+		$paymentMethod = $donation->getPaymentMethod();
+
+		$this->assertSame( ValidDonation::PAYMENT_BANK_TRANSFER_CODE, $paymentMethod->getBankTransferCode() );
 	}
 
 	public function testGivenIncompleteCreditcardData_converterFillsCreditcardDataWithDefaults(): void {
