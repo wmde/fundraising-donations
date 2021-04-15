@@ -28,6 +28,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonorFactory
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter
  *
  * @license GPL-2.0-or-later
  */
@@ -220,34 +221,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$repository->storeDonation( $donation );
 	}
 
-	public function testDataFieldsAreRetainedOrUpdatedOnUpdate(): void {
-		$doctrineDonation = $this->getNewlyCreatedDoctrineDonation();
-
-		$doctrineDonation->encodeAndSetData(
-			array_merge(
-				$doctrineDonation->getDecodedData(),
-				[
-					'untouched' => 'value',
-					'vorname' => 'potato',
-					'another' => 'untouched',
-				]
-			)
-		);
-
-		$this->entityManager->flush();
-
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->assignId( $doctrineDonation->getId() );
-
-		$this->newRepository()->storeDonation( $donation );
-
-		$data = $this->getDoctrineDonationById( $donation->getId() )->getDecodedData();
-
-		$this->assertSame( 'value', $data['untouched'] );
-		$this->assertNotSame( 'potato', $data['vorname'] );
-		$this->assertSame( 'untouched', $data['another'] );
-	}
-
 	public function testGivenDonationUpdateWithoutDonorInformation_DonorNameStaysTheSame(): void {
 		$donation = ValidDonation::newBookedPayPalDonation();
 		$this->newRepository()->storeDonation( $donation );
@@ -258,12 +231,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
 
 		$this->assertSame( $donation->getDonor()->getName()->getFullName(), $doctrineDonation->getDonorFullName() );
-	}
-
-	private function getNewlyCreatedDoctrineDonation(): DoctrineDonation {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$this->newRepository()->storeDonation( $donation );
-		return $this->getDoctrineDonationById( $donation->getId() );
 	}
 
 	public function testCommentGetPersistedAndRetrieved(): void {
@@ -378,6 +345,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testExportedDonationsAreMarked(): void {
+		// TODO move to test for LegacyToDomainConverter
 		$doctrineDonation = ValidDoctrineDonation::newExportedirectDebitDoctrineDonation();
 		$this->entityManager->persist( $doctrineDonation );
 		$this->entityManager->flush();
@@ -389,6 +357,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testPaypalDonationWithChildPaymentsIsSaved(): void {
+		// TODO remove this when LegacyToDomainComnverter is finished
 		$transactionId = '16R12136PU8783961';
 		$fakeChildId = 2;
 		$donation = ValidDonation::newBookedPayPalDonation();
@@ -403,6 +372,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testPaypalDonationWithChildPaymentIsLoaded(): void {
+		// TODO move to test for LegacyToDomainConverter
 		$transactionIds = [
 			'16R12136PU8783961' => 2,
 			'1A412136PU8783961' => 3
@@ -422,6 +392,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testPaypalDonationWithNumericalChildPaymentTransactionIdIsFetched(): void {
+		// TODO move to test for LegacyToDomainConverter
 		$transactionIds = [
 			'123456789' => 2
 		];
