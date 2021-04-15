@@ -104,36 +104,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		);
 	}
 
-	public function testNewBankTransferPayment_persistingSavesBankTransferCode(): void {
-		$donation = ValidDonation::newBankTransferDonation();
-
-		$repository = $this->newRepository();
-
-		$repository->storeDonation( $donation );
-
-		$retrievedDonation = $repository->getDonationById( $donation->getId() );
-		/**
-		 * @var $payment BankTransferPayment
-		 */
-		$payment = $retrievedDonation->getPaymentMethod();
-		$this->assertSame( ValidDonation::PAYMENT_BANK_TRANSFER_CODE, $payment->getBankTransferCode() );
-	}
-
-	public function testNewSofortPayment_persistingSavesBankTransferCode(): void {
-		$donation = ValidDonation::newSofortDonation();
-
-		$repository = $this->newRepository();
-
-		$repository->storeDonation( $donation );
-
-		$retrievedDonation = $repository->getDonationById( $donation->getId() );
-		/**
-		 * @var $payment SofortPayment
-		 */
-		$payment = $retrievedDonation->getPaymentMethod();
-		$this->assertSame( ValidDonation::PAYMENT_BANK_TRANSFER_CODE, $payment->getBankTransferCode() );
-	}
-
 	public function testSofortPaymentDateUpdate_paymentEntityIdStaysTheSame(): void {
 		$donation = ValidDonation::newSofortDonation();
 		$repository = $this->newRepository();

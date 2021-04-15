@@ -7,11 +7,8 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess\LegacyConverter
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter
@@ -21,15 +18,19 @@ class DomainToLegacyConverterTest extends TestCase {
 	/**
 	 * @dataProvider getPaymentMethodsAndTransferCodes
 	 */
-	public function testGetBankTransferCode_identifierIsReturned( string $expectedOutput, PaymentMethod $payment ): void {
-		$this->assertEquals( $expectedOutput, DomainToLegacyConverter::getBankTransferCode( $payment ) );
+	public function testGivenPaymentMethodWithBankTransferCode_converterGetsCodeFromPayment( string $expectedOutput, Donation $donation ): void {
+		$converter = new DomainToLegacyConverter();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertEquals( $expectedOutput, $doctrineDonation->getBankTransferCode() );
 	}
 
 	public function getPaymentMethodsAndTransferCodes(): array {
 		return [
-			[ 'ffg', new SofortPayment( 'ffg' ) ],
-			[ 'hhi', new BankTransferPayment( 'hhi' ) ],
-			[ '', new CreditCardPayment() ],
+			[ ValidDonation::PAYMENT_BANK_TRANSFER_CODE, ValidDonation::newBankTransferDonation() ],
+			[ ValidDonation::PAYMENT_BANK_TRANSFER_CODE, ValidDonation::newSofortDonation() ],
+			[ '', ValidDonation::newBookedCreditCardDonation() ],
 		];
 	}
 

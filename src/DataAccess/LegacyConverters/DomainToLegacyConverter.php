@@ -79,13 +79,11 @@ class DomainToLegacyConverter {
 		);
 	}
 
-	public static function getBankTransferCode( PaymentMethod $paymentMethod ): string {
+	private static function getBankTransferCode( PaymentMethod $paymentMethod ): string {
 		if ( $paymentMethod instanceof BankTransferPayment ) {
 			return $paymentMethod->getBankTransferCode();
-		} else {
-			if ( $paymentMethod instanceof SofortPayment ) {
+		} elseif ( $paymentMethod instanceof SofortPayment ) {
 				return $paymentMethod->getBankTransferCode();
-			}
 		}
 
 		return '';
