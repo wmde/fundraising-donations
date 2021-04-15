@@ -72,4 +72,24 @@ class DomainToLegacyConverterTest extends TestCase {
 
 		$this->assertSame( [ '16R12136PU8783961' => 2 ], $data['transactionIds'] );
 	}
+
+	public function testCreditCardWithExpiryDateIsConverted(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newBookedCreditCardDonation();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$data = $doctrineDonation->getDecodedData();
+
+		$this->assertSame( '9/2001', $data['mcp_cc_expiry_date'] );
+	}
+
+	public function testCreditCardWithOutExpiryDateIsConverted(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newIncompleteCreditCardDonation();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$data = $doctrineDonation->getDecodedData();
+
+		$this->assertSame( '', $data['mcp_cc_expiry_date'] );
+	}
 }

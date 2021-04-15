@@ -3,6 +3,7 @@
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess\LegacyConverters;
 
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\InvalidLegacyDataException;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
@@ -10,10 +11,12 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentWithoutAssociatedData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 
 /**
- * @covers WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter
  */
 class LegacyToDomainConverterTest extends TestCase {
 	public function testGivenIncompletePaypalData_converterFillsPaypalDataWithDefaults(): void {
@@ -76,6 +79,18 @@ class LegacyToDomainConverterTest extends TestCase {
 		$this->assertSame( '', $paymentMethod->getCreditCardData()->getTitle() );
 	}
 
+	public function testGivenSofortDonation_converterFillsSofrtPaymentData(): void {
+		$doctrineDonation = ValidDoctrineDonation::newSofortDonation();
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		/** @var SofortPayment $paymentMethod */
+		$paymentMethod = $donation->getPaymentMethod();
+
+		$this->assertNotNull( $paymentMethod->getConfirmedAt() );
+		$this->assertSame( ValidDonation::PAYMENT_BANK_TRANSFER_CODE, $paymentMethod->getBankTransferCode() );
+	}
+
 	public function testGivenDataSetWithExportDate_donationIsMarkedAsExported(): void {
 		$doctrineDonation = ValidDoctrineDonation::newExportedirectDebitDoctrineDonation();
 		$converter = new LegacyToDomainConverter();
@@ -122,6 +137,17 @@ class LegacyToDomainConverterTest extends TestCase {
 		$paypalPayment = $donation->getPaymentMethod();
 
 		$this->assertEquals( $transactionIds, $paypalPayment->getPaypalData()->getAllChildPayments() );
+	}
+
+	public function testGivenDonationWithUnknownPayment_converterCreatesPaymentWithoutAssociatedData(): void {
+		$doctrineDonation = ValidDoctrineDonation::newDonationWithCash();
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		$paymentMethod = $donation->getPaymentMethod();
+
+		$this->assertInstanceOf( PaymentWithoutAssociatedData::class, $paymentMethod );
+		$this->assertSame( 'CSH', $paymentMethod->getId() );
 	}
 
 }
