@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationPayments\SofortPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
@@ -97,6 +98,18 @@ class ValidDoctrineDonation {
 		$self = new self();
 		$donation = $self->createDonation();
 		$donation->setPaymentType( PaymentMethod::BANK_TRANSFER );
+		$donation->setBankTransferCode( ValidDonation::PAYMENT_BANK_TRANSFER_CODE );
+		return $donation;
+	}
+
+	public static function newSofortDonation(): Donation {
+		$self = new self();
+		$payment = new SofortPayment();
+		$payment->setId( 1 );
+		$payment->setConfirmedAt( new \DateTime( ValidDonation::SOFORT_DONATION_CONFIRMED_AT ) );
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::SOFORT );
+		$donation->setPayment( $payment );
 		$donation->setBankTransferCode( ValidDonation::PAYMENT_BANK_TRANSFER_CODE );
 		return $donation;
 	}
@@ -211,6 +224,18 @@ class ValidDoctrineDonation {
 			'paypal_mc_fee' => '0.47',
 			'user_agent' => 'PayPal IPN ( https://www.paypal.com/ipn )',
 		];
+	}
+
+	public static function newDonationWithCash(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( 'CSH' );
+		$donation->encodeAndSetData(
+			array_merge(
+				[ 'adresstyp' => 'anonym' ],
+			)
+		);
+		return $donation;
 	}
 
 }

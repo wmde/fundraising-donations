@@ -87,15 +87,11 @@ class LegacyToDomainConverter {
 		return $bankData->freeze()->assertNoNullFields();
 	}
 
-	private function getPayPalDataFromEntity( DoctrineDonation $dd ): ?PayPalData {
+	private function getPayPalDataFromEntity( DoctrineDonation $dd ): PayPalData {
 		$data = $dd->getDecodedData();
 
-		if ( !array_key_exists( 'paypal_payer_id', $data ) ) {
-			return null;
-		}
-
 		$payPalData = ( new PayPalData() )
-			->setPayerId( $data['paypal_payer_id'] )
+			->setPayerId( $data['paypal_payer_id'] ?? '' )
 			->setSubscriberId( $data['paypal_subscr_id'] ?? '' )
 			->setPayerStatus( $data['paypal_payer_status'] ?? '' )
 			->setAddressStatus( $data['paypal_address_status'] ?? '' )
