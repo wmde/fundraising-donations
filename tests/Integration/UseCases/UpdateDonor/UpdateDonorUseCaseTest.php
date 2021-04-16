@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\UpdateDono
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
@@ -115,6 +116,21 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 		$this->assertFalse( $response->isSuccessful() );
 		$this->assertEquals( UpdateDonorResponse::ERROR_DONATION_IS_EXPORTED, $response->getErrorMessage() );
+	}
+
+	public function testGivenCanceledDonation_donationUpdateFails() {
+		$repository = $this->newRepository();
+		$useCase = $this->newUpdateDonorUseCase( $repository );
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->setDonor( new AnonymousDonor() );
+		$donation->cancel();
+		$repository->storeDonation( $donation );
+		$donationId = $donation->getId();
+
+		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
+
+		$this->assertFalse( $response->isSuccessful() );
+		$this->assertEquals( UpdateDonorResponse::ERROR_ACCESS_DENIED, $response->getErrorMessage() );
 	}
 
 	public function testGivenFailingValidation_donationUpdateFails() {

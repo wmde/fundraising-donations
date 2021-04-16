@@ -72,19 +72,8 @@ class DoctrineDonationRepository implements DonationRepository {
 		}
 	}
 
-	/**
-	 * @param int $id
-	 *
-	 * @return DoctrineDonation|null
-	 * @throws ORMException
-	 */
-	public function getDoctrineDonationById( int $id ): ?DoctrineDonation {
-		return $this->entityManager->getRepository( DoctrineDonation::class )->findOneBy(
-			[
-				'id' => $id,
-				'deletionTime' => null
-			]
-		);
+	private function getDoctrineDonationById( int $id ): ?DoctrineDonation {
+		return $this->entityManager->find( DoctrineDonation::class, $id );
 	}
 
 	public function getDonationById( int $id ): ?Donation {

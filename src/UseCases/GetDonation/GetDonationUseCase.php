@@ -34,7 +34,7 @@ class GetDonationUseCase {
 
 		$donation = $this->getDonationById( $request->getDonationId() );
 
-		if ( $donation === null ) {
+		if ( $donation === null || $donation->isCancelled() ) {
 			return GetDonationResponse::newNotAllowedResponse();
 		}
 
