@@ -157,7 +157,7 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 		$this->assertTrue( $response->isSuccessful() );
 
 		$this->assertTrue(
-			$this->donationRepository->getDonationById( self::DONATION_ID )->needsModeration()
+			$this->donationRepository->getDonationById( self::DONATION_ID )->isMarkedForModeration()
 		);
 	}
 

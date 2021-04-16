@@ -37,7 +37,7 @@ class DonationConfirmationMailer {
 				'id' => $donation->getId(),
 				'amount' => $donation->getAmount()->getEuroFloat(),
 				'interval' => $donation->getPaymentIntervalInMonths(),
-				'needsModeration' => $donation->needsModeration(),
+				'needsModeration' => $donation->isMarkedForModeration(),
 				'paymentType' => $donation->getPaymentMethodId(),
 				'bankTransferCode' => $this->getBankTransferCode( $donation->getPaymentMethod() ),
 				'receiptOptIn' => $donation->getOptsIntoDonationReceipt(),
