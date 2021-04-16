@@ -83,7 +83,7 @@ class ValidDonation {
 	public static function newBankTransferDonation(): Donation {
 		return self::createDonation(
 			new BankTransferPayment( self::PAYMENT_BANK_TRANSFER_CODE ),
-			Donation::STATUS_NEW
+			Donation::STATUS_PROMISE
 		);
 	}
 
@@ -190,6 +190,12 @@ class ValidDonation {
 	public static function newCancelledPayPalDonation(): Donation {
 		return self::createCancelledDonation(
 			new PayPalPayment( new PayPalData() )
+		);
+	}
+
+	public static function newCancelledBankTransferDonation(): Donation {
+		return self::createCancelledDonation(
+			new BankTransferPayment( self::PAYMENT_BANK_TRANSFER_CODE )
 		);
 	}
 

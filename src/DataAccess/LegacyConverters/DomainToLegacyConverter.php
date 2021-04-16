@@ -29,6 +29,7 @@ class DomainToLegacyConverter {
 		$this->updateComment( $doctrineDonation, $donation->getComment() );
 		$doctrineDonation->setDonorOptsIntoNewsletter( $donation->getOptsIntoNewsletter() );
 		$doctrineDonation->setDonationReceipt( $donation->getOptsIntoDonationReceipt() );
+		$this->updateStatusInformation( $doctrineDonation, $donation );
 
 		// TODO create $this->updateExportState($doctrineDonation, $donation);
 		// currently, that method is not needed because the export state is set in a dedicated
@@ -44,8 +45,20 @@ class DomainToLegacyConverter {
 		return $doctrineDonation;
 	}
 
-	private function updatePaymentInformation( DoctrineDonation $doctrineDonation, Donation $donation ): void {
+	private function updateStatusInformation( DoctrineDonation $doctrineDonation, Donation $donation ): void {
 		$doctrineDonation->setStatus( $donation->getStatus() );
+
+		if ( $donation->isCancelled() ) {
+			$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
+			// returns because cancellation marker has priority over moderation marker
+			return;
+		}
+		if ( $donation->isMarkedForModeration() ) {
+			$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+		}
+	}
+
+	private function updatePaymentInformation( DoctrineDonation $doctrineDonation, Donation $donation ): void {
 		$doctrineDonation->setAmount( $donation->getAmount()->getEuroString() );
 		$doctrineDonation->setPaymentIntervalInMonths( $donation->getPaymentIntervalInMonths() );
 
