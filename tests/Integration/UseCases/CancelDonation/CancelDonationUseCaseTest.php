@@ -11,14 +11,14 @@ use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase;
 
 /**
- * @covers WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase
  *
  * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
@@ -48,7 +48,7 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 	public function setUp(): void {
 		$this->repository = new FakeDonationRepository();
 		$this->mailer = new TemplateBasedMailerSpy( $this );
-		$this->authorizer = new SucceedingDonationAuthorizer();
+		$this->authorizer = new SucceedingDonationAuthorizerSpy();
 		$this->logger = new DonationEventLoggerSpy();
 	}
 
@@ -135,6 +135,18 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
+	public function testWhenDonationGetsCancelledByAdmin_adminUserNameIsWrittenAsLogEntry(): void {
+		$donation = $this->newCancelableDonation();
+		$this->repository->storeDonation( $donation );
+
+		$this->newCancelDonationUseCase()->cancelDonation( new CancelDonationRequest( $donation->getId(), "coolAdmin" ) );
+
+		$this->assertSame(
+			[ [ $donation->getId(), 'cancelled by user: coolAdmin' ] ],
+			$this->logger->getLogCalls()
+		);
+	}
+
 	public function testGivenIdOfNonCancellableDonation_nothingIsWrittenToTheLog(): void {
 		$this->newCancelDonationUseCase()->cancelDonation( new CancelDonationRequest( 1 ) );
 
@@ -184,6 +196,39 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 		$response = $this->newCancelDonationUseCase()->cancelDonation( $request );
 
 		$this->assertFalse( $response->cancellationSucceeded() );
+	}
+
+	public function testWhenAdminUserCancelsDonation_authorizerChecksIfSystemCanModifyDonation(): void {
+		$donation = $this->newCancelableDonation();
+		$this->repository->storeDonation( $donation );
+
+		$request = new CancelDonationRequest( $donation->getId(), "coolAdmin" );
+		$this->newCancelDonationUseCase()->cancelDonation( $request );
+
+		$this->assertTrue( $this->authorizer->hasAuthorizedAsAdmin() );
+		$this->assertFalse( $this->authorizer->hasAuthorizedAsUser() );
+	}
+
+	public function testWhenDonorCancelsDonation_authorizerUsesFullAuthorizationCheck(): void {
+		$donation = $this->newCancelableDonation();
+		$this->repository->storeDonation( $donation );
+
+		$request = new CancelDonationRequest( $donation->getId() );
+		$this->newCancelDonationUseCase()->cancelDonation( $request );
+
+		$this->assertFalse( $this->authorizer->hasAuthorizedAsAdmin() );
+		$this->assertTrue( $this->authorizer->hasAuthorizedAsUser() );
+	}
+
+	public function testWhenAdminUserCancelsDonation_emailIsNotSent(): void {
+		$this->mailer = $this->createMock( TemplateMailerInterface::class );
+		$this->mailer->expects( $this->never() )->method( 'sendMail' );
+
+		$donation = $this->newCancelableDonation();
+		$this->repository->storeDonation( $donation );
+
+		$request = new CancelDonationRequest( $donation->getId(), "coolAdmin" );
+		$this->newCancelDonationUseCase()->cancelDonation( $request );
 	}
 
 }
