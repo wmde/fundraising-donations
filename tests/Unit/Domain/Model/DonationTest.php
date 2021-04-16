@@ -64,7 +64,7 @@ class DonationTest extends TestCase {
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$donation->markForModeration();
-		$this->assertTrue( $donation->needsModeration() );
+		$this->assertTrue( $donation->isMarkedForModeration() );
 	}
 
 	public function testGivenModerationStatus_cancellationSucceeds(): void {
@@ -230,13 +230,13 @@ class DonationTest extends TestCase {
 	public function testWhenNonExternalPaymentIsNotifiedOfPolicyValidationFailure_itIsPutInModeration(): void {
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->notifyOfPolicyValidationFailure();
-		$this->assertTrue( $donation->needsModeration() );
+		$this->assertTrue( $donation->isMarkedForModeration() );
 	}
 
 	public function testWhenExternalPaymentIsNotifiedOfPolicyValidationFailure_itIsNotPutInModeration(): void {
 		$donation = ValidDonation::newIncompletePayPalDonation();
 		$donation->notifyOfPolicyValidationFailure();
-		$this->assertFalse( $donation->needsModeration() );
+		$this->assertFalse( $donation->isMarkedForModeration() );
 	}
 
 }

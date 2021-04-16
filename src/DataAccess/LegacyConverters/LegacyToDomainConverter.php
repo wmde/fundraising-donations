@@ -29,7 +29,7 @@ class LegacyToDomainConverter {
 	public function createFromLegacyObject( DoctrineDonation $doctrineDonation ): Donation {
 		$donation = new Donation(
 			$doctrineDonation->getId(),
-			$doctrineDonation->getStatus(),
+			$this->convertStatus( $doctrineDonation ),
 			DonorFactory::createDonorFromEntity( $doctrineDonation ),
 			$this->createPayment( $doctrineDonation ),
 			(bool)$doctrineDonation->getDonorOptsIntoNewsletter(),
@@ -40,7 +40,29 @@ class LegacyToDomainConverter {
 		if ( $this->entityIsExported( $doctrineDonation ) ) {
 			$donation->markAsExported();
 		}
+		$this->assignCancellationAndModeration( $doctrineDonation, $donation );
 		return $donation;
+	}
+
+	private function convertStatus( DoctrineDonation $dd ): string {
+		switch ( $dd->getPaymentType() ) {
+			case PaymentMethod::BANK_TRANSFER:
+				return Donation::STATUS_PROMISE;
+			case PaymentMethod::DIRECT_DEBIT:
+				return Donation::STATUS_NEW;
+			default:
+				// TODO ask Kai what to do with old data that would create an error here
+				return $dd->getStatus();
+		}
+	}
+
+	private function assignCancellationAndModeration( DoctrineDonation $dd, Donation $donation ): void {
+		if ( $dd->getStatus() == DoctrineDonation::STATUS_CANCELLED ) {
+			$donation->cancelWithoutChecks();
+		}
+		if ( $dd->getStatus() == DoctrineDonation::STATUS_MODERATION ) {
+			$donation->markForModeration();
+		}
 	}
 
 	private function createPayment( DoctrineDonation $dd ): DonationPayment {

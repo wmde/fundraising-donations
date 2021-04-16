@@ -59,7 +59,7 @@ class AddCommentUseCase {
 		}
 
 		$successMessage = 'comment_success_ok';
-		if ( $donation->needsModeration() ) {
+		if ( $donation->isMarkedForModeration() ) {
 			$successMessage = 'comment_success_needs_moderation';
 		}
 

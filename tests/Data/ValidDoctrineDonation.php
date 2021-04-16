@@ -34,6 +34,7 @@ class ValidDoctrineDonation {
 		$self = new self();
 		$donation = $self->createDonation();
 		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setStatus( Donation::STATUS_EXTERNAL_BOOKED );
 		$donation->encodeAndSetData(
 			array_merge(
 				$donation->getDecodedData(),
@@ -66,6 +67,7 @@ class ValidDoctrineDonation {
 		$self = new self();
 		$donation = $self->createDonation();
 		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setStatus( Donation::STATUS_EXTERNAL_BOOKED );
 		$donation->encodeAndSetData(
 			array_merge(
 				[ 'adresstyp' => 'anonym' ],
@@ -80,6 +82,7 @@ class ValidDoctrineDonation {
 		$self = new self();
 		$donation = $self->createDonation();
 		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setStatus( Donation::STATUS_EXTERNAL_BOOKED );
 		$donation->encodeAndSetData(
 			array_merge(
 				[
@@ -118,6 +121,7 @@ class ValidDoctrineDonation {
 		$self = new self();
 		$donation = $self->createDonation();
 		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setStatus( Donation::STATUS_EXTERNAL_BOOKED );
 		$donation->encodeAndSetData(
 			array_merge(
 				[
@@ -235,6 +239,14 @@ class ValidDoctrineDonation {
 				[ 'adresstyp' => 'anonym' ],
 			)
 		);
+		return $donation;
+	}
+
+	public static function newIncompletePaypalDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setStatus( Donation::STATUS_EXTERNAL_INCOMPLETE );
 		return $donation;
 	}
 

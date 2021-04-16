@@ -300,7 +300,7 @@ class AddDonationUseCaseTest extends TestCase {
 		);
 
 		$response = $useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
-		$this->assertTrue( $response->getDonation()->needsModeration() );
+		$this->assertTrue( $response->getDonation()->isMarkedForModeration() );
 	}
 
 	public function testGivenPolicyViolationForExternalPaymentDonation_donationIsNotModerated(): void {
@@ -318,7 +318,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
 		$request->setPaymentType( 'PPL' );
 		$response = $useCase->addDonation( $request );
-		$this->assertFalse( $response->getDonation()->needsModeration() );
+		$this->assertFalse( $response->getDonation()->isMarkedForModeration() );
 	}
 
 	private function newUseCaseWithMailer( DonationConfirmationMailer $mailer ): AddDonationUseCase {
@@ -404,9 +404,8 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertInstanceOf( CompanyName::class, $events[0]->getDonor()->getName() );
 	}
 
-
 	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsDeleted(): void {
-		$this->markTestIncomplete("TODO we must fix doctrine repository first and adapt status change");
+		$this->markTestIncomplete( "TODO we must fix doctrine repository first and adapt status change" );
 		$repository = $this->newRepository();
 		$useCase = new AddDonationUseCase(
 			$repository,
