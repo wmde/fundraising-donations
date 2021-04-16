@@ -2,9 +2,13 @@
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess\LegacyConverters;
 
+use phpDocumentor\Reflection\Types\Iterable_;
+use PHPStan\Type\IterableType;
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\InvalidLegacyDataException;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -150,4 +154,69 @@ class LegacyToDomainConverterTest extends TestCase {
 		$this->assertSame( 'CSH', $paymentMethod->getId() );
 	}
 
+	public function testGivenDonationWithCancelledStatus_converterMarksDonationAsCancelled(): void {
+		$doctrineDonation = ValidDoctrineDonation::newBankTransferDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		$this->assertTrue( $donation->isCancelled() );
+	}
+
+	/**
+	 * @dataProvider cancelledDonations
+	 */
+	public function testGivenDonationWithCancelledStatus_DonationStatusMatchesPaymentType( DoctrineDonation $dd, string $expectedStatus ): void {
+		$converter = new LegacyToDomainConverter();
+		$donation = $converter->createFromLegacyObject( $dd );
+
+		$this->assertSame( $expectedStatus, $donation->getStatus() );
+	}
+
+	public function cancelledDonations(): iterable {
+		$doctrineDonation = ValidDoctrineDonation::newBankTransferDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
+		yield [ $doctrineDonation, Donation::STATUS_PROMISE ];
+
+		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
+		yield [ $doctrineDonation, Donation::STATUS_NEW ];
+
+		// this case should never occur, but tested anyway
+		$doctrineDonation = ValidDoctrineDonation::newIncompletePaypalDonation();
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_INCOMPLETE ];
+	}
+
+	public function testGivenDonationWithModerationNeededStatus_converterMarksDonationAsToBeModerated(): void {
+		$doctrineDonation = ValidDoctrineDonation::newBankTransferDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		$this->assertTrue( $donation->isMarkedForModeration() );
+	}
+
+	/**
+	 * @dataProvider donationsMarkedForModeration
+	 */
+	public function testGivenDonationWithModerationNeededStatus_DonationStatusMatchesPaymentType( DoctrineDonation $dd, string $expectedStatus ): void {
+		$converter = new LegacyToDomainConverter();
+		$donation = $converter->createFromLegacyObject( $dd );
+
+		$this->assertSame( $expectedStatus, $donation->getStatus() );
+	}
+
+	public function donationsMarkedForModeration(): iterable {
+		$doctrineDonation = ValidDoctrineDonation::newBankTransferDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+		yield [ $doctrineDonation, Donation::STATUS_PROMISE ];
+
+		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+		yield [ $doctrineDonation, Donation::STATUS_NEW ];
+
+		// this case should never occur, but tested anyway
+		$doctrineDonation = ValidDoctrineDonation::newIncompletePaypalDonation();
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_INCOMPLETE ];
+	}
 }

@@ -28,7 +28,7 @@ class Donation {
 	// external payment, notified by payment provider
 	public const STATUS_EXTERNAL_BOOKED = 'B';
 
-	private bool $moderated;
+	private bool $moderationNeeded;
 	private bool $cancelled;
 
 	public const OPTS_INTO_NEWSLETTER = true;
@@ -81,7 +81,7 @@ class Donation {
 		$this->comment = $comment;
 		$this->exported = false;
 		$this->optsIntoDonationReceipt = null;
-		$this->moderated = false;
+		$this->moderationNeeded = false;
 		$this->cancelled = false;
 	}
 
@@ -198,7 +198,7 @@ class Donation {
 			throw new RuntimeException( 'Only incomplete donations can be confirmed as booked' );
 		}
 
-		if ( $this->hasComment() && ( $this->needsModeration() || $this->isCancelled() ) ) {
+		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
 			$this->makeCommentPrivate();
 		}
 
@@ -218,15 +218,15 @@ class Donation {
 	}
 
 	private function statusAllowsForBooking(): bool {
-		return $this->isIncomplete() || $this->needsModeration() || $this->isCancelled();
+		return $this->isIncomplete() || $this->isMarkedForModeration() || $this->isCancelled();
 	}
 
 	public function markForModeration(): void {
-		$this->moderated = true;
+		$this->moderationNeeded = true;
 	}
 
 	public function markAsApproved(): void {
-		$this->moderated = false;
+		$this->moderationNeeded = false;
 	}
 
 	public function notifyOfPolicyValidationFailure(): void {
@@ -279,8 +279,8 @@ class Donation {
 		return $this->status === self::STATUS_EXTERNAL_INCOMPLETE;
 	}
 
-	public function needsModeration(): bool {
-		return $this->moderated;
+	public function isMarkedForModeration(): bool {
+		return $this->moderationNeeded;
 	}
 
 	public function isBooked(): bool {
