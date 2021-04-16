@@ -52,7 +52,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		try {
 			$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
 		}
-		catch ( ORMException $ex ) {
+		catch ( GetDonationException $ex ) {
 			throw new StoreDonationException( $ex );
 		}
 
@@ -73,16 +73,16 @@ class DoctrineDonationRepository implements DonationRepository {
 	}
 
 	private function getDoctrineDonationById( int $id ): ?DoctrineDonation {
-		return $this->entityManager->find( DoctrineDonation::class, $id );
-	}
-
-	public function getDonationById( int $id ): ?Donation {
 		try {
-			$doctrineDonation = $this->getDoctrineDonationById( $id );
+			return $this->entityManager->find( DoctrineDonation::class, $id );
 		}
 		catch ( ORMException $ex ) {
 			throw new GetDonationException( $ex );
 		}
+	}
+
+	public function getDonationById( int $id ): ?Donation {
+		$doctrineDonation = $this->getDoctrineDonationById( $id );
 
 		if ( $doctrineDonation === null ) {
 			return null;
