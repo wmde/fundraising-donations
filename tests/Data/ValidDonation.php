@@ -27,6 +27,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
+use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardExpiry;
 
 /**
  * @license GPL-2.0-or-later
@@ -70,6 +71,8 @@ class ValidDonation {
 	public const PAYPAL_TRANSACTION_ID = '61E67681CH3238416';
 
 	public const CREDIT_CARD_TRANSACTION_ID = '';
+	public const CREDIT_CARD_EXPIRY_YEAR = 2001;
+	public const CREDIT_CARD_EXPIRY_MONTH = 9;
 
 	public const COMMENT_TEXT = 'For great justice!';
 	public const COMMENT_IS_PUBLIC = true;
@@ -162,6 +165,7 @@ class ValidDonation {
 	public static function newBookedCreditCardDonation(): Donation {
 		$creditCardData = new CreditCardTransactionData();
 		$creditCardData->setTransactionId( self::CREDIT_CARD_TRANSACTION_ID );
+		$creditCardData->setCardExpiry( new CreditCardExpiry( self::CREDIT_CARD_EXPIRY_MONTH, self::CREDIT_CARD_EXPIRY_YEAR ) );
 
 		return self::createDonation(
 			new CreditCardPayment( $creditCardData ),
