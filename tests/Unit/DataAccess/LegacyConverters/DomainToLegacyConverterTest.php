@@ -92,4 +92,43 @@ class DomainToLegacyConverterTest extends TestCase {
 
 		$this->assertSame( '', $data['mcp_cc_expiry_date'] );
 	}
+
+	public function testGivenCancelledDonation_convertsToCancelledStatusDoctrineDonation(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newCancelledBankTransferDonation();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertSame( DoctrineDonation::STATUS_CANCELLED, $doctrineDonation->getStatus() );
+	}
+
+	public function testGivenDonationMarkedForModeration_convertsToModerationStatusDoctrineDonation(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->markForModeration();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertSame( DoctrineDonation::STATUS_MODERATION, $doctrineDonation->getStatus() );
+	}
+
+	public function testGivenDonationWithoutModerationOrCancellation_paymentStatusIsPreserved(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newBankTransferDonation();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertSame( DoctrineDonation::STATUS_PROMISE, $doctrineDonation->getStatus() );
+	}
+
+	public function testGivenCancelledDonationThatIsMarkedForModeration_convertsToCancelledStatusDoctrineDonation(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newBankTransferDonation();
+		$donation->markForModeration();
+		$donation->cancelWithoutChecks();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertSame( DoctrineDonation::STATUS_CANCELLED, $doctrineDonation->getStatus() );
+	}
 }
