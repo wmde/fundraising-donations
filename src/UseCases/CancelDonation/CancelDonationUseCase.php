@@ -19,7 +19,8 @@ use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
  */
 class CancelDonationUseCase {
 
-	private const LOG_MESSAGE_FOR_BACKEND = 'frontend: storno';
+	private const LOG_MESSAGE_DONATION_STATUS_CHANGE = 'frontend: storno';
+	private const LOG_MESSAGE_DONATION_STATUS_CHANGE_BY_ADMIN = 'cancelled by user: %s';
 
 	private $donationRepository;
 	private $mailer;
@@ -35,7 +36,7 @@ class CancelDonationUseCase {
 	}
 
 	public function cancelDonation( CancelDonationRequest $cancellationRequest ): CancelDonationResponse {
-		if ( !$this->authorizationService->userCanModifyDonation( $cancellationRequest->getDonationId() ) ) {
+		if ( !$this->requestIsAllowedToModifyDonation( $cancellationRequest ) ) {
 			return $this->newFailureResponse( $cancellationRequest );
 		}
 
@@ -64,10 +65,10 @@ class CancelDonationUseCase {
 			return $this->newFailureResponse( $cancellationRequest );
 		}
 
-		$this->donationLogger->log( $donation->getId(), self::LOG_MESSAGE_FOR_BACKEND );
+		$this->donationLogger->log( $donation->getId(), $this->getLogMessage( $cancellationRequest ) );
 
 		try {
-			$this->sendConfirmationEmail( $donation );
+			$this->sendConfirmationEmail( $cancellationRequest, $donation );
 		}
 		catch ( \RuntimeException $ex ) {
 			return new CancelDonationResponse(
@@ -77,6 +78,21 @@ class CancelDonationUseCase {
 		}
 
 		return $this->newSuccessResponse( $cancellationRequest );
+	}
+
+	public function getLogMessage( CancelDonationRequest $cancellationRequest ): string {
+		if ( $cancellationRequest->isAuthorizedRequest() ) {
+			return sprintf( self::LOG_MESSAGE_DONATION_STATUS_CHANGE_BY_ADMIN, $cancellationRequest->getUserName() );
+		}
+		return self::LOG_MESSAGE_DONATION_STATUS_CHANGE;
+	}
+
+	public function requestIsAllowedToModifyDonation( CancelDonationRequest $cancellationRequest ): bool {
+		if ( $cancellationRequest->isAuthorizedRequest() ) {
+			return $this->authorizationService->systemCanModifyDonation( $cancellationRequest->getDonationId() );
+
+		}
+		return $this->authorizationService->userCanModifyDonation( $cancellationRequest->getDonationId() );
 	}
 
 	private function newFailureResponse( CancelDonationRequest $cancellationRequest ): CancelDonationResponse {
@@ -93,7 +109,10 @@ class CancelDonationUseCase {
 		);
 	}
 
-	private function sendConfirmationEmail( Donation $donation ): void {
+	private function sendConfirmationEmail( CancelDonationRequest $cancellationRequest, Donation $donation ): void {
+		if ( $cancellationRequest->isAuthorizedRequest() ) {
+			return;
+		}
 		if ( !$donation->getDonor()->hasEmailAddress() ) {
 			return;
 		}
