@@ -20,7 +20,7 @@ phpunit:
 	docker-compose run --rm --no-deps app ./vendor/bin/phpunit
 
 phpunit-with-coverage:
-	docker-compose -f docker-compose.yml -f docker-compose.debug.yml run --rm --no-deps -e XDEBUG_MODE=coverage app ./vendor/bin/phpunit --coverage-clover coverage.clover
+	docker-compose -f docker-compose.yml -f docker-compose.debug.yml run --rm --no-deps -e XDEBUG_MODE=coverage app_debug ./vendor/bin/phpunit --coverage-html coverage
 
 cs:
 	docker-compose run --rm --no-deps app ./vendor/bin/phpcs
