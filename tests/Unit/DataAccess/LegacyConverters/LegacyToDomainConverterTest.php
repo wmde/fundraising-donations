@@ -2,11 +2,8 @@
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess\LegacyConverters;
 
-use phpDocumentor\Reflection\Types\Iterable_;
-use PHPStan\Type\IterableType;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
-use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\InvalidLegacyDataException;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
