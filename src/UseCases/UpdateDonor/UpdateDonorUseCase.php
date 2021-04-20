@@ -49,6 +49,10 @@ class UpdateDonorUseCase {
 		// No null check needed here, because authorizationService will deny access to non-existing donations
 		$donation = $this->donationRepository->getDonationById( $updateDonorRequest->getDonationId() );
 
+		if ( $donation->isCancelled() ) {
+			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_ACCESS_DENIED );
+		}
+
 		if ( $donation->isExported() ) {
 			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_DONATION_IS_EXPORTED );
 		}

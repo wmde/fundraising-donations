@@ -159,33 +159,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$repository->storeDonation( $donation );
 	}
 
-	public function testWhenDeletionDateGetsSet_repositoryNoLongerReturnsEntity(): void {
-		// TODO: We might need to change or move this behavior when implementing undelete use case
-		$donation = $this->createDeletedDonation();
-		$repository = $this->newRepository();
-
-		$this->assertNull( $repository->getDonationById( $donation->getId() ) );
-	}
-
-	private function createDeletedDonation(): Donation {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$repository = $this->newRepository();
-		$repository->storeDonation( $donation );
-		$doctrineDonation = $repository->getDoctrineDonationById( $donation->getId() );
-		$doctrineDonation->setDeletionTime( new \DateTime() );
-		$this->entityManager->flush();
-		return $donation;
-	}
-
-	public function testWhenDeletionDateGetsSet_repositoryNoLongerPersistsEntity(): void {
-		// TODO: We might need to change or move this behavior when implementing undelete use case
-		$donation = $this->createDeletedDonation();
-		$repository = $this->newRepository();
-
-		$this->expectException( StoreDonationException::class );
-		$repository->storeDonation( $donation );
-	}
-
 	public function testGivenDonationUpdateWithoutDonorInformation_DonorNameStaysTheSame(): void {
 		$donation = ValidDonation::newBookedPayPalDonation();
 		$this->newRepository()->storeDonation( $donation );

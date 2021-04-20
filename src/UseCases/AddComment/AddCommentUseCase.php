@@ -50,7 +50,7 @@ class AddCommentUseCase {
 			return AddCommentResponse::newFailureResponse( 'comment_failure_donation_error' );
 		}
 
-		if ( $donation === null ) {
+		if ( $donation === null || $donation->isCancelled() ) {
 			return AddCommentResponse::newFailureResponse( 'comment_failure_donation_not_found' );
 		}
 
