@@ -4,10 +4,9 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ModerateComment;
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
-use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentRepository;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentErrorResponse;
 use WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentRequest;
 use WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentSuccessResponse;
@@ -22,12 +21,15 @@ use WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentUse
 class ModerateCommentUseCaseTest extends TestCase {
 
 	private const AUTHORIZED_USER_NAME = 'MarkusTheModerator';
+	private const MISSING_DONATION_ID = 123;
+	private const DONATION_ID = 7;
 
 	public function testWhenDonationIsNotFound_moderationFails(): void {
-		$repository = new FakeDonationRepository();
+		$repository = $this->createMock( CommentRepository::class );
+		$repository->method( 'getCommentByDonationId' )->willThrowException( new GetDonationException() );
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
-		$request = ModerateCommentRequest::publishComment( 1, self::AUTHORIZED_USER_NAME );
+		$request = ModerateCommentRequest::publishComment( self::MISSING_DONATION_ID, self::AUTHORIZED_USER_NAME );
 
 		$response = $useCase->moderateComment( $request );
 
@@ -36,11 +38,11 @@ class ModerateCommentUseCaseTest extends TestCase {
 	}
 
 	public function testWhenDonationHasNoComment_moderationFails(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$repository = new FakeDonationRepository( $donation );
+		$repository = $this->createMock( CommentRepository::class );
+		$repository->method( 'getCommentByDonationId' )->willReturn( null );
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
-		$request = ModerateCommentRequest::publishComment( $donation->getId(), self::AUTHORIZED_USER_NAME );
+		$request = ModerateCommentRequest::publishComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
 
 		$response = $useCase->moderateComment( $request );
 
@@ -52,18 +54,17 @@ class ModerateCommentUseCaseTest extends TestCase {
 	 * @dataProvider commentProviderForPublication
 	 */
 	public function testWhenDonationHasComment_publicationSucceeds( DonationComment $comment, string $assertMessage ): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->addComment( $comment );
-		$repository = new FakeDonationRepository( $donation );
+		$repository = $this->createMock( CommentRepository::class );
+		$repository->method( 'getCommentByDonationId' )->willReturn( $comment );
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
-		$request = ModerateCommentRequest::publishComment( $donation->getId(), self::AUTHORIZED_USER_NAME );
+		$request = ModerateCommentRequest::publishComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
 
 		$response = $useCase->moderateComment( $request );
 
 		$this->assertInstanceOf( ModerateCommentSuccessResponse::class, $response );
-		$this->assertSame( $donation->getId(), $response->getDonationId() );
-		$this->assertTrue( $donation->getComment()->isPublic(), $assertMessage );
+		$this->assertSame( self::DONATION_ID, $response->getDonationId() );
+		$this->assertTrue( $comment->isPublic(), $assertMessage );
 	}
 
 	public function commentProviderForPublication(): iterable {
@@ -72,37 +73,32 @@ class ModerateCommentUseCaseTest extends TestCase {
 	}
 
 	public function testWhenPublicationSucceeds_donationGetsPersisted(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->addComment( $this->newPrivateComment() );
-		$repository = new DonationRepositorySpy( $donation );
+		$comment = $this->newPrivateComment();
+		$repository = $this->createMock( CommentRepository::class );
+		$repository->method( 'getCommentByDonationId' )->willReturn( $comment );
+		$repository->expects( $this->once() )->method( 'updateComment' )->with( $comment );
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
-		$request = ModerateCommentRequest::publishComment( $donation->getId(), self::AUTHORIZED_USER_NAME );
+		$request = ModerateCommentRequest::publishComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
 
-		$response = $useCase->moderateComment( $request );
-
-		$this->assertInstanceOf( ModerateCommentSuccessResponse::class, $response );
-		$storedDonations = $repository->getStoreDonationCalls();
-		$this->assertCount( 1, $storedDonations );
-		$this->assertSame( $donation->getId(), $storedDonations[0]->getId() );
+		$useCase->moderateComment( $request );
 	}
 
 	/**
 	 * @dataProvider commentProviderForRetraction
 	 */
 	public function testWhenDonationHasComment_retractionSucceeds( DonationComment $comment, string $assertMessage ): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->addComment( $comment );
-		$repository = new FakeDonationRepository( $donation );
+		$repository = $this->createMock( CommentRepository::class );
+		$repository->method( 'getCommentByDonationId' )->willReturn( $comment );
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
-		$request = ModerateCommentRequest::retractComment( $donation->getId(), self::AUTHORIZED_USER_NAME );
+		$request = ModerateCommentRequest::retractComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
 
 		$response = $useCase->moderateComment( $request );
 
 		$this->assertInstanceOf( ModerateCommentSuccessResponse::class, $response );
-		$this->assertSame( $donation->getId(), $response->getDonationId() );
-		$this->assertFalse( $donation->getComment()->isPublic(), $assertMessage );
+		$this->assertSame( self::DONATION_ID, $response->getDonationId() );
+		$this->assertFalse( $comment->isPublic(), $assertMessage );
 	}
 
 	public function commentProviderForRetraction(): iterable {
@@ -111,30 +107,24 @@ class ModerateCommentUseCaseTest extends TestCase {
 	}
 
 	public function testWhenRetractionSucceeds_donationGetsPersisted(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->addComment( $this->newPublicComment() );
-		$repository = new DonationRepositorySpy( $donation );
+		$comment = $this->newPublicComment();
+		$repository = $this->createMock( CommentRepository::class );
+		$repository->method( 'getCommentByDonationId' )->willReturn( $comment );
+		$repository->expects( $this->once() )->method( 'updateComment' )->with( $comment );
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
-		$request = ModerateCommentRequest::retractComment( $donation->getId(), self::AUTHORIZED_USER_NAME );
+		$request = ModerateCommentRequest::retractComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
 
-		$response = $useCase->moderateComment( $request );
-
-		$this->assertInstanceOf( ModerateCommentSuccessResponse::class, $response );
-		$storedDonations = $repository->getStoreDonationCalls();
-		$this->assertCount( 1, $storedDonations );
-		$this->assertSame( $donation->getId(), $storedDonations[0]->getId() );
+		$useCase->moderateComment( $request );
 	}
 
 	public function testPublicationAndRetractionLogAdminUserName(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->addComment( $this->newPublicComment() );
-		$repository = new DonationRepositorySpy( $donation );
+		$repository = $this->createMock( CommentRepository::class );
+		$repository->method( 'getCommentByDonationId' )->willReturn( $this->newPublicComment() );
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
-		$donationId = $donation->getId();
-		$retractionRequest = ModerateCommentRequest::retractComment( $donationId, self::AUTHORIZED_USER_NAME );
-		$publicationRequest = ModerateCommentRequest::publishComment( $donationId, 'OliverTheOverrider' );
+		$retractionRequest = ModerateCommentRequest::retractComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
+		$publicationRequest = ModerateCommentRequest::publishComment( self::DONATION_ID, 'OliverTheOverrider' );
 
 		$useCase->moderateComment( $retractionRequest );
 		$useCase->moderateComment( $publicationRequest );
@@ -142,8 +132,8 @@ class ModerateCommentUseCaseTest extends TestCase {
 		$logCalls = $logger->getLogCalls();
 		$this->assertCount( 2, $logCalls );
 		$expectedLogCalls = [
-			[ $donationId, 'Comment set to private by user: MarkusTheModerator' ],
-			[ $donationId, 'Comment published by user: OliverTheOverrider' ],
+			[ self::DONATION_ID, 'Comment set to private by user: MarkusTheModerator' ],
+			[ self::DONATION_ID, 'Comment published by user: OliverTheOverrider' ],
 		];
 		$this->assertEquals( $expectedLogCalls, $logCalls );
 	}
