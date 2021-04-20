@@ -225,7 +225,7 @@ class Donation {
 		$this->moderationNeeded = true;
 	}
 
-	public function markAsApproved(): void {
+	public function approve(): void {
 		$this->moderationNeeded = false;
 	}
 
