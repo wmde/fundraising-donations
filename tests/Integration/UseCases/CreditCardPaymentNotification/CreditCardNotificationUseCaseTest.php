@@ -4,10 +4,10 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CreditCardPaymentNotification;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidCreditCardNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -20,7 +20,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
 use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase;
-use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardPaymentHandlerException;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Infrastructure\FakeCreditCardService;
 
 /**
@@ -36,7 +36,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 	/** @var DoctrineDonationRepository|FakeDonationRepository|DonationRepositorySpy */
 	private $repository;
 	private $authorizer;
-	/** @var DonationConfirmationMailer|\PHPUnit_Framework_MockObject_MockObject */
+	/** @var DonationConfirmationNotifier&MockObject */
 	private $mailer;
 	private $eventLogger;
 	private $creditCardService;
@@ -103,7 +103,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
 		$this->repository->storeDonation( $donation );
 		$this->mailer->expects( $this->once() )
-			->method( 'sendConfirmationMailFor' )
+			->method( 'sendConfirmationFor' )
 			->with( $donation );
 		$useCase = $this->newCreditCardNotificationUseCase();
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
@@ -150,14 +150,14 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationMailer|\PHPUnit_Framework_MockObject_MockObject
+	 * @return DonationConfirmationNotifier&MockObject
 	 */
-	private function newMailer(): DonationConfirmationMailer {
-		return $this->getMockBuilder( DonationConfirmationMailer::class )->disableOriginalConstructor()->getMock();
+	private function newMailer(): DonationConfirmationNotifier {
+		return $this->getMockBuilder( DonationConfirmationNotifier::class )->disableOriginalConstructor()->getMock();
 	}
 
 	/**
-	 * @return DonationEventLogger|\PHPUnit_Framework_MockObject_MockObject
+	 * @return DonationEventLogger^MockObject
 	 */
 	private function newEventLogger(): DonationEventLogger {
 		return $this->createMock( DonationEventLogger::class );

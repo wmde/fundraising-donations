@@ -19,7 +19,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
@@ -40,20 +40,20 @@ class AddDonationUseCase {
 	private DonationRepository $donationRepository;
 	private AddDonationValidator $donationValidator;
 	private AddDonationPolicyValidator $policyValidator;
-	private DonationConfirmationMailer $mailer;
+	private DonationConfirmationNotifier $notifier;
 	private TransferCodeGenerator $transferCodeGenerator;
 	private DonationTokenFetcher $tokenFetcher;
 	private InitialDonationStatusPicker $initialDonationStatusPicker;
 	private EventEmitter $eventEmitter;
 
 	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
-			AddDonationPolicyValidator $policyValidator, DonationConfirmationMailer $mailer,
+			AddDonationPolicyValidator $policyValidator, DonationConfirmationNotifier $notifier,
 			TransferCodeGenerator $transferCodeGenerator, DonationTokenFetcher $tokenFetcher,
 			InitialDonationStatusPicker $initialDonationStatusPicker, EventEmitter $eventEmitter ) {
 		$this->donationRepository = $donationRepository;
 		$this->donationValidator = $donationValidator;
 		$this->policyValidator = $policyValidator;
-		$this->mailer = $mailer;
+		$this->notifier = $notifier;
 		$this->transferCodeGenerator = $transferCodeGenerator;
 		$this->tokenFetcher = $tokenFetcher;
 		$this->initialDonationStatusPicker = $initialDonationStatusPicker;
@@ -203,7 +203,7 @@ class AddDonationUseCase {
 
 	private function sendDonationConfirmationEmail( Donation $donation ): void {
 		if ( $donation->getDonor()->hasEmailAddress() && !$donation->hasExternalPayment() ) {
-			$this->mailer->sendConfirmationMailFor( $donation );
+			$this->notifier->sendConfirmationFor( $donation );
 		}
 	}
 

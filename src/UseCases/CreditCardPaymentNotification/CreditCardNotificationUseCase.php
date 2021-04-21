@@ -4,14 +4,13 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification;
 
-use Exception;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardService;
@@ -22,19 +21,19 @@ use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardService;
  */
 class CreditCardNotificationUseCase {
 
-	private $repository;
-	private $authorizationService;
-	private $creditCardService;
-	private $mailer;
-	private $donationEventLogger;
+	private DonationRepository $repository;
+	private DonationAuthorizer $authorizationService;
+	private CreditCardService $creditCardService;
+	private DonationConfirmationNotifier $notifier;
+	private DonationEventLogger $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-		CreditCardService $creditCardService, DonationConfirmationMailer $mailer,
+		CreditCardService $creditCardService, DonationConfirmationNotifier $notifier,
 		DonationEventLogger $donationEventLogger ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->creditCardService = $creditCardService;
-		$this->mailer = $mailer;
+		$this->notifier = $notifier;
 		$this->donationEventLogger = $donationEventLogger;
 	}
 
@@ -83,7 +82,7 @@ class CreditCardNotificationUseCase {
 
 		$this->donationEventLogger->log( $donation->getId(), 'mcp_handler: booked' );
 
-		$this->mailer->sendConfirmationMailFor( $donation );
+		$this->notifier->sendConfirmationFor( $donation );
 
 		return CreditCardNotificationResponse::newSuccessResponse( null );
 	}
