@@ -9,7 +9,6 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayPalNotificationRequest;
@@ -20,6 +19,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
 
@@ -99,7 +99,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		$mailer = $this->getMailer();
 		$mailer->expects( $this->once() )
-			->method( 'sendConfirmationMailFor' )
+			->method( 'sendConfirmationFor' )
 			->with( $donation );
 
 		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
@@ -372,7 +372,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 12345 );
 		$mailer = $this->getMailer();
 		$mailer->expects( $this->once() )
-			->method( 'sendConfirmationMailFor' )
+			->method( 'sendConfirmationFor' )
 			->with( $this->anything() );
 		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
 			new FakeDonationRepository(),
@@ -423,14 +423,14 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationMailer|MockObject
+	 * @return DonationConfirmationNotifier&MockObject
 	 */
-	private function getMailer(): DonationConfirmationMailer {
-		return $this->getMockBuilder( DonationConfirmationMailer::class )->disableOriginalConstructor()->getMock();
+	private function getMailer(): DonationConfirmationNotifier {
+		return $this->getMockBuilder( DonationConfirmationNotifier::class )->disableOriginalConstructor()->getMock();
 	}
 
 	/**
-	 * @return DonationEventLogger|MockObject
+	 * @return DonationEventLogger&MockObject
 	 */
 	private function getEventLogger(): DonationEventLogger {
 		return $this->createMock( DonationEventLogger::class );

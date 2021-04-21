@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 
 /**
  * @license GPL-2.0-or-later
@@ -20,14 +20,14 @@ class DonationAcceptedEventHandler {
 	public const DATABASE_ERROR_OCCURRED = 'Database error occurred';
 	public const SUCCESS = null;
 
-	private $authorizer;
-	private $repository;
-	private $mailer;
+	private DonationAuthorizer $authorizer;
+	private DonationRepository $repository;
+	private DonationConfirmationNotifier $notifier;
 
-	public function __construct( DonationAuthorizer $authorizer, DonationRepository $repository, DonationConfirmationMailer $mailer ) {
+	public function __construct( DonationAuthorizer $authorizer, DonationRepository $repository, DonationConfirmationNotifier $notifier ) {
 		$this->authorizer = $authorizer;
 		$this->repository = $repository;
-		$this->mailer = $mailer;
+		$this->notifier = $notifier;
 	}
 
 	/**
@@ -51,7 +51,7 @@ class DonationAcceptedEventHandler {
 			return self::UNKNOWN_ID_PROVIDED;
 		}
 
-		$this->mailer->sendConfirmationMailFor( $donation );
+		$this->notifier->sendConfirmationFor( $donation );
 
 		return self::SUCCESS;
 	}

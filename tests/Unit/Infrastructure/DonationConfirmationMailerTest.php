@@ -11,7 +11,7 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
 
 /**
- * @covers \WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer
+ * @covers \WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationNotifier
  */
 class DonationConfirmationMailerTest extends TestCase {
 
@@ -20,7 +20,7 @@ class DonationConfirmationMailerTest extends TestCase {
 		$confirmationMailer = new DonationConfirmationMailer( $mailerSpy );
 		$donation = ValidDonation::newBankTransferDonation();
 
-		$confirmationMailer->sendConfirmationMailFor( $donation );
+		$confirmationMailer->sendConfirmationFor( $donation );
 
 		$mailerSpy->assertCalledOnceWith( new EmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS ), [
 			'recipient' => [
@@ -46,7 +46,7 @@ class DonationConfirmationMailerTest extends TestCase {
 		$confirmationMailer = new DonationConfirmationMailer( $mailerSpy );
 		$donation = ValidDonation::newBookedAnonymousPayPalDonation();
 
-		$confirmationMailer->sendConfirmationMailFor( $donation );
+		$confirmationMailer->sendConfirmationFor( $donation );
 
 		$this->assertCount( 0, $mailerSpy->getSendMailCalls(), 'Mailer should not get any calls' );
 	}
@@ -61,7 +61,7 @@ class DonationConfirmationMailerTest extends TestCase {
 		$confirmationMailer = new DonationConfirmationMailer( $mailerSpy );
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$confirmationMailer->sendConfirmationMailFor( $donation );
+		$confirmationMailer->sendConfirmationFor( $donation );
 
 		$mailerSpy->assertCalledOnceWith( new EmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS ), [
 			'recipient' => [

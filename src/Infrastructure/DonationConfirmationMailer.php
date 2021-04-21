@@ -6,13 +6,14 @@ namespace WMDE\Fundraising\DonationContext\Infrastructure;
 
 use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
  * @license GPL-2.0-or-later
  */
-class DonationConfirmationMailer {
+class DonationConfirmationMailer implements DonationConfirmationNotifier {
 
 	private TemplateMailerInterface $mailer;
 
@@ -20,7 +21,7 @@ class DonationConfirmationMailer {
 		$this->mailer = new BestEffortTemplateMailer( $mailer );
 	}
 
-	public function sendConfirmationMailFor( Donation $donation ): void {
+	public function sendConfirmationFor( Donation $donation ): void {
 		if ( !$donation->getDonor()->hasEmailAddress() ) {
 			return;
 		}

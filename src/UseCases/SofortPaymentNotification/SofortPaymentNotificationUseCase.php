@@ -10,22 +10,22 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 use WMDE\Fundraising\PaymentContext\RequestModel\SofortNotificationRequest;
 use WMDE\Fundraising\PaymentContext\ResponseModel\SofortNotificationResponse;
 
 class SofortPaymentNotificationUseCase {
 
-	private $repository;
-	private $authorizationService;
-	private $mailer;
+	private DonationRepository $repository;
+	private DonationAuthorizer $authorizationService;
+	private DonationConfirmationNotifier $notifier;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-		DonationConfirmationMailer $mailer ) {
+		DonationConfirmationNotifier $notifier ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
-		$this->mailer = $mailer;
+		$this->notifier = $notifier;
 	}
 
 	public function handleNotification( SofortNotificationRequest $request ): SofortNotificationResponse {
@@ -74,7 +74,7 @@ class SofortPaymentNotificationUseCase {
 			return $this->createFailureResponse( $ex );
 		}
 
-		$this->mailer->sendConfirmationMailFor( $donation );
+		$this->notifier->sendConfirmationFor( $donation );
 
 		return SofortNotificationResponse::newSuccessResponse();
 	}

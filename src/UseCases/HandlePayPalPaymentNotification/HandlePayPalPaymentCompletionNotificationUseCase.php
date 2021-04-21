@@ -13,8 +13,8 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
 use WMDE\Fundraising\PaymentContext\RequestModel\PayPalPaymentNotificationRequest;
@@ -29,14 +29,14 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 
 	private DonationRepository $repository;
 	private DonationAuthorizer $authorizationService;
-	private DonationConfirmationMailer $mailer;
+	private DonationConfirmationNotifier $notifier;
 	private DonationEventLogger $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-		DonationConfirmationMailer $mailer, DonationEventLogger $donationEventLogger ) {
+		DonationConfirmationNotifier $notifier, DonationEventLogger $donationEventLogger ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
-		$this->mailer = $mailer;
+		$this->notifier = $notifier;
 		$this->donationEventLogger = $donationEventLogger;
 	}
 
@@ -65,7 +65,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			return $this->createErrorResponse( $ex );
 		}
 
-		$this->mailer->sendConfirmationMailFor( $donation );
+		$this->notifier->sendConfirmationFor( $donation );
 		$this->donationEventLogger->log( $donation->getId(), 'paypal_handler: booked' );
 
 		return PaypalNotificationResponse::newSuccessResponse();
@@ -109,7 +109,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			return $this->createErrorResponse( $ex );
 		}
 
-		$this->mailer->sendConfirmationMailFor( $donation );
+		$this->notifier->sendConfirmationFor( $donation );
 		$this->donationEventLogger->log( $donation->getId(), 'paypal_handler: booked' );
 
 		return PaypalNotificationResponse::newSuccessResponse();

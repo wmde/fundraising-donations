@@ -13,7 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 
 /**
  * This use case is for adding donor information to a donation after it was created.
@@ -27,13 +27,13 @@ class UpdateDonorUseCase {
 	private DonationAuthorizer $authorizationService;
 	private DonationRepository $donationRepository;
 	private UpdateDonorValidator $updateDonorValidator;
-	private DonationConfirmationMailer $donationConfirmationMailer;
+	private DonationConfirmationNotifier $donationConfirmationMailer;
 
 	public function __construct(
 		DonationAuthorizer $authorizationService,
 		UpdateDonorValidator $updateDonorValidator,
 		DonationRepository $donationRepository,
-		DonationConfirmationMailer $donationConfirmationMailer
+		DonationConfirmationNotifier $donationConfirmationMailer
 	) {
 		$this->authorizationService = $authorizationService;
 		$this->donationRepository = $donationRepository;
@@ -71,7 +71,7 @@ class UpdateDonorUseCase {
 		$donation->setDonor( $this->getDonorFromRequest( $updateDonorRequest ) );
 		$this->donationRepository->storeDonation( $donation );
 
-		$this->donationConfirmationMailer->sendConfirmationMailFor( $donation );
+		$this->donationConfirmationMailer->sendConfirmationFor( $donation );
 
 		return UpdateDonorResponse::newSuccessResponse( UpdateDonorResponse::SUCCESS_TEXT, $donation );
 	}

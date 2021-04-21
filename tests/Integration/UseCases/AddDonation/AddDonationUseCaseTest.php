@@ -6,7 +6,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonatio
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use PHPUnit_Framework_MockObject_MockObject;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
@@ -15,7 +14,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
@@ -27,7 +25,7 @@ use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\ReferrerGeneralizer;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\LessSimpleTransferCodeGenerator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
@@ -115,10 +113,10 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationMailer|MockObject
+	 * @return DonationConfirmationNotifier|MockObject
 	 */
-	private function newMailer(): DonationConfirmationMailer {
-		return $this->getMockBuilder( DonationConfirmationMailer::class )
+	private function newMailer(): DonationConfirmationNotifier {
+		return $this->getMockBuilder( DonationConfirmationNotifier::class )
 			->disableOriginalConstructor()
 			->getMock();
 	}
@@ -267,7 +265,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$donation = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
 
 		$mailer->expects( $this->once() )
-			->method( 'sendConfirmationMailFor' )
+			->method( 'sendConfirmationFor' )
 			->with( $this->isInstanceOf( Donation::class ) );
 
 		$useCase = $this->newUseCaseWithMailer( $mailer );
@@ -321,7 +319,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertFalse( $response->getDonation()->isMarkedForModeration() );
 	}
 
-	private function newUseCaseWithMailer( DonationConfirmationMailer $mailer ): AddDonationUseCase {
+	private function newUseCaseWithMailer( DonationConfirmationNotifier $mailer ): AddDonationUseCase {
 		return new AddDonationUseCase(
 			$this->newRepository(),
 			$this->getSucceedingValidatorMock(),

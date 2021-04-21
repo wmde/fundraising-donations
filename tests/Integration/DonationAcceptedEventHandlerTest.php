@@ -4,23 +4,25 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration;
 
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\DonationAcceptedEventHandler;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 
 /**
- * @covers WMDE\Fundraising\DonationContext\DonationAcceptedEventHandler
+ * @covers \WMDE\Fundraising\DonationContext\DonationAcceptedEventHandler
  *
  * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class DonationAcceptedEventHandlerTest extends \PHPUnit\Framework\TestCase {
+class DonationAcceptedEventHandlerTest extends TestCase {
 
 	private const UNKNOWN_ID = 32202;
 	private const KNOWN_ID = 31337;
@@ -36,14 +38,14 @@ class DonationAcceptedEventHandlerTest extends \PHPUnit\Framework\TestCase {
 	private $repository;
 
 	/**
-	 * @var DonationConfirmationMailer|\PHPUnit_Framework_MockObject_MockObject
+	 * @var DonationConfirmationNotifier&MockObject
 	 */
 	private $mailer;
 
 	public function setUp(): void {
 		$this->authorizer = new SucceedingDonationAuthorizer();
 		$this->repository = new FakeDonationRepository( $this->newDonation() );
-		$this->mailer = $this->createMock( DonationConfirmationMailer::class );
+		$this->mailer = $this->createMock( DonationConfirmationNotifier::class );
 	}
 
 	private function newDonation(): Donation {
@@ -87,7 +89,7 @@ class DonationAcceptedEventHandlerTest extends \PHPUnit\Framework\TestCase {
 
 	public function testGivenKnownIdAndValidAuth_mailerIsInvoked(): void {
 		$this->mailer->expects( $this->once() )
-			->method( 'sendConfirmationMailFor' )
+			->method( 'sendConfirmationFor' )
 			->with( $this->equalTo( $this->newDonation() ) );
 
 		$this->newDonationAcceptedEventHandler()->onDonationAccepted( self::KNOWN_ID );
