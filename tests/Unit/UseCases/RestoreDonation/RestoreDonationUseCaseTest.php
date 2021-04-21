@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\RestoreDonation;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationUseCase;
 
@@ -56,14 +57,16 @@ class RestoreDonationUseCaseTest extends TestCase {
 
 	public function testRestoredDonationIsPersisted(): void {
 		$donation = ValidDonation::newCancelledBankTransferDonation();
-		$fakeDonationRepository = new FakeDonationRepository( $donation );
+		$donationRepositorySpy = new DonationRepositorySpy( $donation );
 		$donationLogger = new DonationEventLoggerSpy();
 
-		$useCase = new RestoreDonationUseCase( $fakeDonationRepository, $donationLogger );
-		$useCase->restoreCancelledDonation( $donation->getId(), self::AUTH_USER_NAME );
+		$useCase = new RestoreDonationUseCase( $donationRepositorySpy, $donationLogger );
+		$response = $useCase->restoreCancelledDonation( $donation->getId(), self::AUTH_USER_NAME );
 
-		$persistedDonation = $fakeDonationRepository->getDonationById( $donation->getId() );
-		$this->assertFalse( $persistedDonation->isCancelled() );
+		$this->assertTrue( $response->restoreSucceeded() );
+		$storeCalls = $donationRepositorySpy->getStoreDonationCalls();
+		$this->assertCount( 1, $storeCalls );
+		$this->assertSame( $donation->getId(), $storeCalls[0]->getId() );
 	}
 
 	public function testWhenCancelledDonationGetsRestored_adminUserNameIsWrittenAsLogEntry(): void {
