@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ModerateDonation;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\ModerateDonationUseCase;
 
@@ -58,14 +59,16 @@ class ModerateDonationUseCaseTest extends TestCase {
 	public function testApprovalOfDonationIsPersisted(): void {
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration();
-		$fakeDonationRepository = new FakeDonationRepository( $donation );
+		$donationRepositorySpy = new DonationRepositorySpy( $donation );
 		$donationLogger = new DonationEventLoggerSpy();
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
-		$useCase->approveDonation( $donation->getId(), self::AUTH_USER_NAME );
+		$useCase = new ModerateDonationUseCase( $donationRepositorySpy, $donationLogger );
+		$response = $useCase->approveDonation( $donation->getId(), self::AUTH_USER_NAME );
 
-		$persistedDonation = $fakeDonationRepository->getDonationById( $donation->getId() );
-		$this->assertFalse( $persistedDonation->isMarkedForModeration() );
+		$this->assertTrue( $response->moderationChangeSucceeded() );
+		$storeCalls = $donationRepositorySpy->getStoreDonationCalls();
+		$this->assertCount( 1, $storeCalls );
+		$this->assertSame( $donation->getId(), $storeCalls[0]->getId() );
 	}
 
 	public function testWhenModeratedDonationGotApproved_adminUserNameIsWrittenAsLogEntry(): void {
@@ -121,15 +124,16 @@ class ModerateDonationUseCaseTest extends TestCase {
 
 	public function testModerationMarkerOfDonationIsPersisted(): void {
 		$donation = ValidDonation::newBankTransferDonation();
-		$donation->markForModeration();
-		$fakeDonationRepository = new FakeDonationRepository( $donation );
+		$donationRepositorySpy = new DonationRepositorySpy( $donation );
 		$donationLogger = new DonationEventLoggerSpy();
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
-		$useCase->markDonationAsModerated( $donation->getId(), self::AUTH_USER_NAME );
+		$useCase = new ModerateDonationUseCase( $donationRepositorySpy, $donationLogger );
+		$response = $useCase->markDonationAsModerated( $donation->getId(), self::AUTH_USER_NAME );
 
-		$persistedDonation = $fakeDonationRepository->getDonationById( $donation->getId() );
-		$this->assertTrue( $persistedDonation->isMarkedForModeration() );
+		$this->assertTrue( $response->moderationChangeSucceeded() );
+		$storeCalls = $donationRepositorySpy->getStoreDonationCalls();
+		$this->assertCount( 1, $storeCalls );
+		$this->assertSame( $donation->getId(), $storeCalls[0]->getId() );
 	}
 
 	public function testWhenDonationGetsMarkedForModeration_adminUserNameIsWrittenAsLogEntry(): void {
