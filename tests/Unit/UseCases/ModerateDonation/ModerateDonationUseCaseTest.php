@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ModerateDonation;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
@@ -11,6 +12,7 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\ModerateDonationUseCase;
 
 /**
@@ -25,9 +27,15 @@ class ModerateDonationUseCaseTest extends TestCase {
 
 	private DonationEventLogger $donationLogger;
 
+	/**
+	 * @var MockObject&DonationConfirmationNotifier
+	 */
+	private $notifier;
+
 	protected function setUp(): void {
 		parent::setUp();
 		$this->donationLogger = new DonationEventLoggerSpy();
+		$this->notifier = $this->createMock( DonationConfirmationNotifier::class );
 	}
 
 	public function testGivenNonExistingDonation_approvalFails(): void {
@@ -84,6 +92,16 @@ class ModerateDonationUseCaseTest extends TestCase {
 			[ [ $donation->getId(), 'marked as approved by user: coolAdmin' ] ],
 			$this->donationLogger->getLogCalls()
 		);
+	}
+
+	public function testWhenModeratedDonationGotApproved_donorIsNotified(): void {
+		$donation = ValidDonation::newBankTransferDonation();
+		$donation->markForModeration();
+
+		$this->notifier->expects( $this->once() )->method( 'sendConfirmationFor' )->with( $donation );
+
+		$useCase = $this->newModerateDonationUseCase( $donation );
+		$useCase->approveDonation( $donation->getId(), self::AUTH_USER_NAME );
 	}
 
 	public function testGivenNonExistingDonation_markingForModerationFails(): void {
@@ -157,6 +175,6 @@ class ModerateDonationUseCaseTest extends TestCase {
 	}
 
 	private function newModerateDonationUseCase( Donation ...$donations ): ModerateDonationUseCase {
-		return new ModerateDonationUseCase( new FakeDonationRepository( ...$donations ), $this->donationLogger );
+		return new ModerateDonationUseCase( new FakeDonationRepository( ...$donations ), $this->donationLogger, $this->notifier );
 	}
 }
