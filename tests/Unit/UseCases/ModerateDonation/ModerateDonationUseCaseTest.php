@@ -5,6 +5,8 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ModerateDonation;
 
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
@@ -21,35 +23,35 @@ class ModerateDonationUseCaseTest extends TestCase {
 
 	private const AUTH_USER_NAME = "coolAdmin";
 
-	public function testGivenNonExistingDonation_approvalFails(): void {
-		$fakeDonationRepository = new FakeDonationRepository();
-		$donationLogger = new DonationEventLoggerSpy();
+	private DonationEventLogger $donationLogger;
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
+	protected function setUp(): void {
+		parent::setUp();
+		$this->donationLogger = new DonationEventLoggerSpy();
+	}
+
+	public function testGivenNonExistingDonation_approvalFails(): void {
+		$useCase = $this->newModerateDonationUseCase();
 		$response = $useCase->approveDonation( 1, self::AUTH_USER_NAME );
 
 		$this->assertFalse( $response->moderationChangeSucceeded() );
-		$this->assertCount( 0, $donationLogger->getLogCalls() );
+		$this->assertCount( 0, $this->donationLogger->getLogCalls() );
 	}
 
 	public function testGivenDonationThatIsNotMarkedForModeration_approvalFails(): void {
-		$fakeDonationRepository = new FakeDonationRepository( ValidDonation::newBankTransferDonation() );
-		$donationLogger = new DonationEventLoggerSpy();
+		$useCase = $this->newModerateDonationUseCase( ValidDonation::newBankTransferDonation() );
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$response = $useCase->approveDonation( 1, self::AUTH_USER_NAME );
 
 		$this->assertFalse( $response->moderationChangeSucceeded() );
-		$this->assertCount( 0, $donationLogger->getLogCalls() );
+		$this->assertCount( 0, $this->donationLogger->getLogCalls() );
 	}
 
 	public function testGivenDonationThatWasMarkedForModeration_approvalSucceeds(): void {
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration();
-		$fakeDonationRepository = new FakeDonationRepository( $donation );
-		$donationLogger = new DonationEventLoggerSpy();
+		$useCase = $this->newModerateDonationUseCase( $donation );
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$response = $useCase->approveDonation( 1, self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
@@ -74,48 +76,39 @@ class ModerateDonationUseCaseTest extends TestCase {
 	public function testWhenModeratedDonationGotApproved_adminUserNameIsWrittenAsLogEntry(): void {
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration();
-		$fakeDonationRepository = new FakeDonationRepository( $donation );
-		$donationLogger = new DonationEventLoggerSpy();
+		$useCase = $this->newModerateDonationUseCase( $donation );
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$useCase->approveDonation( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertSame(
 			[ [ $donation->getId(), 'marked as approved by user: coolAdmin' ] ],
-			$donationLogger->getLogCalls()
+			$this->donationLogger->getLogCalls()
 		);
 	}
 
 	public function testGivenNonExistingDonation_markingForModerationFails(): void {
-		$fakeDonationRepository = new FakeDonationRepository();
-		$donationLogger = new DonationEventLoggerSpy();
+		$useCase = $this->newModerateDonationUseCase();
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$response = $useCase->markDonationAsModerated( 1, self::AUTH_USER_NAME );
 
 		$this->assertFalse( $response->moderationChangeSucceeded() );
-		$this->assertCount( 0, $donationLogger->getLogCalls() );
+		$this->assertCount( 0, $this->donationLogger->getLogCalls() );
 	}
 
 	public function testGivenDonationThatIsAlreadyMarkedForModeration_markingForModerationFails(): void {
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration();
-		$fakeDonationRepository = new FakeDonationRepository( $donation );
-		$donationLogger = new DonationEventLoggerSpy();
+		$useCase = $this->newModerateDonationUseCase( $donation );
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$response = $useCase->markDonationAsModerated( 1, self::AUTH_USER_NAME );
 
 		$this->assertFalse( $response->moderationChangeSucceeded() );
-		$this->assertCount( 0, $donationLogger->getLogCalls() );
+		$this->assertCount( 0, $this->donationLogger->getLogCalls() );
 	}
 
 	public function testGivenDonationThatIsNotModerated_markingForModerationSucceeds(): void {
 		$donation = ValidDonation::newBankTransferDonation();
-		$fakeDonationRepository = new FakeDonationRepository( $donation );
-		$donationLogger = new DonationEventLoggerSpy();
-
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
+		$useCase = $this->newModerateDonationUseCase( $donation );
 		$response = $useCase->markDonationAsModerated( 1, self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
@@ -138,34 +131,32 @@ class ModerateDonationUseCaseTest extends TestCase {
 
 	public function testWhenDonationGetsMarkedForModeration_adminUserNameIsWrittenAsLogEntry(): void {
 		$donation = ValidDonation::newBankTransferDonation();
-		$fakeDonationRepository = new FakeDonationRepository( $donation );
-		$donationLogger = new DonationEventLoggerSpy();
+		$useCase = $this->newModerateDonationUseCase( $donation );
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$response = $useCase->markDonationAsModerated( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertSame(
 			[ [ $response->getDonationId(), 'marked for moderation by user: coolAdmin' ] ],
-			$donationLogger->getLogCalls()
+			$this->donationLogger->getLogCalls()
 		);
 	}
 
 	public function testApprovedDonation_canBeMarkedForModerationAgain(): void {
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration();
-		$fakeDonationRepository = new FakeDonationRepository( $donation );
-		$donationLogger = new DonationEventLoggerSpy();
-
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
+		$useCase = $this->newModerateDonationUseCase( $donation );
 		$response = $useCase->approveDonation( 1, self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
 		$this->assertFalse( $donation->isMarkedForModeration() );
 
-		$useCase = new ModerateDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$response = $useCase->markDonationAsModerated( 1, self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
 		$this->assertTrue( $donation->isMarkedForModeration() );
+	}
+
+	private function newModerateDonationUseCase( Donation ...$donations ): ModerateDonationUseCase {
+		return new ModerateDonationUseCase( new FakeDonationRepository( ...$donations ), $this->donationLogger );
 	}
 }
