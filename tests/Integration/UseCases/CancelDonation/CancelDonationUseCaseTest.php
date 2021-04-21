@@ -4,12 +4,15 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CancelDonation;
 
+use PHPUnit\Framework\TestCase;
 use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
@@ -19,16 +22,17 @@ use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCa
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationResponse
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest
  *
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
+class CancelDonationUseCaseTest extends TestCase {
 
 	/**
-	 * @var FakeDonationRepository
+	 * @var DonationRepository|FakeDonationRepository|DonationRepositorySpy
 	 */
-	private $repository;
+	private DonationRepository $repository;
 
 	/**
 	 * @var TemplateMailerInterface|TemplateBasedMailerSpy
@@ -36,14 +40,11 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 	private $mailer;
 
 	/**
-	 * @var DonationAuthorizer
+	 * @var DonationAuthorizer|SucceedingDonationAuthorizerSpy
 	 */
-	private $authorizer;
+	private DonationAuthorizer $authorizer;
 
-	/**
-	 * @var DonationEventLoggerSpy
-	 */
-	private $logger;
+	private DonationEventLoggerSpy $logger;
 
 	public function setUp(): void {
 		$this->repository = new FakeDonationRepository();
@@ -82,7 +83,6 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 
 		$this->assertTrue( $response->cancellationSucceeded() );
 		$this->assertFalse( $response->mailDeliveryFailed() );
-
 		$this->assertTrue( $this->repository->getDonationById( $donation->getId() )->isCancelled() );
 	}
 
@@ -108,7 +108,6 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 		$response = $this->newCancelDonationUseCase()->cancelDonation( $request );
 
 		$this->assertTrue( $response->cancellationSucceeded() );
-
 		$this->mailer->assertCalledOnceWith(
 			new EmailAddress( $donation->getDonor()->getEmailAddress() ),
 			[
@@ -189,7 +188,6 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 	public function testWhenDonationSavingFails_cancellationIsNotSuccessful(): void {
 		$donation = $this->newCancelableDonation();
 		$this->repository->storeDonation( $donation );
-
 		$this->repository->throwOnWrite();
 
 		$request = new CancelDonationRequest( $donation->getId() );
@@ -229,6 +227,19 @@ class CancelDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 
 		$request = new CancelDonationRequest( $donation->getId(), "coolAdmin" );
 		$this->newCancelDonationUseCase()->cancelDonation( $request );
+	}
+
+	public function testCanceledDonationIsPersisted(): void {
+		$donation = $this->newCancelableDonation();
+		$this->repository = new DonationRepositorySpy( $donation );
+
+		$request = new CancelDonationRequest( $donation->getId(), "coolAdmin" );
+		$response = $this->newCancelDonationUseCase()->cancelDonation( $request );
+
+		$this->assertTrue( $response->cancellationSucceeded() );
+		$storeCalls = $this->repository->getStoreDonationCalls();
+		$this->assertCount( 1, $storeCalls );
+		$this->assertSame( $donation->getId(), $storeCalls[0]->getId() );
 	}
 
 }
