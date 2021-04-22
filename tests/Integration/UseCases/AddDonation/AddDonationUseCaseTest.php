@@ -404,8 +404,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertInstanceOf( CompanyName::class, $events[0]->getDonor()->getName() );
 	}
 
-	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsDeleted(): void {
-		$this->markTestIncomplete( "TODO we must fix doctrine repository first and adapt status change" );
+	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsCancelled(): void {
 		$repository = $this->newRepository();
 		$useCase = new AddDonationUseCase(
 			$repository,
@@ -419,7 +418,7 @@ class AddDonationUseCaseTest extends TestCase {
 		);
 
 		$useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
-		$this->assertSame( Donation::STATUS_CANCELLED, $repository->getDonationById( 1 )->getStatus() );
+		$this->assertTrue( $repository->getDonationById( 1 )->isCancelled() );
 	}
 
 	public function testOptingIntoDonationReceipt_persistedInDonation(): void {
