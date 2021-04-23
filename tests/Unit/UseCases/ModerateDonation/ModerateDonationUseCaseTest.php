@@ -77,7 +77,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 		$donationRepositorySpy = new DonationRepositorySpy( $donation );
 		$donationLogger = new DonationEventLoggerSpy();
 
-		$useCase = new ModerateDonationUseCase( $donationRepositorySpy, $donationLogger );
+		$useCase = new ModerateDonationUseCase( $donationRepositorySpy, $donationLogger, $this->notifier, $this->notificationLog );
 		$response = $useCase->approveDonation( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
@@ -167,7 +167,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 		$donationRepositorySpy = new DonationRepositorySpy( $donation );
 		$donationLogger = new DonationEventLoggerSpy();
 
-		$useCase = new ModerateDonationUseCase( $donationRepositorySpy, $donationLogger );
+		$useCase = new ModerateDonationUseCase( $donationRepositorySpy, $donationLogger, $this->notifier, $this->notificationLog );
 		$response = $useCase->markDonationAsModerated( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
