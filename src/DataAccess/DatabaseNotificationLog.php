@@ -10,6 +10,8 @@ use WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\NotificationLog;
 
 class DatabaseNotificationLog implements NotificationLog {
 
+	private const TABLE_NAME = 'donation_notification_log';
+
 	private Connection $connection;
 
 	public function __construct( Connection $connection ) {
@@ -19,7 +21,7 @@ class DatabaseNotificationLog implements NotificationLog {
 	public function hasSentConfirmationFor( int $donationId ): bool {
 		$qb = $this->connection->createQueryBuilder();
 		$qb->select( 'COUNT(*)' )
-			->from( NotificationLogSchema::TABLE_NAME )
+			->from( self::TABLE_NAME )
 			->where( 'donation_id = :donation_id' )
 			->setParameter( 'donation_id', $donationId, Types::INTEGER );
 		$result = $this->connection->executeQuery( $qb->getSQL(), $qb->getParameters(), $qb->getParameterTypes() );
@@ -31,7 +33,7 @@ class DatabaseNotificationLog implements NotificationLog {
 			return;
 		}
 		$qb = $this->connection->createQueryBuilder();
-		$qb->insert( NotificationLogSchema::TABLE_NAME )
+		$qb->insert( self::TABLE_NAME )
 			->values(
 				[ 'donation_id' => '?' ]
 			)
