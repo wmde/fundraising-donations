@@ -8,7 +8,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidSofortNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
@@ -16,6 +15,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
+use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase;
 
 /**
@@ -38,10 +38,10 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationMailer&MockObject
+	 * @return DonationConfirmationNotifier&MockObject
 	 */
-	private function getMailer(): DonationConfirmationMailer {
-		return $this->createMock( DonationConfirmationMailer::class );
+	private function getMailer(): DonationConfirmationNotifier {
+		return $this->createMock( DonationConfirmationNotifier::class );
 	}
 
 	public function testWhenNotificationIsForNonExistingDonation_unhandledResponseIsReturned(): void {
@@ -140,7 +140,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$mailer = $this->getMailer();
 		$mailer
 			->expects( $this->once() )
-			->method( 'sendConfirmationMailFor' )
+			->method( 'sendConfirmationFor' )
 			->with( $donation );
 
 		$useCase = new SofortPaymentNotificationUseCase(
