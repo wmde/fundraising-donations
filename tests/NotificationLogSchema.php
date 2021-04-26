@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\DonationContext\DataAccess;
+namespace WMDE\Fundraising\DonationContext\Tests;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;

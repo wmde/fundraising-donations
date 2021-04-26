@@ -3,11 +3,9 @@
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Schema\Schema;
-use Doctrine\DBAL\Types\Types;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DatabaseNotificationLog;
-use WMDE\Fundraising\DonationContext\DataAccess\NotificationLogSchema;
+use WMDE\Fundraising\DonationContext\Tests\NotificationLogSchema;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
