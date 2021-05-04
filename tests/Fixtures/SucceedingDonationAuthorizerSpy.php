@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\TokenSet;
 
 /**
  * @license GPL-2.0-or-later
@@ -37,4 +38,7 @@ class SucceedingDonationAuthorizerSpy implements DonationAuthorizer {
 		return $this->authorizedAsAdmin;
 	}
 
+	public function getTokensForDonation( int $donationId ): TokenSet {
+		throw new \LogicException( 'not needed yet, implement when needed' );
+	}
 }
