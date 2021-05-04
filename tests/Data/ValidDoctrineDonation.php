@@ -250,4 +250,41 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
+	public static function newIncompleteCreditCardDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::CREDIT_CARD );
+		$donation->setStatus( Donation::STATUS_EXTERNAL_INCOMPLETE );
+		return $donation;
+	}
+
+	public static function newCreditCardDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::CREDIT_CARD );
+		$donation->setStatus( Donation::STATUS_EXTERNAL_INCOMPLETE );
+		$donation->encodeAndSetData( array_merge( $donation->getDecodedData(), [
+			'ext_payment_id' => 'spenden.wikimedia.de-IDvooNg2sh#1',
+			'ext_payment_status' => 'processed',
+			'ext_payment_timestamp' => '2020-12-25T15:11:55+01:00',
+			'mcp_amount' => '13.37',
+			'ext_payment_account' => '4e1243bd22c66e76c2ba9eddc1f91394e57f9f83',
+			'mcp_sessionid' => 'CC42f34220c26b6c33e611b0a2bb89fdaccd295a',
+			'mcp_auth' => 'd8e8fca2dc0f896fd7cb4cb0031ba249',
+			'mcp_title' => 'Ihre Spende an Wikipedia',
+			'mcp_country' => 'DE',
+			'mcp_currency' => 'EUR',
+			'mcp_cc_expiry_date' => '2/2025'
+		] ) );
+		return $donation;
+	}
+
+	public static function newIncompleteSofortDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( PaymentMethod::SOFORT );
+		$donation->setStatus( Donation::STATUS_EXTERNAL_INCOMPLETE );
+		return $donation;
+	}
+
 }
