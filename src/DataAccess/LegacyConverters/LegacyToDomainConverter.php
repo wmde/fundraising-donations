@@ -44,16 +44,28 @@ class LegacyToDomainConverter {
 		return $donation;
 	}
 
+	/**
+	 * Create a new status from the payment type.
+	 *
+	 * This method is a violation of the Open-Closed principle because we need to touch it whenever we add new payment types.
+	 * We are planning to remove the status from the Donation domain model all together,
+	 * see https://phabricator.wikimedia.org/T281853
+	 *
+	 * @param DoctrineDonation $dd
+	 *
+	 * @return string
+	 */
 	private function convertStatus( DoctrineDonation $dd ): string {
-		switch ( $dd->getPaymentType() ) {
-			case PaymentMethod::BANK_TRANSFER:
-				return Donation::STATUS_PROMISE;
-			case PaymentMethod::DIRECT_DEBIT:
-				return Donation::STATUS_NEW;
-			default:
-				// TODO ask Kai what to do with old data that would create an error here
-				return $dd->getStatus();
+		$paymentMethod = $this->getPaymentMethodFromEntity( $dd );
+		if ( $paymentMethod instanceof BankTransferPayment ) {
+			return Donation::STATUS_PROMISE;
+		} elseif ( $paymentMethod instanceof DirectDebitPayment ) {
+			return Donation::STATUS_NEW;
+		} elseif ( $paymentMethod->hasExternalProvider() ) {
+			return $paymentMethod->paymentCompleted() ? Donation::STATUS_EXTERNAL_BOOKED : Donation::STATUS_EXTERNAL_INCOMPLETE;
 		}
+		// For greater legacy compatibility (at the cost of future errors), we don't throw an exception here
+		return Donation::STATUS_PROMISE;
 	}
 
 	private function assignCancellationAndModeration( DoctrineDonation $dd, Donation $donation ): void {

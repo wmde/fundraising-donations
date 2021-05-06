@@ -216,4 +216,59 @@ class LegacyToDomainConverterTest extends TestCase {
 		$doctrineDonation = ValidDoctrineDonation::newIncompletePaypalDonation();
 		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_INCOMPLETE ];
 	}
+
+	/**
+	 * @dataProvider donationsWithExternalPaymentAndModifiedState
+	 */
+	public function testGivenCanceledOrModeratedDonationWithExternalPayment_statusReflectsPaymentState( DoctrineDonation $dd, string $expectedStatus, string $description ): void {
+		$converter = new LegacyToDomainConverter();
+		$donation = $converter->createFromLegacyObject( $dd );
+
+		$this->assertSame( $expectedStatus, $donation->getStatus(), "Failed expectation for: $description" );
+	}
+
+	public function donationsWithExternalPaymentAndModifiedState(): iterable {
+		$doctrineDonation = ValidDoctrineDonation::newIncompletePaypalDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_INCOMPLETE, 'Moderated incomplete paypal donation' ];
+
+		// Some legacy donations were canceled, even when that's not possible now
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_INCOMPLETE, 'Canceled incomplete paypal donation (broken legacy data)' ];
+
+		$doctrineDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_BOOKED, 'Moderated booked paypal donation' ];
+
+		// Some legacy donations were canceled, even when that's not possible now
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_BOOKED, 'Canceled booked paypal donation (broken legacy data)' ];
+
+		$doctrineDonation = ValidDoctrineDonation::newIncompleteCreditCardDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_INCOMPLETE, 'Moderated incomplete credit card donation' ];
+
+		// Some legacy donations were canceled, even when that's not possible now
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_INCOMPLETE, 'Canceled incomplete credit card donation (broken legacy data)' ];
+
+		$doctrineDonation = ValidDoctrineDonation::newCreditCardDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_BOOKED, 'Moderated booked credit card donation' ];
+
+		// Some legacy donations were canceled, even when that's not possible now
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
+		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_BOOKED, 'Canceled booked credit card donation (broken legacy data)' ];
+	}
+
+	/**
+	 * Remove this test when we remove status from Donation, see https://phabricator.wikimedia.org/T281853
+	 */
+	public function testGivenUnknownPaymentMethod_stateIsPromised(): void {
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( ValidDoctrineDonation::newDonationWithCash() );
+
+		$this->assertSame( Donation::STATUS_PROMISE, $donation->getStatus() );
+	}
 }
