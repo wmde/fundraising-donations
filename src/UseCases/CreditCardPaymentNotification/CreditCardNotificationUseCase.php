@@ -66,8 +66,8 @@ class CreditCardNotificationUseCase {
 
 	private function handleRequest( CreditCardPaymentNotificationRequest $request, Donation $donation ): CreditCardNotificationResponse {
 		try {
-			$donation->addCreditCardData( $this->newCreditCardDataFromRequest( $request ) );
 			$donation->confirmBooked();
+			$donation->addCreditCardData( $this->newCreditCardDataFromRequest( $request ) );
 		}
 		catch ( \RuntimeException $e ) {
 			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::DOMAIN_ERROR, $e );
