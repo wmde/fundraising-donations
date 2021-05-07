@@ -54,7 +54,7 @@ class SofortPaymentNotificationUseCase {
 			return $this->createUnhandledResponse( 'Wrong access code for donation' );
 		}
 
-		if ( $paymentMethod->isConfirmedPayment() ) {
+		if ( $paymentMethod->paymentCompleted() ) {
 			return $this->createUnhandledResponse( 'Duplicate notification' );
 		}
 
