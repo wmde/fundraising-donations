@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
+use DomainException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -97,7 +98,7 @@ class DonationTest extends TestCase {
 	public function testGivenNonExternalPaymentType_confirmBookedThrowsException(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$this->expectException( RuntimeException::class );
+		$this->expectException( DomainException::class );
 		$this->expectExceptionMessageMatches( '/Only external payments/' );
 		$donation->confirmBooked();
 	}
@@ -119,7 +120,7 @@ class DonationTest extends TestCase {
 	 * @dataProvider statusesThatDoNotAllowForBookingProvider
 	 */
 	public function testGivenStatusThatDoesNotAllowForBooking_confirmBookedThrowsException( Donation $donation ): void {
-		$this->expectException( RuntimeException::class );
+		$this->expectException( DomainException::class );
 		$donation->confirmBooked();
 	}
 
