@@ -69,8 +69,9 @@ class ValidDonation {
 	public const TRACKING_TRACKING = 'test/gelb';
 
 	public const PAYPAL_TRANSACTION_ID = '61E67681CH3238416';
+	public const PAYPAL_PAYER_ID = 'HE373U84ENFYQ';
 
-	public const CREDIT_CARD_TRANSACTION_ID = '';
+	public const CREDIT_CARD_TRANSACTION_ID = '7788998877';
 	public const CREDIT_CARD_EXPIRY_YEAR = 2001;
 	public const CREDIT_CARD_EXPIRY_MONTH = 9;
 
@@ -104,6 +105,7 @@ class ValidDonation {
 	public static function newBookedPayPalDonation( string $transactionId = self::PAYPAL_TRANSACTION_ID ): Donation {
 		$payPalData = new PayPalData();
 		$payPalData->setPaymentId( $transactionId );
+		$payPalData->setPayerId( self::PAYPAL_PAYER_ID );
 
 		return self::createDonation(
 			new PayPalPayment( $payPalData ),

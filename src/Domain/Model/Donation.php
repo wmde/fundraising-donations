@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Domain\Model;
 
+use DomainException;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
@@ -61,7 +62,7 @@ class Donation {
 
 	/**
 	 * @param int|null $id
-	 * @param string $status Must be one of the Donation::STATUS_ constants
+	 * @param string $status Must be one of the Donation::STATUS_ constants. Will be deprecated, see https://phabricator.wikimedia.org/T276817
 	 * @param Donor $donor
 	 * @param DonationPayment $payment
 	 * @param bool $optsIntoNewsletter
@@ -85,6 +86,10 @@ class Donation {
 		$this->cancelled = false;
 	}
 
+	/**
+	 * @param string $status
+	 * @deprecated See https://phabricator.wikimedia.org/T276817
+	 */
 	private function setStatus( string $status ): void {
 		if ( !$this->isValidStatus( $status ) ) {
 			throw new \InvalidArgumentException( 'Invalid donation status' );
@@ -126,6 +131,7 @@ class Donation {
 	 * Usage of more specific methods such as isBooked or statusAllowsForCancellation is recommended.
 	 *
 	 * @return string One of the Donation::STATUS_ constants
+	 * @deprecated See https://phabricator.wikimedia.org/T276817
 	 */
 	public function getStatus(): string {
 		return $this->status;
@@ -187,22 +193,25 @@ class Donation {
 	}
 
 	/**
-	 * @throws RuntimeException
+	 * @throws DomainException
 	 */
 	public function confirmBooked(): void {
 		if ( !$this->hasExternalPayment() ) {
-			throw new RuntimeException( 'Only external payments can be confirmed as booked' );
+			throw new DomainException( 'Only external payments can be confirmed as booked' );
 		}
 
-		if ( !$this->statusAllowsForBooking() ) {
-			throw new RuntimeException( 'Only incomplete donations can be confirmed as booked' );
+		if ( !$this->stateAllowsBooking() ) {
+			throw new DomainException( 'Only valid, unmoderated and incomplete donations can be confirmed as booked' );
 		}
 
 		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
 			$this->makeCommentPrivate();
 		}
 
-		$this->status = self::STATUS_EXTERNAL_BOOKED;
+		// When we implement https://phabricator.wikimedia.org/T276817 we should add a parameter to this method that
+		// relays the booking data to the payment method. This goes around the
+		// add parameters to this method and call the addData method of
+		$this->setStatus( self::STATUS_EXTERNAL_BOOKED );
 	}
 
 	private function makeCommentPrivate(): void {
@@ -217,7 +226,7 @@ class Donation {
 		return $this->comment !== null;
 	}
 
-	private function statusAllowsForBooking(): bool {
+	private function stateAllowsBooking(): bool {
 		return $this->isIncomplete() || $this->isMarkedForModeration() || $this->isCancelled();
 	}
 
@@ -269,14 +278,11 @@ class Donation {
 	}
 
 	public function hasExternalPayment(): bool {
-		return in_array(
-			$this->getPaymentMethodId(),
-			[ PaymentMethod::PAYPAL, PaymentMethod::CREDIT_CARD, PaymentMethod::SOFORT ]
-		);
+		return $this->getPaymentMethod()->hasExternalProvider();
 	}
 
 	private function isIncomplete(): bool {
-		return $this->status === self::STATUS_EXTERNAL_INCOMPLETE;
+		return !$this->isBooked();
 	}
 
 	public function isMarkedForModeration(): bool {
@@ -284,7 +290,7 @@ class Donation {
 	}
 
 	public function isBooked(): bool {
-		return $this->status === self::STATUS_EXTERNAL_BOOKED;
+		return $this->getPaymentMethod()->paymentCompleted();
 	}
 
 	public function isExported(): bool {
