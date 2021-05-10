@@ -93,10 +93,9 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			return $this->createChildDonation( $donation, $request );
 		}
 
-		$paymentMethod->addPayPalData( $this->newPayPalDataFromRequest( $request ) );
-
 		try {
 			$donation->confirmBooked();
+			$paymentMethod->addPayPalData( $this->newPayPalDataFromRequest( $request ) );
 		}
 		catch ( \RuntimeException $ex ) {
 			return $this->createErrorResponse( $ex );
