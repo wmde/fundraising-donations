@@ -6,7 +6,6 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
-use http\Exception\RuntimeException;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Authorization\TokenSet;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
@@ -18,9 +17,9 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
  */
 class DoctrineDonationAuthorizer implements DonationAuthorizer {
 
-	private $entityManager;
-	private $updateToken;
-	private $accessToken;
+	private EntityManager $entityManager;
+	private ?string $updateToken;
+	private ?string $accessToken;
 
 	public function __construct( EntityManager $entityManager, string $updateToken = null, string $accessToken = null ) {
 		$this->entityManager = $entityManager;
@@ -36,13 +35,7 @@ class DoctrineDonationAuthorizer implements DonationAuthorizer {
 	 * @return bool
 	 */
 	public function userCanModifyDonation( int $donationId ): bool {
-		try {
-			$donation = $this->getDonationById( $donationId );
-		}
-		catch ( ORMException $ex ) {
-			// TODO: might want to log failure here
-			return false;
-		}
+		$donation = $this->getDonationById( $donationId );
 
 		return $donation !== null
 			&& $this->updateTokenMatches( $donation )
@@ -50,7 +43,11 @@ class DoctrineDonationAuthorizer implements DonationAuthorizer {
 	}
 
 	private function getDonationById( int $donationId ): ?Donation {
-		return $this->entityManager->find( Donation::class, $donationId );
+		try {
+			return $this->entityManager->find( Donation::class, $donationId );
+		} catch ( ORMException $e ) {
+			throw new GetDonationException( $e, sprintf( 'Could not get donation with id %d', $donationId ) );
+		}
 	}
 
 	private function updateTokenMatches( Donation $donation ): bool {
@@ -74,26 +71,14 @@ class DoctrineDonationAuthorizer implements DonationAuthorizer {
 	 * @return bool
 	 */
 	public function systemCanModifyDonation( int $donationId ): bool {
-		try {
-			$donation = $this->getDonationById( $donationId );
-		}
-		catch ( ORMException $ex ) {
-			// TODO: might want to log failure here
-			return false;
-		}
+		$donation = $this->getDonationById( $donationId );
 
 		return $donation !== null
 			&& $this->updateTokenMatches( $donation );
 	}
 
 	public function canAccessDonation( int $donationId ): bool {
-		try {
-			$donation = $this->getDonationById( $donationId );
-		}
-		catch ( ORMException $ex ) {
-			// TODO: might want to log failure here
-			return false;
-		}
+		$donation = $this->getDonationById( $donationId );
 
 		return $donation !== null
 			&& $this->accessTokenMatches( $donation );
