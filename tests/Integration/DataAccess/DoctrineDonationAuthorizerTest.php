@@ -188,29 +188,40 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		return date( 'Y-m-d H:i:s', time() - 1 );
 	}
 
-	/**
-	 * @slowThreshold 400
-	 */
-	public function testWhenDoctrineThrowsException(): void {
+	public function testGivenExceptionFromEntityManager_authorizerWrapsExceptionForUserModification(): void {
 		$authorizer = new DoctrineDonationAuthorizer(
 			$this->getThrowingEntityManager(),
 			self::CORRECT_UPDATE_TOKEN,
 			self::CORRECT_ACCESS_TOKEN
 		);
 
-		$this->specify(
-			'update authorization fails',
-			function () use ( $authorizer ): void {
-				$this->assertFalse( $authorizer->userCanModifyDonation( self::MEANINGLESS_DONATION_ID ) );
-			}
+		$this->expectException( GetDonationException::class );
+
+		$authorizer->userCanModifyDonation( self::MEANINGLESS_DONATION_ID );
+	}
+
+	public function testGivenExceptionFromEntityManager_authorizerWrapsExceptionForSystemModification(): void {
+		$authorizer = new DoctrineDonationAuthorizer(
+			$this->getThrowingEntityManager(),
+			self::CORRECT_UPDATE_TOKEN,
+			self::CORRECT_ACCESS_TOKEN
 		);
 
-		$this->specify(
-			'access authorization fails',
-			function () use ( $authorizer ): void {
-				$this->assertFalse( $authorizer->canAccessDonation( self::MEANINGLESS_DONATION_ID ) );
-			}
+		$this->expectException( GetDonationException::class );
+
+		$authorizer->systemCanModifyDonation( self::MEANINGLESS_DONATION_ID );
+	}
+
+	public function testGivenExceptionFromEntityManager_authorizerWrapsExceptionForAccessCheck(): void {
+		$authorizer = new DoctrineDonationAuthorizer(
+			$this->getThrowingEntityManager(),
+			self::CORRECT_UPDATE_TOKEN,
+			self::CORRECT_ACCESS_TOKEN
 		);
+
+		$this->expectException( GetDonationException::class );
+
+		$authorizer->canAccessDonation( self::MEANINGLESS_DONATION_ID );
 	}
 
 	private function getThrowingEntityManager(): EntityManager {
