@@ -3,9 +3,10 @@
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DatabaseNotificationLog;
-use WMDE\Fundraising\DonationContext\Tests\NotificationLogSchema;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationNotificationLog;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
@@ -16,35 +17,38 @@ class DatabaseNotificationLogTest extends TestCase {
 	private const MISSING_DONATION_ID = 41;
 	private const EXISTING_DONATION_ID = 42;
 
+	private EntityManager $entityManager;
 	private Connection $connection;
+	private string $tableName;
 
 	public function setUp(): void {
-		$this->connection = TestEnvironment::newInstance()->getFactory()->getConnection();
-		NotificationLogSchema::createSchema( $this->connection );
+		$factory = TestEnvironment::newInstance()->getFactory();
+		$this->connection = $factory->getConnection();
+		$this->entityManager = $factory->getEntityManager();
+		$this->tableName = $factory->getEntityManager()->getClassMetadata( DonationNotificationLog::class )->getTableName();
 		parent::setUp();
 	}
 
 	public function testGivenEmptyTable_NoLogIsFound(): void {
-		$log = new DatabaseNotificationLog( $this->connection );
+		$log = new DatabaseNotificationLog( $this->entityManager );
 
 		$this->assertFalse( $log->hasSentConfirmationFor( self::MISSING_DONATION_ID ) );
 	}
 
 	public function testGivenDonationIdInDatabase_LoggerFindsSentConfirmation(): void {
-		$this->connection->insert( 'donation_notification_log', [ 'donation_id' => self::EXISTING_DONATION_ID ] );
-		$log = new DatabaseNotificationLog( $this->connection );
+		$this->insertLogEntry();
+		$log = new DatabaseNotificationLog( $this->entityManager );
 
 		$this->assertTrue( $log->hasSentConfirmationFor( self::EXISTING_DONATION_ID ) );
 		$this->assertFalse( $log->hasSentConfirmationFor( self::MISSING_DONATION_ID ) );
 	}
 
 	public function testLogConfirmationSentWritesToDatabase(): void {
-		$table_name = NotificationLogSchema::TABLE_NAME;
-		$log = new DatabaseNotificationLog( $this->connection );
+		$log = new DatabaseNotificationLog( $this->entityManager );
 		$log->logConfirmationSent( self::MISSING_DONATION_ID );
 
 		$count = $this->connection->fetchOne(
-			"SELECT count(*) as row_count FROM {$table_name} WHERE donation_id = ?",
+			"SELECT count(*) as row_count FROM {$this->tableName} WHERE donation_id = ?",
 			[ self::MISSING_DONATION_ID ]
 		);
 
@@ -52,17 +56,21 @@ class DatabaseNotificationLogTest extends TestCase {
 	}
 
 	public function testGivenDonationIdAlreadyLogged_writingConfirmationFails(): void {
-		$this->connection->insert( 'donation_notification_log', [ 'donation_id' => self::EXISTING_DONATION_ID ] );
-		$table_name = NotificationLogSchema::TABLE_NAME;
-		$log = new DatabaseNotificationLog( $this->connection );
+		$this->insertLogEntry();
+		$log = new DatabaseNotificationLog( $this->entityManager );
 
 		$log->logConfirmationSent( self::EXISTING_DONATION_ID );
 
 		$count = $this->connection->fetchOne(
-			"SELECT count(*) as row_count FROM {$table_name} WHERE donation_id = ?",
+			"SELECT count(*) as row_count FROM {$this->tableName} WHERE donation_id = ?",
 			[ self::EXISTING_DONATION_ID ]
 		);
 		$this->assertSame( 1, intval( $count ) );
+	}
+
+	private function insertLogEntry(): void {
+		$this->entityManager->persist( new DonationNotificationLog( self::EXISTING_DONATION_ID ) );
+		$this->entityManager->flush();
 	}
 
 }

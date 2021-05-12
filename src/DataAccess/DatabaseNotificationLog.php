@@ -4,27 +4,29 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
-use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\EntityManager;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationNotificationLog;
 use WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\NotificationLog;
 
 class DatabaseNotificationLog implements NotificationLog {
 
 	private const TABLE_NAME = 'donation_notification_log';
 
-	private Connection $connection;
+	private EntityManager $entityManager;
 
-	public function __construct( Connection $connection ) {
-		$this->connection = $connection;
+	public function __construct( EntityManager $connection ) {
+		$this->entityManager = $connection;
 	}
 
 	public function hasSentConfirmationFor( int $donationId ): bool {
-		$qb = $this->connection->createQueryBuilder();
+		$connection = $this->entityManager->getConnection();
+		$qb = $connection->createQueryBuilder();
 		$qb->select( 'COUNT(*)' )
 			->from( self::TABLE_NAME )
 			->where( 'donation_id = :donation_id' )
 			->setParameter( 'donation_id', $donationId, Types::INTEGER );
-		$result = $this->connection->executeQuery( $qb->getSQL(), $qb->getParameters(), $qb->getParameterTypes() );
+		$result = $connection->executeQuery( $qb->getSQL(), $qb->getParameters(), $qb->getParameterTypes() );
 		return intval( $result->fetchColumn() ) > 0;
 	}
 
@@ -32,13 +34,8 @@ class DatabaseNotificationLog implements NotificationLog {
 		if ( $this->hasSentConfirmationFor( $donationId ) ) {
 			return;
 		}
-		$qb = $this->connection->createQueryBuilder();
-		$qb->insert( self::TABLE_NAME )
-			->values(
-				[ 'donation_id' => '?' ]
-			)
-			->setParameter( 0, $donationId );
-
-		$this->connection->executeQuery( $qb->getSQL(), $qb->getParameters(), $qb->getParameterTypes() );
+		$donationNotificationLog = new DonationNotificationLog( $donationId );
+		$this->entityManager->persist( $donationNotificationLog );
+		$this->entityManager->flush();
 	}
 }
