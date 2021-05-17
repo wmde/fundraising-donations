@@ -13,8 +13,15 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
  */
 class DonationRepositorySpy extends FakeDonationRepository {
 
-	private $storeDonationCalls = [];
-	private $getDonationCalls = [];
+	/**
+	 * @var Donation[]
+	 */
+	private array $storeDonationCalls;
+
+	/**
+	 * @var int[]
+	 */
+	private array $getDonationCalls = [];
 
 	public function __construct( Donation ...$donations ) {
 		parent::__construct( ...$donations );
