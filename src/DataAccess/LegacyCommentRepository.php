@@ -18,11 +18,11 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
  */
 class LegacyCommentRepository implements CommentRepository {
 
-	private array $fetchedComments = [];
+	private array $fetchedDonationsByComment = [];
 	private DonationRepository $donationRepository;
 
 	public function __construct( DonationRepository $donationRepository ) {
- $this->donationRepository = $donationRepository;
+		$this->donationRepository = $donationRepository;
 	}
 
 	public function getCommentById( int $commentId ): ?DonationComment {
@@ -36,7 +36,7 @@ class LegacyCommentRepository implements CommentRepository {
 		}
 		$comment = $donation->getComment();
 		if ( $comment !== null ) {
-			$this->fetchedComments[spl_object_id( $comment )] = $donation->getId();
+			$this->fetchedDonationsByComment[spl_object_id( $comment )] = $donation;
 		}
 		return $comment;
 	}
@@ -54,9 +54,10 @@ class LegacyCommentRepository implements CommentRepository {
 
 	public function updateComment( DonationComment $comment ): void {
 		$objectId = spl_object_id( $comment );
-		if ( !isset( $this->fetchedComments[$objectId] ) ) {
+		if ( !isset( $this->fetchedDonationsByComment[$objectId] ) ) {
 			throw new LegacyException( 'updateComment is not implementable without calling getCommentByDonationId first. Please check your call order and make sure you\'re only updating donations that previously had a comment.' );
 		}
+		$this->donationRepository->storeDonation( $this->fetchedDonationsByComment[$objectId] );
 	}
 
 }
