@@ -15,11 +15,11 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
  */
 class FakeDonationRepository implements DonationRepository {
 
-	private $calls = 0;
-	private $donations = [];
-	private $donationClones = [];
-	private $throwOnRead = false;
-	private $throwOnWrite = false;
+	private int $calls = 0;
+	private array $donations = [];
+	private array $donationClones = [];
+	private bool $throwOnRead = false;
+	private bool $throwOnWrite = false;
 
 	public function __construct( Donation ...$donations ) {
 		foreach ( $donations as $donation ) {
