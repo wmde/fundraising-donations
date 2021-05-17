@@ -103,9 +103,9 @@ class LegacyCommentRepositoryTest extends TestCase {
 		$repository->getCommentByDonationId( $donation->getId() );
 		$repository->updateComment( $comment );
 
-		$storeDonationCalls = $donationRepository->getGetDonationCalls();
+		$storeDonationCalls = $donationRepository->getStoreDonationCalls();
 		$this->assertCount( 1, $storeDonationCalls );
-		$this->assertSame( $donation->getId(), $storeDonationCalls[0] );
+		$this->assertEquals( $donation, $storeDonationCalls[0] );
 	}
 
 	public function testUpdateCommentFailsIfLoadedDonationHadNoComment(): void {
