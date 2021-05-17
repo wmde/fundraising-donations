@@ -5,6 +5,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyCommentRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyException;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
@@ -106,6 +107,29 @@ class LegacyCommentRepositoryTest extends TestCase {
 		$storeDonationCalls = $donationRepository->getStoreDonationCalls();
 		$this->assertCount( 1, $storeDonationCalls );
 		$this->assertEquals( $donation, $storeDonationCalls[0] );
+	}
+
+	/**
+	 * This test demonstrates a flaw in the implementation of LegacyCommentRepository,
+	 * which uses DonationRepository internally, leading to the requirement that the original Donation comment
+	 * must be mutated and can't be immutably replaced with a new comment.
+	 *
+	 * A "proper" implementation of the CommentRepository SHOULD allow for switching out comments.
+	 */
+	public function testUpdateCommentFailsIfTheCommentIsNew(): void {
+		$donation = ValidDonation::newBookedCreditCardDonation();
+		$comment = ValidDonation::newPublicComment();
+		$donation->addComment( $comment );
+		$donationRepository = new DonationRepositorySpy( $donation );
+		$repository = new LegacyCommentRepository( $donationRepository );
+		// The call to getCommentByDonationId will make the repository remember which donation the comment belonged to
+		$repository->getCommentByDonationId( $donation->getId() );
+		$newComment = clone $comment;
+		$newComment->retract();
+
+		$this->expectException( LegacyException::class );
+
+		$repository->updateComment( $newComment );
 	}
 
 	public function testUpdateCommentFailsIfLoadedDonationHadNoComment(): void {
