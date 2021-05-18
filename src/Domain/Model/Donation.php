@@ -8,9 +8,9 @@ use DomainException;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
-use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BookablePayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentTransactionData;
 
 /**
  * @license GPL-2.0-or-later
@@ -193,11 +193,14 @@ class Donation {
 	}
 
 	/**
+	 * @param PaymentTransactionData $paymentTransactionData
+	 *
 	 * @throws DomainException
 	 */
-	public function confirmBooked(): void {
-		if ( !$this->hasExternalPayment() ) {
-			throw new DomainException( 'Only external payments can be confirmed as booked' );
+	public function confirmBooked( PaymentTransactionData $paymentTransactionData ): void {
+		$paymentMethod = $this->getPaymentMethod();
+		if ( !( $paymentMethod instanceof BookablePayment ) ) {
+			throw new DomainException( 'Only bookable payments can be confirmed as booked' );
 		}
 
 		if ( !$this->stateAllowsBooking() ) {
@@ -208,10 +211,7 @@ class Donation {
 			$this->makeCommentPrivate();
 		}
 
-		// When we implement https://phabricator.wikimedia.org/T276817 we should add a parameter to this method that
-		// relays the booking data to the payment method. This goes around the
-		// add parameters to this method and call the addData method of
-		$this->setStatus( self::STATUS_EXTERNAL_BOOKED );
+		$paymentMethod->bookPayment( $paymentTransactionData );
 	}
 
 	private function makeCommentPrivate(): void {
@@ -250,21 +250,6 @@ class Donation {
 
 	public function getTrackingInfo(): DonationTrackingInfo {
 		return $this->trackingInfo;
-	}
-
-	/**
-	 * @param CreditCardTransactionData $creditCardData
-	 *
-	 * @throws RuntimeException
-	 */
-	public function addCreditCardData( CreditCardTransactionData $creditCardData ): void {
-		$paymentMethod = $this->payment->getPaymentMethod();
-
-		if ( !( $paymentMethod instanceof CreditCardPayment ) ) {
-			throw new RuntimeException( 'Cannot set credit card transaction data on a non credit card payment' );
-		}
-
-		$paymentMethod->addCreditCardTransactionData( $creditCardData );
 	}
 
 	private function isCancellable(): bool {

@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification;
 
+use DomainException;
+use Exception;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -94,10 +96,9 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		}
 
 		try {
-			$donation->confirmBooked();
-			$paymentMethod->addPayPalData( $this->newPayPalDataFromRequest( $request ) );
+			$donation->confirmBooked( $this->newPayPalDataFromRequest( $request ) );
 		}
-		catch ( \RuntimeException $ex ) {
+		catch ( DomainException $ex ) {
 			return $this->createErrorResponse( $ex );
 		}
 
@@ -225,7 +226,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		return $payment->getPayPalData()->hasChildPayment( $transactionId );
 	}
 
-	private function createErrorResponse( \Exception $ex ): PaypalNotificationResponse {
+	private function createErrorResponse( Exception $ex ): PaypalNotificationResponse {
 		return PaypalNotificationResponse::newFailureResponse(
 			[
 				'message' => $ex->getMessage(),

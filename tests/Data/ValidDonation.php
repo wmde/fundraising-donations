@@ -103,14 +103,20 @@ class ValidDonation {
 	}
 
 	public static function newBookedPayPalDonation( string $transactionId = self::PAYPAL_TRANSACTION_ID ): Donation {
-		$payPalData = new PayPalData();
+		$payPalData = self::newPayPalData();
 		$payPalData->setPaymentId( $transactionId );
-		$payPalData->setPayerId( self::PAYPAL_PAYER_ID );
 
 		return self::createDonation(
 			new PayPalPayment( $payPalData ),
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
+	}
+
+	public static function newPayPalData(): PayPalData {
+		$payPalData = new PayPalData();
+		$payPalData->setPaymentId( self::PAYPAL_TRANSACTION_ID );
+		$payPalData->setPayerId( self::PAYPAL_PAYER_ID );
+		return $payPalData;
 	}
 
 	public static function newIncompletePayPalDonation(): Donation {
@@ -165,14 +171,17 @@ class ValidDonation {
 	}
 
 	public static function newBookedCreditCardDonation(): Donation {
+		return self::createDonation(
+			new CreditCardPayment( self::newCreditCardData() ),
+			Donation::STATUS_EXTERNAL_BOOKED
+		);
+	}
+
+	public static function newCreditCardData(): CreditCardTransactionData {
 		$creditCardData = new CreditCardTransactionData();
 		$creditCardData->setTransactionId( self::CREDIT_CARD_TRANSACTION_ID );
 		$creditCardData->setCardExpiry( new CreditCardExpiry( self::CREDIT_CARD_EXPIRY_MONTH, self::CREDIT_CARD_EXPIRY_YEAR ) );
-
-		return self::createDonation(
-			new CreditCardPayment( $creditCardData ),
-			Donation::STATUS_EXTERNAL_BOOKED
-		);
+		return $creditCardData;
 	}
 
 	public static function newIncompleteCreditCardDonation(): Donation {

@@ -114,7 +114,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$request = ValidSofortNotificationRequest::newInstantPayment();
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
-		$this->assertSame( Donation::STATUS_EXTERNAL_BOOKED, $repository->getDonationById( $donation->getId() )->getStatus() );
+		$this->assertTrue( $donation->isBooked() );
 	}
 
 	public function testWhenPaymentTypeIsNonSofort_unhandledResponseIsReturned(): void {

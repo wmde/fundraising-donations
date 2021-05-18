@@ -4,6 +4,9 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification;
 
+use DateTimeImmutable;
+use DomainException;
+use Exception;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -12,6 +15,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\SofortTransactionData;
 use WMDE\Fundraising\PaymentContext\RequestModel\SofortNotificationRequest;
 use WMDE\Fundraising\PaymentContext\ResponseModel\SofortNotificationResponse;
 
@@ -59,13 +63,11 @@ class SofortPaymentNotificationUseCase {
 		}
 
 		try {
-			$donation->confirmBooked();
+			$donation->confirmBooked( new SofortTransactionData( DateTimeImmutable::createFromMutable( $request->getTime() ) ) );
 		}
-		catch ( \RuntimeException $ex ) {
+		catch ( DomainException $ex ) {
 			return $this->createFailureResponse( $ex );
 		}
-
-		$paymentMethod->setConfirmedAt( $request->getTime() );
 
 		try {
 			$this->repository->storeDonation( $donation );
@@ -87,7 +89,7 @@ class SofortPaymentNotificationUseCase {
 		);
 	}
 
-	private function createFailureResponse( RuntimeException $ex ): SofortNotificationResponse {
+	private function createFailureResponse( Exception $ex ): SofortNotificationResponse {
 		return SofortNotificationResponse::newFailureResponse(
 			[
 				'message' => $ex->getMessage(),

@@ -9,6 +9,9 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentTransactionData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donation
@@ -95,12 +98,12 @@ class DonationTest extends TestCase {
 		$donation->assignId( 43 );
 	}
 
-	public function testGivenNonExternalPaymentType_confirmBookedThrowsException(): void {
+	public function testGivenNonBookablePaymentType_confirmBookedThrowsException(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$this->expectException( DomainException::class );
-		$this->expectExceptionMessageMatches( '/Only external payments/' );
-		$donation->confirmBooked();
+		$this->expectExceptionMessageMatches( '/Only bookable payments/' );
+		$donation->confirmBooked( ValidDonation::newCreditCardData() );
 	}
 
 	public function testNewDonationsAreNotExported() {
@@ -119,32 +122,32 @@ class DonationTest extends TestCase {
 	/**
 	 * @dataProvider statusesThatDoNotAllowForBookingProvider
 	 */
-	public function testGivenStatusThatDoesNotAllowForBooking_confirmBookedThrowsException( Donation $donation ): void {
+	public function testGivenStatusThatDoesNotAllowForBooking_confirmBookedThrowsException( Donation $donation, PaymentTransactionData $transactionData ): void {
 		$this->expectException( DomainException::class );
-		$donation->confirmBooked();
+		$donation->confirmBooked( $transactionData );
 	}
 
 	public function statusesThatDoNotAllowForBookingProvider(): array {
 		return [
-			[ ValidDonation::newBookedPayPalDonation() ],
-			[ ValidDonation::newBookedCreditCardDonation() ],
+			[ ValidDonation::newBookedPayPalDonation(), ValidDonation::newPayPalData() ],
+			[ ValidDonation::newBookedCreditCardDonation(), ValidDonation::newCreditCardData() ],
 		];
 	}
 
 	/**
 	 * @dataProvider statusesThatAllowsForBookingProvider
 	 */
-	public function testGivenStatusThatAllowsForBooking_confirmBookedSetsBookedStatus( Donation $donation ): void {
-		$donation->confirmBooked();
-		$this->assertSame( Donation::STATUS_EXTERNAL_BOOKED, $donation->getStatus() );
+	public function testGivenStatusThatAllowsForBooking_confirmBookedSetsBookedStatus( Donation $donation, PaymentTransactionData $transactionData ): void {
+		$donation->confirmBooked( $transactionData );
+		$this->assertTrue( $donation->isBooked() );
 	}
 
 	public function statusesThatAllowsForBookingProvider(): array {
 		return [
-			[ ValidDonation::newIncompletePayPalDonation() ],
-			[ ValidDonation::newIncompleteCreditCardDonation() ],
-			[ $this->newInModerationPayPalDonation() ],
-			[ ValidDonation::newCancelledPayPalDonation() ],
+			[ ValidDonation::newIncompletePayPalDonation(), ValidDonation::newPayPalData() ],
+			[ ValidDonation::newIncompleteCreditCardDonation(), ValidDonation::newCreditCardData() ],
+			[ $this->newInModerationPayPalDonation(), ValidDonation::newPayPalData() ],
+			[ ValidDonation::newCancelledPayPalDonation(), ValidDonation::newPayPalData() ],
 		];
 	}
 
@@ -192,7 +195,7 @@ class DonationTest extends TestCase {
 		$donation = $this->newInModerationPayPalDonation();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
-		$donation->confirmBooked();
+		$donation->confirmBooked( ValidDonation::newPayPalData() );
 
 		$this->assertFalse( $donation->getComment()->isPublic() );
 	}
@@ -201,7 +204,7 @@ class DonationTest extends TestCase {
 		$donation = ValidDonation::newCancelledPayPalDonation();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
-		$donation->confirmBooked();
+		$donation->confirmBooked( ValidDonation::newPayPalData() );
 
 		$this->assertFalse( $donation->getComment()->isPublic() );
 	}
@@ -209,7 +212,7 @@ class DonationTest extends TestCase {
 	public function testWhenCompletingBookingOfCancelledExternalPayment_lackOfCommentCausesNoError(): void {
 		$donation = ValidDonation::newCancelledPayPalDonation();
 
-		$donation->confirmBooked();
+		$donation->confirmBooked( ValidDonation::newPayPalData() );
 
 		$this->assertFalse( $donation->hasComment() );
 	}
