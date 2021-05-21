@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification;
 
+use DomainException;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -66,10 +67,9 @@ class CreditCardNotificationUseCase {
 
 	private function handleRequest( CreditCardPaymentNotificationRequest $request, Donation $donation ): CreditCardNotificationResponse {
 		try {
-			$donation->confirmBooked();
-			$donation->addCreditCardData( $this->newCreditCardDataFromRequest( $request ) );
+			$donation->confirmBooked( $this->newCreditCardDataFromRequest( $request ) );
 		}
-		catch ( \RuntimeException $e ) {
+		catch ( DomainException $e ) {
 			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::DOMAIN_ERROR, $e );
 		}
 
