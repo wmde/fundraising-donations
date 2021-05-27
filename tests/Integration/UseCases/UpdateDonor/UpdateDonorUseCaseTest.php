@@ -6,13 +6,16 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\UpdateDono
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Event\DonorUpdatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeEventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest;
@@ -92,7 +95,8 @@ class UpdateDonorUseCaseTest extends TestCase {
 			new FailingDonationAuthorizer(),
 			$this->newDonorValidator(),
 			$repository,
-			$this->newConfirmationMailer()
+			$this->newConfirmationMailer(),
+			new FakeEventEmitter()
 		);
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
@@ -143,7 +147,8 @@ class UpdateDonorUseCaseTest extends TestCase {
 			$this->newDonationAuthorizer(),
 			$validator,
 			$repository,
-			$this->newConfirmationMailer()
+			$this->newConfirmationMailer(),
+			new FakeEventEmitter()
 		);
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
@@ -153,6 +158,36 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 		$this->assertFalse( $response->isSuccessful() );
 		$this->assertEquals( 'donor_change_failure_validation_error', $response->getErrorMessage() );
+	}
+
+	public function testOnUpdateAddress_emitsEvent() {
+		$repository = $this->newRepository();
+		$eventEmitter = new EventEmitterSpy();
+		$useCase = new UpdateDonorUseCase(
+			$this->newDonationAuthorizer(),
+			$this->createMock( UpdateDonorValidator::class ),
+			$repository,
+			$this->newConfirmationMailer(),
+			$eventEmitter
+		);
+		$donation = ValidDonation::newBookedAnonymousPayPalDonation();
+		$repository->storeDonation( $donation );
+		$donationId = $donation->getId();
+		$previousDonor = $donation->getDonor();
+		$updateDonorRequest = $this->newUpdateDonorRequestForPerson( $donationId );
+
+		$useCase->updateDonor( $updateDonorRequest );
+
+		/** @var $events DonorUpdatedEvent[] */
+		$events = $eventEmitter->getEvents();
+
+		$this->assertCount( 1, $events, 'Only 1 event should be emitted' );
+		$this->assertInstanceOf( DonorUpdatedEvent::class, $events[0] );
+		$this->assertSame( $donationId, $events[0]->getDonationId() );
+		$this->assertSame( $previousDonor->getName(), $events[0]->getPreviousDonor()->getName() );
+		$this->assertStringContainsString( $updateDonorRequest->getFirstName(), $events[0]->getNewDonor()->getName()->getFullName() );
+		$this->assertStringContainsString( $updateDonorRequest->getLastName(), $events[0]->getNewDonor()->getName()->getFullName() );
+		$this->assertNotSame( $events[0]->getPreviousDonor(), $events[0]->getNewDonor(), 'Event should contain a new donor instance' );
 	}
 
 	private function newRepository(): DonationRepository {
@@ -174,7 +209,8 @@ class UpdateDonorUseCaseTest extends TestCase {
 			$this->newDonationAuthorizer(),
 			$this->newDonorValidator(),
 			$repository,
-			$this->newConfirmationMailer()
+			$this->newConfirmationMailer(),
+			new FakeEventEmitter()
 		);
 	}
 

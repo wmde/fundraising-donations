@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Event\DonorUpdatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
@@ -13,6 +14,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 
 /**
@@ -28,17 +30,20 @@ class UpdateDonorUseCase {
 	private DonationRepository $donationRepository;
 	private UpdateDonorValidator $updateDonorValidator;
 	private DonationConfirmationNotifier $donationConfirmationMailer;
+	private EventEmitter $eventEmitter;
 
 	public function __construct(
 		DonationAuthorizer $authorizationService,
 		UpdateDonorValidator $updateDonorValidator,
 		DonationRepository $donationRepository,
-		DonationConfirmationNotifier $donationConfirmationMailer
+		DonationConfirmationNotifier $donationConfirmationMailer,
+		EventEmitter $eventEmitter
 	) {
 		$this->authorizationService = $authorizationService;
 		$this->donationRepository = $donationRepository;
 		$this->updateDonorValidator = $updateDonorValidator;
 		$this->donationConfirmationMailer = $donationConfirmationMailer;
+		$this->eventEmitter = $eventEmitter;
 	}
 
 	public function updateDonor( UpdateDonorRequest $updateDonorRequest ): UpdateDonorResponse {
@@ -68,9 +73,13 @@ class UpdateDonorUseCase {
 			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_VALIDATION_FAILED, $donation );
 		}
 
-		$donation->setDonor( $this->getDonorFromRequest( $updateDonorRequest ) );
+		$previousDonor = $donation->getDonor();
+		$newDonor = $this->getDonorFromRequest( $updateDonorRequest );
+
+		$donation->setDonor( $newDonor );
 		$this->donationRepository->storeDonation( $donation );
 
+		$this->eventEmitter->emit( new DonorUpdatedEvent( $donation->getId(), $previousDonor, $newDonor ) );
 		$this->donationConfirmationMailer->sendConfirmationFor( $donation );
 
 		return UpdateDonorResponse::newSuccessResponse( UpdateDonorResponse::SUCCESS_TEXT, $donation );
