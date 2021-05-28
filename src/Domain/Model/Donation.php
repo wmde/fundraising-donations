@@ -203,8 +203,8 @@ class Donation {
 			throw new DomainException( 'Only bookable payments can be confirmed as booked' );
 		}
 
-		if ( !$this->stateAllowsBooking() ) {
-			throw new DomainException( 'Only valid, unmoderated and incomplete donations can be confirmed as booked' );
+		if ( $this->isBooked() ) {
+			throw new DomainException( 'Only un-booked donations can be confirmed as booked' );
 		}
 
 		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
@@ -224,10 +224,6 @@ class Donation {
 
 	public function hasComment(): bool {
 		return $this->comment !== null;
-	}
-
-	private function stateAllowsBooking(): bool {
-		return $this->isIncomplete() || $this->isMarkedForModeration() || $this->isCancelled();
 	}
 
 	public function markForModeration(): void {
@@ -264,10 +260,6 @@ class Donation {
 
 	public function hasExternalPayment(): bool {
 		return $this->getPaymentMethod()->hasExternalProvider();
-	}
-
-	private function isIncomplete(): bool {
-		return !$this->isBooked();
 	}
 
 	public function isMarkedForModeration(): bool {
