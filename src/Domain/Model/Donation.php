@@ -204,7 +204,10 @@ class Donation {
 		}
 
 		if ( !$this->stateAllowsBooking() ) {
-			throw new DomainException( 'Only valid, unmoderated and incomplete donations can be confirmed as booked' );
+			throw new DomainException( sprintf(
+				'Only valid, unmoderated and incomplete donations can be confirmed as booked. Blocking states: %s',
+				implode( ', ', $this->getStatesThatAllowBooking() ),
+			) );
 		}
 
 		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
@@ -227,7 +230,16 @@ class Donation {
 	}
 
 	private function stateAllowsBooking(): bool {
-		return $this->isIncomplete() || $this->isMarkedForModeration() || $this->isCancelled();
+		return count( $this->getStatesThatAllowBooking() ) > 0;
+	}
+
+	private function getStatesThatAllowBooking(): array {
+		$blockingStates = [
+			'incomplete' => $this->isIncomplete(),
+			'moderated' => $this->isMarkedForModeration(),
+			'canceled' => $this->isCancelled()
+			];
+		return array_keys( array_filter( $blockingStates ) );
 	}
 
 	public function markForModeration(): void {
