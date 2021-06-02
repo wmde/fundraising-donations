@@ -21,6 +21,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentWithoutAssociatedData;
@@ -33,9 +34,6 @@ use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
  * @license GPL-2.0-or-later
  */
 class AddDonationUseCase {
-
-	private const PREFIX_BANK_TRANSACTION_KNOWN_DONOR = 'XW';
-	private const PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR = 'XR';
 
 	private DonationRepository $donationRepository;
 	private AddDonationValidator $donationValidator;
@@ -93,11 +91,12 @@ class AddDonationUseCase {
 	}
 
 	private function newDonationFromRequest( AddDonationRequest $donationRequest ): Donation {
+		$paymentFactory = new PaymentFactory( $this->transferCodeGenerator );
 		$donation = new Donation(
 			null,
 			( $this->initialDonationStatusPicker )( $donationRequest->getPaymentType() ),
 			$this->getPersonalInfoFromRequest( $donationRequest ),
-			$this->getPaymentFromRequest( $donationRequest ),
+			$paymentFactory->getPaymentFromRequest( $donationRequest ),
 			$donationRequest->getOptIn() === '1',
 			$this->newTrackingInfoFromRequest( $donationRequest )
 		);
@@ -149,46 +148,6 @@ class AddDonationUseCase {
 			$request->getDonorCity(),
 			$request->getDonorCountryCode()
 		);
-	}
-
-	private function getPaymentFromRequest( AddDonationRequest $donationRequest ): DonationPayment {
-		return new DonationPayment(
-			$donationRequest->getAmount(),
-			$donationRequest->getInterval(),
-			$this->getPaymentMethodFromRequest( $donationRequest )
-		);
-	}
-
-	private function getPaymentMethodFromRequest( AddDonationRequest $donationRequest ): PaymentMethod {
-		$paymentType = $donationRequest->getPaymentType();
-
-		switch ( $paymentType ) {
-			case PaymentMethod::BANK_TRANSFER:
-				return new BankTransferPayment(
-					$this->transferCodeGenerator->generateTransferCode(
-						$this->getTransferCodePrefix( $donationRequest )
-					)
-				);
-			case PaymentMethod::DIRECT_DEBIT:
-				return new DirectDebitPayment( $donationRequest->getBankData() );
-			case PaymentMethod::PAYPAL:
-				return new PayPalPayment( new PayPalData() );
-			case PaymentMethod::SOFORT:
-				return new SofortPayment(
-					$this->transferCodeGenerator->generateTransferCode(
-						$this->getTransferCodePrefix( $donationRequest )
-					)
-				);
-			default:
-				return new PaymentWithoutAssociatedData( $paymentType );
-		}
-	}
-
-	private function getTransferCodePrefix( AddDonationRequest $request ): string {
-		if ( $request->donorIsAnonymous() ) {
-			return self::PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR;
-		}
-		return self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
 	}
 
 	private function newTrackingInfoFromRequest( AddDonationRequest $request ): DonationTrackingInfo {
