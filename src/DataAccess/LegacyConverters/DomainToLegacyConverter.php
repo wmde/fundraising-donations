@@ -148,7 +148,8 @@ class DomainToLegacyConverter {
 		}
 
 		if ( $paymentMethod instanceof CreditCardPayment ) {
-			return $this->getDataFieldsFromCreditCardData( $paymentMethod->getCreditCardData() );
+			$creditCardTransactionData = $paymentMethod->getCreditCardData();
+			return $creditCardTransactionData === null ? [] : $this->getDataFieldsFromCreditCardData( $creditCardTransactionData );
 		}
 
 		return [];

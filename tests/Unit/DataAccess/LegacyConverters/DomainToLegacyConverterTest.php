@@ -64,7 +64,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertNotSame( 'potato', $data['vorname'], 'Person-related data should change' );
 	}
 
-	public function testTransactionIdsOfChildDondationsAreConverted(): void {
+	public function testTransactionIdsOfChildDonationsAreConverted(): void {
 		$converter = new DomainToLegacyConverter();
 		$transactionId = '16R12136PU8783961';
 		$fakeChildId = 2;
@@ -90,7 +90,7 @@ class DomainToLegacyConverterTest extends TestCase {
 
 	public function testCreditCardWithOutExpiryDateIsConverted(): void {
 		$converter = new DomainToLegacyConverter();
-		$donation = ValidDonation::newIncompleteCreditCardDonation();
+		$donation = ValidDonation::newIncompleteAnonymousCreditCardDonation();
 
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
 		$data = $doctrineDonation->getDecodedData();
@@ -168,6 +168,8 @@ class DomainToLegacyConverterTest extends TestCase {
 	}
 
 	public function incompleteDonationProvider(): iterable {
+		// The credit card data tests both null and empty credit card transaction data
+		yield [ ValidDonation::newIncompleteCreditCardDonation() ];
 		yield [ ValidDonation::newIncompleteAnonymousCreditCardDonation() ];
 		yield [ ValidDonation::newIncompleteAnonymousPayPalDonation() ];
 		yield [ ValidDonation::newIncompleteSofortDonation() ];
