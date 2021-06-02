@@ -181,7 +181,8 @@ class ValidDonation {
 
 	public static function newIncompleteCreditCardDonation(): Donation {
 		return self::createDonation(
-			new CreditCardPayment( new CreditCardTransactionData() ),
+		// We're leaving the transaction data null here on purpose
+			new CreditCardPayment(),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
