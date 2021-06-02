@@ -61,6 +61,8 @@ class LegacyToDomainConverter {
 			return Donation::STATUS_PROMISE;
 		} elseif ( $paymentMethod instanceof DirectDebitPayment ) {
 			return Donation::STATUS_NEW;
+		} elseif ( $paymentMethod instanceof SofortPayment ) {
+			return $paymentMethod->paymentCompleted() ? Donation::STATUS_PROMISE : Donation::STATUS_EXTERNAL_INCOMPLETE;
 		} elseif ( $paymentMethod->hasExternalProvider() ) {
 			return $paymentMethod->paymentCompleted() ? Donation::STATUS_EXTERNAL_BOOKED : Donation::STATUS_EXTERNAL_INCOMPLETE;
 		}
