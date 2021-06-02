@@ -12,6 +12,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BookablePayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
@@ -46,7 +47,19 @@ class DomainToLegacyConverter {
 	}
 
 	private function updateStatusInformation( DoctrineDonation $doctrineDonation, Donation $donation ): void {
-		$doctrineDonation->setStatus( $donation->getStatus() );
+		$paymentMethod = $donation->getPaymentMethod();
+		if ( $paymentMethod instanceof BankTransferPayment ) {
+			$paymentStatus = DoctrineDonation::STATUS_PROMISE;
+		} elseif ( $paymentMethod instanceof DirectDebitPayment ) {
+			$paymentStatus = DoctrineDonation::STATUS_NEW;
+		} elseif ( $paymentMethod instanceof SofortPayment ) {
+			$paymentStatus = $paymentMethod->paymentCompleted() ? DoctrineDonation::STATUS_PROMISE : DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE;
+		} elseif ( $paymentMethod instanceof BookablePayment ) {
+			$paymentStatus = $paymentMethod->paymentCompleted() ? DoctrineDonation::STATUS_EXTERNAL_BOOKED : DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE;
+		} else {
+			throw new \DomainException( sprintf( 'Unknown payment method "%s" - can\'t create status', get_class( $paymentMethod ) ) );
+		}
+		$doctrineDonation->setStatus( $paymentStatus );
 
 		if ( $donation->isCancelled() ) {
 			$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
