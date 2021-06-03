@@ -18,7 +18,7 @@ class DonationConfirmationMailer implements DonationConfirmationNotifier {
 	private TemplateMailerInterface $mailer;
 
 	public function __construct( TemplateMailerInterface $mailer ) {
-		$this->mailer = new BestEffortTemplateMailer( $mailer );
+		$this->mailer = $mailer;
 	}
 
 	public function sendConfirmationFor( Donation $donation ): void {
