@@ -11,7 +11,7 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
 
 /**
- * @covers \WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationNotifier
+ * @covers \WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer
  */
 class DonationConfirmationMailerTest extends TestCase {
 
