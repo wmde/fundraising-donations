@@ -9,9 +9,7 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentTransactionData;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donation
@@ -23,18 +21,18 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
  */
 class DonationTest extends TestCase {
 
-	public function testGivenNonDirectDebitDonation_cancellationFails(): void {
-		$donation = ValidDonation::newBankTransferDonation();
-
-		$this->expectException( RuntimeException::class );
+	/**
+	 * @dataProvider cancellableDonationProvider
+	 */
+	public function testGivenCancellableDonation_cancellationSucceeds( Donation $donation ): void {
 		$donation->cancel();
+
+		$this->assertTrue( $donation->isCancelled() );
 	}
 
-	public function testGivenDirectDebitDonation_cancellationSucceeds(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-
-		$donation->cancel();
-		$this->assertTrue( $donation->isCancelled() );
+	public function cancellableDonationProvider(): iterable {
+		yield [ ValidDonation::newDirectDebitDonation() ];
+		yield [ ValidDonation::newBankTransferDonation() ];
 	}
 
 	/**
@@ -49,19 +47,11 @@ class DonationTest extends TestCase {
 		$exportedDonation = ValidDonation::newDirectDebitDonation();
 		$exportedDonation->markAsExported();
 		return [
-			[ ValidDonation::newBankTransferDonation() ],
 			[ ValidDonation::newSofortDonation() ],
 			[ ValidDonation::newBookedPayPalDonation() ],
 			[ $exportedDonation ],
 			[ ValidDonation::newCancelledPayPalDonation() ]
 		];
-	}
-
-	public function testGivenNewStatus_cancellationSucceeds(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-
-		$donation->cancel();
-		$this->assertTrue( $donation->isCancelled() );
 	}
 
 	public function testModerationStatusCanBeQueried(): void {
