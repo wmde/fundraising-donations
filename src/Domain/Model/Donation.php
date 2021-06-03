@@ -183,7 +183,7 @@ class Donation {
 
 	public function cancel(): void {
 		if ( !$this->isCancellable() ) {
-			throw new RuntimeException( 'Can only cancel new donations' );
+			throw new RuntimeException( 'Can only cancel un-exported donations with nom-external payment providers' );
 		}
 		$this->cancelled = true;
 	}
@@ -249,7 +249,7 @@ class Donation {
 	}
 
 	private function isCancellable(): bool {
-		if ( $this->getPaymentMethodId() !== PaymentMethod::DIRECT_DEBIT ) {
+		if ( $this->getPaymentMethod()->hasExternalProvider() ) {
 			return false;
 		}
 		if ( $this->isExported() ) {
