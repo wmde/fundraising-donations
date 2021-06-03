@@ -27,6 +27,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\SofortTransactionData;
 use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardExpiry;
 
 /**
@@ -135,7 +136,7 @@ class ValidDonation {
 
 	public static function newCompletedSofortDonation(): Donation {
 		$payment = new SofortPayment( self::PAYMENT_BANK_TRANSFER_CODE );
-		$payment->setConfirmedAt( new DateTime( self::SOFORT_DONATION_CONFIRMED_AT ) );
+		$payment->bookPayment( new SofortTransactionData( new \DateTimeImmutable( self::SOFORT_DONATION_CONFIRMED_AT ) ) );
 		return self::createDonation(
 			$payment,
 			Donation::STATUS_PROMISE
@@ -150,22 +151,16 @@ class ValidDonation {
 	}
 
 	public static function newBookedAnonymousPayPalDonation(): Donation {
-		$payPalData = new PayPalData();
-		$payPalData->setPaymentId( self::PAYPAL_TRANSACTION_ID );
-
 		return self::createAnonymousDonation(
-			new PayPalPayment( $payPalData ),
+			new PayPalPayment( self::newPayPalData() ),
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
 	public static function newBookedAnonymousPayPalDonationUpdate( int $donationId ): Donation {
-		$payPalData = new PayPalData();
-		$payPalData->setPaymentId( self::PAYPAL_TRANSACTION_ID );
-
 		return self::createAnonymousDonationWithId(
 			$donationId,
-			new PayPalPayment( $payPalData ),
+			new PayPalPayment( self::newPayPalData() ),
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
@@ -186,7 +181,8 @@ class ValidDonation {
 
 	public static function newIncompleteCreditCardDonation(): Donation {
 		return self::createDonation(
-			new CreditCardPayment( new CreditCardTransactionData() ),
+		// We're leaving the transaction data null here on purpose
+			new CreditCardPayment(),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}

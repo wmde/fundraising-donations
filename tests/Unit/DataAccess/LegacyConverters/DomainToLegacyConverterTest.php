@@ -5,10 +5,15 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess\LegacyConverters;
 
 use PHPUnit\Framework\TestCase;
+use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
+use WMDE\Fundraising\DonationContext\Tests\Data\InvalidPaymentMethod;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter
@@ -59,7 +64,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertNotSame( 'potato', $data['vorname'], 'Person-related data should change' );
 	}
 
-	public function testTransactionIdsOfChildDondationsAreConverted(): void {
+	public function testTransactionIdsOfChildDonationsAreConverted(): void {
 		$converter = new DomainToLegacyConverter();
 		$transactionId = '16R12136PU8783961';
 		$fakeChildId = 2;
@@ -85,7 +90,7 @@ class DomainToLegacyConverterTest extends TestCase {
 
 	public function testCreditCardWithOutExpiryDateIsConverted(): void {
 		$converter = new DomainToLegacyConverter();
-		$donation = ValidDonation::newIncompleteCreditCardDonation();
+		$donation = ValidDonation::newIncompleteAnonymousCreditCardDonation();
 
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
 		$data = $doctrineDonation->getDecodedData();
@@ -130,5 +135,77 @@ class DomainToLegacyConverterTest extends TestCase {
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
 
 		$this->assertSame( DoctrineDonation::STATUS_CANCELLED, $doctrineDonation->getStatus() );
+	}
+
+	public function testGivenDirectDebitDonation_statusIsSet(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newDirectDebitDonation();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertSame( DoctrineDonation::STATUS_NEW, $doctrineDonation->getStatus() );
+	}
+
+	public function testGivenBankTransferDonation_statusIsSet(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newBankTransferDonation();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertSame( DoctrineDonation::STATUS_PROMISE, $doctrineDonation->getStatus() );
+	}
+
+	/**
+	 * @dataProvider incompleteDonationProvider
+	 * @param Donation $donation
+	 */
+	public function testGivenIncompleteDonation_statusIsSet( Donation $donation ): void {
+		$converter = new DomainToLegacyConverter();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertSame( DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE, $doctrineDonation->getStatus() );
+	}
+
+	public function incompleteDonationProvider(): iterable {
+		// The credit card data tests both null and empty credit card transaction data
+		yield [ ValidDonation::newIncompleteCreditCardDonation() ];
+		yield [ ValidDonation::newIncompleteAnonymousCreditCardDonation() ];
+		yield [ ValidDonation::newIncompleteAnonymousPayPalDonation() ];
+		yield [ ValidDonation::newIncompleteSofortDonation() ];
+	}
+
+	/**
+	 * @dataProvider externallyBookedDonationProvider
+	 * @param Donation $donation
+	 * @param string $expectedStatus
+	 */
+	public function testGivenBookedDonation_statusIsSet( Donation $donation, string $expectedStatus ): void {
+		$converter = new DomainToLegacyConverter();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertSame( $expectedStatus, $doctrineDonation->getStatus() );
+	}
+
+	public function externallyBookedDonationProvider(): iterable {
+		yield [ ValidDonation::newBookedAnonymousPayPalDonation(), DoctrineDonation::STATUS_EXTERNAL_BOOKED ];
+		yield [ ValidDonation::newBookedCreditCardDonation(), DoctrineDonation::STATUS_EXTERNAL_BOOKED ];
+		yield [ ValidDonation::newCompletedSofortDonation(), DoctrineDonation::STATUS_PROMISE ];
+	}
+
+	public function testDonationWithGivenUnknownPaymentType_settingStatusFails(): void {
+		$donation = new Donation( null,
+			DoctrineDonation::STATUS_NEW,
+			ValidDonation::newEmailOnlyDonor(),
+			new DonationPayment( Euro::newFromCents( 100 ), 0, new InvalidPaymentMethod() ),
+			false,
+			DonationTrackingInfo::newBlankTrackingInfo()
+		);
+		$converter = new DomainToLegacyConverter();
+
+		$this->expectException( \DomainException::class );
+
+		$converter->convert( $donation, new DoctrineDonation() );
 	}
 }
