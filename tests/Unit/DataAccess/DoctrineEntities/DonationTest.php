@@ -142,7 +142,7 @@ class DonationTest extends TestCase {
 			'pink' => 'fluffy',
 		] );
 
-		$donation->modifyDataObject( function ( DonationData $data ) {
+		$donation->modifyDataObject( static function ( DonationData $data ) {
 			$data->setAccessToken( 'foo' );
 			$data->setUpdateToken( 'bar' );
 		} );

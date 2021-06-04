@@ -33,7 +33,7 @@ class DoctrineCommentFinder implements CommentFinder {
 	 */
 	public function getPublicComments( int $limit, int $offset = 0 ): array {
 		return array_map(
-			function ( Donation $donation ) {
+			static function ( Donation $donation ) {
 				return CommentWithAmount::newInstance()
 					->setAuthorName( $donation->getPublicRecord() )
 					->setCommentText( $donation->getComment() )
