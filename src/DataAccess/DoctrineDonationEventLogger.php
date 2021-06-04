@@ -22,7 +22,7 @@ class DoctrineDonationEventLogger implements DonationEventLogger {
 	public function __construct( EntityManager $entityManager, callable $timestampFunction = null ) {
 		$this->entityManager = $entityManager;
 		if ( $timestampFunction === null ) {
-			$this->timestampFunction = function () {
+			$this->timestampFunction = static function () {
 				return date( 'Y-m-d H:i:s' );
 			};
 		} else {
