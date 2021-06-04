@@ -74,7 +74,7 @@ class AddDonationPolicyValidator {
 
 	private function getAmountViolations( AddDonationRequest $request ): array {
 		return array_map(
-			function ( ConstraintViolation $violation ) {
+			static function ( ConstraintViolation $violation ) {
 				$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
 				return $violation;
 			},
