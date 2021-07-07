@@ -4,7 +4,7 @@
 	"homepage": "https://github.com/wmde/fundraising-donations",
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"php": ">=7.4",
+		"php": ">=8.0",
 		"ext-curl": "*",
 
 		"doctrine/orm": "~2.9",
@@ -15,8 +15,8 @@
 		"wmde/email-address": "~1.0",
 		"wmde/euro": "~1.0",
 		"wmde/freezable-value-object": "~2.0",
-		"wmde/fun-validators": "~3.0.0",
-		"wmde/fundraising-payments": "~3.0"
+		"wmde/fun-validators": "~4.0",
+		"wmde/fundraising-payments": "~4.0"
 	},
 	"repositories": [
 		{
