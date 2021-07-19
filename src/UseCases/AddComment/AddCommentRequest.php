@@ -14,10 +14,10 @@ use WMDE\FreezableValueObject\FreezableValueObject;
 class AddCommentRequest {
 	use FreezableValueObject;
 
-	private $commentText;
-	private $isPublic;
-	private $isAnonymous;
-	private $donationId;
+	private string $commentText;
+	private bool $isPublic;
+	private bool $isAnonymous;
+	private int $donationId;
 
 	public function getCommentText(): string {
 		return $this->commentText;
@@ -25,7 +25,7 @@ class AddCommentRequest {
 
 	public function setCommentText( string $commentText ): self {
 		$this->assertIsWritable();
-		$this->commentText = $commentText;
+		$this->commentText = trim( $commentText );
 		return $this;
 	}
 
