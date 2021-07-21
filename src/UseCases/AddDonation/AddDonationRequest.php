@@ -39,7 +39,6 @@ class AddDonationRequest {
 	private ?BankData $bankData;
 
 	private string $tracking = '';
-	private string $source = '';
 	private int $totalImpressionCount = 0;
 	private int $singleBannerImpressionCount = 0;
 
@@ -76,7 +75,7 @@ class AddDonationRequest {
 	}
 
 	public function setOptIn( string $optIn ): void {
-		$this->optIn = $optIn;
+		$this->optIn = trim( $optIn );
 	}
 
 	public function getAmount(): Euro {
@@ -92,7 +91,7 @@ class AddDonationRequest {
 	}
 
 	public function setPaymentType( string $paymentType ): void {
-		$this->paymentType = $paymentType;
+		$this->paymentType = trim( $paymentType );
 	}
 
 	public function getInterval(): int {
@@ -116,7 +115,7 @@ class AddDonationRequest {
 	}
 
 	public function setTracking( string $tracking ): void {
-		$this->tracking = $tracking;
+		$this->tracking = trim( $tracking );
 	}
 
 	public function getTotalImpressionCount(): int {
@@ -169,7 +168,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorFirstName( string $donorFirstName ): void {
-		$this->donorFirstName = $donorFirstName;
+		$this->donorFirstName = trim( $donorFirstName );
 	}
 
 	public function getDonorLastName(): string {
@@ -177,7 +176,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorLastName( string $donorLastName ): void {
-		$this->donorLastName = $donorLastName;
+		$this->donorLastName = trim( $donorLastName );
 	}
 
 	public function getDonorSalutation(): string {
@@ -185,7 +184,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorSalutation( string $donorSalutation ): void {
-		$this->donorSalutation = $donorSalutation;
+		$this->donorSalutation = trim( $donorSalutation );
 	}
 
 	public function getDonorTitle(): string {
@@ -193,7 +192,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorTitle( string $donorTitle ): void {
-		$this->donorTitle = $donorTitle;
+		$this->donorTitle = trim( $donorTitle );
 	}
 
 	public function getDonorCompany(): string {
@@ -201,7 +200,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorCompany( string $donorCompany ): void {
-		$this->donorCompany = $donorCompany;
+		$this->donorCompany = trim( $donorCompany );
 	}
 
 	public function getDonorStreetAddress(): string {
@@ -209,7 +208,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorStreetAddress( string $donorStreetAddress ): void {
-		$this->donorStreetAddress = $donorStreetAddress;
+		$this->donorStreetAddress = trim( $donorStreetAddress );
 	}
 
 	public function getDonorPostalCode(): string {
@@ -217,7 +216,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorPostalCode( string $donorPostalCode ): void {
-		$this->donorPostalCode = $donorPostalCode;
+		$this->donorPostalCode = trim( $donorPostalCode );
 	}
 
 	public function getDonorCity(): string {
@@ -225,7 +224,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorCity( string $donorCity ): void {
-		$this->donorCity = $donorCity;
+		$this->donorCity = trim( $donorCity );
 	}
 
 	public function getDonorCountryCode(): string {
@@ -233,7 +232,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorCountryCode( string $donorCountryCode ): void {
-		$this->donorCountryCode = $donorCountryCode;
+		$this->donorCountryCode = trim( $donorCountryCode );
 	}
 
 	public function getDonorEmailAddress(): string {
@@ -241,7 +240,7 @@ class AddDonationRequest {
 	}
 
 	public function setDonorEmailAddress( string $donorEmailAddress ): void {
-		$this->donorEmailAddress = $donorEmailAddress;
+		$this->donorEmailAddress = trim( $donorEmailAddress );
 	}
 
 	public function donorIsAnonymous(): bool {
