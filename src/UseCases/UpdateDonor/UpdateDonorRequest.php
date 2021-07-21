@@ -40,61 +40,61 @@ class UpdateDonorRequest {
 
 	public function withFirstName( string $firstName ): self {
 		$request = clone $this;
-		$request->firstName = $firstName;
+		$request->firstName = trim( $firstName );
 		return $request;
 	}
 
 	public function withLastName( string $lastName ): self {
 		$request = clone $this;
-		$request->lastName = $lastName;
+		$request->lastName = trim( $lastName );
 		return $request;
 	}
 
 	public function withSalutation( string $salutation ): self {
 		$request = clone $this;
-		$request->salutation = $salutation;
+		$request->salutation = trim( $salutation );
 		return $request;
 	}
 
 	public function withTitle( string $title ): self {
 		$request = clone $this;
-		$request->title = $title;
+		$request->title = trim( $title );
 		return $request;
 	}
 
 	public function withCompanyName( string $companyName ): self {
 		$request = clone $this;
-		$request->companyName = $companyName;
+		$request->companyName = trim( $companyName );
 		return $request;
 	}
 
 	public function withStreetAddress( string $streetAddress ): self {
 		$request = clone $this;
-		$request->streetAddress = $streetAddress;
+		$request->streetAddress = trim( $streetAddress );
 		return $request;
 	}
 
 	public function withPostalCode( string $postalCode ): self {
 		$request = clone $this;
-		$request->postalCode = $postalCode;
+		$request->postalCode = trim( $postalCode );
 		return $request;
 	}
 
 	public function withCity( string $city ): self {
 		$request = clone $this;
-		$request->city = $city;
+		$request->city = trim( $city );
 		return $request;
 	}
 
 	public function withCountryCode( string $countryCode ): self {
 		$request = clone $this;
-		$request->countryCode = $countryCode;
+		$request->countryCode = trim( $countryCode );
 		return $request;
 	}
 
 	public function withEmailAddress( string $emailAddress ): self {
 		$request = clone $this;
-		$request->emailAddress = $emailAddress;
+		$request->emailAddress = trim( $emailAddress );
 		return $request;
 	}
 
