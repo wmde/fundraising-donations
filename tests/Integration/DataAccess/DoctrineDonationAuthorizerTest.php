@@ -18,7 +18,6 @@ use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizer
  *
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineDonationAuthorizerTest extends TestCase {
 	use Specify;
@@ -28,6 +27,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 	private const WRONG__UPDATE_TOKEN = 'WrongUpdateToken';
 	private const WRONG_ACCESS_TOKEN = 'WrongAccessToken';
 	private const MEANINGLESS_TOKEN = 'Some token';
+	private const EMPTY_TOKEN = '';
 	private const MEANINGLESS_DONATION_ID = 1337;
 	private const ID_OF_WRONG_DONATION = 42;
 
@@ -143,9 +143,25 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 	public function testGivenTokenAndLegacyDonation_accessAuthorizationFails(): void {
 		$donation = new Donation();
 		$this->storeDonation( $donation );
-		$authorizer = $this->newAuthorizationService( '', self::MEANINGLESS_TOKEN );
+		$authorizer = $this->newAuthorizationService( self::EMPTY_TOKEN, self::MEANINGLESS_TOKEN );
+
+		$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
+	}
+
+	public function testGivenEmptyTokenAndLegacyDonation_updateAuthorizationFails(): void {
+		$donation = new Donation();
+		$this->storeDonation( $donation );
+		$authorizer = $this->newAuthorizationService( self::EMPTY_TOKEN, self::EMPTY_TOKEN );
 
 		$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
+	}
+
+	public function testGivenEmptyTokenAndLegacyDonation_accessAuthorizationFails(): void {
+		$donation = new Donation();
+		$this->storeDonation( $donation );
+		$authorizer = $this->newAuthorizationService( self::EMPTY_TOKEN, self::EMPTY_TOKEN );
+
+		$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
 	}
 
 	/**

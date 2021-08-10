@@ -13,7 +13,6 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
 /**
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineDonationAuthorizer implements DonationAuthorizer {
 
@@ -51,6 +50,9 @@ class DoctrineDonationAuthorizer implements DonationAuthorizer {
 	}
 
 	private function updateTokenMatches( Donation $donation ): bool {
+		if ( $this->updateToken === '' ) {
+			return false;
+		}
 		return hash_equals(
 			(string)$donation->getDataObject()->getUpdateToken(),
 			$this->updateToken
@@ -85,6 +87,9 @@ class DoctrineDonationAuthorizer implements DonationAuthorizer {
 	}
 
 	private function accessTokenMatches( Donation $donation ): bool {
+		if ( $this->accessToken === '' ) {
+			return false;
+		}
 		return hash_equals(
 			(string)$donation->getDataObject()->getAccessToken(),
 			$this->accessToken
