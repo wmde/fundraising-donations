@@ -10,11 +10,10 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 
 /**
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class FixedDonationTokenFetcher implements DonationTokenFetcher {
 
-	private $tokens;
+	private DonationTokens $tokens;
 
 	public function __construct( DonationTokens $tokens ) {
 		$this->tokens = $tokens;
@@ -24,7 +23,6 @@ class FixedDonationTokenFetcher implements DonationTokenFetcher {
 	 * @param int $donationId
 	 *
 	 * @return DonationTokens
-	 * @throws DonationTokenFetchingException
 	 */
 	public function getTokens( int $donationId ): DonationTokens {
 		return $this->tokens;
