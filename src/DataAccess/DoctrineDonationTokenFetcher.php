@@ -9,14 +9,14 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetchingException;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
 /**
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DoctrineDonationTokenFetcher implements DonationTokenFetcher {
 
-	private $entityManager;
+	private EntityManager $entityManager;
 
 	public function __construct( EntityManager $entityManager ) {
 		$this->entityManager = $entityManager;
@@ -31,10 +31,18 @@ class DoctrineDonationTokenFetcher implements DonationTokenFetcher {
 	public function getTokens( int $donationId ): DonationTokens {
 		$donation = $this->getDonationById( $donationId );
 
-		return new DonationTokens(
-			$donation->getDataObject()->getAccessToken(),
-			$donation->getDataObject()->getUpdateToken()
-		);
+		if ( $donation === null ) {
+			throw new DonationTokenFetchingException( sprintf( 'Could not find donation with ID "%d"', $donationId ) );
+		}
+
+		try {
+			return new DonationTokens(
+				(string)$donation->getDataObject()->getAccessToken(),
+				(string)$donation->getDataObject()->getUpdateToken()
+			);
+		} catch ( \UnexpectedValueException $e ) {
+			throw new DonationTokenFetchingException( $e->getMessage(), $e );
+		}
 	}
 
 	private function getDonationById( int $donationId ): ?Donation {

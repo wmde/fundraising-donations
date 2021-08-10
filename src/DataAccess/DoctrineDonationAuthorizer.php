@@ -7,7 +7,6 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\DonationContext\Authorization\TokenSet;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
@@ -94,18 +93,5 @@ class DoctrineDonationAuthorizer implements DonationAuthorizer {
 			(string)$donation->getDataObject()->getAccessToken(),
 			$this->accessToken
 		);
-	}
-
-	public function getTokensForDonation( int $donationId ): TokenSet {
-		$doctrineDonation = $this->getDonationById( $donationId );
-		if ( $doctrineDonation === null ) {
-			throw new GetDonationException( null );
-		}
-		$updateToken = $doctrineDonation->getDataObject()->getUpdateToken();
-		$accessToken = $doctrineDonation->getDataObject()->getAccessToken();
-		if ( $updateToken === null || $accessToken === null ) {
-			throw new \UnexpectedValueException( sprintf( 'Update token / access token missing for donation %d', $donationId ) );
-		}
-		return new TokenSet( $updateToken, $accessToken );
 	}
 }
