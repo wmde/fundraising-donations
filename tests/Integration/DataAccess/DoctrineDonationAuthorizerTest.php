@@ -132,28 +132,20 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		return date( 'Y-m-d H:i:s', time() + 60 * 60 );
 	}
 
-	/**
-	 * @slowThreshold 400
-	 */
-	public function testWhenDonationWithoutTokenExists(): void {
+	public function testGivenTokenAndLegacyDonation_updateAuthorizationFails(): void {
 		$donation = new Donation();
 		$this->storeDonation( $donation );
+		$authorizer = $this->newAuthorizationService( self::MEANINGLESS_TOKEN );
 
-		$this->specify(
-			'given correct donation id and a token, update authorization fails',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( self::MEANINGLESS_TOKEN );
-				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
-			}
-		);
+		$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
+	}
 
-		$this->specify(
-			'given correct donation id and a token, access authorization fails',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( '', self::MEANINGLESS_TOKEN );
-				$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
-			}
-		);
+	public function testGivenTokenAndLegacyDonation_accessAuthorizationFails(): void {
+		$donation = new Donation();
+		$this->storeDonation( $donation );
+		$authorizer = $this->newAuthorizationService( '', self::MEANINGLESS_TOKEN );
+
+		$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 	}
 
 	/**
