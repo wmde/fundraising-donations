@@ -18,10 +18,10 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 class DoctrineDonationAuthorizer implements DonationAuthorizer {
 
 	private EntityManager $entityManager;
-	private ?string $updateToken;
-	private ?string $accessToken;
+	private string $updateToken;
+	private string $accessToken;
 
-	public function __construct( EntityManager $entityManager, string $updateToken = null, string $accessToken = null ) {
+	public function __construct( EntityManager $entityManager, string $updateToken = '', string $accessToken = '' ) {
 		$this->entityManager = $entityManager;
 		$this->updateToken = $updateToken;
 		$this->accessToken = $accessToken;
@@ -53,7 +53,7 @@ class DoctrineDonationAuthorizer implements DonationAuthorizer {
 	private function updateTokenMatches( Donation $donation ): bool {
 		return hash_equals(
 			(string)$donation->getDataObject()->getUpdateToken(),
-			(string)$this->updateToken
+			$this->updateToken
 		);
 	}
 
@@ -87,7 +87,7 @@ class DoctrineDonationAuthorizer implements DonationAuthorizer {
 	private function accessTokenMatches( Donation $donation ): bool {
 		return hash_equals(
 			(string)$donation->getDataObject()->getAccessToken(),
-			(string)$this->accessToken
+			$this->accessToken
 		);
 	}
 

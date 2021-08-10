@@ -15,7 +15,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
- * @covers WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizer
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizer
  *
  * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
@@ -37,7 +37,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$this->entityManager = TestEnvironment::newInstance()->getFactory()->getEntityManager();
 	}
 
-	private function newAuthorizationService( string $updateToken = null, string $accessToken = null ): DonationAuthorizer {
+	private function newAuthorizationService( string $updateToken = '', string $accessToken = '' ): DonationAuthorizer {
 		return new DoctrineDonationAuthorizer( $this->entityManager, $updateToken, $accessToken );
 	}
 
@@ -98,7 +98,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$this->specify(
 			'given correct donation id and wrong token, update authorization fails',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( self::WRONG__UPDATE_TOKEN, null );
+				$authorizer = $this->newAuthorizationService( self::WRONG__UPDATE_TOKEN );
 				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 			}
 		);
@@ -106,7 +106,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$this->specify(
 			'given correct donation id and correct token, access authorization succeeds',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( null, self::CORRECT_ACCESS_TOKEN );
+				$authorizer = $this->newAuthorizationService( '', self::CORRECT_ACCESS_TOKEN );
 				$this->assertTrue( $authorizer->canAccessDonation( $donation->getId() ) );
 			}
 		);
@@ -114,7 +114,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$this->specify(
 			'given wrong donation id and correct token, access authorization fails',
 			function (): void {
-				$authorizer = $this->newAuthorizationService( null, self::CORRECT_ACCESS_TOKEN );
+				$authorizer = $this->newAuthorizationService( '', self::CORRECT_ACCESS_TOKEN );
 				$this->assertFalse( $authorizer->canAccessDonation( self::ID_OF_WRONG_DONATION ) );
 			}
 		);
@@ -122,7 +122,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$this->specify(
 			'given correct donation id and wrong token, access authorization fails',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( null, self::WRONG_ACCESS_TOKEN );
+				$authorizer = $this->newAuthorizationService( '', self::WRONG_ACCESS_TOKEN );
 				$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
 			}
 		);
@@ -150,7 +150,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$this->specify(
 			'given correct donation id and a token, access authorization fails',
 			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( null, self::MEANINGLESS_TOKEN );
+				$authorizer = $this->newAuthorizationService( '', self::MEANINGLESS_TOKEN );
 				$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
 			}
 		);
@@ -242,7 +242,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$donation->setDataObject( $donationData );
 		$this->storeDonation( $donation );
 
-		$donAuthorizer = new DoctrineDonationAuthorizer( $this->entityManager );
+		$donAuthorizer = new DoctrineDonationAuthorizer( $this->entityManager, '', '' );
 		$resultTokenSet = $donAuthorizer->getTokensForDonation( $donation->getId() );
 
 		$this->assertSame( self::CORRECT_ACCESS_TOKEN, $resultTokenSet->getAccessToken() );
@@ -257,7 +257,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$mockEM = $this->createMock( EntityManager::class );
 		$mockEM->method( 'find' )->willReturn( $donation );
 
-		$donAuthorizer = new DoctrineDonationAuthorizer( $mockEM );
+		$donAuthorizer = new DoctrineDonationAuthorizer( $mockEM, '', '' );
 
 		$this->expectException( \UnexpectedValueException::class );
 		$donAuthorizer->getTokensForDonation( self::MEANINGLESS_DONATION_ID );
@@ -271,7 +271,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$mockEM = $this->createMock( EntityManager::class );
 		$mockEM->method( 'find' )->willReturn( $donation );
 
-		$donAuthorizer = new DoctrineDonationAuthorizer( $mockEM );
+		$donAuthorizer = new DoctrineDonationAuthorizer( $mockEM, '', '' );
 
 		$this->expectException( \UnexpectedValueException::class );
 		$donAuthorizer->getTokensForDonation( self::MEANINGLESS_DONATION_ID );
@@ -281,7 +281,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$mockEM = $this->createMock( EntityManager::class );
 		$mockEM->method( 'find' )->willReturn( null );
 
-		$donAuthorizer = new DoctrineDonationAuthorizer( $mockEM );
+		$donAuthorizer = new DoctrineDonationAuthorizer( $mockEM, '', '' );
 
 		$this->expectException( GetDonationException::class );
 		$donAuthorizer->getTokensForDonation( self::MEANINGLESS_DONATION_ID );
