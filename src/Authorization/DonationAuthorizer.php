@@ -37,11 +37,4 @@ interface DonationAuthorizer {
 	 */
 	public function canAccessDonation( int $donationId ): bool;
 
-	/**
-	 * @param int $donationId
-	 *
-	 * @return TokenSet
-	 */
-	public function getTokensForDonation( int $donationId ): TokenSet;
-
 }
