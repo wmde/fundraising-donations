@@ -6,20 +6,19 @@ namespace WMDE\Fundraising\DonationContext\Authorization;
 
 /**
  * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DonationTokens {
 
-	private $accessToken;
-	private $updateToken;
+	private string $accessToken;
+	private string $updateToken;
 
 	public function __construct( string $accessToken, string $updateToken ) {
 		if ( $accessToken === '' ) {
-			throw new \InvalidArgumentException( 'Access token cannot be empty' );
+			throw new \UnexpectedValueException( 'Access token cannot be empty' );
 		}
 
 		if ( $updateToken === '' ) {
-			throw new \InvalidArgumentException( 'Update token cannot be empty' );
+			throw new \UnexpectedValueException( 'Update token cannot be empty' );
 		}
 
 		$this->accessToken = $accessToken;
