@@ -7,7 +7,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
@@ -20,14 +19,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentWithoutAssociatedData;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
 
 /**

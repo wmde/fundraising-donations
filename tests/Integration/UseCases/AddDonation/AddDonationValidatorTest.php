@@ -10,7 +10,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidationResult;

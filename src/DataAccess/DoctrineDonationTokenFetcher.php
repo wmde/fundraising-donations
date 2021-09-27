@@ -9,7 +9,6 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetchingException;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
 /**
  * @license GPL-2.0-or-later

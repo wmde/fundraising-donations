@@ -7,7 +7,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\SofortPaym
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidSofortNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
