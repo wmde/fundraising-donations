@@ -5,7 +5,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyCommentRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyException;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;

@@ -4,8 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
-use Doctrine\ORM\Mapping as ORM;
-
 /**
  * This class keeps track of donations that a notification was sent to.
  *
