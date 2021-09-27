@@ -15,8 +15,6 @@ use Doctrine\ORM\Mapping as ORM;
  * The notification log is an implementation detail of the notification class, not part of the core domain.
  * Therefore, we only reference donations by their ID, not by any direct reference.
  *
- * @ORM\Table(name="donation_notification_log")
- * @ORM\Entity
  */
 class DonationNotificationLog {
 
@@ -25,9 +23,6 @@ class DonationNotificationLog {
 	 * because the notification log is not part of the core domain
 	 *
 	 * @var int
-	 *
-	 * @ORM\Id
-	 * @ORM\Column(name="donation_id", type="integer")
 	 */
 	private int $donationId;
 
