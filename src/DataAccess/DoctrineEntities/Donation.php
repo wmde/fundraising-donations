@@ -4,28 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
-use Doctrine\ORM\Mapping as ORM;
-use Gedmo\Mapping\Annotation as Gedmo;
 use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
 
-/**
- * @ORM\Table(
- *     name="spenden",
- *     indexes={
- *         @ORM\Index(name="d_email", columns={"email"}, flags={"fulltext"}),
- *         @ORM\Index(name="d_name", columns={"name"}, flags={"fulltext"}),
- *         @ORM\Index(name="d_ort", columns={"ort"}, flags={"fulltext"}),
- *         @ORM\Index(name="d_dt_new", columns={"dt_new", "is_public"}),
- *         @ORM\Index(name="d_zahlweise", columns={"zahlweise", "dt_new"}),
- *         @ORM\Index(name="d_dt_gruen", columns={"dt_gruen", "dt_del"}),
- *         @ORM\Index(name="d_ueb_code", columns={"ueb_code"}),
- *         @ORM\Index(name="d_dt_backup", columns={"dt_backup"}),
- *         @ORM\Index(name="d_status", columns={"status", "dt_new"}),
- *         @ORM\Index(name="d_comment_list", columns={"is_public", "dt_del"})
- *     }
- * )
- * @ORM\Entity
- */
 class Donation {
 
 	// direct debit
@@ -48,176 +28,53 @@ class Donation {
 	 */
 	public const STATUS_EXPORTED = 'E';
 
-	/**
-	 * @var int
-	 *
-	 * @ORM\Column(name="id", type="integer")
-	 * @ORM\Id
-	 * @ORM\GeneratedValue(strategy="IDENTITY")
-	 */
-	private $id;
+	private ?int $id = null;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="status", type="string", length=1, options={"default":"N", "fixed":true}, nullable=false)
-	 */
-	private $status = self::STATUS_NEW;
+	private string $status = self::STATUS_NEW;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="name", type="string", length=250, nullable=true)
-	 */
-	private $donorFullName;
+	private string $donorFullName;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="ort", type="string", length=250, nullable=true)
-	 */
-	private $donorCity;
+	private string $donorCity;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="email", type="string", length=250, nullable=true)
-	 */
-	private $donorEmail;
+	private string $donorEmail;
 
-	/**
-	 * @var bool
-	 *
-	 * @ORM\Column(name="info", type="boolean", options={"default":0}, nullable=false)
-	 */
-	private $donorOptsIntoNewsletter = false;
+	private bool $donorOptsIntoNewsletter = false;
 
-	/**
-	 * @var bool
-	 *
-	 * @ORM\Column(name="bescheinigung", type="boolean", nullable=true)
-	 */
-	private $donationReceipt;
+	private ?bool $donationReceipt = null;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="eintrag", type="string", length=250, options={"default":""}, nullable=false)
-	 */
-	private $publicRecord = '';
+	private string $publicRecord = '';
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="betrag", type="string", length=250, nullable=true)
-	 */
-	private $amount;
+	private string $amount;
 
-	/**
-	 * @var int
-	 *
-	 * @ORM\Column(name="periode", type="smallint", options={"default":0}, nullable=false)
-	 */
-	private $paymentIntervalInMonths = 0;
+	private int $paymentIntervalInMonths = 0;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="zahlweise", type="string", length=3, options={"default":"BEZ", "fixed":true}, nullable=false)
-	 */
-	private $paymentType = 'BEZ';
+	private string $paymentType = 'BEZ';
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="kommentar", type="text", options={"default":""}, nullable=false)
-	 */
-	private $comment = '';
+	private string $comment = '';
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="ueb_code", type="string", length=32, options={"default":""}, nullable=false)
-	 */
-	private $bankTransferCode = '';
+	private string $bankTransferCode = '';
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="data", type="text", nullable=true)
-	 */
-	private $data;
+	private ?string $data = null;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="source", type="string", length=250, nullable=true)
-	 */
-	private $source;
+	private ?string $source = null;
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="remote_addr", type="string", length=250, options={"default":""}, nullable=false)
-	 */
-	private $remoteAddr = '';
+	private string $remoteAddr = '';
 
-	/**
-	 * @var string
-	 *
-	 * @ORM\Column(name="hash", type="string", length=250, nullable=true)
-	 */
-	private $hash;
+	private string $hash;
 
-	/**
-	 * @var bool
-	 *
-	 * @ORM\Column(name="is_public", type="boolean", options={"default":0}, nullable=false)
-	 */
-	private $isPublic = false;
+	private bool $isPublic = false;
 
-	/**
-	 * @var \DateTime
-	 *
-	 * @Gedmo\Timestampable(on="create")
-	 * @ORM\Column(name="dt_new", type="datetime")
-	 */
-	private $creationTime;
+	private \DateTime $creationTime;
 
-	/**
-	 * @var \DateTime
-	 *
-	 * @ORM\Column(name="dt_del", type="datetime", nullable=true)
-	 */
-	private $deletionTime;
+	private ?\DateTime $deletionTime = null;
 
-	/**
-	 * @var \DateTime
-	 *
-	 * @ORM\Column(name="dt_exp", type="datetime", nullable=true)
-	 */
-	private $dtExp;
+	private ?\DateTime $dtExp = null;
 
-	/**
-	 * @var \DateTime
-	 *
-	 * @ORM\Column(name="dt_gruen", type="datetime", nullable=true)
-	 */
-	private $dtGruen;
+	private ?\DateTime $dtGruen = null;
 
-	/**
-	 * @var \DateTime
-	 *
-	 * @ORM\Column(name="dt_backup", type="datetime", nullable=true)
-	 */
-	private $dtBackup;
+	private ?\DateTime $dtBackup = null;
 
-	/**
-	 * @var DonationPayment
-	 *
-	 * @ORM\OneToOne(targetEntity="WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationPayment", cascade={"all"}, fetch="EAGER")
-	 */
-	private $payment;
+	private ?DonationPayment $payment = null;
 
 	public function setDonorFullName( string $donorFullName ): self {
 		$this->donorFullName = $donorFullName;
@@ -545,7 +402,7 @@ class Donation {
 	 * @return string Base 64 encoded, serialized PHP array
 	 */
 	public function getData(): string {
-		return $this->data;
+		return $this->data ?? base64_encode( serialize( [] ) );
 	}
 
 	/**

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd" xmlns:gedmo="http://gediminasm.org/schemas/orm/doctrine-extensions-mapping">
+  <entity name="WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation" table="spenden">
+    <indexes>
+      <index name="d_email" columns="email" flags="fulltext"/>
+      <index name="d_name" columns="name" flags="fulltext"/>
+      <index name="d_ort" columns="ort" flags="fulltext"/>
+      <index name="d_dt_new" columns="dt_new,is_public"/>
+      <index name="d_zahlweise" columns="zahlweise,dt_new"/>
+      <index name="d_dt_gruen" columns="dt_gruen,dt_del"/>
+      <index name="d_ueb_code" columns="ueb_code"/>
+      <index name="d_dt_backup" columns="dt_backup"/>
+      <index name="d_status" columns="status,dt_new"/>
+      <index name="d_comment_list" columns="is_public,dt_del"/>
+    </indexes>
+    <id name="id" type="integer" column="id">
+      <generator strategy="IDENTITY"/>
+    </id>
+    <field name="status" type="string" column="status" length="1" nullable="false">
+      <options>
+        <option name="default">N</option>
+        <option name="fixed">1</option>
+      </options>
+    </field>
+    <field name="donorFullName" type="string" column="name" length="250" nullable="true"/>
+    <field name="donorCity" type="string" column="ort" length="250" nullable="true"/>
+    <field name="donorEmail" type="string" column="email" length="250" nullable="true"/>
+    <field name="donorOptsIntoNewsletter" type="boolean" column="info" nullable="false">
+      <options>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="donationReceipt" type="boolean" column="bescheinigung" nullable="true"/>
+    <field name="publicRecord" type="string" column="eintrag" length="250" nullable="false">
+      <options>
+        <option name="default"/>
+      </options>
+    </field>
+    <field name="amount" type="string" column="betrag" length="250" nullable="true"/>
+    <field name="paymentIntervalInMonths" type="smallint" column="periode" nullable="false">
+      <options>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="paymentType" type="string" column="zahlweise" length="3" nullable="false">
+      <options>
+        <option name="default">BEZ</option>
+        <option name="fixed">1</option>
+      </options>
+    </field>
+    <field name="comment" type="text" column="kommentar" nullable="false">
+      <options>
+        <option name="default"/>
+      </options>
+    </field>
+    <field name="bankTransferCode" type="string" column="ueb_code" length="32" nullable="false">
+      <options>
+        <option name="default"/>
+      </options>
+    </field>
+    <field name="data" type="text" column="data" nullable="true"/>
+    <field name="source" type="string" column="source" length="250" nullable="true"/>
+    <field name="remoteAddr" type="string" column="remote_addr" length="250" nullable="false">
+      <options>
+        <option name="default"/>
+      </options>
+    </field>
+    <field name="hash" type="string" column="hash" length="250" nullable="true"/>
+    <field name="isPublic" type="boolean" column="is_public" nullable="false">
+      <options>
+        <option name="default">0</option>
+      </options>
+    </field>
+    <field name="creationTime" type="datetime" column="dt_new" nullable="false">
+      <gedmo:timestampable on="create"/>
+    </field>
+    <field name="deletionTime" type="datetime" column="dt_del" nullable="true"/>
+    <field name="dtExp" type="datetime" column="dt_exp" nullable="true"/>
+    <field name="dtGruen" type="datetime" column="dt_gruen" nullable="true"/>
+    <field name="dtBackup" type="datetime" column="dt_backup" nullable="true"/>
+    <one-to-one field="payment" target-entity="WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationPayment" fetch="EAGER">
+      <cascade>
+        <cascade-all/>
+      </cascade>
+      <join-columns>
+        <join-column name="payment_id" referenced-column-name="id"/>
+      </join-columns>
+    </one-to-one>
+  </entity>
+</doctrine-mapping>

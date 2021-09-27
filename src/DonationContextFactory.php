@@ -8,6 +8,7 @@ use DateInterval;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\ORM\Configuration;
+use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Gedmo\Timestampable\TimestampableListener;
 use WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator;
@@ -24,9 +25,7 @@ class DonationContextFactory {
 	 */
 	public const ENTITY_NAMESPACE = 'WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities';
 
-	private const ENTITY_PATHS = [
-		__DIR__ . '/DataAccess/DoctrineEntities/',
-	];
+	private const DOCTRINE_CLASS_MAPPING_DIRECTORY = __DIR__ . '/../config/DoctrineClassMapping';
 
 	protected array $config;
 	protected Configuration $doctrineConfiguration;
@@ -54,10 +53,7 @@ class DonationContextFactory {
 	}
 
 	public function newMappingDriver(): MappingDriver {
-		// We're only calling this for the side effect of adding Mapping/Driver/DoctrineAnnotations.php
-		// to the AnnotationRegistry. When AnnotationRegistry is deprecated with Doctrine Annotations 2.0,
-		// use $this->>annotationReader instead
-		return $this->doctrineConfiguration->newDefaultAnnotationDriver( self::ENTITY_PATHS, false );
+		return new XmlDriver( self::DOCTRINE_CLASS_MAPPING_DIRECTORY );
 	}
 
 	private function newTimestampableListener(): TimestampableListener {
