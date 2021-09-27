@@ -4,10 +4,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess;
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
-use WMDE\Fundraising\DonationContext\Domain\Model\Address;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 

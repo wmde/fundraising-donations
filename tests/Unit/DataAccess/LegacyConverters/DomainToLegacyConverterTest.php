@@ -13,7 +13,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Tests\Data\InvalidPaymentMethod;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter

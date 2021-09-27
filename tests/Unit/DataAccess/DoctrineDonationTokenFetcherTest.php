@@ -6,11 +6,8 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess;
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetchingException;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationTokenFetcher
