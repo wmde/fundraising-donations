@@ -385,27 +385,6 @@ class Donation {
 	}
 
 	/**
-	 * @deprecated Use @see getDecodedData or @see getDataObject instead
-	 *
-	 * @param string $data Base 64 encoded, serialized PHP array
-	 * @return self
-	 */
-	public function setData( string $data ): self {
-		$this->data = $data;
-
-		return $this;
-	}
-
-	/**
-	 * @deprecated @see getDecodedData or @see getDataObject instead
-	 *
-	 * @return string Base 64 encoded, serialized PHP array
-	 */
-	public function getData(): string {
-		return $this->data ?? base64_encode( serialize( [] ) );
-	}
-
-	/**
 	 * NOTE: if possible, use @see getDataObject instead, as it provides a nicer API.
 	 *
 	 * @return array
