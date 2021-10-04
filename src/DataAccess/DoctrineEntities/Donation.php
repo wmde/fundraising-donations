@@ -366,9 +366,6 @@ class Donation {
 
 		if ( $mode === null ) {
 			$mode = $this->publicRecord;
-			if ( !is_int( $mode ) ) {
-				return $this->publicRecord;
-			}
 		}
 
 		if ( $mode == 1 || $mode == 2 ) {

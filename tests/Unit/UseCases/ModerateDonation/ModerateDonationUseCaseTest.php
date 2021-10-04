@@ -7,7 +7,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ModerateDonation;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
@@ -27,7 +26,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 
 	private const AUTH_USER_NAME = "coolAdmin";
 
-	private DonationEventLogger $donationLogger;
+	private DonationEventLoggerSpy $donationLogger;
 
 	/**
 	 * @var MockObject&DonationConfirmationNotifier

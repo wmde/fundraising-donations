@@ -1,29 +1,5 @@
 parameters:
 	ignoreErrors:
-		-
-			message: "#^Strict comparison using \\=\\=\\= between WMDE\\\\Fundraising\\\\DonationContext\\\\DataAccess\\\\DoctrineEntities\\\\Donation and null will always evaluate to false\\.$#"
-			count: 1
-			path: src/DataAccess/DoctrineDonationEventLogger.php
-
-		-
-			message: "#^Call to function is_int\\(\\) with string will always evaluate to false\\.$#"
-			count: 1
-			path: src/DataAccess/DoctrineEntities/Donation.php
-
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\DataAccess\\\\DoctrineEntities\\\\DonationPayment\\:\\:setConfirmedAt\\(\\)\\.$#"
-			count: 1
-			path: src/DataAccess/LegacyConverters/DomainToLegacyConverter.php
-
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\PaymentContext\\\\Domain\\\\Model\\\\PaymentMethod\\:\\:setConfirmedAt\\(\\)\\.$#"
-			count: 1
-			path: tests/Integration/DataAccess/DoctrineDonationRepositoryTest.php
-
-		-
-			message: "#^PHPDoc tag @var has invalid value \\(\\$sofortPayment SofortPayment\\)\\: Unexpected token \"\\$sofortPayment\", expected type at offset 14$#"
-			count: 1
-			path: tests/Integration/DataAccess/DoctrineDonationRepositoryTest.php
 
 		-
 			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\DonationConfirmationNotifier\\:\\:expects\\(\\)\\.$#"
@@ -76,36 +52,6 @@ parameters:
 			path: tests/Integration/UseCases/HandlePayPalPaymentNotification/HandlePayPalPaymentCompletionNotificationUseCaseTest.php
 
 		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Event\\:\\:getDonationId\\(\\)\\.$#"
-			count: 1
-			path: tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
-
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Event\\:\\:getNewDonor\\(\\)\\.$#"
-			count: 3
-			path: tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
-
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Event\\:\\:getPreviousDonor\\(\\)\\.$#"
-			count: 2
-			path: tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
-
-		-
-			message: "#^PHPDoc tag @var has invalid value \\(\\$events DonorUpdatedEvent\\[\\]\\)\\: Unexpected token \"\\$events\", expected type at offset 9$#"
-			count: 1
-			path: tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$classes of method Doctrine\\\\ORM\\\\Tools\\\\SchemaTool\\:\\:createSchema\\(\\) expects array\\<int, Doctrine\\\\ORM\\\\Mapping\\\\ClassMetadata\\>, array\\<Doctrine\\\\Persistence\\\\Mapping\\\\ClassMetadata\\> given\\.$#"
-			count: 1
-			path: tests/SchemaCreator.php
-
-		-
-			message: "#^Parameter \\#1 \\$classes of method Doctrine\\\\ORM\\\\Tools\\\\SchemaTool\\:\\:dropSchema\\(\\) expects array\\<int, Doctrine\\\\ORM\\\\Mapping\\\\ClassMetadata\\>, array\\<Doctrine\\\\Persistence\\\\Mapping\\\\ClassMetadata\\> given\\.$#"
-			count: 1
-			path: tests/SchemaCreator.php
-
-		-
 			message: "#^Parameter \\#2 \\$address of class WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donor\\\\PersonDonor constructor expects WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donor\\\\Address\\\\PostalAddress, WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Address given\\.$#"
 			count: 1
 			path: tests/Unit/DataAccess/DonorFieldMapperTest.php
@@ -115,8 +61,4 @@ parameters:
 			count: 1
 			path: tests/Unit/DataAccess/LegacyConverters/DomainToLegacyConverterTest.php
 
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Infrastructure\\\\DonationEventLogger\\:\\:getLogCalls\\(\\)\\.$#"
-			count: 6
-			path: tests/Unit/UseCases/ModerateDonation/ModerateDonationUseCaseTest.php
 

@@ -16,6 +16,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\SofortTransactionData;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
@@ -110,10 +111,10 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$paymentId = $this->getDoctrineDonationById( $donation->getId() )->getPayment()->getId();
 
 		/**
-		 * @var $sofortPayment SofortPayment
+		 * @var SofortPayment $sofortPayment
 		 */
 		$sofortPayment = $donation->getPayment()->getPaymentMethod();
-		$sofortPayment->setConfirmedAt( new \DateTime( '2017-08-03T12:44:42' ) );
+		$sofortPayment->bookPayment( new SofortTransactionData( new \DateTimeImmutable( '2017-08-03T12:44:42' ) ) );
 
 		$repository->storeDonation( $donation );
 

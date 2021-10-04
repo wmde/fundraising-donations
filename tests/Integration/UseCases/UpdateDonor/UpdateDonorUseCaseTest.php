@@ -178,7 +178,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 		$useCase->updateDonor( $updateDonorRequest );
 
-		/** @var $events DonorUpdatedEvent[] */
+		/** @var DonorUpdatedEvent[] $events */
 		$events = $eventEmitter->getEvents();
 
 		$this->assertCount( 1, $events, 'Only 1 event should be emitted' );
