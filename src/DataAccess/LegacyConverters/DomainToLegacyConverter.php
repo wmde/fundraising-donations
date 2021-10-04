@@ -116,6 +116,7 @@ class DomainToLegacyConverter {
 	}
 
 	private function updateSofortPaymentInformation( DoctrineDonation $doctrineDonation, SofortPayment $paymentMethod ): void {
+		/** @var ?DoctrineSofortPayment $doctrineSofortPayment */
 		$doctrineSofortPayment = $doctrineDonation->getPayment();
 
 		if ( $doctrineSofortPayment === null ) {
