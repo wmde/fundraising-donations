@@ -27,7 +27,7 @@ class DatabaseNotificationLog implements NotificationLog {
 			->where( 'donation_id = :donation_id' )
 			->setParameter( 'donation_id', $donationId, Types::INTEGER );
 		$result = $connection->executeQuery( $qb->getSQL(), $qb->getParameters(), $qb->getParameterTypes() );
-		return intval( $result->fetchColumn() ) > 0;
+		return intval( $result->fetchOne() ) > 0;
 	}
 
 	public function logConfirmationSent( int $donationId ): void {
