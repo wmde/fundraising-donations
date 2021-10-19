@@ -36,7 +36,7 @@ class Donation {
 
 	private string $donorCity;
 
-	private string $donorEmail;
+	private ?string $donorEmail = null;
 
 	private bool $donorOptsIntoNewsletter = false;
 
