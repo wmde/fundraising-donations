@@ -32,9 +32,9 @@ class Donation {
 
 	private string $status = self::STATUS_NEW;
 
-	private string $donorFullName;
+	private ?string $donorFullName = null;
 
-	private string $donorCity;
+	private ?string $donorCity = null;
 
 	private ?string $donorEmail = null;
 
@@ -44,7 +44,7 @@ class Donation {
 
 	private string $publicRecord = '';
 
-	private string $amount;
+	private ?string $amount = null;
 
 	private int $paymentIntervalInMonths = 0;
 
@@ -92,7 +92,7 @@ class Donation {
 		return $this;
 	}
 
-	public function getDonorCity(): string {
+	public function getDonorCity(): ?string {
 		return $this->donorCity;
 	}
 
@@ -165,7 +165,7 @@ class Donation {
 	}
 
 	public function getAmount(): string {
-		return $this->amount;
+		return $this->amount ?? '0';
 	}
 
 	public function setPaymentIntervalInMonths( int $paymentIntervalInMonths ): self {
@@ -369,7 +369,7 @@ class Donation {
 		}
 
 		if ( $mode == 1 || $mode == 2 ) {
-			$eintrag = $this->donorFullName;
+			$eintrag = $this->donorFullName ?? '';
 		} else {
 			$eintrag = 'anonym';
 		}
