@@ -44,15 +44,6 @@ class AddDonationUseCaseTest extends TestCase {
 	private const UPDATE_TOKEN = 'a very nice token';
 	private const ACCESS_TOKEN = 'kindly allow me access';
 
-	/**
-	 * @var \DateTime
-	 */
-	private $oneHourInTheFuture;
-
-	public function setUp(): void {
-		$this->oneHourInTheFuture = ( new \DateTime() )->add( $this->newOneHourInterval() );
-	}
-
 	public function testWhenValidationSucceeds_successResponseIsCreated(): void {
 		$useCase = $this->newValidationSucceedingUseCase();
 
@@ -128,10 +119,6 @@ class AddDonationUseCaseTest extends TestCase {
 				self::UPDATE_TOKEN
 			)
 		);
-	}
-
-	private function newOneHourInterval(): \DateInterval {
-		return new \DateInterval( 'PT1H' );
 	}
 
 	private function newRepository(): DonationRepository {

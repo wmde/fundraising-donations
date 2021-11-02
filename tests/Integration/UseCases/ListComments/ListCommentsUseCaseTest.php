@@ -126,7 +126,7 @@ class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {
 	 * @dataProvider invalidLimitProvider
 	 */
 	public function testGivenInvalidLimit_10resultsAreReturned( int $invalidLimit ): void {
-		$useCase = new ListCommentsUseCase( $this->newInMemoryCommentFinderWithComments( 20 ) );
+		$useCase = new ListCommentsUseCase( $this->newInMemoryCommentFinderWithComments() );
 
 		$commentList = $useCase->listComments(
 			new CommentListingRequest(
@@ -138,22 +138,12 @@ class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {
 		$this->assertCount( 10, $commentList->toArray() );
 	}
 
-	private function newInMemoryCommentFinderWithComments( int $commentCount ): InMemoryCommentFinder {
-		return new InMemoryCommentFinder(
-			...new \LimitIterator(
-				$this->newInfiniteCommentIterator(),
-				0,
-				$commentCount
-			)
-		);
-	}
-
-	private function newInfiniteCommentIterator(): \Iterator {
-		$commentNumber = 0;
-
-		while ( true ) {
-			yield $this->newCommentWithAuthorName( 'name' . $commentNumber++ );
+	private function newInMemoryCommentFinderWithComments(): InMemoryCommentFinder {
+		$comments = [];
+		for ( $i = 0; $i < 20; $i++ ) {
+			$comments[] = $this->newCommentWithAuthorName( "name $i" );
 		}
+		return new InMemoryCommentFinder( ...$comments );
 	}
 
 	public function invalidLimitProvider(): array {
