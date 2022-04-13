@@ -6,6 +6,8 @@ namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
 /**
  * Abstract base class for DonationPayment subclasses
+ *
+ * @deprecated Use Payment class from payment domain instead
  */
 abstract class DonationPayment {
 

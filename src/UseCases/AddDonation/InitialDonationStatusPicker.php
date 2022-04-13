@@ -5,17 +5,17 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
 
 class InitialDonationStatusPicker {
 
-	public function __invoke( string $paymentType ): string {
-		if ( $paymentType === PaymentMethod::DIRECT_DEBIT ) {
-			return Donation::STATUS_NEW;
-		} elseif ( $paymentType === PaymentMethod::BANK_TRANSFER ) {
-			return Donation::STATUS_PROMISE;
-		}
-
-		return Donation::STATUS_EXTERNAL_INCOMPLETE;
+	public function __invoke( Payment $payment ): string {
+		return match( true ) {
+			$payment instanceof DirectDebitPayment => Donation::STATUS_NEW,
+			$payment instanceof BankTransferPayment => Donation::STATUS_PROMISE,
+			default => Donation::STATUS_EXTERNAL_INCOMPLETE
+		};
 	}
 }

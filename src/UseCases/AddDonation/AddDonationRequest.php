@@ -6,7 +6,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
 
 /**
  * @license GPL-2.0-or-later
@@ -36,7 +35,8 @@ class AddDonationRequest {
 	private string $paymentType = '';
 	private int $interval = 0;
 
-	private ?BankData $bankData;
+	private string $iban = '';
+	private string $bic = '';
 
 	private string $tracking = '';
 	private int $totalImpressionCount = 0;
@@ -79,10 +79,12 @@ class AddDonationRequest {
 	}
 
 	public function getAmount(): Euro {
+		trigger_error( "Amount in request should be integer (euro-cents)", E_USER_WARNING );
 		return $this->amount;
 	}
 
 	public function setAmount( Euro $amount ): void {
+		trigger_error( "Amount in request should be integer (euro-cents)", E_USER_WARNING );
 		$this->amount = $amount;
 	}
 
@@ -102,12 +104,26 @@ class AddDonationRequest {
 		$this->interval = $interval;
 	}
 
-	public function getBankData(): ?BankData {
-		return $this->bankData;
+	/**
+	 * @return string
+	 */
+	public function getIban(): string {
+		return $this->iban;
 	}
 
-	public function setBankData( BankData $bankData ): void {
-		$this->bankData = $bankData;
+	/**
+	 * @param string $iban
+	 */
+	public function setIban( string $iban ): void {
+		$this->iban = $iban;
+	}
+
+	public function getBic(): string {
+		return $this->bic;
+	}
+
+	public function setBic( string $bic ): void {
+		$this->bic = $bic;
 	}
 
 	public function getTracking(): string {
