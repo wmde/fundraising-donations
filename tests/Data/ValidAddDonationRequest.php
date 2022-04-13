@@ -7,23 +7,18 @@ namespace WMDE\Fundraising\DonationContext\Tests\Data;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
-use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentTypes;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class ValidAddDonationRequest {
 
 	public static function getRequest(): AddDonationRequest {
 		$request = new AddDonationRequest();
 		$request->setAmount( Euro::newFromInt( 5 ) );
-		$request->setBankData( self::newValidBankData() );
+		$request->setIban( ValidDonation::PAYMENT_IBAN );
+		$request->setBic( ValidDonation::PAYMENT_BIC );
 		$request->setInterval( ValidDonation::PAYMENT_INTERVAL_IN_MONTHS );
 		$request->setOptIn( (string)ValidDonation::OPTS_INTO_NEWSLETTER );
-		$request->setPaymentType( PaymentMethod::DIRECT_DEBIT );
+		$request->setPaymentType( PaymentTypes::DirectDebit->value );
 
 		$request->setDonorType( DonorType::PERSON() );
 		$request->setDonorSalutation( ValidDonation::DONOR_SALUTATION );
@@ -38,17 +33,5 @@ class ValidAddDonationRequest {
 		$request->setDonorEmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS );
 
 		return $request;
-	}
-
-	private static function newValidBankData(): BankData {
-		$bankData = new BankData();
-
-		$bankData->setAccount( ValidDonation::PAYMENT_BANK_ACCOUNT );
-		$bankData->setBankCode( ValidDonation::PAYMENT_BANK_CODE );
-		$bankData->setBankName( ValidDonation::PAYMENT_BANK_NAME );
-		$bankData->setBic( ValidDonation::PAYMENT_BIC );
-		$bankData->setIban( new Iban( ValidDonation::PAYMENT_IBAN ) );
-
-		return $bankData->freeze()->assertNoNullFields();
 	}
 }

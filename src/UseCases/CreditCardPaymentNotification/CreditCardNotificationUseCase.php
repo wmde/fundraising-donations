@@ -12,9 +12,6 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
-use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardService;
 
 /**
  * @license GPL-2.0-or-later
@@ -24,16 +21,14 @@ class CreditCardNotificationUseCase {
 
 	private DonationRepository $repository;
 	private DonationAuthorizer $authorizationService;
-	private CreditCardService $creditCardService;
 	private DonationConfirmationNotifier $notifier;
 	private DonationEventLogger $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-		CreditCardService $creditCardService, DonationConfirmationNotifier $notifier,
+		DonationConfirmationNotifier $notifier,
 		DonationEventLogger $donationEventLogger ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
-		$this->creditCardService = $creditCardService;
 		$this->notifier = $notifier;
 		$this->donationEventLogger = $donationEventLogger;
 	}
@@ -50,13 +45,15 @@ class CreditCardNotificationUseCase {
 			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::DONATION_NOT_FOUND );
 		}
 
-		if ( $donation->getPaymentMethodId() !== PaymentMethod::CREDIT_CARD ) {
-			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::PAYMENT_TYPE_MISMATCH );
-		}
-
-		if ( !$donation->getAmount()->equals( $request->getAmount() ) ) {
-			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::AMOUNT_MISMATCH );
-		}
+		/**
+		 * if ( $donation->getPaymentMethodId() !== PaymentMethod::CREDIT_CARD ) {
+		 * return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::PAYMENT_TYPE_MISMATCH );
+		 * }
+		 *
+		 * if ( !$donation->getAmount()->equals( $request->getAmount() ) ) {
+		 * return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::AMOUNT_MISMATCH );
+		 * }
+		 */
 
 		if ( !$this->authorizationService->systemCanModifyDonation( $request->getDonationId() ) ) {
 			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::AUTHORIZATION_FAILED );
@@ -87,7 +84,8 @@ class CreditCardNotificationUseCase {
 		return CreditCardNotificationResponse::newSuccessResponse( null );
 	}
 
-	private function newCreditCardDataFromRequest( CreditCardPaymentNotificationRequest $request ): CreditCardTransactionData {
+	private function newCreditCardDataFromRequest( CreditCardPaymentNotificationRequest $request ): array {
+		/*
 		return ( new CreditCardTransactionData() )
 			->setTransactionId( $request->getTransactionId() )
 			->setTransactionStatus( 'processed' )
@@ -100,6 +98,7 @@ class CreditCardNotificationUseCase {
 			->setTitle( $request->getTitle() )
 			->setCountryCode( $request->getCountry() )
 			->setCurrencyCode( $request->getCurrency() );
+		*/
+		return [];
 	}
-
 }
