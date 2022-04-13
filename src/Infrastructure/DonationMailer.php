@@ -8,6 +8,7 @@ use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
+use WMDE\Fundraising\DonationContext\RefactoringException;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
@@ -35,6 +36,7 @@ class DonationMailer implements DonationNotifier {
 	}
 
 	private function getTemplateArguments( Donation $donation ): array {
+		throw new RefactoringException( 'TODO: Use getpayment use case' );
 		return [
 			'recipient' => $donation->getDonor()->getName()->toArray(),
 			'donation' => [

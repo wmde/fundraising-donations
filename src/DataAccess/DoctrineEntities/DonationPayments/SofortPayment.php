@@ -7,6 +7,9 @@ namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationP
 use DateTime;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationPayment;
 
+/**
+ * @deprecated Use Payment class from payment domain instead
+ */
 class SofortPayment extends DonationPayment {
 
 	private $confirmedAt;

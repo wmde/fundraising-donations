@@ -5,33 +5,35 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\EntityRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
-use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentReferenceCode;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentReferenceCodeGenerator;
 
 /**
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
+ * @deprecated Transfer code generator now in payment domain
  */
-class UniqueTransferCodeGenerator implements TransferCodeGenerator {
+class UniqueTransferCodeGenerator implements PaymentReferenceCodeGenerator {
 
-	private $generator;
-	private $entityRepository;
+	private PaymentReferenceCodeGenerator $generator;
+	private EntityRepository $entityRepository;
 
-	public function __construct( TransferCodeGenerator $generator, EntityManager $entityManager ) {
+	public function __construct( PaymentReferenceCodeGenerator $generator, EntityManager $entityManager ) {
 		$this->generator = $generator;
+		// TODO No longer a valid dependency, pass in the db connection instead
 		$this->entityRepository = $entityManager->getRepository( Donation::class );
 	}
 
-	public function generateTransferCode( string $prefix ): string {
+	public function newPaymentReference( string $prefix ): PaymentReferenceCode {
 		do {
-			$transferCode = $this->generator->generateTransferCode( $prefix );
+			$transferCode = $this->generator->newPaymentReference( $prefix );
 		} while ( $this->codeIsNotUnique( $transferCode ) );
 
 		return $transferCode;
 	}
 
-	private function codeIsNotUnique( string $transferCode ): bool {
+	private function codeIsNotUnique( PaymentReferenceCode $transferCode ): bool {
+		// TODO This will no longer work - use a SQL UNION statement instead of repo, code must be unique across payments
 		return !empty( $this->entityRepository->findBy( [ 'bankTransferCode' => $transferCode ] ) );
 	}
 

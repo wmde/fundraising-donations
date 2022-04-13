@@ -4,29 +4,13 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification;
 
-use DomainException;
-use Exception;
-use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
-use WMDE\Fundraising\PaymentContext\RequestModel\PayPalPaymentNotificationRequest;
-use WMDE\Fundraising\PaymentContext\ResponseModel\PaypalNotificationResponse;
+use WMDE\Fundraising\DonationContext\UseCases\NotificationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\NotificationResponse;
 
-/**
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class HandlePayPalPaymentCompletionNotificationUseCase {
 
 	private DonationRepository $repository;
@@ -42,7 +26,10 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		$this->donationEventLogger = $donationEventLogger;
 	}
 
-	public function handleNotification( PayPalPaymentNotificationRequest $request ): PaypalNotificationResponse {
+	public function handleNotification( NotificationRequest $request ): NotificationResponse {
+		// TODO Consolidate booking use cases
+		return new NotificationResponse();
+		/*
 		try {
 			$donation = $this->repository->getDonationById( $request->getInternalId() );
 		}
@@ -55,8 +42,10 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 		}
 
 		return $this->handleRequestForDonation( $request, $donation );
+		*/
 	}
 
+	/*
 	private function handleRequestWithoutDonation( PayPalPaymentNotificationRequest $request ): PaypalNotificationResponse {
 		$donation = $this->newDonationFromRequest( $request );
 
@@ -165,6 +154,7 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			return $this->createErrorResponse( $ex );
 		}
 		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $paymentMethod */
+	/*
 		$paymentMethod = $payment->getPaymentMethod();
 		$paymentMethod->getPayPalData()->addChildPayment( $request->getTransactionId(), $childDonation->getId() );
 		try {
@@ -204,35 +194,35 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 			DonationTrackingInfo::newBlankTrackingInfo()->freeze()->assertNoNullFields()
 		);
 	}
+*/
+//	/**
+//	 * @todo Move this check to the payment domain use case, see https://phabricator.wikimedia.org/T192323
+//	 *
+//	 * @param Donation $donation
+//	 * @param string $transactionId
+//	 *
+//	 * @return bool
+//	 */
+//	private function donationWasBookedWithSameTransactionId( Donation $donation, string $transactionId ): bool {
+//		/**
+//		 * @var PayPalPayment $payment
+//		 */
+//		$payment = $donation->getPaymentMethod();
+//
+//		if ( $payment->getPayPalData()->getPaymentId() === $transactionId ) {
+//			return true;
+//		}
+//
+//		return $payment->getPayPalData()->hasChildPayment( $transactionId );
+//	}
 
-	/**
-	 * @todo Move this check to the payment domain use case, see https://phabricator.wikimedia.org/T192323
-	 *
-	 * @param Donation $donation
-	 * @param string $transactionId
-	 *
-	 * @return bool
-	 */
-	private function donationWasBookedWithSameTransactionId( Donation $donation, string $transactionId ): bool {
-		/**
-		 * @var PayPalPayment $payment
-		 */
-		$payment = $donation->getPaymentMethod();
-
-		if ( $payment->getPayPalData()->getPaymentId() === $transactionId ) {
-			return true;
-		}
-
-		return $payment->getPayPalData()->hasChildPayment( $transactionId );
-	}
-
-	private function createErrorResponse( Exception $ex ): PaypalNotificationResponse {
-		return PaypalNotificationResponse::newFailureResponse(
-			[
-				'message' => $ex->getMessage(),
-				'stackTrace' => $ex->getTraceAsString()
-			]
-		);
-	}
+//	private function createErrorResponse( Exception $ex ): PaypalNotificationResponse {
+//		return PaypalNotificationResponse::newFailureResponse(
+//			[
+//				'message' => $ex->getMessage(),
+//				'stackTrace' => $ex->getTraceAsString()
+//			]
+//		);
+//	}
 
 }

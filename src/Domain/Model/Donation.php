@@ -4,13 +4,13 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Domain\Model;
 
-use DomainException;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\RefactoringException;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BookablePayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentTransactionData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\CancellablePayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
 
 /**
  * @license GPL-2.0-or-later
@@ -41,7 +41,12 @@ class Donation {
 	private ?int $id;
 	private string $status;
 	private Donor $donor;
-	private DonationPayment $payment;
+	/**
+	 * @var Payment
+	 * @deprecated Use payment ID instead
+	 */
+	private Payment $payment;
+	private int $paymentId;
 	private bool $optsIntoNewsletter;
 	private ?DonationComment $comment;
 	private bool $exported;
@@ -67,14 +72,14 @@ class Donation {
 	 * @param int|null $id
 	 * @param string $status Must be one of the Donation::STATUS_ constants. Will be deprecated, see https://phabricator.wikimedia.org/T276817
 	 * @param Donor $donor
-	 * @param DonationPayment $payment
+	 * @param Payment $payment TODO Deprecated, Pass paymentId instead
 	 * @param bool $optsIntoNewsletter
 	 * @param DonationTrackingInfo $trackingInfo
 	 * @param DonationComment|null $comment
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( ?int $id, string $status, Donor $donor, DonationPayment $payment,
+	public function __construct( ?int $id, string $status, Donor $donor, Payment $payment,
 		bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 		$this->id = $id;
 		$this->setStatus( $status );
@@ -86,6 +91,7 @@ class Donation {
 		$this->exported = false;
 		$this->optsIntoDonationReceipt = null;
 		$this->cancelled = false;
+		$this->paymentId = $payment->getId();
 		$this->moderationReasons = [];
 	}
 
@@ -144,12 +150,22 @@ class Donation {
 		return $this->payment->getAmount();
 	}
 
+	/**
+	 * @deprecated
+	 *
+	 * @return int
+	 */
 	public function getPaymentIntervalInMonths(): int {
-		return $this->payment->getIntervalInMonths();
+		throw new RefactoringException( 'You shall not ask donations for payment intervals!' );
 	}
 
+	/**
+	 * @deprecated
+	 *
+	 * @return string
+	 */
 	public function getPaymentMethodId(): string {
-		return $this->getPaymentMethod()->getId();
+		throw new RefactoringException( 'You shall not ask donations for payment method IDs!' );
 	}
 
 	public function getDonor(): Donor {
@@ -172,12 +188,18 @@ class Donation {
 		$this->comment = $comment;
 	}
 
-	public function getPayment(): DonationPayment {
+	/**
+	 * @deprecated Donation code should not interact with the payment entity,
+	 *      this is here for BC compatibility and should be gone at the end of the payment integration refactoring
+	 *
+	 * @return Payment
+	 */
+	public function getPayment(): Payment {
 		return $this->payment;
 	}
 
-	public function getPaymentMethod(): PaymentMethod {
-		return $this->payment->getPaymentMethod();
+	public function getPaymentMethod(): string {
+		throw new RefactoringException( 'You shall not ask donations for payment methods!' );
 	}
 
 	public function getOptsIntoNewsletter(): bool {
@@ -186,7 +208,7 @@ class Donation {
 
 	public function cancel(): void {
 		if ( !$this->isCancellable() ) {
-			throw new RuntimeException( 'Can only cancel un-exported donations with nom-external payment providers' );
+			throw new RuntimeException( 'Can only cancel un-exported donations with non-external payment providers' );
 		}
 		$this->cancelled = true;
 	}
@@ -195,26 +217,13 @@ class Donation {
 		$this->cancelled = false;
 	}
 
-	/**
-	 * @param PaymentTransactionData $paymentTransactionData
-	 *
-	 * @throws DomainException
-	 */
-	public function confirmBooked( PaymentTransactionData $paymentTransactionData ): void {
-		$paymentMethod = $this->getPaymentMethod();
-		if ( !( $paymentMethod instanceof BookablePayment ) ) {
-			throw new DomainException( 'Only bookable payments can be confirmed as booked' );
-		}
-
-		if ( $this->isBooked() ) {
-			throw new DomainException( 'Only un-booked donations can be confirmed as booked' );
-		}
+	public function confirmBooked( array $paymentTransactionData ): void {
+		// phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable
+		throw new RefactoringException( 'TODO: your use case should call the payment booking with transaction data, this method is just for followup data changes' );
 
 		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
 			$this->makeCommentPrivate();
 		}
-
-		$paymentMethod->bookPayment( $paymentTransactionData );
 	}
 
 	private function makeCommentPrivate(): void {
@@ -254,18 +263,22 @@ class Donation {
 		return $this->trackingInfo;
 	}
 
+	/**
+	 * @deprecated The donation should not know anything about the payment. Instead, try to cancel the payment, then cancel the donation.
+	 *
+	 * @return bool
+	 */
 	private function isCancellable(): bool {
-		if ( $this->getPaymentMethod()->hasExternalProvider() ) {
-			return false;
-		}
-		if ( $this->isExported() ) {
-			return false;
-		}
-		return true;
+		return ( $this->payment instanceof CancellablePayment ) && $this->payment->isCancellable();
 	}
 
-	public function hasExternalPayment(): bool {
-		return $this->getPaymentMethod()->hasExternalProvider();
+	/**
+	 * @deprecated The donation should not know anything about the payment.
+	 *
+	 * @return bool
+	 */
+	public function hasBookablePayment(): bool {
+		return $this->payment instanceof BookablePayment;
 	}
 
 	public function isMarkedForModeration(): bool {
@@ -273,7 +286,7 @@ class Donation {
 	}
 
 	public function isBooked(): bool {
-		return $this->getPaymentMethod()->paymentCompleted();
+		throw new RefactoringException( 'You shall not ask donations for payment booking state! Or at least check if this method is really needed' );
 	}
 
 	public function isExported(): bool {
