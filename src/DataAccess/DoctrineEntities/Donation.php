@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
+use WMDE\Fundraising\DonationContext\RefactoringException;
 
 class Donation {
 
@@ -344,12 +345,23 @@ class Donation {
 		return $this->id;
 	}
 
+	/**
+	 * @deprecated Should be just payment id
+	 * @return DonationPayment|null
+	 */
 	public function getPayment(): ?DonationPayment {
+		// phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable
+		throw new RefactoringException( 'This should be an integer ID, DonationPayment should be dropped' );
 		return $this->payment;
 	}
 
+	/**
+	 * @param DonationPayment $payment
+	 * @return void
+	 */
 	public function setPayment( DonationPayment $payment ) {
 		$this->payment = $payment;
+		throw new RefactoringException( 'This should be an integer ID, DonationPayment should be dropped' );
 	}
 
 	public function setId( ?int $id ) {

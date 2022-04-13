@@ -4,19 +4,19 @@
 	"homepage": "https://github.com/wmde/fundraising-donations",
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"php": ">=8.0",
+		"php": ">=8.1",
 		"ext-curl": "*",
 
 		"doctrine/orm": "~2.9",
 		"gedmo/doctrine-extensions": "^3.0",
 		"psr/log": "~1.0",
-		"symfony/http-client": "^5.2",
+		"symfony/http-client": "^6.0",
 
 		"wmde/email-address": "~1.0",
 		"wmde/euro": "~1.0",
 		"wmde/freezable-value-object": "~2.0",
 		"wmde/fun-validators": "~4.0",
-		"wmde/fundraising-payments": "~4.0"
+		"wmde/fundraising-payments": "dev-refactor-payment-domain"
 	},
 	"repositories": [
 		{
@@ -37,7 +37,7 @@
 	],
 	"require-dev": {
 		"ext-pdo_sqlite": "*",
-		"symfony/cache": "^5.3",
+		"symfony/cache": "^6.0",
 		"phpunit/phpunit": "~9.5.1",
 		"codeception/specify": "~2.0",
 		"phpstan/phpstan": "^1.0",
@@ -54,7 +54,10 @@
 		}
 	},
 	"config": {
-		"discard-changes": true
+		"discard-changes": true,
+		"allow-plugins": {
+			"composer/package-versions-deprecated": true
+		}
 	},
 	"extra": {
 		"branch-alias": {

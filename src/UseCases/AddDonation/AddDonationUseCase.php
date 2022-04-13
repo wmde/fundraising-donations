@@ -19,7 +19,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
-use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentReferenceCodeGenerator;
 
 /**
  * @license GPL-2.0-or-later
@@ -30,14 +30,14 @@ class AddDonationUseCase {
 	private AddDonationValidator $donationValidator;
 	private AddDonationPolicyValidator $policyValidator;
 	private DonationConfirmationNotifier $notifier;
-	private TransferCodeGenerator $transferCodeGenerator;
+	private PaymentReferenceCodeGenerator $transferCodeGenerator;
 	private DonationTokenFetcher $tokenFetcher;
 	private InitialDonationStatusPicker $initialDonationStatusPicker;
 	private EventEmitter $eventEmitter;
 
 	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
 			AddDonationPolicyValidator $policyValidator, DonationConfirmationNotifier $notifier,
-			TransferCodeGenerator $transferCodeGenerator, DonationTokenFetcher $tokenFetcher,
+								 PaymentReferenceCodeGenerator $transferCodeGenerator, DonationTokenFetcher $tokenFetcher,
 			InitialDonationStatusPicker $initialDonationStatusPicker, EventEmitter $eventEmitter ) {
 		$this->donationRepository = $donationRepository;
 		$this->donationValidator = $donationValidator;
@@ -82,12 +82,15 @@ class AddDonationUseCase {
 	}
 
 	private function newDonationFromRequest( AddDonationRequest $donationRequest ): Donation {
+		// TODO replace PaymentFactory with "Create payment" use case, using determining the correct branch
 		$paymentFactory = new PaymentFactory( $this->transferCodeGenerator );
+		$payment = $paymentFactory->getPaymentFromRequest( $donationRequest );
+
 		$donation = new Donation(
 			null,
-			( $this->initialDonationStatusPicker )( $donationRequest->getPaymentType() ),
+			( $this->initialDonationStatusPicker )( $payment ),
 			$this->getPersonalInfoFromRequest( $donationRequest ),
-			$paymentFactory->getPaymentFromRequest( $donationRequest ),
+			$payment,
 			$donationRequest->getOptIn() === '1',
 			$this->newTrackingInfoFromRequest( $donationRequest )
 		);
@@ -152,7 +155,8 @@ class AddDonationUseCase {
 	}
 
 	private function sendDonationConfirmationEmail( Donation $donation ): void {
-		if ( $donation->getDonor()->hasEmailAddress() && !$donation->hasExternalPayment() ) {
+		// TODO pass in the payment as a parameter instead of asking the donation
+		if ( $donation->getDonor()->hasEmailAddress() && !$donation->hasBookablePayment() ) {
 			$this->notifier->sendConfirmationFor( $donation );
 		}
 	}

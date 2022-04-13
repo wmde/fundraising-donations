@@ -5,14 +5,12 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
+use WMDE\Fundraising\DonationContext\RefactoringException;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidationResult;
 use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
-use WMDE\Fundraising\PaymentContext\Domain\IbanBlocklist;
-use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethods;
-use WMDE\Fundraising\PaymentContext\Domain\PaymentDataValidator;
+use WMDE\Fundraising\PaymentContext\Domain\IbanBlockList;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AddressValidator;
@@ -23,9 +21,17 @@ use WMDE\FunValidators\Validators\EmailValidator;
  */
 class AddDonationValidator {
 
-	private PaymentDataValidator $paymentDataValidator;
+	private PaymentValidator $paymentDataValidator;
+	/**
+	 * @deprecated should not be used, use CheckIban use case instead
+	 * @var BankDataValidator
+	 */
 	private BankDataValidator $bankDataValidator;
-	private IbanBlocklist $ibanBlocklist;
+	/**
+	 * @deprecated Use CheckIban use case instead
+	 * @var IbanBlockList
+	 */
+	private IbanBlockList $ibanBlocklist;
 	private AddressValidator $addressValidator;
 	private EmailValidator $emailValidator;
 
@@ -41,8 +47,8 @@ class AddDonationValidator {
 		Result::SOURCE_DONOR_EMAIL => 250
 	];
 
-	public function __construct( PaymentDataValidator $paymentDataValidator, BankDataValidator $bankDataValidator,
-		IbanBlocklist $ibanBlocklist, EmailValidator $emailValidator, AddressValidator $addressValidator ) {
+	public function __construct( PaymentValidator $paymentDataValidator, BankDataValidator $bankDataValidator,
+		IbanBlockList $ibanBlocklist, EmailValidator $emailValidator, AddressValidator $addressValidator ) {
 		$this->paymentDataValidator = $paymentDataValidator;
 		$this->bankDataValidator = $bankDataValidator;
 		$this->ibanBlocklist = $ibanBlocklist;
@@ -54,49 +60,19 @@ class AddDonationValidator {
 		$this->request = $addDonationRequest;
 		$this->violations = [];
 
-		$this->validateAmount();
 		$this->validatePayment();
-		$this->validateBankData();
 		$this->validateDonor();
 
 		return new Result( ...$this->violations );
-	}
-
-	private function validateAmount(): void {
-		// TODO validate without euro class, put conversion in PaymentDataValidator
-		$result = $this->paymentDataValidator->validate(
-			$this->request->getAmount()->getEuroFloat(),
-			$this->request->getPaymentType()
-		);
-
-		$violations = array_map(
-			static function ( ConstraintViolation $violation ) {
-				$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
-				return $violation;
-			},
-			$result->getViolations()
-		);
-		$this->addViolations( $violations );
 	}
 
 	private function addViolations( array $violations ): void {
 		$this->violations = array_merge( $this->violations, $violations );
 	}
 
-	private function validateBankData(): void {
-		if ( $this->request->getPaymentType() !== PaymentMethod::DIRECT_DEBIT ) {
-			return;
-		}
-
-		$bankData = $this->request->getBankData();
-		$validationResult = $this->bankDataValidator->validate( $bankData );
-
-		$this->addViolations( $validationResult->getViolations() );
-
-		$this->validateIban( $bankData->getIban() );
-	}
-
 	private function validatePayment(): void {
+		throw new RefactoringException( "TODO use payment validator check iban use case" );
+		/*
 		if ( !in_array( $this->request->getPaymentType(), PaymentMethods::getList() ) ) {
 			$this->violations[] = new ConstraintViolation(
 				$this->request->getPaymentType(),
@@ -104,6 +80,7 @@ class AddDonationValidator {
 				Result::SOURCE_PAYMENT_TYPE
 			);
 		}
+		*/
 	}
 
 	private function validateFieldLength( string $value, string $fieldName ): void {
@@ -166,7 +143,7 @@ class AddDonationValidator {
 		)->getViolations();
 	}
 
-	private function validateIban( Iban $iban ): void {
+	private function validateIban( string $iban ): void {
 		if ( $this->ibanBlocklist->isIbanBlocked( $iban ) ) {
 			$this->addViolations(
 				[

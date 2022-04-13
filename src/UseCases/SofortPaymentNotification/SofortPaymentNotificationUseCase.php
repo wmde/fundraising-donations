@@ -4,20 +4,11 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification;
 
-use DateTimeImmutable;
-use DomainException;
-use Exception;
-use RuntimeException;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
-use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\SofortTransactionData;
-use WMDE\Fundraising\PaymentContext\RequestModel\SofortNotificationRequest;
-use WMDE\Fundraising\PaymentContext\ResponseModel\SofortNotificationResponse;
+use WMDE\Fundraising\DonationContext\UseCases\NotificationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\NotificationResponse;
 
 class SofortPaymentNotificationUseCase {
 
@@ -32,9 +23,12 @@ class SofortPaymentNotificationUseCase {
 		$this->notifier = $notifier;
 	}
 
-	public function handleNotification( SofortNotificationRequest $request ): SofortNotificationResponse {
+	public function handleNotification( NotificationRequest $request ): NotificationResponse {
+		// TODO Consolidate booking use cases
+		return new NotificationResponse();
+		/*
 		try {
-			$donation = $this->repository->getDonationById( $request->getDonationId() );
+			$donation = $this->repository->getDonationById( $request->donationId );
 		}
 		catch ( GetDonationException $ex ) {
 			return $this->createFailureResponse( $ex );
@@ -45,9 +39,11 @@ class SofortPaymentNotificationUseCase {
 		}
 
 		return $this->handleRequestForDonation( $request, $donation );
+		*/
 	}
 
-	private function handleRequestForDonation( SofortNotificationRequest $request, Donation $donation ): SofortNotificationResponse {
+/*
+	private function handleRequestForDonation( NotificationRequest $request, Donation $donation ): NotificationResponse {
 		$paymentMethod = $donation->getPayment()->getPaymentMethod();
 
 		if ( !( $paymentMethod instanceof SofortPayment ) ) {
@@ -63,7 +59,7 @@ class SofortPaymentNotificationUseCase {
 		}
 
 		try {
-			$donation->confirmBooked( new SofortTransactionData( DateTimeImmutable::createFromMutable( $request->getTime() ) ) );
+			$donation->confirmBooked( $request->bookingData );
 		}
 		catch ( DomainException $ex ) {
 			return $this->createFailureResponse( $ex );
@@ -78,24 +74,24 @@ class SofortPaymentNotificationUseCase {
 
 		$this->notifier->sendConfirmationFor( $donation );
 
-		return SofortNotificationResponse::newSuccessResponse();
+		return NotificationResponse::newSuccessResponse();
 	}
 
-	private function createUnhandledResponse( string $reason ): SofortNotificationResponse {
-		return SofortNotificationResponse::newUnhandledResponse(
+	private function createUnhandledResponse( string $reason ): NotificationResponse {
+		return NotificationResponse::newUnhandledResponse(
 			[
 				'message' => $reason
 			]
 		);
 	}
 
-	private function createFailureResponse( Exception $ex ): SofortNotificationResponse {
-		return SofortNotificationResponse::newFailureResponse(
+	private function createFailureResponse( Exception $ex ): NotificationResponse {
+		return NotificationResponse::newFailureResponse(
 			[
 				'message' => $ex->getMessage(),
 				'stackTrace' => $ex->getTraceAsString()
 			]
 		);
 	}
-
+*/
 }
