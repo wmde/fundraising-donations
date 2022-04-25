@@ -198,6 +198,10 @@ class Donation {
 		return $this->payment;
 	}
 
+	public function getPaymentId(): int {
+		return $this->paymentId;
+	}
+
 	public function getPaymentMethod(): string {
 		throw new RefactoringException( 'You shall not ask donations for payment methods!' );
 	}

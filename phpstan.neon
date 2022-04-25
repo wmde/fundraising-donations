@@ -30,3 +30,4 @@ parameters:
 			- tests/Unit/Domain/Model/DonationTest.php
 			- tests/Unit/Infrastructure/DonationConfirmationMailerTest.php
 			- tests/Unit/UseCases/AddDonation/AddDonationRequestTest.php
+			- tests/Unit/UseCases/AddDonation/InitialDonationStatusPickerTest.php 
