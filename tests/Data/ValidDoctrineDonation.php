@@ -102,7 +102,7 @@ class ValidDoctrineDonation {
 		$self = new self();
 		$donation = $self->createDonation();
 		$donation->setPaymentType( self::PAYMENT_BANK_TRANSFER );
-		$donation->setBankTransferCode( ValidDonation::PAYMENT_BANK_TRANSFER_CODE );
+		$donation->setBankTransferCode( ValidPayments::PAYMENT_BANK_TRANSFER_CODE );
 		return $donation;
 	}
 
@@ -110,11 +110,11 @@ class ValidDoctrineDonation {
 		$self = new self();
 		$payment = new SofortPayment();
 		$payment->setId( 1 );
-		$payment->setConfirmedAt( new \DateTime( ValidDonation::SOFORT_DONATION_CONFIRMED_AT ) );
+		$payment->setConfirmedAt( new \DateTime( ValidPayments::SOFORT_DONATION_CONFIRMED_AT ) );
 		$donation = $self->createDonation();
 		$donation->setPaymentType( self::PAYMENT_SOFORT );
 		$donation->setPayment( $payment );
-		$donation->setBankTransferCode( ValidDonation::PAYMENT_BANK_TRANSFER_CODE );
+		$donation->setBankTransferCode( ValidPayments::PAYMENT_BANK_TRANSFER_CODE );
 		return $donation;
 	}
 
@@ -176,11 +176,11 @@ class ValidDoctrineDonation {
 
 	private function getBankDataArray(): array {
 		return [
-			'iban' => ValidDonation::PAYMENT_IBAN,
-			'bic' => ValidDonation::PAYMENT_BIC,
-			'konto' => ValidDonation::PAYMENT_BANK_ACCOUNT,
-			'blz' => ValidDonation::PAYMENT_BANK_CODE,
-			'bankname' => ValidDonation::PAYMENT_BANK_NAME,
+			'iban' => ValidPayments::PAYMENT_IBAN,
+			'bic' => ValidPayments::PAYMENT_BIC,
+			'konto' => ValidPayments::PAYMENT_BANK_ACCOUNT,
+			'blz' => ValidPayments::PAYMENT_BANK_CODE,
+			'bankname' => ValidPayments::PAYMENT_BANK_NAME,
 		];
 	}
 

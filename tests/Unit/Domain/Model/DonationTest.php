@@ -10,6 +10,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donation
@@ -93,7 +94,7 @@ class DonationTest extends TestCase {
 			null,
 			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			ValidDonation::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null
@@ -112,7 +113,7 @@ class DonationTest extends TestCase {
 			null,
 			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			ValidDonation::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			ValidDonation::newPublicComment()
@@ -127,7 +128,7 @@ class DonationTest extends TestCase {
 			null,
 			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			ValidDonation::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null
@@ -177,7 +178,7 @@ class DonationTest extends TestCase {
 			null,
 			'Such invalid status',
 			ValidDonation::newDonor(),
-			ValidDonation::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null

@@ -36,6 +36,7 @@ class DonationMailer implements DonationNotifier {
 	}
 
 	private function getTemplateArguments( Donation $donation ): array {
+		// phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable
 		throw new RefactoringException( 'TODO: Use getpayment use case' );
 		return [
 			'recipient' => $donation->getDonor()->getName()->toArray(),
