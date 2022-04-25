@@ -13,6 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
+use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
 /**
  * @license GPL-2.0-or-later
@@ -20,9 +21,11 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 class DoctrineDonationRepository implements DonationRepository {
 
 	private EntityManager $entityManager;
+	private GetPaymentUseCase $getPaymentUseCase;
 
-	public function __construct( EntityManager $entityManager ) {
+	public function __construct( EntityManager $entityManager, GetPaymentUseCase $getPaymentUseCase ) {
 		$this->entityManager = $entityManager;
+		$this->getPaymentUseCase = $getPaymentUseCase;
 	}
 
 	public function storeDonation( Donation $donation ): void {
@@ -35,7 +38,11 @@ class DoctrineDonationRepository implements DonationRepository {
 
 	private function insertDonation( Donation $donation ): void {
 		$converter = new DomainToLegacyConverter();
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert(
+			$donation,
+			new DoctrineDonation(),
+			$this->getPaymentUseCase->getLegacyPaymentDataObject( $donation->getPaymentId() )
+		);
 
 		try {
 			$this->entityManager->persist( $doctrineDonation );
@@ -61,7 +68,11 @@ class DoctrineDonationRepository implements DonationRepository {
 		}
 
 		$converter = new DomainToLegacyConverter();
-		$doctrineDonation = $converter->convert( $donation, $doctrineDonation );
+		$doctrineDonation = $converter->convert(
+			$donation,
+			$doctrineDonation,
+			$this->getPaymentUseCase->getLegacyPaymentDataObject( $donation->getPaymentId() )
+		);
 
 		try {
 			$this->entityManager->persist( $doctrineDonation );
