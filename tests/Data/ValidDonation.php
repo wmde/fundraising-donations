@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
-use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
@@ -15,21 +14,9 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\EmailDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
 use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentReferenceCode;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Repositories\PaymentIDRepository;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
+
 class ValidDonation {
 
 	public const DONOR_FIRST_NAME = 'Jeroen';
@@ -50,17 +37,7 @@ class ValidDonation {
 	public const DONATION_AMOUNT = 13.37;
 	public const PAYMENT_INTERVAL_IN_MONTHS = 3;
 
-	public const PAYMENT_BANK_ACCOUNT = '0648489890';
-	public const PAYMENT_BANK_CODE = '50010517';
-	public const PAYMENT_BANK_NAME = 'ING-DiBa';
-	public const PAYMENT_BIC = 'INGDDEFFXXX';
-	public const PAYMENT_IBAN = 'DE12500105170648489890';
 
-	public const PAYMENT_BANK_TRANSFER_CODE = 'XW-DAR-E99-X';
-
-	public const PAYMENT_VALUATION_DATE = '2021-05-15 21:12:00';
-
-	public const PAYMENT_SOFORT_VALUATION_DATE = '2021-06-15T05:07:00Z';
 
 	public const OPTS_INTO_NEWSLETTER = Donation::OPTS_INTO_NEWSLETTER;
 	public const TRACKING_BANNER_IMPRESSION_COUNT = 1;
@@ -68,62 +45,46 @@ class ValidDonation {
 	// "tracking" is the name of the property on the object, "TRACKING" is our prefix, hence TRACKING_TRACKING
 
 	public const TRACKING_TRACKING = 'test/gelb';
-	public const PAYPAL_TRANSACTION_ID = '61E67681CH3238416';
 
-	public const PAYPAL_PAYER_ID = 'HE373U84ENFYQ';
-
-	public const CREDIT_CARD_TRANSACTION_ID = '7788998877';
 	public const COMMENT_TEXT = 'For great justice!';
 	public const COMMENT_IS_PUBLIC = true;
 
 	public const COMMENT_AUTHOR_DISPLAY_NAME = 'Such a tomato';
-	public const SOFORT_DONATION_CONFIRMED_AT = '-1 hour';
-	public const SOFORT_TRANSACTION_ID = '44544554';
+
 
 	public static function newBankTransferDonation(): Donation {
 		return self::createDonation(
-			self::newBankTransferPayment(),
+			ValidPayments::newBankTransferPayment(),
 			Donation::STATUS_PROMISE
 		);
 	}
 
 	public static function newSofortDonation(): Donation {
 		return self::createDonation(
-			self::newSofortPayment(),
+			ValidPayments::newSofortPayment(),
 			Donation::STATUS_PROMISE
 		);
 	}
 
 	public static function newDirectDebitDonation(): Donation {
 		return self::createDonation(
-			self::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment(),
 			Donation::STATUS_NEW
 		);
 	}
 
-	public static function newBookedPayPalDonation( string $transactionId = self::PAYPAL_TRANSACTION_ID ): Donation {
+	public static function newBookedPayPalDonation( string $transactionId = ValidPayments::PAYPAL_TRANSACTION_ID ): Donation {
 		return self::createDonation(
-			self::newBookedPayPalPayment( $transactionId ),
+			ValidPayments::newBookedPayPalPayment( $transactionId ),
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
-	private static function newBookedPayPalPayment( string $transactionId = self::PAYPAL_TRANSACTION_ID ): PayPalPayment {
-		$payment = self::newPayPalPayment();
-		$payment->bookPayment(
-			[
-				'payer_id' => self::PAYPAL_PAYER_ID,
-				'txn_id' => $transactionId,
-				'payment_date' => self::PAYMENT_VALUATION_DATE
-			],
-			self::newPaymentIdGeneratorStub()
-		);
-		return $payment;
-	}
+
 
 	public static function newIncompletePayPalDonation(): Donation {
 		return self::createDonation(
-			self::newPayPalPayment(),
+			ValidPayments::newPayPalPayment(),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
@@ -133,11 +94,7 @@ class ValidDonation {
 	}
 
 	public static function newCompletedSofortDonation(): Donation {
-		$payment = self::newSofortPayment();
-		$payment->bookPayment(
-			[ 'valuationDate' => self::PAYMENT_SOFORT_VALUATION_DATE, 'transactionId' => self::SOFORT_TRANSACTION_ID ],
-			self::newPaymentIdGeneratorStub()
-		);
+		$payment = ValidPayments::newCompletedSofortPayment();
 		return self::createDonation(
 			$payment,
 			Donation::STATUS_PROMISE
@@ -146,14 +103,14 @@ class ValidDonation {
 
 	public static function newIncompleteAnonymousPayPalDonation(): Donation {
 		return self::createAnonymousDonation(
-			self::newPayPalPayment(),
+			ValidPayments::newPayPalPayment(),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
 	public static function newBookedAnonymousPayPalDonation(): Donation {
 		return self::createAnonymousDonation(
-			self::newBookedPayPalPayment(),
+			ValidPayments::newBookedPayPalPayment(),
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
@@ -161,56 +118,50 @@ class ValidDonation {
 	public static function newBookedAnonymousPayPalDonationUpdate( int $donationId ): Donation {
 		return self::createAnonymousDonationWithId(
 			$donationId,
-			self::newBookedPayPalPayment(),
+			ValidPayments::newBookedPayPalPayment(),
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
 	public static function newBookedCreditCardDonation(): Donation {
-		$payment = self::newCreditCardPayment();
-		$payment->bookPayment(
-			self::newCreditCardBookingData(),
-			self::newPaymentIdGeneratorStub()
-		);
+		$payment = ValidPayments::newBookedCreditCardPayment();
 		return self::createDonation(
 			$payment,
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
-	public static function newCreditCardBookingData(): array {
-		return [ 'transactionId' => self::CREDIT_CARD_TRANSACTION_ID ];
-	}
+
 
 	public static function newIncompleteCreditCardDonation(): Donation {
 		return self::createDonation(
-			self::newCreditCardPayment(),
+			ValidPayments::newCreditCardPayment(),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
 	public static function newIncompleteAnonymousCreditCardDonation(): Donation {
 		return self::createAnonymousDonation(
-			self::newCreditCardPayment(),
+			ValidPayments::newCreditCardPayment(),
 			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
 	public static function newCancelledPayPalDonation(): Donation {
 		return self::createCancelledDonation(
-			self::newPayPalPayment()
+			ValidPayments::newPayPalPayment()
 		);
 	}
 
 	public static function newCancelledBankTransferDonation(): Donation {
 		return self::createCancelledDonation(
-			self::newBankTransferPayment()
+			ValidPayments::newBankTransferPayment()
 		);
 	}
 
 	public static function newCompanyBankTransferDonation(): Donation {
 		$donation = self::createDonation(
-			self::newBankTransferPayment(),
+			ValidPayments::newBankTransferPayment(),
 			Donation::STATUS_NEW
 		);
 		$donation->setDonor( self::newCompanyDonor() );
@@ -271,15 +222,7 @@ class ValidDonation {
 		);
 	}
 
-	public static function newDirectDebitPayment(): DirectDebitPayment {
-		return DirectDebitPayment::create(
-			1,
-			Euro::newFromFloat( self::DONATION_AMOUNT ),
-			PaymentInterval::Quarterly,
-			new Iban( self::PAYMENT_IBAN ),
-			self::PAYMENT_BIC
-		);
-	}
+
 
 	private static function newPersonName(): PersonName {
 		return new PersonName(
@@ -331,49 +274,6 @@ class ValidDonation {
 
 	public static function newEmailOnlyDonor(): EmailDonor {
 		return new EmailDonor( self::newPersonName(), self::DONOR_EMAIL_ADDRESS );
-	}
-
-	private static function newSofortPayment(): SofortPayment {
-		return SofortPayment::create(
-			1,
-			Euro::newFromFloat( self::DONATION_AMOUNT ),
-			PaymentInterval::OneTime,
-			PaymentReferenceCode::newFromString( self::PAYMENT_BANK_TRANSFER_CODE )
-		);
-	}
-
-	private static function newPaymentIdGeneratorStub() {
-		return new class implements PaymentIDRepository {
-			public function getNewID(): int {
-				throw new \LogicException( 'Id generator should never be called - this is only for followup payments' );
-			}
-
-		};
-	}
-
-	public static function newPayPalPayment(): PayPalPayment {
-		return new PayPalPayment(
-			1,
-			Euro::newFromFloat( self::DONATION_AMOUNT ),
-			PaymentInterval::Quarterly
-		);
-	}
-
-	public static function newCreditCardPayment(): CreditCardPayment {
-		return new CreditCardPayment(
-			1,
-			Euro::newFromFloat( self::DONATION_AMOUNT ),
-			PaymentInterval::Quarterly
-		);
-	}
-
-	public static function newBankTransferPayment(): BankTransferPayment {
-		return BankTransferPayment::create(
-			1,
-			Euro::newFromFloat( self::DONATION_AMOUNT ),
-			PaymentInterval::Quarterly,
-			PaymentReferenceCode::newFromString( self::PAYMENT_BANK_TRANSFER_CODE )
-		);
 	}
 
 }

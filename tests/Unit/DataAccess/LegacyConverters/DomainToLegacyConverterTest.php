@@ -11,6 +11,8 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Tests\Data\InvalidPayment;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
+use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter
@@ -21,18 +23,24 @@ class DomainToLegacyConverterTest extends TestCase {
 	 * @dataProvider getPaymentMethodsAndTransferCodes
 	 */
 	public function testGivenPaymentMethodWithBankTransferCode_converterGetsCodeFromPayment( string $expectedOutput, Donation $donation ): void {
-		$this->markTestIncomplete( 'Converter needs "get payment" use case' );
 		$converter = new DomainToLegacyConverter();
+		$legacyData = new LegacyPaymentData(
+			99,
+			9,
+			'*',
+			$expectedOutput? ['ueb_code' => $expectedOutput]: [],
+			'X'
+		);
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyData );
 
 		$this->assertEquals( $expectedOutput, $doctrineDonation->getBankTransferCode() );
 	}
 
 	public function getPaymentMethodsAndTransferCodes(): array {
 		return [
-			[ ValidDonation::PAYMENT_BANK_TRANSFER_CODE, ValidDonation::newBankTransferDonation() ],
-			[ ValidDonation::PAYMENT_BANK_TRANSFER_CODE, ValidDonation::newSofortDonation() ],
+			[ ValidPayments::PAYMENT_BANK_TRANSFER_CODE, ValidDonation::newBankTransferDonation(),  ],
+			[ ValidPayments::PAYMENT_BANK_TRANSFER_CODE, ValidDonation::newSofortDonation() ],
 			[ '', ValidDonation::newBookedCreditCardDonation() ],
 		];
 	}
@@ -119,6 +127,8 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertSame( DoctrineDonation::STATUS_CANCELLED, $doctrineDonation->getStatus() );
 	}
 
+
+	//TODO can probably be deleted
 	public function testGivenDirectDebitDonation_statusIsSet(): void {
 		$this->markTestIncomplete( 'status derived from payment needs to be reworked' );
 		$converter = new DomainToLegacyConverter();
@@ -129,6 +139,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertSame( DoctrineDonation::STATUS_NEW, $doctrineDonation->getStatus() );
 	}
 
+	//TODO can probably be deleted
 	public function testGivenBankTransferDonation_statusIsSet(): void {
 		$this->markTestIncomplete( 'status derived from payment needs to be reworked' );
 		$converter = new DomainToLegacyConverter();
@@ -178,21 +189,5 @@ class DomainToLegacyConverterTest extends TestCase {
 		yield [ ValidDonation::newBookedAnonymousPayPalDonation(), DoctrineDonation::STATUS_EXTERNAL_BOOKED ];
 		yield [ ValidDonation::newBookedCreditCardDonation(), DoctrineDonation::STATUS_EXTERNAL_BOOKED ];
 		yield [ ValidDonation::newCompletedSofortDonation(), DoctrineDonation::STATUS_PROMISE ];
-	}
-
-	public function testDonationWithGivenUnknownPaymentType_settingStatusFails(): void {
-		$this->markTestIncomplete( 'status derived from payment needs to be reworked' );
-		$donation = new Donation( null,
-			DoctrineDonation::STATUS_NEW,
-			ValidDonation::newEmailOnlyDonor(),
-			new InvalidPayment(),
-			false,
-			DonationTrackingInfo::newBlankTrackingInfo()
-		);
-		$converter = new DomainToLegacyConverter();
-
-		$this->expectException( \DomainException::class );
-
-		$converter->convert( $donation, new DoctrineDonation() );
 	}
 }
