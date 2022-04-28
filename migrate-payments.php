@@ -29,36 +29,114 @@ class NullGenerator implements PaymentIDRepository {
 	}
 }
 
+class BoundedValue {
+	private mixed $lowerBound;
+	private mixed $upperBound;
+
+	public function __construct(mixed $value)
+	{
+		$this->lowerBound = $value;
+		$this->upperBound = $value;
+	}
+
+	public function set(mixed $value): void {
+		if ( $value < $this->lowerBound ) {
+			$this->lowerBound = $value;
+		}
+		if ( $value > $this->upperBound ) {
+			$this->upperBound = $value;
+		}
+	}
+}
+
+class AnalysisResult {
+
+	private const BUFFER_SIZE = 20;
+
+	/**
+	 * @var ResultObject[]
+	 */
+	private array $errors = [];
+	/**
+	 * @var ResultObject[]
+	 */
+	private array $warnings = [];
+	private int $donationCount = 0;
+
+	public function addError(string $itemType, array $row): void {
+		if (!isset($this->errors[$itemType])) {
+			$this->errors[$itemType] = new ResultObject( self::BUFFER_SIZE, $row );
+		} else {
+			$this->errors[$itemType]->add($row);
+		}
+	}
+
+	public function addWarning(string $itemType, array $row): void {
+		if (!isset($this->warnings[$itemType])) {
+			$this->warnings[$itemType] = new ResultObject( self::BUFFER_SIZE, $row );
+		} else {
+			$this->warnings[$itemType]->add($row);
+		}
+	}
+
+	public function addRow(): self {
+		$this->donationCount++;
+		return $this;
+	}
+
+	public function getErrors(): array
+	{
+		return $this->errors;
+	}
+
+	public function getWarnings(): array
+	{
+		return $this->warnings;
+	}
+
+	public function getDonationCount(): int
+	{
+		return $this->donationCount;
+	}
+}
+
+
 class ResultObject {
 	private array $itemBuffer = [];
-	private array $itemCounts = [];
-	private array $currentItemTypeIndex = [];
+	private int $bufferIndex;
+	private int $itemCount;
+	private BoundedValue $donationIdRange;
+	private BoundedValue $donationDateRange;
 
-	public function __construct( private int $bufferSize)
+
+	public function __construct( private int $bufferSize, array $row )
 	{
+		$this->itemBuffer = [$row];
+		$this->bufferIndex = 0;
+		$this->itemCount = 1;
+		//$this->donationIdRange
 	}
 
-	public function add(string $itemType, array $row ): void {
-		// TODO Store upper and lower bound of donation id and donation date, to see the period of time whwre malformed data existed
-		if (!isset($this->currentItemTypeIndex[$itemType])) {
-			$this->itemBuffer[$itemType] = [];
-			$this->currentItemTypeIndex[$itemType] = 0;
-			$this->itemCounts[$itemType] = 0;
-		}
-		$this->itemBuffer[$itemType][$this->currentItemTypeIndex[$itemType]] = $row;
-		$this->itemCounts[$itemType]++;
-		$this->currentItemTypeIndex[$itemType]++;
-		if ( $this->currentItemTypeIndex[$itemType] > $this->bufferSize) {
-			$this->currentItemTypeIndex[$itemType] = 0;
-		}
+	public function add(array $row ): void {
+		$this->itemBuffer[$this->bufferIndex] = $row;
+		$this->itemCount++;
+		$this->increaseBufferIndex();
 	}
 
-	public function getItemCounts(): array {
-		return $this->itemCounts;
+	public function getItemCount(): int {
+		return $this->itemCount;
 	}
 
 	public function getItemSample(): array {
 		return $this->itemBuffer;
+	}
+
+	private function increaseBufferIndex(): void
+	{
+		$this->bufferIndex++;
+		if ($this->bufferIndex > $this->bufferSize) {
+			$this->bufferIndex = 0;
+		}
 	}
 }
 
@@ -94,20 +172,16 @@ class DonationToPaymentConverter {
 	];
 
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
-
-	private ResultObject $errors;
-	private ResultObject $warnings;
+	private AnalysisResult $result;
 
 	public function __construct(
 		private Connection $db
 	) {
 		$this->idGenerator = new NullGenerator();
 		$this->anonymisedPaymentReferenceCode = new PaymentReferenceCode('AA','AAAAAA','A');
-		$this->errors = new ResultObject( 5 );
-		$this->warnings = new ResultObject( 5 );
 	}
 
-	public function convertDonations() {
+	public function convertDonations(): AnalysisResult {
 
 		$this->db->getNativeConnection()->setAttribute(\PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false);
 		$qb = $this->db->createQueryBuilder();
@@ -120,16 +194,22 @@ class DonationToPaymentConverter {
 			->setMaxResults(100000)
 		;
 
-		$result = $qb->executeQuery();
-		$processedPayments = 0;
-		foreach ( $result->iterateAssociative() as $row ) {
+		$dbResult = $qb->executeQuery();
+		$this->result = new AnalysisResult();
+		foreach ( $dbResult->iterateAssociative() as $row ) {
+			$this->result->addRow();
 			if ( $row['data'] ) {
 				$row['data'] = unserialize( base64_decode( $row['data'] ) );
 			}
 
 			// Skip payments
 			if ($row['paymentType'] === 'PPL' && $row['status'] === 'D') {
-				$this->warnings->add('Skipped deleted paypal payment', ['id' => $row['id']]);
+				$this->result->addWarning('Skipped deleted paypal payment', $row);
+				continue;
+			}
+
+			if ($row['paymentType'] === 'MBK') {
+				$this->result->addWarning('Skipped MBK payment', $row);
 				continue;
 			}
 
@@ -139,11 +219,10 @@ class DonationToPaymentConverter {
 				// We might actually save the payment here later
 			} catch ( \Throwable $e ) {
 				$msg = $e->getMessage();
-				$this->errors->add($msg, $row);
+				$this->result->addError($msg, $row);
 			}
-			$processedPayments++;
 		}
-		return [ $processedPayments, $this->errors, $this->warnings ];
+		return $this->result;
 	}
 
 	private function newPayment( array $row ): Payment {
@@ -197,7 +276,7 @@ class DonationToPaymentConverter {
 			return $payment;
 		}
 		if (empty($row['data']['ext_payment_timestamp'])) {
-			$this->warnings->add('Payment without timestamp', $row);
+			$this->result->addWarning('Paypal payment without timestamp', $row);
 			$row['data']['ext_payment_timestamp'] = $row['donationDate'];
 		}
 		// TODO convert followup payments, probably using reflection
@@ -209,7 +288,7 @@ class DonationToPaymentConverter {
 		$paymentReferenceCode = empty( $row['transferCode'] ) ? null : PaymentReferenceCode::newFromString( $row['transferCode'] );
 		$interval = PaymentInterval::from( intval( $row['intervalInMonths'] ) );
 		if ($interval !== PaymentInterval::OneTime ) {
-			$this->warnings->add('Recurring interval for sofort payment', [ 'id' => $row['id'], 'interval' => $interval->value ] );
+			$this->result->addWarning('Recurring interval for sofort payment', [ 'id' => $row['id'], 'interval' => $interval->value ] );
 			$interval = PaymentInterval::OneTime;
 		}
 		$payment = SofortPayment::create(
@@ -285,7 +364,7 @@ class DonationToPaymentConverter {
 			return $this->anonymisedPaymentReferenceCode;
 		}
 		if (!preg_match('/^\w{2}-\w{3}-\w{3}-\w$/', $row['transferCode'])) {
-			$this->warnings->add('Legacy transfer code pattern, omitting', ['id' => $row['id'], 'transferCode' => $row['transferCode']] );
+			$this->result->addWarning('Legacy transfer code pattern, omitting', ['id' => $row['id'], 'transferCode' => $row['transferCode']] );
 			return $this->anonymisedPaymentReferenceCode;
 		}
 		return PaymentReferenceCode::newFromString($row['transferCode']);
@@ -295,7 +374,7 @@ class DonationToPaymentConverter {
 	{
 		$amount = $row['amount'];
 		if (empty($amount)) {
-			$this->warnings->add('Converted empty amount to 0', ['id' => $row['id'], 'amount' => $row['amount']]);
+			$this->result->addWarning('Converted empty amount to 0', ['id' => $row['id'], 'amount' => $row['amount']]);
 			$amount = '0';
 		}
 		return Euro::newFromString($amount);
@@ -305,11 +384,31 @@ class DonationToPaymentConverter {
 
 $db = DriverManager::getConnection( $config );
 $converter = new DonationToPaymentConverter( $db );
-/** @var array{0:int,1:ResultObject,2:ResultObject} */
-[ $processedPayments, $errors, $warnings ] = $converter->convertDonations();
 
-$errorStats = $errors->getItemCounts();
-$errorCount = array_sum($errorStats);
-printf( "Processed %d donations, with %d errors (%.2f%%)\n", $processedPayments, $errorCount, ( $errorCount * 100 ) / $processedPayments );
-print_r($errorStats);
-//print_r($errors->getItemSample());
+$result = $converter->convertDonations();
+
+$errors = $result->getErrors();
+$warnings = $result->getWarnings();
+$processedPayments = $result->getDonationCount();
+$errorCount = array_reduce($errors, fn(int $acc, ResultObject $error) => $acc + $error->getItemCount(), 0 );
+$warningCount = array_reduce($warnings, fn(int $acc, ResultObject $error) => $acc + $error->getItemCount(), 0 );
+printf( "Processed %d donations, with %d errors (%.2f%%) and %d warnings (%.2f%%)\n",
+	$processedPayments,
+	$errorCount,
+	( $errorCount * 100 ) / $processedPayments,
+	$warningCount,
+	( $warningCount * 100 ) / $processedPayments
+);
+
+echo "Warnings:\n";
+foreach($warnings as $type => $warning) {
+	// TODO output date ranges
+	printf("%s: %d\n", $type, $warning->getItemCount());
+}
+echo "Errors:\n";
+foreach($errors as $type => $error) {
+	printf("%s: %d\n", $type, $error->getItemCount());
+}
+print_r($errors['Transaction data must have payer ID']->getItemSample());
+
+
