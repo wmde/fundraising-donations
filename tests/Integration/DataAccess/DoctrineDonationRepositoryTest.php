@@ -216,8 +216,8 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function makeGetPaymentUseCaseStub(): GetPaymentUseCase {
-		$stub = $this->createStub(GetPaymentUseCase::class );
-		$stub->method('getLegacyPaymentDataObject')->willReturn(
+		$stub = $this->createStub( GetPaymentUseCase::class );
+		$stub->method( 'getLegacyPaymentDataObject' )->willReturn(
 			new LegacyPaymentData(
 				999999,
 				999,

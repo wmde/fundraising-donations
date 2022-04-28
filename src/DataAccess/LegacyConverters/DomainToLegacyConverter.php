@@ -39,20 +39,19 @@ class DomainToLegacyConverter {
 	private function updateStatusInformation( DoctrineDonation $doctrineDonation, Donation $donation, LegacyPaymentData $legacyPaymentData ): void {
 		$doctrineDonation->setStatus( $legacyPaymentData->paymentStatus );
 
-		if ( $donation->isMarkedForModeration() ) {
+		if ( $donation->isMarkedForModeration() && !$donation->isCancelled() ) {
 			$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
 		}
 	}
 
 	private function updatePaymentInformation( DoctrineDonation $doctrineDonation, LegacyPaymentData $legacyPaymentData ): void {
-
 		$doctrineDonation->setAmount( Euro::newFromCents( $legacyPaymentData->amountInEuroCents )->getEuroString() );
 		$doctrineDonation->setPaymentIntervalInMonths( $legacyPaymentData->intervalInMonths );
-		if ( isset( $legacyPaymentData->paymentSpecificValues['ueb_code'] ) ){
-			$doctrineDonation->setBankTransferCode($legacyPaymentData->paymentSpecificValues['ueb_code'] );
+		if ( isset( $legacyPaymentData->paymentSpecificValues['ueb_code'] ) ) {
+			$doctrineDonation->setBankTransferCode( $legacyPaymentData->paymentSpecificValues['ueb_code'] );
 		}
 
-		$doctrineDonation->setPaymentType($legacyPaymentData->paymentName);
+		$doctrineDonation->setPaymentType( $legacyPaymentData->paymentName );
 	}
 
 	private function updateComment( DoctrineDonation $doctrineDonation, DonationComment $comment = null ): void {
@@ -69,7 +68,7 @@ class DomainToLegacyConverter {
 
 	private function getDataMap( Donation $donation, LegacyPaymentData $legacyPaymentData ): array {
 		$filteredPaymentSpecificValues = $legacyPaymentData->paymentSpecificValues;
-		unset($filteredPaymentSpecificValues['ueb_code']);
+		unset( $filteredPaymentSpecificValues['ueb_code'] );
 		return array_merge(
 			$this->getDataFieldsFromTrackingInfo( $donation->getTrackingInfo() ),
 			$filteredPaymentSpecificValues,

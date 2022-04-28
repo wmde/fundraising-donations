@@ -30,4 +30,8 @@ class InvalidPayment extends Payment {
 	public function getValuationDate(): ?DateTimeImmutable {
 		return null;
 	}
+
+	protected function getLegacyPaymentStatus(): string {
+		return '';
+	}
 }
