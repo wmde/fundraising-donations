@@ -13,6 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentStatus;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter
@@ -24,7 +25,8 @@ class DomainToLegacyConverterTest extends TestCase {
 	 */
 	public function testGivenPaymentMethodWithBankTransferCode_converterGetsCodeFromPayment( string $expectedOutput, Donation $donation ): void {
 		$converter = new DomainToLegacyConverter();
-		$legacyData = new LegacyPaymentData(
+
+		$legacyPaymentData = new LegacyPaymentData(
 			99,
 			9,
 			'*',
@@ -32,7 +34,7 @@ class DomainToLegacyConverterTest extends TestCase {
 			'X'
 		);
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyData, [] );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
 
 		$this->assertEquals( $expectedOutput, $doctrineDonation->getBankTransferCode() );
 	}
@@ -49,7 +51,6 @@ class DomainToLegacyConverterTest extends TestCase {
 		$converter = new DomainToLegacyConverter();
 		// This donation is from a person, so person-related data should be overwritten
 		$donation = ValidDonation::newBankTransferDonation();
-		$legacyPaymentData = ValidPayments::newBankTransferPayment()->getLegacyData();
 		$doctrineDonation = new DoctrineDonation();
 		$doctrineDonation->encodeAndSetData( array_merge(
 			$doctrineDonation->getDecodedData(),
@@ -59,6 +60,14 @@ class DomainToLegacyConverterTest extends TestCase {
 				'another' => 'untouched',
 			]
 		) );
+
+		$legacyPaymentData = new LegacyPaymentData(
+			1,
+			1,
+			'PPPP',
+			[],
+			'*'
+		);
 
 		$conversionResult = $converter->convert( $donation, $doctrineDonation, $legacyPaymentData, [] );
 		$data = $conversionResult->getDecodedData();
@@ -74,10 +83,15 @@ class DomainToLegacyConverterTest extends TestCase {
 	public function testGivenCancelledDonation_convertsToCancelledStatusDoctrineDonation(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newCancelledBankTransferDonation();
-		$payment = ValidPayments::newBankTransferPayment();
-		$payment->cancel();
+		$legacyPaymentData = new LegacyPaymentData(
+			9999,
+			1,
+			'UEB',
+			[],
+			LegacyPaymentStatus::CANCELLED->value
+		);
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $payment->getLegacyData(), [] );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_CANCELLED, $doctrineDonation->getStatus() );
 	}
@@ -90,7 +104,13 @@ class DomainToLegacyConverterTest extends TestCase {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->markForModeration( $this->makeGenericModerationReason() );
-		$legacyPaymentData = ValidPayments::newDirectDebitPayment()->getLegacyData();
+		$legacyPaymentData = new LegacyPaymentData(
+			9999,
+			1,
+			'BEZ',
+			[],
+			'*'
+		);
 
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
 
@@ -100,7 +120,13 @@ class DomainToLegacyConverterTest extends TestCase {
 	public function testGivenDonationWithoutModerationOrCancellation_paymentStatusIsPreserved(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newBankTransferDonation();
-		$legacyPaymentData = ValidPayments::newBankTransferPayment()->getLegacyData();
+		$legacyPaymentData = new LegacyPaymentData(
+			9999,
+			1,
+			'UEB',
+			[],
+			LegacyPaymentStatus::BANK_TRANSFER->value
+		);
 
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
 
@@ -132,24 +158,36 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertEquals( $moderationReasons, $doctrineDonation->getModerationReasons()->toArray() );
 	}
 
-	/** @todo can probably be deleted */
 	public function testGivenDirectDebitDonation_statusIsSet(): void {
-		$this->markTestIncomplete( 'status derived from payment needs to be reworked' );
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
+		$legacyPaymentData = new LegacyPaymentData(
+			9999,
+			1,
+			'UEB',
+			[],
+			LegacyPaymentStatus::DIRECT_DEBIT->value
+		);
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_NEW, $doctrineDonation->getStatus() );
 	}
 
-	/** @todo can probably be deleted */
 	public function testGivenBankTransferDonation_statusIsSet(): void {
-		$this->markTestIncomplete( 'status derived from payment needs to be reworked' );
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newBankTransferDonation();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
+		$legacyPaymentData = new LegacyPaymentData(
+			9999,
+			1,
+			'UEB',
+			[],
+			LegacyPaymentStatus::BANK_TRANSFER->value
+		);
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_PROMISE, $doctrineDonation->getStatus() );
 	}
@@ -159,10 +197,17 @@ class DomainToLegacyConverterTest extends TestCase {
 	 * @param Donation $donation
 	 */
 	public function testGivenIncompleteDonation_statusIsSet( Donation $donation ): void {
-		$this->markTestIncomplete( 'status derived from payment needs to be reworked' );
 		$converter = new DomainToLegacyConverter();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
+		$legacyPaymentData = new LegacyPaymentData(
+			9999,
+			1,
+			'irrelevant',
+			[],
+			LegacyPaymentStatus::EXTERNAL_INCOMPLETE->value
+		);
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE, $doctrineDonation->getStatus() );
 	}
@@ -181,10 +226,16 @@ class DomainToLegacyConverterTest extends TestCase {
 	 * @param string $expectedStatus
 	 */
 	public function testGivenBookedDonation_statusIsSet( Donation $donation, string $expectedStatus ): void {
-		$this->markTestIncomplete( 'status derived from payment needs to be reworked' );
 		$converter = new DomainToLegacyConverter();
+		$legacyPaymentData = new LegacyPaymentData(
+			9999,
+			1,
+			'UEB',
+			[],
+			$expectedStatus
+		);
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
 
 		$this->assertSame( $expectedStatus, $doctrineDonation->getStatus() );
 	}
