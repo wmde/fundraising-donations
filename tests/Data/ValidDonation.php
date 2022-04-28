@@ -16,7 +16,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
 
-
 class ValidDonation {
 
 	public const DONOR_FIRST_NAME = 'Jeroen';
@@ -37,8 +36,6 @@ class ValidDonation {
 	public const DONATION_AMOUNT = 13.37;
 	public const PAYMENT_INTERVAL_IN_MONTHS = 3;
 
-
-
 	public const OPTS_INTO_NEWSLETTER = Donation::OPTS_INTO_NEWSLETTER;
 	public const TRACKING_BANNER_IMPRESSION_COUNT = 1;
 	public const TRACKING_TOTAL_IMPRESSION_COUNT = 3;
@@ -50,7 +47,6 @@ class ValidDonation {
 	public const COMMENT_IS_PUBLIC = true;
 
 	public const COMMENT_AUTHOR_DISPLAY_NAME = 'Such a tomato';
-
 
 	public static function newBankTransferDonation(): Donation {
 		return self::createDonation(
@@ -79,8 +75,6 @@ class ValidDonation {
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
-
-
 
 	public static function newIncompletePayPalDonation(): Donation {
 		return self::createDonation(
@@ -130,8 +124,6 @@ class ValidDonation {
 			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
-
-
 
 	public static function newIncompleteCreditCardDonation(): Donation {
 		return self::createDonation(
@@ -221,8 +213,6 @@ class ValidDonation {
 			self::DONOR_EMAIL_ADDRESS
 		);
 	}
-
-
 
 	private static function newPersonName(): PersonName {
 		return new PersonName(

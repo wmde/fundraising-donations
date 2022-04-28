@@ -14,8 +14,8 @@ class ValidAddDonationRequest {
 	public static function getRequest(): AddDonationRequest {
 		$request = new AddDonationRequest();
 		$request->setAmount( Euro::newFromInt( 5 ) );
-		$request->setIban( ValidDonation::PAYMENT_IBAN );
-		$request->setBic( ValidDonation::PAYMENT_BIC );
+		$request->setIban( ValidPayments::PAYMENT_IBAN );
+		$request->setBic( ValidPayments::PAYMENT_BIC );
 		$request->setInterval( ValidDonation::PAYMENT_INTERVAL_IN_MONTHS );
 		$request->setOptIn( (string)ValidDonation::OPTS_INTO_NEWSLETTER );
 		$request->setPaymentType( PaymentTypes::DirectDebit->value );

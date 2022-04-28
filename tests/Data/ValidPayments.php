@@ -115,7 +115,7 @@ class ValidPayments {
 	}
 
 	public static function newBookedCreditCardPayment(): CreditCardPayment {
-		$payment= self::newCreditCardPayment();
+		$payment = self::newCreditCardPayment();
 		$payment->bookPayment(
 			self::newCreditCardBookingData(),
 			self::newPaymentIdGeneratorStub()
