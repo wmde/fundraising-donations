@@ -166,7 +166,7 @@ class DonationToPaymentConverter {
 		$paymentReferenceCode = empty( $row['transferCode'] ) ? null : PaymentReferenceCode::newFromString( $row['transferCode'] );
 		$interval = PaymentInterval::from( intval( $row['intervalInMonths'] ) );
 		if ( $interval !== PaymentInterval::OneTime ) {
-			$this->result->addWarning( 'Recurring interval for sofort payment', [ 'id' => $row['id'], 'interval' => $interval->value ] );
+			$this->result->addWarning( 'Recurring interval for sofort payment', [ ...$row, 'interval' => $interval->value ] );
 			$interval = PaymentInterval::OneTime;
 		}
 		$payment = SofortPayment::create(
@@ -241,7 +241,7 @@ class DonationToPaymentConverter {
 			return $this->anonymisedPaymentReferenceCode;
 		}
 		if ( !preg_match( '/^\w{2}-\w{3}-\w{3}-\w$/', $row['transferCode'] ) ) {
-			$this->result->addWarning( 'Legacy transfer code pattern, omitting', [ 'id' => $row['id'], 'transferCode' => $row['transferCode'] ] );
+			$this->result->addWarning( 'Legacy transfer code pattern, omitting', $row );
 			return $this->anonymisedPaymentReferenceCode;
 		}
 		return PaymentReferenceCode::newFromString( $row['transferCode'] );
@@ -249,8 +249,8 @@ class DonationToPaymentConverter {
 
 	private function getAmount( array $row ): Euro {
 		$amount = $row['amount'];
-		if ( empty( $amount ) ) {
-			$this->result->addWarning( 'Converted empty amount to 0', [ 'id' => $row['id'], 'amount' => $row['amount'] ] );
+		if ( $amount === '' || $amount === null ) {
+			$this->result->addWarning( 'Converted empty amount to 0', $row );
 			$amount = '0';
 		}
 		return Euro::newFromString( $amount );
