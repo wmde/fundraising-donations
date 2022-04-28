@@ -7,10 +7,8 @@ class ResultObject {
 	private array $itemBuffer = [];
 	private int $bufferIndex;
 	private int $itemCount;
-
-	// TODO
-	// private BoundedValue $donationIdRange;
-	// private BoundedValue $donationDateRange;
+	private BoundedValue $donationIdRange;
+	private BoundedValue $donationDateRange;
 
 	/**
 	 * @param int $bufferSize
@@ -20,14 +18,15 @@ class ResultObject {
 		$this->itemBuffer = [ $row ];
 		$this->bufferIndex = 0;
 		$this->itemCount = 1;
-		// TODO initialize from row
-		//$this->donationIdRange
+		$this->donationIdRange = new BoundedValue( $row['id'] );
+		$this->donationDateRange = new BoundedValue( $row['donationDate'] );
 	}
 
 	public function add( array $row ): void {
 		$this->itemBuffer[$this->bufferIndex] = $row;
 		$this->itemCount++;
-		// TODO update donation and date range from row
+		$this->donationIdRange->set( $row['id'] );
+		$this->donationDateRange->set( $row['donationDate'] );
 		$this->increaseBufferIndex();
 	}
 
@@ -45,4 +44,13 @@ class ResultObject {
 			$this->bufferIndex = 0;
 		}
 	}
+
+	public function getDonationIdRange(): BoundedValue {
+		return $this->donationIdRange;
+	}
+
+	public function getDonationDateRange(): BoundedValue {
+		return $this->donationDateRange;
+	}
+
 }

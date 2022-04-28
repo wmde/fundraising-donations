@@ -31,12 +31,14 @@ printf( "Processed %d donations, with %d errors (%.2f%%) and %d warnings (%.2f%%
 	( $warningCount * 100 ) / $processedPayments
 );
 
-echo "Warnings:\n";
+echo "\nWarnings\n";
+echo "--------\n";
 foreach($warnings as $type => $warning) {
-	// TODO output date ranges
-	printf("%s: %d\n", $type, $warning->getItemCount());
+	$dateRange = $warning->getDonationDateRange();
+	printf("%s: %d  (%s - %s) \n", $type, $warning->getItemCount(), $dateRange->getLowerBound(), $dateRange->getUpperBound() );
 }
-echo "Errors:\n";
+echo "\nErrors\n";
+echo "------\n";
 foreach($errors as $type => $error) {
 	printf("%s: %d\n", $type, $error->getItemCount());
 }
