@@ -20,4 +20,12 @@ class BoundedValue {
 			$this->upperBound = $value;
 		}
 	}
+
+	public function getLowerBound(): mixed {
+		return $this->lowerBound;
+	}
+
+	public function getUpperBound(): mixed {
+		return $this->upperBound;
+	}
 }
