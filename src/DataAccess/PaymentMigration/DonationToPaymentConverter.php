@@ -75,6 +75,9 @@ class DonationToPaymentConverter {
 			->from( 'spenden', 'd' )
 			->leftJoin( 'd', 'donation_payment', 'p', 'd.payment_id = p.id' )
 			->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' )
+
+			// The following 2 statements are for stepping through all donations
+			->where( 'd.id > 200000' )
 			->setMaxResults( 100000 );
 
 		$dbResult = $qb->executeQuery();
@@ -86,11 +89,6 @@ class DonationToPaymentConverter {
 			}
 
 			// Skip payments
-			if ( $row['paymentType'] === 'PPL' && $row['status'] === 'D' ) {
-				$this->result->addWarning( 'Skipped deleted paypal payment', $row );
-				continue;
-			}
-
 			if ( $row['paymentType'] === 'MBK' ) {
 				$this->result->addWarning( 'Skipped MBK payment', $row );
 				continue;
@@ -140,7 +138,7 @@ class DonationToPaymentConverter {
 			$this->getAmount( $row ),
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) )
 		);
-		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE ) {
+		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE || $row['status'] === Donation::STATUS_CANCELLED ) {
 			return $payment;
 		}
 
@@ -154,7 +152,7 @@ class DonationToPaymentConverter {
 			$this->getAmount( $row ),
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) )
 		);
-		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE ) {
+		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE || $row['status'] === Donation::STATUS_CANCELLED ) {
 			return $payment;
 		}
 		if ( empty( $row['data']['paypal_payer_id'] ) && in_array( $row['id'], self::MANUALLY_BOOKED_DONATIONS ) ) {
