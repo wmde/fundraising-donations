@@ -49,7 +49,12 @@ class DonationToPaymentConverter {
 	];
 
 	private const MANUALLY_BOOKED_DONATIONS = [
-		112974
+		112974,
+		331164,
+		353933,
+		323979,
+		468736,
+		543578
 	];
 
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
@@ -77,7 +82,7 @@ class DonationToPaymentConverter {
 			->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' )
 
 			// The following 2 statements are for stepping through all donations
-			->where( 'd.id > 200000' )
+			->where( 'd.id > 500000' )
 			->setMaxResults( 100000 );
 
 		$dbResult = $qb->executeQuery();
@@ -140,6 +145,10 @@ class DonationToPaymentConverter {
 		);
 		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE || $row['status'] === Donation::STATUS_CANCELLED ) {
 			return $payment;
+		}
+		if ( empty( $row['data']['ext_payment_id'] ) && in_array( $row['id'], self::MANUALLY_BOOKED_DONATIONS ) ) {
+			$row['data']['ext_payment_id'] = 'unknown, manually booked';
+			$this->result->addWarning( 'Booked Credit card without transaction ID, booked by admins', $row );
 		}
 
 		$payment->bookPayment( $this->getBookingData( self::MCP_LEGACY_KEY_MAP, $row['data'] ), $this->idGenerator );
