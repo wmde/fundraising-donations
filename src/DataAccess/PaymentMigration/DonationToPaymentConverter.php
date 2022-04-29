@@ -54,7 +54,7 @@ class DonationToPaymentConverter {
 		353933,
 		323979,
 		468736,
-		543578
+		543578,
 	];
 
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
@@ -62,11 +62,22 @@ class DonationToPaymentConverter {
 
 	private const ANONYMOUS_REFERENCE_CODE = 'AA-AAA-AAA-A';
 
+	/**
+	 * In 2015 we had an error in the old fundraising app where we lost booking data.
+	 * We'll "fake" the booking data to still mark the payments as booked
+	 *
+	 * @var \DateTimeImmutable
+	 */
+	private \DateTimeImmutable $lostBookingDataPeriodStart;
+	private \DateTimeImmutable $lostBookingDataPeriodEnd;
+
 	public function __construct(
 		private Connection $db
 	) {
 		$this->idGenerator = new NullGenerator();
 		$this->anonymisedPaymentReferenceCode = PaymentReferenceCode::newFromString( self::ANONYMOUS_REFERENCE_CODE );
+		$this->lostBookingDataPeriodStart = new \DateTimeImmutable( '2015-09-28 0:00:00' );
+		$this->lostBookingDataPeriodEnd = new \DateTimeImmutable( '2015-10-08 0:00:00' );
 	}
 
 	public function convertDonations(): AnalysisResult {
@@ -82,7 +93,7 @@ class DonationToPaymentConverter {
 			->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' )
 
 			// The following 2 statements are for stepping through all donations
-			->where( 'd.id > 500000' )
+			->where( 'd.id > 2000000' )
 			->setMaxResults( 100000 );
 
 		$dbResult = $qb->executeQuery();
@@ -146,9 +157,15 @@ class DonationToPaymentConverter {
 		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE || $row['status'] === Donation::STATUS_CANCELLED ) {
 			return $payment;
 		}
-		if ( empty( $row['data']['ext_payment_id'] ) && in_array( $row['id'], self::MANUALLY_BOOKED_DONATIONS ) ) {
-			$row['data']['ext_payment_id'] = 'unknown, manually booked';
-			$this->result->addWarning( 'Booked Credit card without transaction ID, booked by admins', $row );
+		if ( empty( $row['data']['ext_payment_id'] ) ) {
+			$donationDate = new \DateTimeImmutable( $row['donationDate'] );
+			if ( in_array( $row['id'], self::MANUALLY_BOOKED_DONATIONS ) ) {
+				$row['data']['ext_payment_id'] = 'unknown, manually booked';
+				$this->result->addWarning( 'Booked Credit card without transaction ID, booked by admins', $row );
+			} elseif ( $donationDate >= $this->lostBookingDataPeriodStart && $donationDate <= $this->lostBookingDataPeriodEnd ) {
+				$this->result->addWarning( 'Booked Credit card without transaction ID, 2015 error period', $row );
+				$row['data']['ext_payment_id'] = 'unknown, manually booked';
+			}
 		}
 
 		$payment->bookPayment( $this->getBookingData( self::MCP_LEGACY_KEY_MAP, $row['data'] ), $this->idGenerator );
@@ -164,9 +181,15 @@ class DonationToPaymentConverter {
 		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE || $row['status'] === Donation::STATUS_CANCELLED ) {
 			return $payment;
 		}
-		if ( empty( $row['data']['paypal_payer_id'] ) && in_array( $row['id'], self::MANUALLY_BOOKED_DONATIONS ) ) {
-			$this->result->addWarning( 'Booked Paypal without payer ID, booked by admins', $row );
-			$row['data']['paypal_payer_id'] = 'unknown, manually booked';
+		if ( empty( $row['data']['paypal_payer_id'] ) ) {
+			$donationDate = new \DateTimeImmutable( $row['donationDate'] );
+			if ( in_array( $row['id'], self::MANUALLY_BOOKED_DONATIONS ) ) {
+				$this->result->addWarning( 'Booked Paypal without payer ID, booked by admins', $row );
+				$row['data']['paypal_payer_id'] = 'unknown, manually booked';
+			} elseif ( $donationDate >= $this->lostBookingDataPeriodStart && $donationDate <= $this->lostBookingDataPeriodEnd ) {
+				$this->result->addWarning( 'Booked Paypal without payer ID, 2015 error period', $row );
+				$row['data']['paypal_payer_id'] = 'unknown, manually booked';
+			}
 		}
 		if ( empty( $row['data']['ext_payment_timestamp'] ) ) {
 			$log = $row['data']['log'] ?? [];
