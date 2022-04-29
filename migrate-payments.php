@@ -37,11 +37,21 @@ foreach($warnings as $type => $warning) {
 	$dateRange = $warning->getDonationDateRange();
 	printf("%s: %d  (%s - %s) \n", $type, $warning->getItemCount(), $dateRange->getLowerBound(), $dateRange->getUpperBound() );
 }
+
+if ( count($errors) === 0) {
+	echo "\nNo errors.\n";
+	return;
+}
+
 echo "\nErrors\n";
 echo "------\n";
 foreach($errors as $type => $error) {
 	printf("%s: %d\n", $type, $error->getItemCount());
 }
-print_r($errors['Transaction data must have payer ID']->getItemSample());
+/** @var ResultObject $lastErrorResult */
+$lastErrorResult = reset($errors);
+$lastErrorClass = key($errors);
+echo "$lastErrorClass\n";
+print_r($lastErrorResult->getItemSample());
 
 
