@@ -93,8 +93,8 @@ class DonationToPaymentConverter {
 			->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' )
 
 			// The following 2 statements are for stepping through all donations
-			->where( 'd.id > 2000000' )
-			->setMaxResults( 100000 );
+			->where( 'd.id > 3500000' )
+			->setMaxResults( 500000 );
 
 		$dbResult = $qb->executeQuery();
 		$this->result = new AnalysisResult();
@@ -222,31 +222,33 @@ class DonationToPaymentConverter {
 	}
 
 	private function newSofortPayment( array $row ): SofortPayment {
-		$paymentReferenceCode = empty( $row['transferCode'] ) ? null : PaymentReferenceCode::newFromString( $row['transferCode'] );
 		$interval = PaymentInterval::from( intval( $row['intervalInMonths'] ) );
 		if ( $interval !== PaymentInterval::OneTime ) {
-			$this->result->addWarning( 'Recurring interval for sofort payment', [ ...$row, 'interval' => $interval->value ] );
+			$this->result->addWarning( 'Recurring interval for sofort payment, set to one-time', [ ...$row, 'interval' => $interval->value ] );
 			$interval = PaymentInterval::OneTime;
 		}
 		$payment = SofortPayment::create(
 			intval( $row['paymentId'] ),
 			$this->getAmount( $row ),
 			$interval,
-			$paymentReferenceCode
+			$this->getPaymentReferenceCode( $row )
 		);
-		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE ) {
+		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE || $row['status'] === Donation::STATUS_CANCELLED ) {
 			return $payment;
 		}
 		if ( empty( $row['valuationDate'] ) ) {
-			throw new \Exception( 'Valuation date missing from sofort donation' );
+			$row['valuationDate'] = ( new \DateTimeImmutable( $row['donationDate'] ) )->format( DATE_ATOM );
+			$this->result->addWarning( 'Sofort donation with empty valuation date, using donation date', $row );
 		}
 		$bookingData = [
 			// We fake the transaction id, we did not store it previously
 			'transactionId' => md5( 'sofort-' . $row['id'] ),
 			'valuationDate' => ( new \DateTimeImmutable( $row['valuationDate'] ) )->format( DATE_ATOM )
 		];
-
 		$payment->bookPayment( $bookingData, $this->idGenerator );
+		if ( $payment->getPaymentReferenceCode() === self::ANONYMOUS_REFERENCE_CODE ) {
+			$payment->anonymise();
+		}
 		return $payment;
 	}
 
