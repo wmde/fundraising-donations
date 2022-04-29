@@ -48,6 +48,10 @@ class DonationToPaymentConverter {
 		'mcp_cc_expiry_date' => 'expiryDate'
 	];
 
+	private const MANUALLY_BOOKED_DONATIONS = [
+		112974
+	];
+
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
 	private AnalysisResult $result;
 
@@ -153,9 +157,34 @@ class DonationToPaymentConverter {
 		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE ) {
 			return $payment;
 		}
+		if ( empty( $row['data']['paypal_payer_id'] ) && in_array( $row['id'], self::MANUALLY_BOOKED_DONATIONS ) ) {
+			$this->result->addWarning( 'Booked Paypal without payer ID, booked by admins', $row );
+			$row['data']['paypal_payer_id'] = 'unknown, manually booked';
+		}
 		if ( empty( $row['data']['ext_payment_timestamp'] ) ) {
-			$this->result->addWarning( 'Paypal payment without timestamp', $row );
-			$row['data']['ext_payment_timestamp'] = $row['donationDate'];
+			$log = $row['data']['log'] ?? [];
+			foreach ( $log as $date => $logmsg ) {
+				if ( $logmsg === 'paypal_handler: booked' ) {
+					$row['data']['ext_payment_timestamp'] = $date;
+					$this->result->addWarning( 'Booked Paypal payment without timestamp, restored from log', $row );
+					break;
+				}
+			}
+			if ( empty( $row['data']['ext_payment_timestamp'] ) ) {
+				$this->result->addWarning( 'Booked Paypal payment without timestamp, assumed donation date', $row );
+				$row['data']['ext_payment_timestamp'] = $row['donationDate'];
+			}
+		} elseif ( !\DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $row['data']['ext_payment_timestamp'] ) ) {
+			$solution = 'created from donation date';
+			try {
+
+				$bookingDate = new \DateTimeImmutable( $row['data']['ext_payment_timestamp'] );
+				$row['data']['ext_payment_timestamp'] = $bookingDate->format( 'Y-m-d H:i:s' );
+				$solution = 'reformatted existing date';
+			} catch ( \Exception ) {
+				$row['data']['ext_payment_timestamp'] = $row['donationDate'];
+			}
+			$this->result->addWarning( 'Invalid date format for booked PayPal, ' . $solution, $row );
 		}
 		// TODO convert followup payments, probably using reflection
 		$payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), $this->idGenerator );
