@@ -290,10 +290,9 @@ class DonationToPaymentConverter {
 		if ( $payment->getPaymentReferenceCode() === self::ANONYMOUS_REFERENCE_CODE ) {
 			$payment->anonymise();
 		}
-		// TODO uncomment when https://github.com/wmde/fundraising-payments/pull/95 is merged
-		//if ( $row['status'] == Donation::STATUS_CANCELLED ) {
-		//	$payment->cancel();
-		//}
+		if ( $row['status'] == Donation::STATUS_CANCELLED ) {
+			$payment->cancel();
+		}
 		return $payment;
 	}
 
