@@ -23,6 +23,10 @@ $warnings = $result->getWarnings();
 $processedPayments = $result->getDonationCount();
 $errorCount = array_reduce($errors, fn(int $acc, ResultObject $error) => $acc + $error->getItemCount(), 0 );
 $warningCount = array_reduce($warnings, fn(int $acc, ResultObject $error) => $acc + $error->getItemCount(), 0 );
+
+// TODO Move counts into AnalysisResult and get more accurate warning count by ignoring duplicate donation IDs?
+//    One donation can have multiple warnings, e.g. paypal payments without payer id and timestamp
+
 printf( "Processed %d donations, with %d errors (%.2f%%) and %d warnings (%.2f%%)\n",
 	$processedPayments,
 	$errorCount,
