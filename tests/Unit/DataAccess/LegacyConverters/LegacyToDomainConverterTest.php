@@ -7,7 +7,6 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as Doc
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentWithoutAssociatedData;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter
@@ -15,7 +14,6 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentWithoutAssociatedData;
 class LegacyToDomainConverterTest extends TestCase {
 
 	public function testGivenIncompleteTrackingData_converterFillsTrackingDataWithDefaults(): void {
-		$this->markTestIncomplete( 'This should work again when converter no longer creates dummy payment' );
 		$doctrineDonation = IncompleteDoctrineDonation::newPaypalDonationWithMissingTrackingData();
 		$converter = new LegacyToDomainConverter();
 
@@ -29,7 +27,6 @@ class LegacyToDomainConverterTest extends TestCase {
 	}
 
 	public function testGivenDataSetWithExportDate_donationIsMarkedAsExported(): void {
-		$this->markTestIncomplete( 'This should work again when converter no longer creates dummy payment' );
 		$doctrineDonation = ValidDoctrineDonation::newExportedirectDebitDoctrineDonation();
 		$converter = new LegacyToDomainConverter();
 
@@ -38,21 +35,7 @@ class LegacyToDomainConverterTest extends TestCase {
 		$this->assertTrue( $donation->isExported(), 'Donation should be marked as exported' );
 	}
 
-	public function testGivenDonationWithUnknownPayment_converterCreatesPaymentWithoutAssociatedData(): void {
-		$this->markTestIncomplete( 'Talk to PM about this error condition - how backwards compatible should we be? See also https://phabricator.wikimedia.org/T304727' );
-		// Commented out because we can't construct a doctrine donation with associated payment object
-		// $doctrineDonation = ValidDoctrineDonation::newDonationWithCash();
-		$converter = new LegacyToDomainConverter();
-
-		$donation = $converter->createFromLegacyObject( $doctrineDonation );
-		$paymentMethod = $donation->getPaymentMethod();
-
-		$this->assertInstanceOf( PaymentWithoutAssociatedData::class, $paymentMethod );
-		$this->assertSame( 'CSH', $paymentMethod->getId() );
-	}
-
 	public function testGivenDonationWithCancelledStatus_converterMarksDonationAsCancelled(): void {
-		$this->markTestIncomplete( 'This should work again when converter no longer creates dummy payment' );
 		$doctrineDonation = ValidDoctrineDonation::newBankTransferDonation();
 		$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
 		$converter = new LegacyToDomainConverter();
@@ -62,7 +45,6 @@ class LegacyToDomainConverterTest extends TestCase {
 	}
 
 	public function testGivenDonationWithModerationNeededStatus_converterMarksDonationAsToBeModerated(): void {
-		$this->markTestIncomplete( 'This should work again when converter no longer creates dummy payment' );
 		$doctrineDonation = ValidDoctrineDonation::newBankTransferDonation();
 		$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
 		$converter = new LegacyToDomainConverter();
