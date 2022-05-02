@@ -61,7 +61,7 @@ class DonationToPaymentConverter {
 
 	private PaymentIDRepository $dummyIdGeneratorForFollowups;
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
-	private AnalysisResult $result;
+	private ConversionResult $result;
 
 	/**
 	 * In 2015 we had an error in the old fundraising app where we lost booking data.
@@ -89,10 +89,10 @@ class DonationToPaymentConverter {
 	 *
 	 * @param int $idOffset Starting donation ID
 	 * @param int $maxConversions Maximum number of donations to convert
-	 * @return AnalysisResult
+	 * @return ConversionResult
 	 */
-	public function convertDonations( int $idOffset = 0, int $maxConversions = self::CONVERT_ALL ): AnalysisResult {
-		$this->result = new AnalysisResult();
+	public function convertDonations( int $idOffset = 0, int $maxConversions = self::CONVERT_ALL ): ConversionResult {
+		$this->result = new ConversionResult();
 		foreach ( $this->getRows( $idOffset, $maxConversions ) as $row ) {
 			$this->result->addRow();
 			if ( $row['data'] ) {
