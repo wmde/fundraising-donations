@@ -67,7 +67,6 @@ class DonationTest extends TestCase {
 	public function testNewDonationsAreNotExported() {
 		$donation = new Donation(
 			null,
-			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
@@ -86,7 +85,6 @@ class DonationTest extends TestCase {
 	public function testAddCommentThrowsExceptionWhenCommentAlreadySet(): void {
 		$donation = new Donation(
 			null,
-			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
@@ -101,7 +99,6 @@ class DonationTest extends TestCase {
 	public function testAddCommentSetsWhenCommentNotSetYet(): void {
 		$donation = new Donation(
 			null,
-			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
@@ -141,20 +138,6 @@ class DonationTest extends TestCase {
 		$donation->confirmBooked();
 
 		$this->assertFalse( $donation->hasComment() );
-	}
-
-	public function testWhenConstructingWithInvalidStatus_exceptionIsThrown(): void {
-		$this->expectException( \InvalidArgumentException::class );
-
-		new Donation(
-			null,
-			'Such invalid status',
-			ValidDonation::newDonor(),
-			ValidPayments::newDirectDebitPayment()->getId(),
-			Donation::OPTS_INTO_NEWSLETTER,
-			ValidDonation::newTrackingInfo(),
-			null
-		);
 	}
 
 	private function makeGenericModerationReason(): ModerationReason {

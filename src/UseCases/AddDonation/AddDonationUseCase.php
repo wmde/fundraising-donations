@@ -33,20 +33,18 @@ class AddDonationUseCase {
 	private DonationNotifier $notifier;
 	private PaymentReferenceCodeGenerator $transferCodeGenerator;
 	private DonationTokenFetcher $tokenFetcher;
-	private InitialDonationStatusPicker $initialDonationStatusPicker;
 	private EventEmitter $eventEmitter;
 
 	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
 								 ModerationService $policyValidator, DonationNotifier $notifier,
 								 PaymentReferenceCodeGenerator $transferCodeGenerator, DonationTokenFetcher $tokenFetcher,
-			InitialDonationStatusPicker $initialDonationStatusPicker, EventEmitter $eventEmitter ) {
+				 EventEmitter $eventEmitter ) {
 		$this->donationRepository = $donationRepository;
 		$this->donationValidator = $donationValidator;
 		$this->policyValidator = $policyValidator;
 		$this->notifier = $notifier;
 		$this->transferCodeGenerator = $transferCodeGenerator;
 		$this->tokenFetcher = $tokenFetcher;
-		$this->initialDonationStatusPicker = $initialDonationStatusPicker;
 		$this->eventEmitter = $eventEmitter;
 	}
 
@@ -92,7 +90,6 @@ class AddDonationUseCase {
 
 		$donation = new Donation(
 			null,
-			( $this->initialDonationStatusPicker )( $payment ),
 			$this->getPersonalInfoFromRequest( $donationRequest ),
 			$payment->getId(),
 			$donationRequest->getOptIn() === '1',
