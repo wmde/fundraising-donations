@@ -18,8 +18,6 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Repositories\PaymentIDRepository;
 
 class DonationToPaymentConverter {
-	private PaymentIDRepository $idGenerator;
-
 	private const PPL_LEGACY_KEY_MAP = [
 		'paypal_payer_id' => 'payer_id',
 		'paypal_subscr_id' => 'subscr_id',
@@ -57,10 +55,11 @@ class DonationToPaymentConverter {
 		543578,
 	];
 
+	private const ANONYMOUS_REFERENCE_CODE = 'AA-AAA-AAA-A';
+
+	private PaymentIDRepository $dummyIdGeneratorForFollowups;
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
 	private AnalysisResult $result;
-
-	private const ANONYMOUS_REFERENCE_CODE = 'AA-AAA-AAA-A';
 
 	/**
 	 * In 2015 we had an error in the old fundraising app where we lost booking data.
@@ -72,9 +71,10 @@ class DonationToPaymentConverter {
 	private \DateTimeImmutable $lostBookingDataPeriodEnd;
 
 	public function __construct(
-		private Connection $db
+		private Connection $db,
+		private PaymentIDRepository $idGenerator,
 	) {
-		$this->idGenerator = new NullGenerator();
+		$this->dummyIdGeneratorForFollowups = new NullGenerator();
 		$this->anonymisedPaymentReferenceCode = PaymentReferenceCode::newFromString( self::ANONYMOUS_REFERENCE_CODE );
 		$this->lostBookingDataPeriodStart = new \DateTimeImmutable( '2015-09-28 0:00:00' );
 		$this->lostBookingDataPeriodEnd = new \DateTimeImmutable( '2015-10-08 0:00:00' );
@@ -87,7 +87,7 @@ class DonationToPaymentConverter {
 		$qb = $this->db->createQueryBuilder();
 		$qb->select( 'd.id', 'betrag AS amount', 'periode AS intervalInMonths', 'zahlweise AS paymentType',
 			'ueb_code AS transferCode', 'data', 'status', 'dt_new AS donationDate', 'ps.confirmed_at AS valuationDate',
-			'p.id AS paymentId' )
+			)
 			->from( 'spenden', 'd' )
 			->leftJoin( 'd', 'donation_payment', 'p', 'd.payment_id = p.id' )
 			->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' )
@@ -150,7 +150,7 @@ class DonationToPaymentConverter {
 
 	private function newCreditCardPayment( array $row ): CreditCardPayment {
 		$payment = new CreditCardPayment(
-			intval( $row['paymentId'] ),
+			$this->idGenerator->getNewID(),
 			$this->getAmount( $row ),
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) )
 		);
@@ -168,13 +168,13 @@ class DonationToPaymentConverter {
 			}
 		}
 
-		$payment->bookPayment( $this->getBookingData( self::MCP_LEGACY_KEY_MAP, $row['data'] ), $this->idGenerator );
+		$payment->bookPayment( $this->getBookingData( self::MCP_LEGACY_KEY_MAP, $row['data'] ), $this->dummyIdGeneratorForFollowups );
 		return $payment;
 	}
 
 	private function newPayPalPayment( array $row ): PayPalPayment {
 		$payment = new PayPalPayment(
-			intval( $row['paymentId'] ),
+			$this->idGenerator->getNewID(),
 			$this->getAmount( $row ),
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) )
 		);
@@ -217,7 +217,7 @@ class DonationToPaymentConverter {
 			$this->result->addWarning( 'Invalid date format for booked PayPal, ' . $solution, $row );
 		}
 		// TODO convert followup payments, probably using reflection
-		$payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), $this->idGenerator );
+		$payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), $this->dummyIdGeneratorForFollowups );
 		return $payment;
 	}
 
@@ -228,7 +228,7 @@ class DonationToPaymentConverter {
 			$interval = PaymentInterval::OneTime;
 		}
 		$payment = SofortPayment::create(
-			intval( $row['paymentId'] ),
+			$this->idGenerator->getNewID(),
 			$this->getAmount( $row ),
 			$interval,
 			$this->getPaymentReferenceCode( $row )
@@ -245,7 +245,7 @@ class DonationToPaymentConverter {
 			'transactionId' => md5( 'sofort-' . $row['id'] ),
 			'valuationDate' => ( new \DateTimeImmutable( $row['valuationDate'] ) )->format( DATE_ATOM )
 		];
-		$payment->bookPayment( $bookingData, $this->idGenerator );
+		$payment->bookPayment( $bookingData, $this->dummyIdGeneratorForFollowups );
 		if ( $payment->getPaymentReferenceCode() === self::ANONYMOUS_REFERENCE_CODE ) {
 			$payment->anonymise();
 		}
@@ -264,7 +264,7 @@ class DonationToPaymentConverter {
 			$anonymous = false;
 		}
 		$payment = DirectDebitPayment::create(
-			intval( $row['paymentId'] ),
+			$this->idGenerator->getNewID(),
 			$this->getAmount( $row ),
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) ),
 			$iban,
@@ -282,7 +282,7 @@ class DonationToPaymentConverter {
 	private function newBankTransferPayment( array $row ): BankTransferPayment {
 		$paymentReferenceCode = $this->getPaymentReferenceCode( $row );
 		$payment = BankTransferPayment::create(
-			intval( $row['paymentId'] ),
+			$this->idGenerator->getNewID(),
 			$this->getAmount( $row ),
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) ),
 			$paymentReferenceCode

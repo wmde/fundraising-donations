@@ -5,6 +5,7 @@
 use Doctrine\DBAL\DriverManager;
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\DonationToPaymentConverter;
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\ResultObject;
+use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\SequentialPaymentIdGenerator;
 
 require __DIR__ . '/vendor/autoload.php';
 
@@ -14,7 +15,8 @@ $config = [
 
 
 $db = DriverManager::getConnection( $config );
-$converter = new DonationToPaymentConverter( $db );
+// TODO after running this in prod, we need to set the autoincrement value of our id table to the last value of the generator
+$converter = new DonationToPaymentConverter( $db, new SequentialPaymentIdGenerator(1) );
 
 $result = $converter->convertDonations();
 
