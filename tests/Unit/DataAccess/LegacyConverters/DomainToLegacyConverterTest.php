@@ -169,7 +169,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$legacyPaymentData = new LegacyPaymentData(
 			9999,
 			1,
-			'UEB',
+			'BEZ',
 			[],
 			$status
 		);
@@ -184,6 +184,24 @@ class DomainToLegacyConverterTest extends TestCase {
 		yield [ LegacyPaymentStatus::BANK_TRANSFER->value ];
 		// Use bogus status to make sure there is no checking
 		yield [ self::BOGUS_STATUS ];
+	}
+
+	public function testLegacyDataGetsSet(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newDirectDebitDonation();
+		$legacyPaymentData = new LegacyPaymentData(
+			2342,
+			1,
+			'BEZ',
+			[],
+			LegacyPaymentStatus::DIRECT_DEBIT->value
+		);
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
+
+		$this->assertSame( 'BEZ', $doctrineDonation->getPaymentType() );
+		$this->assertSame( '23.42', $doctrineDonation->getAmount() );
+		$this->assertSame( 1, $doctrineDonation->getPaymentIntervalInMonths() );
 	}
 
 	public function testGivenExistingModerationReasons_theyOverrideIdenticalDonationModerationReasons(): void {
