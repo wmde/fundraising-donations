@@ -77,6 +77,8 @@ class Donation {
 
 	private ?DonationPayment $payment = null;
 
+	private int $paymentId;
+
 	public function setDonorFullName( string $donorFullName ): self {
 		$this->donorFullName = $donorFullName;
 
@@ -346,22 +348,20 @@ class Donation {
 	}
 
 	/**
-	 * @deprecated Should be just payment id
-	 * @return DonationPayment|null
-	 */
-	public function getPayment(): ?DonationPayment {
-		// phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable
-		throw new RefactoringException( 'This should be an integer ID, DonationPayment should be dropped' );
-		return $this->payment;
-	}
-
-	/**
 	 * @param DonationPayment $payment
 	 * @return void
 	 */
 	public function setPayment( DonationPayment $payment ) {
 		$this->payment = $payment;
 		throw new RefactoringException( 'This should be an integer ID, DonationPayment should be dropped' );
+	}
+
+	public function getPaymentId(): int {
+		return $this->paymentId;
+	}
+
+	public function setPaymentId( int $paymentId ): void {
+		$this->paymentId = $paymentId;
 	}
 
 	public function setId( ?int $id ) {
