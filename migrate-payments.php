@@ -18,7 +18,7 @@ $db = DriverManager::getConnection( $config );
 // TODO after running this in prod, we need to set the autoincrement value of our id table to the last value of the generator
 $converter = new DonationToPaymentConverter( $db, new SequentialPaymentIdGenerator(1) );
 
-$result = $converter->convertDonations(0, 100000);
+$result = $converter->convertDonations();
 
 $errors = $result->getErrors();
 $warnings = $result->getWarnings();
@@ -39,9 +39,14 @@ printf( "Processed %d donations, with %d errors (%.2f%%) and %d warnings (%.2f%%
 
 echo "\nWarnings\n";
 echo "--------\n";
+printf("|Error|Donations affected|Date Range|\n");
 foreach($warnings as $type => $warning) {
 	$dateRange = $warning->getDonationDateRange();
-	printf("%s: %d  (%s - %s) \n", $type, $warning->getItemCount(), $dateRange->getLowerBound(), $dateRange->getUpperBound() );
+	$lower = new DateTimeImmutable($dateRange->getLowerBound());
+	$upper = new DateTimeImmutable($dateRange->getUpperBound());
+	$warningCount = $warning->getItemCount();
+	$percentageOfDonations = ( $warningCount * 100 ) / $processedPayments;
+	printf("|%-60s: | %d (%.2f%%) | (%s - %s) |\n", $type, $warningCount, $percentageOfDonations, $lower->format('Y-m-d'), $upper->format('Y-m-d') );
 }
 
 if ( count($errors) === 0) {
