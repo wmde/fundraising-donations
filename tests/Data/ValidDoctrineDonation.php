@@ -12,6 +12,7 @@ class ValidDoctrineDonation {
 	private const PAYMENT_SOFORT = 'SUB';
 	private const PAYMENT_DIRECT_DEBIT = 'BEZ';
 	private const PAYMENT_CREDIT_CARD = 'MCP';
+	private const PAYMENT_ID = 7;
 
 	/**
 	 * Returns a Doctrine Donation entity equivalent to the domain entity returned
@@ -26,6 +27,7 @@ class ValidDoctrineDonation {
 	public static function newExportedirectDebitDoctrineDonation(): Donation {
 		$donation = ( new self() )->createDonation();
 		$donation->setDtGruen( new \DateTime() );
+		$donation->setPaymentId( self::PAYMENT_ID );
 		return $donation;
 	}
 
@@ -101,6 +103,7 @@ class ValidDoctrineDonation {
 		$donation = $self->createDonation();
 		$donation->setPaymentType( self::PAYMENT_BANK_TRANSFER );
 		$donation->setBankTransferCode( ValidPayments::PAYMENT_BANK_TRANSFER_CODE );
+		$donation->setPaymentId( self::PAYMENT_ID );
 		return $donation;
 	}
 
