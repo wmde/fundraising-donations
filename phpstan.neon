@@ -10,7 +10,6 @@ parameters:
 			- src/UseCases/SofortPaymentNotification/SofortPaymentNotificationUseCase.php
 			- tests/Data/ValidPayPalNotificationRequest.php
 			- tests/Data/ValidSofortNotificationRequest.php
-			- tests/Integration/DataAccess/DoctrineDonationRepositoryTest.php
 			- tests/Integration/DataAccess/SerializedDataHandlingTest.php
 			- tests/Integration/DataAccess/UniqueTransferCodeGeneratorTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationPolicyValidatorTest.php
