@@ -3,7 +3,7 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration;
 
-class AnalysisResult {
+class ConversionResult {
 
 	private const BUFFER_SIZE = 20;
 
