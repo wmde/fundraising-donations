@@ -20,6 +20,8 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentStatus;
  */
 class DomainToLegacyConverterTest extends TestCase {
 
+	private const BOGUS_STATUS = 'R';
+
 	/**
 	 * @dataProvider getPaymentMethodsAndTransferCodes
 	 */
@@ -158,92 +160,30 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertEquals( $moderationReasons, $doctrineDonation->getModerationReasons()->toArray() );
 	}
 
-	public function testGivenDirectDebitDonation_statusIsSet(): void {
+	/**
+	 * @dataProvider getStatusValues
+	 */
+	public function testStatusGetsSetFromLegacyPaymentData( string $status ): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newDirectDebitDonation();
-
 		$legacyPaymentData = new LegacyPaymentData(
 			9999,
 			1,
 			'UEB',
 			[],
-			LegacyPaymentStatus::DIRECT_DEBIT->value
+			$status
 		);
 
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
 
-		$this->assertSame( DoctrineDonation::STATUS_NEW, $doctrineDonation->getStatus() );
+		$this->assertSame( $status, $doctrineDonation->getStatus() );
 	}
 
-	public function testGivenBankTransferDonation_statusIsSet(): void {
-		$converter = new DomainToLegacyConverter();
-		$donation = ValidDonation::newBankTransferDonation();
-
-		$legacyPaymentData = new LegacyPaymentData(
-			9999,
-			1,
-			'UEB',
-			[],
-			LegacyPaymentStatus::BANK_TRANSFER->value
-		);
-
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
-
-		$this->assertSame( DoctrineDonation::STATUS_PROMISE, $doctrineDonation->getStatus() );
-	}
-
-	/**
-	 * @dataProvider incompleteDonationProvider
-	 * @param Donation $donation
-	 */
-	public function testGivenIncompleteDonation_statusIsSet( Donation $donation ): void {
-		$converter = new DomainToLegacyConverter();
-
-		$legacyPaymentData = new LegacyPaymentData(
-			9999,
-			1,
-			'irrelevant',
-			[],
-			LegacyPaymentStatus::EXTERNAL_INCOMPLETE->value
-		);
-
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
-
-		$this->assertSame( DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE, $doctrineDonation->getStatus() );
-	}
-
-	public function incompleteDonationProvider(): iterable {
-		// The credit card data tests both null and empty credit card transaction data
-		yield [ ValidDonation::newIncompleteCreditCardDonation() ];
-		yield [ ValidDonation::newIncompleteAnonymousCreditCardDonation() ];
-		yield [ ValidDonation::newIncompleteAnonymousPayPalDonation() ];
-		yield [ ValidDonation::newIncompleteSofortDonation() ];
-	}
-
-	/**
-	 * @dataProvider externallyBookedDonationProvider
-	 * @param Donation $donation
-	 * @param string $expectedStatus
-	 */
-	public function testGivenBookedDonation_statusIsSet( Donation $donation, string $expectedStatus ): void {
-		$converter = new DomainToLegacyConverter();
-		$legacyPaymentData = new LegacyPaymentData(
-			9999,
-			1,
-			'UEB',
-			[],
-			$expectedStatus
-		);
-
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $legacyPaymentData, [] );
-
-		$this->assertSame( $expectedStatus, $doctrineDonation->getStatus() );
-	}
-
-	public function externallyBookedDonationProvider(): iterable {
-		yield [ ValidDonation::newBookedAnonymousPayPalDonation(), DoctrineDonation::STATUS_EXTERNAL_BOOKED ];
-		yield [ ValidDonation::newBookedCreditCardDonation(), DoctrineDonation::STATUS_EXTERNAL_BOOKED ];
-		yield [ ValidDonation::newCompletedSofortDonation(), DoctrineDonation::STATUS_PROMISE ];
+	public function getStatusValues(): iterable {
+		yield [ LegacyPaymentStatus::DIRECT_DEBIT->value ];
+		yield [ LegacyPaymentStatus::BANK_TRANSFER->value ];
+		// Use bogus status to make sure there is no checking
+		yield [ self::BOGUS_STATUS ];
 	}
 
 	public function testGivenExistingModerationReasons_theyOverrideIdenticalDonationModerationReasons(): void {
