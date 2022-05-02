@@ -12,6 +12,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
@@ -34,16 +35,18 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 	private EntityManager $entityManager;
 
+	private LegacyPaymentData $legacyPaymentData;
+
 	public function setUp(): void {
 		$factory = TestEnvironment::newInstance()->getFactory();
 		$this->entityManager = $factory->getEntityManager();
 		parent::setUp();
+		$this->legacyPaymentData = $this->createDefaultLegacyData();
 	}
 
 	public function testValidDonationGetPersisted(): void {
-		$this->markTestIncomplete( 'This should work again when legacy converters have been fixed' );
 		$donation = ValidDonation::newDirectDebitDonation();
-
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
 		$this->newRepository()->storeDonation( $donation );
 
 		$expectedDoctrineEntity = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
@@ -67,7 +70,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertNotNull( $actual->getCreationTime() );
 		$expected->setCreationTime( $actual->getCreationTime() );
 
-		// pre-persist subscriber automatically access and update tokens. We'Re using fixed values in the test
+		// pre-persist subscriber automatically access and update tokens. We're using fixed values in the test
 		$expected->encodeAndSetData( array_merge( $expected->getDecodedData(), [
 			'token' => FixedTokenGenerator::TOKEN,
 			'utoken' => FixedTokenGenerator::TOKEN,
@@ -98,7 +101,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testNewDonationPersistenceRoundTrip(): void {
-		$this->markTestIncomplete( 'This should work again when legacy converters have been fixed' );
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$repository = $this->newRepository();
@@ -112,9 +114,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testWhenDonationAlreadyExists_persistingCausesUpdate(): void {
-		// TODO for Refactoring: Pay close attention to the payment ID - the entity factory will create a new payment for the detached
-		//  entity, which should not cause any trouble, because the repository should not try to store payment data when the donation changes.
-		$this->markTestIncomplete( 'This should work again when legacy converters have been fixed.' );
 		$repository = $this->newRepository();
 
 		$donation = ValidDonation::newDirectDebitDonation();
@@ -123,7 +122,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		// It is important a new instance is created here to test "detached entity" handling
 		$newDonation = ValidDonation::newDirectDebitDonation();
 		$newDonation->assignId( $donation->getId() );
-		$newDonation->cancel();
+		$newDonation->markForModeration();
 		$repository->storeDonation( $newDonation );
 
 		$this->assertEquals( $newDonation, $repository->getDonationById( $newDonation->getId() ) );
@@ -168,7 +167,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testCommentGetPersistedAndRetrieved(): void {
-		$this->markTestIncomplete( 'This should work again when legacy converters have been fixed.' );
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
@@ -181,7 +179,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testPersistingDonationWithoutCommentCausesCommentToBeCleared(): void {
-		$this->markTestIncomplete( 'This should work again when legacy converters have been fixed.' );
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
@@ -217,15 +215,21 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 	public function makeGetPaymentUseCaseStub(): GetPaymentUseCase {
 		$stub = $this->createStub( GetPaymentUseCase::class );
-		$stub->method( 'getLegacyPaymentDataObject' )->willReturn(
-			new LegacyPaymentData(
-				999999,
-				999,
-				'BLA',
-				[],
-				'*'
-			)
-		);
+		$stub->method( 'getLegacyPaymentDataObject' )->willReturn( $this->legacyPaymentData );
 		return $stub;
+	}
+
+	private function createDefaultLegacyData(): LegacyPaymentData {
+		// Bogus data
+		return new LegacyPaymentData(
+			999999,
+			999,
+			'BLA',
+			[
+				'paymentValue' => 'almostInfinite',
+				'paid' => 'certainly'
+			],
+			'*'
+		);
 	}
 }

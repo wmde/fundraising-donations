@@ -9,6 +9,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
+use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentReferenceCode;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
@@ -16,6 +17,12 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Repositories\PaymentIDRepository;
 
 class ValidPayments {
+
+	public const ID_DIRECT_DEBIT = 1;
+	public const ID_BANK_TRANSFER = 2;
+	public const ID_PAYPAL = 3;
+	public const ID_CREDIT_CARD = 4;
+	public const ID_SOFORT = 5;
 
 	public const CREDIT_CARD_TRANSACTION_ID = '7788998877';
 
@@ -41,7 +48,7 @@ class ValidPayments {
 
 	public static function newPayPalPayment(): PayPalPayment {
 		return new PayPalPayment(
-			1,
+			self::ID_PAYPAL,
 			Euro::newFromFloat( self::DONATION_AMOUNT ),
 			PaymentInterval::Quarterly
 		);
@@ -71,7 +78,7 @@ class ValidPayments {
 
 	public static function newDirectDebitPayment(): DirectDebitPayment {
 		return DirectDebitPayment::create(
-			1,
+			self::ID_DIRECT_DEBIT,
 			Euro::newFromFloat( self::DONATION_AMOUNT ),
 			PaymentInterval::Quarterly,
 			new Iban( self::PAYMENT_IBAN ),
@@ -79,9 +86,21 @@ class ValidPayments {
 		);
 	}
 
+	public static function newDirectDebitLegacyData(): LegacyPaymentData {
+		$legacy = self::newDirectDebitPayment()->getLegacyData();
+		return new LegacyPaymentData( $legacy->amountInEuroCents, $legacy->intervalInMonths, $legacy->paymentName, [
+			...$legacy->paymentSpecificValues,
+			'konto' => self::PAYMENT_BANK_ACCOUNT,
+			'blz' => self::PAYMENT_BANK_CODE,
+			'bankname' => self::PAYMENT_BANK_NAME
+		],
+		$legacy->paymentStatus
+		);
+	}
+
 	public static function newSofortPayment(): SofortPayment {
 		return SofortPayment::create(
-			1,
+			self::ID_SOFORT,
 			Euro::newFromFloat( self::DONATION_AMOUNT ),
 			PaymentInterval::OneTime,
 			PaymentReferenceCode::newFromString( self::PAYMENT_BANK_TRANSFER_CODE )
@@ -99,7 +118,7 @@ class ValidPayments {
 
 	public static function newBankTransferPayment(): BankTransferPayment {
 		return BankTransferPayment::create(
-			1,
+			self::ID_BANK_TRANSFER,
 			Euro::newFromFloat( self::DONATION_AMOUNT ),
 			PaymentInterval::Quarterly,
 			PaymentReferenceCode::newFromString( self::PAYMENT_BANK_TRANSFER_CODE )
@@ -108,7 +127,7 @@ class ValidPayments {
 
 	public static function newCreditCardPayment(): CreditCardPayment {
 		return new CreditCardPayment(
-			1,
+			self::ID_CREDIT_CARD,
 			Euro::newFromFloat( self::DONATION_AMOUNT ),
 			PaymentInterval::Quarterly
 		);
