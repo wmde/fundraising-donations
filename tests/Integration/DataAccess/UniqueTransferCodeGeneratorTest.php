@@ -55,7 +55,6 @@ class UniqueTransferCodeGeneratorTest extends TestCase {
 	private function storeDonationWithTransferCode( string $code ): void {
 		$donation = new Donation(
 			null,
-			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
 			// Can be 0, this test will be deleted anyway
 			0,
