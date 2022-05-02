@@ -4,13 +4,10 @@ parameters:
 	# TODO remove these when working on the payment refactoring tasks
 	excludePaths:
 		analyse:
-			- src/DataAccess/DoctrineEntities/Donation.php
-			- src/Domain/Model/Donation.php
 			- src/UseCases/AddDonation/AddDonationValidator.php
 			- src/UseCases/AddDonation/PaymentFactory.php
 			- src/UseCases/HandlePayPalPaymentNotification/HandlePayPalPaymentCompletionNotificationUseCase.php
 			- src/UseCases/SofortPaymentNotification/SofortPaymentNotificationUseCase.php
-			- tests/Data/ValidDoctrineDonation.php
 			- tests/Data/ValidPayPalNotificationRequest.php
 			- tests/Data/ValidSofortNotificationRequest.php
 			- tests/Integration/DataAccess/DoctrineDonationRepositoryTest.php
@@ -19,12 +16,12 @@ parameters:
 			- tests/Integration/UseCases/AddDonation/AddDonationPolicyValidatorTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationValidatorTest.php
+			- tests/Integration/UseCases/CancelDonation/CancelDonationUseCaseTest.php
 			- tests/Integration/UseCases/CreditCardPaymentNotification/CreditCardNotificationUseCaseTest.php
 			- tests/Integration/UseCases/HandlePayPalPaymentNotification/HandlePayPalPaymentCompletionNotificationUseCaseTest.php
 			- tests/Integration/UseCases/SofortPaymentNotification/SofortPaymentNotificationUseCaseTest.php
 			- tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
 			- tests/Unit/DataAccess/LegacyConverters/DomainToLegacyConverterTest.php
 			- tests/Unit/DataAccess/LegacyConverters/LegacyToDomainConverterTest.php
-			- tests/Unit/Domain/Model/DonationTest.php
 			- tests/Unit/Infrastructure/DonationConfirmationMailerTest.php
 			- tests/Unit/UseCases/AddDonation/AddDonationRequestTest.php

@@ -165,7 +165,7 @@ class ValidDonation {
 			null,
 			$status,
 			self::newDonor(),
-			$payment,
+			$payment->getId(),
 			self::OPTS_INTO_NEWSLETTER,
 			self::newTrackingInfo()
 		);
@@ -176,7 +176,7 @@ class ValidDonation {
 			null,
 			Donation::STATUS_NEW,
 			self::newDonor(),
-			$payment,
+			$payment->getId(),
 			self::OPTS_INTO_NEWSLETTER,
 			self::newTrackingInfo()
 		);
@@ -189,7 +189,7 @@ class ValidDonation {
 			null,
 			$status,
 			new AnonymousDonor(),
-			$payment,
+			$payment->getId(),
 			false,
 			self::newTrackingInfo()
 		);
@@ -200,7 +200,7 @@ class ValidDonation {
 			$donationId,
 			$status,
 			new AnonymousDonor(),
-			$payment,
+			$payment->getId(),
 			false,
 			self::newTrackingInfo()
 		);
