@@ -45,9 +45,4 @@ parameters:
 			count: 1
 			path: tests/Unit/DataAccess/DonorFieldMapperTest.php
 
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\PaymentContext\\\\Domain\\\\Model\\\\PaymentMethod\\:\\:getPayPalData\\(\\)\\.$#"
-			count: 1
-			path: tests/Unit/DataAccess/LegacyConverters/DomainToLegacyConverterTest.php
-
 

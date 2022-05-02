@@ -23,8 +23,6 @@ parameters:
 			- tests/Integration/UseCases/HandlePayPalPaymentNotification/HandlePayPalPaymentCompletionNotificationUseCaseTest.php
 			- tests/Integration/UseCases/SofortPaymentNotification/SofortPaymentNotificationUseCaseTest.php
 			- tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
-			- tests/Unit/DataAccess/LegacyConverters/DomainToLegacyConverterTest.php
-			- tests/Unit/DataAccess/LegacyConverters/LegacyToDomainConverterTest.php
 			- tests/Unit/Infrastructure/DonationConfirmationMailerTest.php
 			- tests/Unit/UseCases/AddDonation/AddDonationRequestTest.php
 			- tests/Unit/UseCases/AddDonation/InitialDonationStatusPickerTest.php
