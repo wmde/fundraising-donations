@@ -51,35 +51,30 @@ class ValidDonation {
 	public static function newBankTransferDonation(): Donation {
 		return self::createDonation(
 			ValidPayments::newBankTransferPayment(),
-			Donation::STATUS_PROMISE
 		);
 	}
 
 	public static function newSofortDonation(): Donation {
 		return self::createDonation(
 			ValidPayments::newSofortPayment(),
-			Donation::STATUS_PROMISE
 		);
 	}
 
 	public static function newDirectDebitDonation(): Donation {
 		return self::createDonation(
 			ValidPayments::newDirectDebitPayment(),
-			Donation::STATUS_NEW
 		);
 	}
 
 	public static function newBookedPayPalDonation( string $transactionId = ValidPayments::PAYPAL_TRANSACTION_ID ): Donation {
 		return self::createDonation(
 			ValidPayments::newBookedPayPalPayment( $transactionId ),
-			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
 	public static function newIncompletePayPalDonation(): Donation {
 		return self::createDonation(
 			ValidPayments::newPayPalPayment(),
-			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
@@ -91,21 +86,18 @@ class ValidDonation {
 		$payment = ValidPayments::newCompletedSofortPayment();
 		return self::createDonation(
 			$payment,
-			Donation::STATUS_PROMISE
 		);
 	}
 
 	public static function newIncompleteAnonymousPayPalDonation(): Donation {
 		return self::createAnonymousDonation(
 			ValidPayments::newPayPalPayment(),
-			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
 	public static function newBookedAnonymousPayPalDonation(): Donation {
 		return self::createAnonymousDonation(
 			ValidPayments::newBookedPayPalPayment(),
-			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
@@ -113,7 +105,6 @@ class ValidDonation {
 		return self::createAnonymousDonationWithId(
 			$donationId,
 			ValidPayments::newBookedPayPalPayment(),
-			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
@@ -121,21 +112,18 @@ class ValidDonation {
 		$payment = ValidPayments::newBookedCreditCardPayment();
 		return self::createDonation(
 			$payment,
-			Donation::STATUS_EXTERNAL_BOOKED
 		);
 	}
 
 	public static function newIncompleteCreditCardDonation(): Donation {
 		return self::createDonation(
 			ValidPayments::newCreditCardPayment(),
-			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
 	public static function newIncompleteAnonymousCreditCardDonation(): Donation {
 		return self::createAnonymousDonation(
 			ValidPayments::newCreditCardPayment(),
-			Donation::STATUS_EXTERNAL_INCOMPLETE
 		);
 	}
 
@@ -154,16 +142,14 @@ class ValidDonation {
 	public static function newCompanyBankTransferDonation(): Donation {
 		$donation = self::createDonation(
 			ValidPayments::newBankTransferPayment(),
-			Donation::STATUS_NEW
 		);
 		$donation->setDonor( self::newCompanyDonor() );
 		return $donation;
 	}
 
-	private static function createDonation( Payment $payment, string $status ): Donation {
+	private static function createDonation( Payment $payment ): Donation {
 		return new Donation(
 			null,
-			$status,
 			self::newDonor(),
 			$payment->getId(),
 			self::OPTS_INTO_NEWSLETTER,
@@ -174,7 +160,6 @@ class ValidDonation {
 	private static function createCancelledDonation( Payment $payment ): Donation {
 		$donation = new Donation(
 			null,
-			Donation::STATUS_NEW,
 			self::newDonor(),
 			$payment->getId(),
 			self::OPTS_INTO_NEWSLETTER,
@@ -184,10 +169,9 @@ class ValidDonation {
 		return $donation;
 	}
 
-	private static function createAnonymousDonation( Payment $payment, string $status ): Donation {
+	private static function createAnonymousDonation( Payment $payment ): Donation {
 		return new Donation(
 			null,
-			$status,
 			new AnonymousDonor(),
 			$payment->getId(),
 			false,
@@ -195,10 +179,9 @@ class ValidDonation {
 		);
 	}
 
-	private static function createAnonymousDonationWithId( int $donationId, Payment $payment, string $status ): Donation {
+	private static function createAnonymousDonationWithId( int $donationId, Payment $payment ): Donation {
 		return new Donation(
 			$donationId,
-			$status,
 			new AnonymousDonor(),
 			$payment->getId(),
 			false,
