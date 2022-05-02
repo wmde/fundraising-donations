@@ -7,9 +7,9 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\DummyPayment;
 use WMDE\Fundraising\DonationContext\RefactoringException;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BookablePayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\CancellablePayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
 
 /**
@@ -41,11 +41,7 @@ class Donation {
 	private ?int $id;
 	private string $status;
 	private Donor $donor;
-	/**
-	 * @var Payment
-	 * @deprecated Use payment ID instead
-	 */
-	private Payment $payment;
+
 	private int $paymentId;
 	private bool $optsIntoNewsletter;
 	private ?DonationComment $comment;
@@ -72,26 +68,25 @@ class Donation {
 	 * @param int|null $id
 	 * @param string $status Must be one of the Donation::STATUS_ constants. Will be deprecated, see https://phabricator.wikimedia.org/T276817
 	 * @param Donor $donor
-	 * @param Payment $payment TODO Deprecated, Pass paymentId instead
+	 * @param int $paymentId
 	 * @param bool $optsIntoNewsletter
 	 * @param DonationTrackingInfo $trackingInfo
 	 * @param DonationComment|null $comment
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( ?int $id, string $status, Donor $donor, Payment $payment,
+	public function __construct( ?int $id, string $status, Donor $donor, int $paymentId,
 		bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 		$this->id = $id;
 		$this->setStatus( $status );
 		$this->donor = $donor;
-		$this->payment = $payment;
+		$this->paymentId = $paymentId;
 		$this->optsIntoNewsletter = $optsIntoNewsletter;
 		$this->trackingInfo = $trackingInfo;
 		$this->comment = $comment;
 		$this->exported = false;
 		$this->optsIntoDonationReceipt = null;
 		$this->cancelled = false;
-		$this->paymentId = $payment->getId();
 		$this->moderationReasons = [];
 	}
 
@@ -146,8 +141,12 @@ class Donation {
 		return $this->status;
 	}
 
+	/**
+	 * @deprecated Use a payment instead
+	 * @return Euro
+	 */
 	public function getAmount(): Euro {
-		return $this->payment->getAmount();
+		return Euro::newFromCents( 0 );
 	}
 
 	/**
@@ -195,7 +194,7 @@ class Donation {
 	 * @return Payment
 	 */
 	public function getPayment(): Payment {
-		return $this->payment;
+		return DummyPayment::create();
 	}
 
 	public function getPaymentId(): int {
@@ -211,9 +210,6 @@ class Donation {
 	}
 
 	public function cancel(): void {
-		if ( !$this->isCancellable() ) {
-			throw new RuntimeException( 'Can only cancel un-exported donations with non-external payment providers' );
-		}
 		$this->cancelled = true;
 	}
 
@@ -221,10 +217,7 @@ class Donation {
 		$this->cancelled = false;
 	}
 
-	public function confirmBooked( array $paymentTransactionData ): void {
-		// phpcs:disable Squiz.PHP.NonExecutableCode.Unreachable
-		throw new RefactoringException( 'TODO: your use case should call the payment booking with transaction data, this method is just for followup data changes' );
-
+	public function confirmBooked( array $paymentTransactionData = [] ): void {
 		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
 			$this->makeCommentPrivate();
 		}
@@ -268,21 +261,12 @@ class Donation {
 	}
 
 	/**
-	 * @deprecated The donation should not know anything about the payment. Instead, try to cancel the payment, then cancel the donation.
-	 *
-	 * @return bool
-	 */
-	private function isCancellable(): bool {
-		return ( $this->payment instanceof CancellablePayment ) && $this->payment->isCancellable();
-	}
-
-	/**
 	 * @deprecated The donation should not know anything about the payment.
 	 *
 	 * @return bool
 	 */
 	public function hasBookablePayment(): bool {
-		return $this->payment instanceof BookablePayment;
+		return $this->getPayment() instanceof BookablePayment;
 	}
 
 	public function isMarkedForModeration(): bool {
