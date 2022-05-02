@@ -94,7 +94,7 @@ class AddDonationUseCase {
 			null,
 			( $this->initialDonationStatusPicker )( $payment ),
 			$this->getPersonalInfoFromRequest( $donationRequest ),
-			$payment,
+			$payment->getId(),
 			$donationRequest->getOptIn() === '1',
 			$this->newTrackingInfoFromRequest( $donationRequest )
 		);

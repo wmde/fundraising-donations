@@ -43,7 +43,8 @@ class LegacyToDomainConverterTest extends TestCase {
 
 	public function testGivenDonationWithUnknownPayment_converterCreatesPaymentWithoutAssociatedData(): void {
 		$this->markTestIncomplete( 'Talk to PM about this error condition - how backwards compatible should we be? See also https://phabricator.wikimedia.org/T304727' );
-		$doctrineDonation = ValidDoctrineDonation::newDonationWithCash();
+		// Commented out because we can't construct a doctrine donation with associated payment object
+		// $doctrineDonation = ValidDoctrineDonation::newDonationWithCash();
 		$converter = new LegacyToDomainConverter();
 
 		$donation = $converter->createFromLegacyObject( $doctrineDonation );
@@ -181,7 +182,10 @@ class LegacyToDomainConverterTest extends TestCase {
 		$this->markTestIncomplete( 'Donation status derived from payment needs to be reworked' );
 		$converter = new LegacyToDomainConverter();
 
-		$donation = $converter->createFromLegacyObject( ValidDoctrineDonation::newDonationWithCash() );
+		// Commented out because we can't construct the doctrine donation with a payment instance any more
+		// $doctrineDonation = ValidDoctrineDonation::newDonationWithCash();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
 
 		$this->assertSame( Donation::STATUS_PROMISE, $donation->getStatus() );
 	}

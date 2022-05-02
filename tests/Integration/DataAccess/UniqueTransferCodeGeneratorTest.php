@@ -6,16 +6,12 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
-use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\UniqueTransferCodeGenerator;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentReferenceCode;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentReferenceCodeGenerator;
 
 /**
@@ -62,7 +58,8 @@ class UniqueTransferCodeGeneratorTest extends TestCase {
 			null,
 			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			BankTransferPayment::create( 1, Euro::newFromCents( 100 ), PaymentInterval::OneTime, PaymentReferenceCode::newFromString( $code ) ),
+			// Can be 0, this test will be deleted anyway
+			0,
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo()
 		);

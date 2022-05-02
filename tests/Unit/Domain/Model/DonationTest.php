@@ -22,37 +22,12 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
  */
 class DonationTest extends TestCase {
 
-	/**
-	 * @dataProvider cancellableDonationProvider
-	 */
-	public function testGivenCancellableDonation_cancellationSucceeds( Donation $donation ): void {
+	public function testCancelingADonationSucceeds(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+
 		$donation->cancel();
 
 		$this->assertTrue( $donation->isCancelled() );
-	}
-
-	public function cancellableDonationProvider(): iterable {
-		yield [ ValidDonation::newDirectDebitDonation() ];
-	}
-
-	/**
-	 * @dataProvider nonCancellableDonationProvider
-	 */
-	public function testGivenNonCancellableDonation_cancellationFails( Donation $donation ): void {
-		$this->markTestIncomplete( 'Investigate why this fails' );
-		$this->expectException( RuntimeException::class );
-		$donation->cancel();
-	}
-
-	public function nonCancellableDonationProvider(): array {
-		$exportedDonation = ValidDonation::newDirectDebitDonation();
-		$exportedDonation->markAsExported();
-		return [
-			[ ValidDonation::newSofortDonation() ],
-			[ ValidDonation::newBookedPayPalDonation() ],
-			[ $exportedDonation ],
-			[ ValidDonation::newCancelledPayPalDonation() ]
-		];
 	}
 
 	public function testModerationStatusCanBeQueried(): void {
@@ -94,7 +69,7 @@ class DonationTest extends TestCase {
 			null,
 			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			ValidPayments::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null
@@ -113,7 +88,7 @@ class DonationTest extends TestCase {
 			null,
 			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			ValidPayments::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			ValidDonation::newPublicComment()
@@ -128,7 +103,7 @@ class DonationTest extends TestCase {
 			null,
 			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			ValidPayments::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null
@@ -143,30 +118,27 @@ class DonationTest extends TestCase {
 	}
 
 	public function testWhenCompletingBookingOfExternalPaymentInModeration_commentIsMadePrivate(): void {
-		$this->markTestIncomplete( 'booking should still do something, but independent from payment' );
 		$donation = $this->newInModerationPayPalDonation();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
-		$donation->confirmBooked( ValidDonation::newPayPalData() );
+		$donation->confirmBooked();
 
 		$this->assertFalse( $donation->getComment()->isPublic() );
 	}
 
 	public function testWhenCompletingBookingOfCancelledExternalPayment_commentIsMadePrivate(): void {
-		$this->markTestIncomplete( 'booking should still do something, but independent from payment' );
 		$donation = ValidDonation::newCancelledPayPalDonation();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
-		$donation->confirmBooked( ValidDonation::newPayPalData() );
+		$donation->confirmBooked();
 
 		$this->assertFalse( $donation->getComment()->isPublic() );
 	}
 
 	public function testWhenCompletingBookingOfCancelledExternalPayment_lackOfCommentCausesNoError(): void {
-		$this->markTestIncomplete( 'booking should still do something, but independent from payment' );
 		$donation = ValidDonation::newCancelledPayPalDonation();
 
-		$donation->confirmBooked( ValidDonation::newPayPalData() );
+		$donation->confirmBooked();
 
 		$this->assertFalse( $donation->hasComment() );
 	}
@@ -178,7 +150,7 @@ class DonationTest extends TestCase {
 			null,
 			'Such invalid status',
 			ValidDonation::newDonor(),
-			ValidPayments::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null
