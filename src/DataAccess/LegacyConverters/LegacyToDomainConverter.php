@@ -9,8 +9,6 @@ use WMDE\Fundraising\DonationContext\DataAccess\DonorFactory;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
-use WMDE\Fundraising\DonationContext\DummyPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
 
 class LegacyToDomainConverter {
 	public function createFromLegacyObject( DoctrineDonation $doctrineDonation ): Donation {
@@ -18,7 +16,7 @@ class LegacyToDomainConverter {
 			$doctrineDonation->getId(),
 			$this->convertStatus( $doctrineDonation ),
 			DonorFactory::createDonorFromEntity( $doctrineDonation ),
-			$this->createPayment( $doctrineDonation ),
+			$doctrineDonation->getPaymentId(),
 			(bool)$doctrineDonation->getDonorOptsIntoNewsletter(),
 			$this->createTrackingInfo( $doctrineDonation ),
 			$this->createComment( $doctrineDonation )
@@ -67,11 +65,6 @@ class LegacyToDomainConverter {
 		if ( $dd->getStatus() == DoctrineDonation::STATUS_MODERATION ) {
 			$donation->markForModeration();
 		}
-	}
-
-	private function createPayment( DoctrineDonation $dd ): Payment {
-		// TODO load payment from payment id, using payment repo
-		return DummyPayment::create();
 	}
 
 	private function createTrackingInfo( DoctrineDonation $dd ): DonationTrackingInfo {

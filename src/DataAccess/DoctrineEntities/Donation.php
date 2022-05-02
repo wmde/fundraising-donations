@@ -348,6 +348,14 @@ class Donation {
 	}
 
 	/**
+	 * @deprecated
+	 * @return DonationPayment|null
+	 */
+	public function getPayment(): ?DonationPayment {
+		return $this->payment;
+	}
+
+	/**
 	 * @param DonationPayment $payment
 	 * @return void
 	 */
