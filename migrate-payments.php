@@ -18,7 +18,7 @@ $db = DriverManager::getConnection( $config );
 // TODO after running this in prod, we need to set the autoincrement value of our id table to the last value of the generator
 $converter = new DonationToPaymentConverter( $db, new SequentialPaymentIdGenerator(1) );
 
-$result = $converter->convertDonations();
+$result = $converter->convertDonations(0, 100000);
 
 $errors = $result->getErrors();
 $warnings = $result->getWarnings();

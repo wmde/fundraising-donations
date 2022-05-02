@@ -56,6 +56,8 @@ class DonationToPaymentConverter {
 	];
 
 	private const ANONYMOUS_REFERENCE_CODE = 'AA-AAA-AAA-A';
+	private const CHUNK_SIZE = 2000;
+	public const CONVERT_ALL = -1;
 
 	private PaymentIDRepository $dummyIdGeneratorForFollowups;
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
@@ -80,25 +82,18 @@ class DonationToPaymentConverter {
 		$this->lostBookingDataPeriodEnd = new \DateTimeImmutable( '2015-10-08 0:00:00' );
 	}
 
-	public function convertDonations(): AnalysisResult {
-		/** @var \PDO $connection */
-		$connection = $this->db->getNativeConnection();
-		$connection->setAttribute( \PDO::MYSQL_ATTR_USE_BUFFERED_QUERY, false );
-		$qb = $this->db->createQueryBuilder();
-		$qb->select( 'd.id', 'betrag AS amount', 'periode AS intervalInMonths', 'zahlweise AS paymentType',
-			'ueb_code AS transferCode', 'data', 'status', 'dt_new AS donationDate', 'ps.confirmed_at AS valuationDate',
-			)
-			->from( 'spenden', 'd' )
-			->leftJoin( 'd', 'donation_payment', 'p', 'd.payment_id = p.id' )
-			->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' )
-
-			// The following 2 statements are for stepping through all donations
-			->where( 'd.id > 3500000' )
-			->setMaxResults( 500000 );
-
-		$dbResult = $qb->executeQuery();
+	/**
+	 * Convert donations to payments
+	 *
+	 * Leave out parameters to convert all donations
+	 *
+	 * @param int $idOffset Starting donation ID
+	 * @param int $maxConversions Maximum number of donations to convert
+	 * @return AnalysisResult
+	 */
+	public function convertDonations( int $idOffset = 0, int $maxConversions = self::CONVERT_ALL ): AnalysisResult {
 		$this->result = new AnalysisResult();
-		foreach ( $dbResult->iterateAssociative() as $row ) {
+		foreach ( $this->getRows( $idOffset, $maxConversions ) as $row ) {
 			$this->result->addRow();
 			if ( $row['data'] ) {
 				$row['data'] = unserialize( base64_decode( $row['data'] ) );
@@ -119,6 +114,37 @@ class DonationToPaymentConverter {
 			}
 		}
 		return $this->result;
+	}
+
+	 private function getRows( int $idOffset, int $maxRowCount ): iterable {
+		if ( $maxRowCount === self::CONVERT_ALL ) {
+			$maxRowCount = $this->getMaxRowCount();
+		}
+		$qb = $this->db->createQueryBuilder();
+		$qb->select( 'd.id', 'betrag AS amount', 'periode AS intervalInMonths', 'zahlweise AS paymentType',
+			 'ueb_code AS transferCode', 'data', 'status', 'dt_new AS donationDate', 'ps.confirmed_at AS valuationDate',
+		)
+			 ->from( 'spenden', 'd' )
+			 ->leftJoin( 'd', 'donation_payment', 'p', 'd.payment_id = p.id' )
+			 ->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' )
+			->where( 'd.id > :offset' )
+			->setMaxResults( self::CHUNK_SIZE );
+
+		for ( $offset = $idOffset; $offset < $maxRowCount; $offset += self::CHUNK_SIZE ) {
+			$qb->setParameter( 'offset', $offset );
+			$dbResult = $qb->executeQuery();
+			foreach ( $dbResult->iterateAssociative() as $row ) {
+				yield $row;
+			}
+		}
+	 }
+
+	private function getMaxRowCount(): int {
+		$rowCount = $this->db->executeQuery( "SELECT COUNT(id) FROM spenden" )->fetchOne();
+		if ( $rowCount === false ) {
+			throw new \RuntimeException( 'Could not get row count' );
+		}
+		return $rowCount;
 	}
 
 	private function newPayment( array $row ): Payment {
@@ -216,7 +242,7 @@ class DonationToPaymentConverter {
 			}
 			$this->result->addWarning( 'Invalid date format for booked PayPal, ' . $solution, $row );
 		}
-		// TODO convert followup payments, probably using reflection
+		// TODO convert followup payments by looking at log message '/new transaction id to corresponding parent donation: (\d+)/'
 		$payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), $this->dummyIdGeneratorForFollowups );
 		return $payment;
 	}
@@ -315,5 +341,4 @@ class DonationToPaymentConverter {
 		}
 		return Euro::newFromString( $amount );
 	}
-
 }
