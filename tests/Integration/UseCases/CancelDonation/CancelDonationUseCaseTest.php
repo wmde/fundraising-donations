@@ -87,7 +87,8 @@ class CancelDonationUseCaseTest extends TestCase {
 	}
 
 	public function testGivenIdOfNonCancellableDonation_cancellationIsNotSuccessful(): void {
-		$donation = ValidDonation::newCancelledPayPalDonation();
+		$this->markTestIncomplete( 'Use case must check if payment can be canceled' );
+		$donation = ValidDonation::newBookedPayPalDonation();
 		$this->repository->storeDonation( $donation );
 
 		$request = new CancelDonationRequest( $donation->getId() );
