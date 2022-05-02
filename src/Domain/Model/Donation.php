@@ -17,18 +17,6 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
  */
 class Donation {
 
-	// direct debit
-	public const STATUS_NEW = 'N';
-
-	// bank transfer
-	public const STATUS_PROMISE = 'Z';
-
-	// external payment, not notified by payment provider
-	public const STATUS_EXTERNAL_INCOMPLETE = 'X';
-
-	// external payment, notified by payment provider
-	public const STATUS_EXTERNAL_BOOKED = 'B';
-
 	private bool $moderationNeeded;
 	private bool $cancelled;
 
@@ -36,7 +24,6 @@ class Donation {
 	public const DOES_NOT_OPT_INTO_NEWSLETTER = false;
 
 	private ?int $id;
-	private string $status;
 	private Donor $donor;
 
 	private int $paymentId;
@@ -63,7 +50,6 @@ class Donation {
 
 	/**
 	 * @param int|null $id
-	 * @param string $status Must be one of the Donation::STATUS_ constants. Will be deprecated, see https://phabricator.wikimedia.org/T276817
 	 * @param Donor $donor
 	 * @param int $paymentId
 	 * @param bool $optsIntoNewsletter
@@ -72,10 +58,9 @@ class Donation {
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( ?int $id, string $status, Donor $donor, int $paymentId,
-		bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
+	public function __construct( ?int $id, Donor $donor, int $paymentId,
+								bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 		$this->id = $id;
-		$this->setStatus( $status );
 		$this->donor = $donor;
 		$this->paymentId = $paymentId;
 		$this->optsIntoNewsletter = $optsIntoNewsletter;
@@ -85,30 +70,6 @@ class Donation {
 		$this->optsIntoDonationReceipt = null;
 		$this->moderationNeeded = false;
 		$this->cancelled = false;
-	}
-
-	/**
-	 * @param string $status
-	 * @deprecated See https://phabricator.wikimedia.org/T276817
-	 */
-	private function setStatus( string $status ): void {
-		if ( !$this->isValidStatus( $status ) ) {
-			throw new \InvalidArgumentException( 'Invalid donation status' );
-		}
-
-		$this->status = $status;
-	}
-
-	private function isValidStatus( string $status ): bool {
-		return in_array(
-			$status,
-			[
-				self::STATUS_NEW,
-				self::STATUS_PROMISE,
-				self::STATUS_EXTERNAL_INCOMPLETE,
-				self::STATUS_EXTERNAL_BOOKED,
-			]
-		);
 	}
 
 	public function getId(): ?int {
@@ -126,16 +87,6 @@ class Donation {
 		}
 
 		$this->id = $id;
-	}
-
-	/**
-	 * Usage of more specific methods such as isBooked or statusAllowsForCancellation is recommended.
-	 *
-	 * @return string One of the Donation::STATUS_ constants
-	 * @deprecated See https://phabricator.wikimedia.org/T276817
-	 */
-	public function getStatus(): string {
-		return $this->status;
 	}
 
 	/**

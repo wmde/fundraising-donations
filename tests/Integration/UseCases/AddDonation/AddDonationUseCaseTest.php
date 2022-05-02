@@ -24,7 +24,6 @@ use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentReferenceCodeGenerator;
 use WMDE\FunValidators\ConstraintViolation;
@@ -87,7 +86,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new EventEmitterSpy()
 		);
 	}
@@ -100,7 +98,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			LessSimpleTransferCodeGenerator::newRandomGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 	}
@@ -136,7 +133,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 
@@ -153,7 +149,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 
@@ -241,7 +236,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$mailer,
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 
@@ -288,7 +282,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 
@@ -305,7 +298,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 
@@ -323,7 +315,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$mailer,
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 	}
@@ -387,7 +378,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			$eventEmitter
 		);
 
@@ -410,7 +400,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 
@@ -428,7 +417,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 
@@ -450,7 +438,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->newMailer(),
 			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
 			new FakeEventEmitter()
 		);
 
