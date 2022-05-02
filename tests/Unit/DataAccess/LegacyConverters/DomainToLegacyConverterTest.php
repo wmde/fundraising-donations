@@ -78,29 +78,6 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertNotSame( 'potato', $data['vorname'], 'Person-related data should change' );
 	}
 
-	public function testTransactionIdsOfChildDonationsAreConverted(): void {
-		$converter = new DomainToLegacyConverter();
-		$transactionId = '16R12136PU8783961';
-		$fakeChildId = 2;
-		$donation = ValidDonation::newBookedPayPalDonation();
-		// TODO Prepare real followup payments in the database instead
-		// $donation->getPaymentMethod()->getPayPalData()->addChildPayment( $transactionId, $fakeChildId );
-		$doctrineDonation = new DoctrineDonation();
-
-		$legacyPaymentData = new LegacyPaymentData(
-			9999,
-			1,
-			'UEB',
-			[],
-			LegacyPaymentStatus::CANCELLED->value
-		);
-
-		$conversionResult = $converter->convert( $donation, $doctrineDonation, $legacyPaymentData );
-		$data = $conversionResult->getDecodedData();
-
-		$this->assertSame( [ '16R12136PU8783961' => 2 ], $data['transactionIds'] );
-	}
-
 	public function testGivenCancelledDonation_convertsToCancelledStatusDoctrineDonation(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newCancelledBankTransferDonation();
