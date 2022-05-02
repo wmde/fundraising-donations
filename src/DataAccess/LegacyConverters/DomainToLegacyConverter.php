@@ -25,6 +25,7 @@ class DomainToLegacyConverter {
 	public function convert( Donation $donation, DoctrineDonation $doctrineDonation, LegacyPaymentData $legacyPaymentData, array $existingModerationReasons ): DoctrineDonation {
 		$doctrineDonation->setId( $donation->getId() );
 		$this->updatePaymentInformation( $doctrineDonation, $legacyPaymentData );
+		$doctrineDonation->setPaymentId( $donation->getPaymentId() );
 		DonorFieldMapper::updateDonorInformation( $doctrineDonation, $donation->getDonor() );
 		$this->updateComment( $doctrineDonation, $donation->getComment() );
 		$doctrineDonation->setDonorOptsIntoNewsletter( $donation->getOptsIntoNewsletter() );
