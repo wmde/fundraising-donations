@@ -9,21 +9,20 @@ use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class AddDonationPolicyValidator {
 
-	private $amountPolicyValidator;
-	private $textPolicyValidator;
-	private $emailAddressBlacklist;
+	private AmountPolicyValidator $amountPolicyValidator;
+	private TextPolicyValidator $textPolicyValidator;
+	/**
+	 * @var string[]
+	 */
+	private array $forbiddenEmailAddresses;
 
 	public function __construct( AmountPolicyValidator $amountPolicyValidator, TextPolicyValidator $textPolicyValidator,
-		array $emailAddressBlacklist = [] ) {
+		array $forbiddenEmailAddresses = [] ) {
 		$this->amountPolicyValidator = $amountPolicyValidator;
 		$this->textPolicyValidator = $textPolicyValidator;
-		$this->emailAddressBlacklist = $emailAddressBlacklist;
+		$this->forbiddenEmailAddresses = $forbiddenEmailAddresses;
 	}
 
 	public function needsModeration( AddDonationRequest $request ): bool {
@@ -36,7 +35,7 @@ class AddDonationPolicyValidator {
 	}
 
 	public function isAutoDeleted( AddDonationRequest $request ): bool {
-		foreach ( $this->emailAddressBlacklist as $blacklistEntry ) {
+		foreach ( $this->forbiddenEmailAddresses as $blacklistEntry ) {
 			if ( preg_match( $blacklistEntry, $request->getDonorEmailAddress() ) ) {
 				return true;
 			}
@@ -73,14 +72,15 @@ class AddDonationPolicyValidator {
 	}
 
 	private function getAmountViolations( AddDonationRequest $request ): array {
+		$paymentRequest = $request->getPaymentCreationRequest();
 		return array_map(
 			static function ( ConstraintViolation $violation ) {
 				$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
 				return $violation;
 			},
 			$this->amountPolicyValidator->validate(
-				$request->getAmount()->getEuroFloat(),
-				$request->getInterval()
+				$paymentRequest->amountInEuroCents / 100,
+				$paymentRequest->interval
 			)->getViolations()
 		);
 	}
