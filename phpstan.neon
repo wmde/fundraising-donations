@@ -4,7 +4,6 @@ parameters:
 	# TODO remove these when working on the payment refactoring tasks
 	excludePaths:
 		analyse:
-			- src/UseCases/AddDonation/AddDonationValidator.php
 			- src/UseCases/AddDonation/PaymentFactory.php
 			- tests/Integration/DataAccess/UniqueTransferCodeGeneratorTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
