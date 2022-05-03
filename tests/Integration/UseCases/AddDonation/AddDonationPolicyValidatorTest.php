@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
 use WMDE\FunValidators\ConstraintViolation;
@@ -13,7 +14,7 @@ use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * @covers WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator
  */
 class AddDonationPolicyValidatorTest extends TestCase {
 
@@ -31,6 +32,17 @@ class AddDonationPolicyValidatorTest extends TestCase {
 			$this->newFailingTextPolicyValidator()
 		);
 		$this->assertTrue( $policyValidator->needsModeration( ValidAddDonationRequest::getRequest() ) );
+	}
+
+	public function testGivenBadWordsWithAnonymousRequest_needsModerationReturnsFalse(): void {
+		$policyValidator = new AddDonationPolicyValidator(
+			$this->newSucceedingAmountValidator(),
+			$this->newFailingTextPolicyValidator()
+		);
+		$request = ValidAddDonationRequest::getRequest();
+		$request->setDonorType( DonorType::ANONYMOUS() );
+
+		$this->assertFalse( $policyValidator->needsModeration( $request ) );
 	}
 
 	private function newFailingAmountValidator(): AmountPolicyValidator {
@@ -100,5 +112,14 @@ class AddDonationPolicyValidatorTest extends TestCase {
 			$this->newSucceedingTextPolicyValidator(),
 			[ '/^blocked.person@bar\.baz$/', '/@example.com$/i' ]
 		);
+	}
+
+	public function testGivenAnonymousDonorWithEmailData_itIgnoresForbiddenEmails(): void {
+		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
+		$request = ValidAddDonationRequest::getRequest();
+		$request->setDonorType( DonorType::ANONYMOUS() );
+		$request->setDonorEmailAddress( 'blocked.person@bar.baz' );
+
+		$this->assertFalse( $policyValidator->isAutoDeleted( $request ) );
 	}
 }
