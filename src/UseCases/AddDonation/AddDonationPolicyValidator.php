@@ -9,6 +9,15 @@ use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
+/**
+ * This validator is for checking if a donation request is valid, but needs moderation / immediate deletion.
+ * It will be applied **after** the use case has created the donation.
+ *
+ * Moderation reasons can be either amounts that are too high (but still plausible) or text policy violations in
+ * the email or postal address fields ("bad words", according to a deny- and allow-list).
+ *
+ * For forbidden email addresses, we immediately delete the donation.
+ */
 class AddDonationPolicyValidator {
 
 	private AmountPolicyValidator $amountPolicyValidator;
@@ -34,7 +43,21 @@ class AddDonationPolicyValidator {
 		return !empty( $violations );
 	}
 
+	/**
+	 * Indicate go-ahead for deleting donations where the email is on the forbidden list.
+	 *
+	 * When the request indicates that the donor is anonymous, don't check the list.
+	 * This behavior ensures that even when the frontend sends form data,
+	 * it will not lead to validation for anonymous users.
+	 *
+	 * @param AddDonationRequest $request
+	 * @return bool
+	 * @deprecated This has not been used after 2016 and might be removed.
+	 */
 	public function isAutoDeleted( AddDonationRequest $request ): bool {
+		if ( $request->donorIsAnonymous() ) {
+			return false;
+		}
 		foreach ( $this->forbiddenEmailAddresses as $blacklistEntry ) {
 			if ( preg_match( $blacklistEntry, $request->getDonorEmailAddress() ) ) {
 				return true;
@@ -44,6 +67,16 @@ class AddDonationPolicyValidator {
 		return false;
 	}
 
+	/**
+	 * Validate address fields with text policy (allow- and deny lists).
+	 *
+	 * When the request indicates that the donor is anonymous, skip the validation.
+	 * This behavior ensures that even when the frontend sends form data,
+	 * it will not lead to validation for anonymous users.
+	 *
+	 * @param AddDonationRequest $request
+	 * @return array
+	 */
 	private function getBadWordViolations( AddDonationRequest $request ): array {
 		if ( $request->donorIsAnonymous() ) {
 			return [];
