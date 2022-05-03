@@ -61,7 +61,7 @@ class ModerationService {
 	 */
 	public function moderateDonationRequest( AddDonationRequest $request ): ModerationResult {
 		$this->result = new ModerationResult();
-		if ( $this->paymentTypeBypassesModeration( $request->getPaymentType() ) ) {
+		if ( $this->paymentTypeBypassesModeration( $request->getPaymentCreationRequest()->paymentType ) ) {
 			return $this->result;
 		}
 

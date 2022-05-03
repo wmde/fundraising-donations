@@ -4,9 +4,10 @@ declare( strict_types=1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddDonation;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest
@@ -57,20 +58,29 @@ class AddDonationRequestTest extends TestCase {
 		$this->assertTrue( $anonymousRequest->donorIsAnonymous() );
 	}
 
-	public function testPaymentFieldsGettersAndSetters(): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field to int and removed the error' );
+	public function testPaymentRequestDefaultValues(): void {
 		$request = new AddDonationRequest();
-		$request->setPaymentType( 'BTC' );
-		$request->setAmount( Euro::newFromInt( 99 ) );
-		$request->setInterval( 6 );
-		$request->setIban( 'DE02100500000054540402' );
-		$request->setBic( 'BELADEBE' );
 
-		$this->assertSame( 'BTC', $request->getPaymentType() );
-		$this->assertSame( 6, $request->getInterval() );
-		$this->assertEquals( Euro::newFromInt( 99 ), $request->getAmount() );
-		$this->assertSame( 'DE02100500000054540402', $request->getIban() );
-		$this->assertSame( 'BELADEBE', $request->getBic() );
+		$paymentCreationRequest = $request->getPaymentCreationRequest();
+
+		$this->assertSame( 0, $paymentCreationRequest->amountInEuroCents );
+		$this->assertSame( PaymentInterval::OneTime->value, $paymentCreationRequest->interval );
+		$this->assertSame( '', $paymentCreationRequest->paymentType );
+		$this->assertSame( '', $paymentCreationRequest->iban );
+		$this->assertSame( '', $paymentCreationRequest->bic );
+		$this->assertSame( '', $paymentCreationRequest->transferCodePrefix );
+	}
+
+	public function testPaymentRequestGetterAndSetter(): void {
+		$paymentCreationRequest = new PaymentCreationRequest(
+			100,
+			PaymentInterval::OneTime->value,
+			'BEZ'
+		);
+		$request = new AddDonationRequest();
+		$request->setPaymentCreationRequest( $paymentCreationRequest );
+
+		$this->assertSame( $paymentCreationRequest, $request->getPaymentCreationRequest() );
 	}
 
 	public function testTrackingFields(): void {

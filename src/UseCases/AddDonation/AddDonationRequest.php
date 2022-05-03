@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 
 /**
  * @license GPL-2.0-or-later
@@ -31,15 +32,13 @@ class AddDonationRequest {
 	 */
 	private string $optIn = '';
 
-	private Euro $amount;
-	private string $paymentType = '';
-	private int $interval = 0;
+	private PaymentRequestBuilder $paymentCreationRequestBuilder;
 
-	private string $iban = '';
-	private string $bic = '';
+	private PaymentCreationRequest $paymentCreationRequest;
 
 	private string $tracking = '';
 	private int $totalImpressionCount = 0;
+
 	private int $singleBannerImpressionCount = 0;
 
 	/**
@@ -66,8 +65,9 @@ class AddDonationRequest {
 	 * AddDonationRequest constructor.
 	 */
 	public function __construct() {
-		$this->amount = Euro::newFromCents( 0 );
 		$this->donorType = DonorType::ANONYMOUS();
+		// TODO move prefixes from PaymentFactory
+		$this->paymentCreationRequestBuilder = new PaymentRequestBuilder();
 	}
 
 	public function getOptIn(): string {
@@ -78,52 +78,59 @@ class AddDonationRequest {
 		$this->optIn = trim( $optIn );
 	}
 
+	/**
+	 * @return Euro
+	 * @deprecated Use {@see $paymentCreationRequest}
+	 */
 	public function getAmount(): Euro {
-		trigger_error( "Amount in request should be integer (euro-cents)", E_USER_WARNING );
-		return $this->amount;
-	}
-
-	public function setAmount( Euro $amount ): void {
-		trigger_error( "Amount in request should be integer (euro-cents)", E_USER_WARNING );
-		$this->amount = $amount;
-	}
-
-	public function getPaymentType(): string {
-		return $this->paymentType;
-	}
-
-	public function setPaymentType( string $paymentType ): void {
-		$this->paymentType = trim( $paymentType );
-	}
-
-	public function getInterval(): int {
-		return $this->interval;
-	}
-
-	public function setInterval( int $interval ): void {
-		$this->interval = $interval;
+		return Euro::newFromCents( $this->paymentCreationRequest->amountInEuroCents );
 	}
 
 	/**
-	 * @return string
+	 * @param Euro $amount
+	 * @return void
+	 * @deprecated Use {@see $paymentCreationRequest}
 	 */
-	public function getIban(): string {
-		return $this->iban;
+	public function setAmount( Euro $amount ): void {
+		$this->paymentCreationRequestBuilder->withAmount( $amount->getEuroCents() );
+		$this->paymentCreationRequest = $this->paymentCreationRequestBuilder->getPaymentCreationRequest();
+	}
+
+	/**
+	 * @param string $paymentType
+	 * @return void
+	 * @deprecated Use {@see $paymentCreationRequest}
+	 */
+	public function setPaymentType( string $paymentType ): void {
+		$this->paymentCreationRequestBuilder->withPaymentType( $paymentType );
+		$this->paymentCreationRequest = $this->paymentCreationRequestBuilder->getPaymentCreationRequest();
+	}
+
+	/**
+	 * @return int
+	 * @deprecated Use {@see $paymentCreationRequest}
+	 */
+	public function getInterval(): int {
+		return $this->getPaymentCreationRequest()->interval;
 	}
 
 	/**
 	 * @param string $iban
+	 * @deprecated Use {@see $paymentCreationRequest}
 	 */
 	public function setIban( string $iban ): void {
-		$this->iban = $iban;
+		$this->paymentCreationRequestBuilder->withBankData( $iban, $this->paymentCreationRequest->bic );
+		$this->paymentCreationRequest = $this->paymentCreationRequestBuilder->getPaymentCreationRequest();
 	}
 
-	public function getBic(): string {
-		return $this->bic;
-	}
-
+	/**
+	 * @param string $bic
+	 * @return void
+	 * @deprecated Use {@see $paymentCreationRequest}
+	 */
 	public function setBic( string $bic ): void {
-		$this->bic = $bic;
+		$this->paymentCreationRequestBuilder->withBankData( $this->paymentCreationRequest->iban, $bic );
+		$this->paymentCreationRequest = $this->paymentCreationRequestBuilder->getPaymentCreationRequest();
 	}
 
 	public function getTracking(): string {
@@ -271,4 +278,11 @@ class AddDonationRequest {
 		return $this->optsIntoDonationReceipt;
 	}
 
+	public function getPaymentCreationRequest(): PaymentCreationRequest {
+		return $this->paymentCreationRequest ?? $this->paymentCreationRequestBuilder->build();
+	}
+
+	public function setPaymentCreationRequest( PaymentCreationRequest $paymentCreationRequest ): void {
+		$this->paymentCreationRequest = $paymentCreationRequest;
+	}
 }
