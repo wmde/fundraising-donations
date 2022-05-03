@@ -152,7 +152,7 @@ class AddDonationValidatorTest extends TestCase {
 	public function testAmountTooLow_validatorReturnsFalse(): void {
 		$this->markTestIncomplete( 'TODO: Create DomainSpecificPaymentValidator implementation for amount checking' );
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setAmount( Euro::newFromCents( 50 ) );
+		$request->setAmountInEuroCents( Euro::newFromCents( 50 ) );
 
 		$result = $this->donationValidator->validate( $request );
 		$this->assertFalse( $result->isSuccessful() );
