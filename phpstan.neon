@@ -6,13 +6,10 @@ parameters:
 		analyse:
 			- src/DataAccess/Migrations/
 			- src/Infrastructure/DonationMailer.php
-			- src/UseCases/AddDonation/AddDonationValidator.php
 			- src/UseCases/AddDonation/PaymentFactory.php
 			- tests/Integration/DataAccess/UniqueTransferCodeGeneratorTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationValidatorTest.php
-			- tests/Integration/UseCases/AddDonation/ModerationServiceTest.php
 			- tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
 			- tests/Unit/Infrastructure/DonationConfirmationMailerTest.php
 			- tests/Unit/UseCases/AddDonation/AddDonationRequestTest.php
-			- tests/Unit/UseCases/AddDonation/InitialDonationStatusPickerTest.php

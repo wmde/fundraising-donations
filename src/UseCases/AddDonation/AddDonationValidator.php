@@ -5,12 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
-use WMDE\Fundraising\DonationContext\RefactoringException;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
-use WMDE\Fundraising\PaymentContext\Domain\BankDataValidationResult;
-use WMDE\Fundraising\PaymentContext\Domain\BankDataValidator;
-use WMDE\Fundraising\PaymentContext\Domain\IbanBlockList;
-use WMDE\Fundraising\PaymentContext\Domain\PaymentValidator;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AddressValidator;
@@ -21,17 +16,6 @@ use WMDE\FunValidators\Validators\EmailValidator;
  */
 class AddDonationValidator {
 
-	private PaymentValidator $paymentDataValidator;
-	/**
-	 * @deprecated should not be used, use CheckIban use case instead
-	 * @var BankDataValidator
-	 */
-	private BankDataValidator $bankDataValidator;
-	/**
-	 * @deprecated Use CheckIban use case instead
-	 * @var IbanBlockList
-	 */
-	private IbanBlockList $ibanBlocklist;
 	private AddressValidator $addressValidator;
 	private EmailValidator $emailValidator;
 
@@ -47,11 +31,7 @@ class AddDonationValidator {
 		Result::SOURCE_DONOR_EMAIL => 250
 	];
 
-	public function __construct( PaymentValidator $paymentDataValidator, BankDataValidator $bankDataValidator,
-		IbanBlockList $ibanBlocklist, EmailValidator $emailValidator, AddressValidator $addressValidator ) {
-		$this->paymentDataValidator = $paymentDataValidator;
-		$this->bankDataValidator = $bankDataValidator;
-		$this->ibanBlocklist = $ibanBlocklist;
+	public function __construct( EmailValidator $emailValidator, AddressValidator $addressValidator ) {
 		$this->addressValidator = $addressValidator;
 		$this->emailValidator = $emailValidator;
 	}
@@ -60,27 +40,9 @@ class AddDonationValidator {
 		$this->request = $addDonationRequest;
 		$this->violations = [];
 
-		$this->validatePayment();
 		$this->validateDonor();
 
 		return new Result( ...$this->violations );
-	}
-
-	private function addViolations( array $violations ): void {
-		$this->violations = array_merge( $this->violations, $violations );
-	}
-
-	private function validatePayment(): void {
-		throw new RefactoringException( "TODO use payment validator check iban use case" );
-		/*
-		if ( !in_array( $this->request->getPaymentType(), PaymentMethods::getList() ) ) {
-			$this->violations[] = new ConstraintViolation(
-				$this->request->getPaymentType(),
-				Result::VIOLATION_WRONG_PAYMENT_TYPE,
-				Result::SOURCE_PAYMENT_TYPE
-			);
-		}
-		*/
 	}
 
 	private function validateFieldLength( string $value, string $fieldName ): void {
@@ -141,19 +103,6 @@ class AddDonationValidator {
 			$this->request->getDonorCity(),
 			$this->request->getDonorCountryCode()
 		)->getViolations();
-	}
-
-	private function validateIban( string $iban ): void {
-		if ( $this->ibanBlocklist->isIbanBlocked( $iban ) ) {
-			$this->addViolations(
-				[
-					new ConstraintViolation(
-						$iban->toString(),
-						Result::VIOLATION_IBAN_BLOCKED,
-						BankDataValidationResult::SOURCE_IBAN
-					) ]
-			);
-		}
 	}
 
 	private function validateEmail(): ValidationResult {
