@@ -14,10 +14,12 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeEventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingPaymentServiceStub;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase;
@@ -25,17 +27,14 @@ use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationR
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
-use WMDE\Fundraising\PaymentContext\Domain\PaymentReferenceCodeGenerator;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\NullGenerator;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as PaymentCreationSucceeded;
 use WMDE\FunValidators\ConstraintViolation;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase
  * @covers \WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent
- *
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class AddDonationUseCaseTest extends TestCase {
 
@@ -43,7 +42,6 @@ class AddDonationUseCaseTest extends TestCase {
 	private const ACCESS_TOKEN = 'kindly allow me access';
 
 	public function testWhenValidationSucceeds_successResponseIsCreated(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
 		$useCase = $this->newValidationSucceedingUseCase();
 
 		$this->assertTrue( $useCase->addDonation( $this->newMinimumDonationRequest() )->isSuccessful() );
@@ -85,9 +83,9 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getSucceedingValidatorMock(),
 			$this->getSucceedingPolicyValidatorMock(),
 			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
-			new EventEmitterSpy()
+			new EventEmitterSpy(),
+			new SucceedingPaymentServiceStub()
 		);
 	}
 
@@ -97,9 +95,11 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getSucceedingValidatorMock(),
 			$this->getSucceedingPolicyValidatorMock(),
 			$this->newMailer(),
-			LessSimpleTransferCodeGenerator::newRandomGenerator(),
 			$this->newTokenFetcher(),
-			new FakeEventEmitter()
+			new FakeEventEmitter(),
+			new SucceedingPaymentServiceStub(
+				new PaymentCreationSucceeded( ValidPayments::ID_BANK_TRANSFER, new NullGenerator() )
+			)
 		);
 	}
 
@@ -132,7 +132,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getFailingValidatorMock( new ConstraintViolation( 'foo', 'bar' ) ),
 			$this->getSucceedingPolicyValidatorMock(),
 			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			new FakeEventEmitter()
 		);
@@ -148,7 +147,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getFailingValidatorMock( new ConstraintViolation( 'foo', 'bar' ) ),
 			$this->getSucceedingPolicyValidatorMock(),
 			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			new FakeEventEmitter()
 		);
@@ -241,16 +239,11 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getFailingValidatorMock( new ConstraintViolation( 'foo', 'bar' ) ),
 			$this->getSucceedingPolicyValidatorMock(),
 			$mailer,
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			new FakeEventEmitter()
 		);
 
 		$useCase->addDonation( $this->newMinimumDonationRequest() );
-	}
-
-	private function newTransferCodeGenerator(): PaymentReferenceCodeGenerator {
-		return $this->createMock( PaymentReferenceCodeGenerator::class );
 	}
 
 	public function testGivenValidRequest_confirmationEmailIsSent(): void {
@@ -287,7 +280,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getSucceedingValidatorMock(),
 			$this->getFailingPolicyValidatorMock(),
 			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			new FakeEventEmitter()
 		);
@@ -303,7 +295,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getSucceedingValidatorMock(),
 			$this->getFailingPolicyValidatorMock(),
 			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			new FakeEventEmitter()
 		);
@@ -320,7 +311,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getSucceedingValidatorMock(),
 			$this->getSucceedingPolicyValidatorMock(),
 			$mailer,
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			new FakeEventEmitter()
 		);
@@ -383,7 +373,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getSucceedingValidatorMock(),
 			$this->getSucceedingPolicyValidatorMock(),
 			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			$eventEmitter
 		);
@@ -405,7 +394,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getSucceedingValidatorMock(),
 			$this->getAutoDeletingPolicyValidatorMock(),
 			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			new FakeEventEmitter()
 		);
@@ -422,7 +410,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getSucceedingValidatorMock(),
 			$this->getAutoDeletingPolicyValidatorMock(),
 			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			new FakeEventEmitter()
 		);
@@ -443,7 +430,6 @@ class AddDonationUseCaseTest extends TestCase {
 			$this->getSucceedingValidatorMock(),
 			$this->getAutoDeletingPolicyValidatorMock(),
 			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
 			$this->newTokenFetcher(),
 			new FakeEventEmitter()
 		);

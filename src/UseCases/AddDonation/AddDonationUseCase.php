@@ -18,32 +18,39 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
+use WMDE\Fundraising\DonationContext\RefactoringException;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
-use WMDE\Fundraising\PaymentContext\Domain\PaymentReferenceCodeGenerator;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 
 /**
  * @license GPL-2.0-or-later
  */
 class AddDonationUseCase {
 
+	private const PREFIX_BANK_TRANSACTION_KNOWN_DONOR = 'XW';
+	private const PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR = 'XR';
+
 	private DonationRepository $donationRepository;
 	private AddDonationValidator $donationValidator;
 	private AddDonationPolicyValidator $policyValidator;
 	private DonationConfirmationNotifier $notifier;
-	private PaymentReferenceCodeGenerator $transferCodeGenerator;
 	private DonationTokenFetcher $tokenFetcher;
 	private EventEmitter $eventEmitter;
+	private CreatePaymentService $paymentService;
 
 	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
 								AddDonationPolicyValidator $policyValidator, DonationConfirmationNotifier $notifier,
-								PaymentReferenceCodeGenerator $transferCodeGenerator, DonationTokenFetcher $tokenFetcher, EventEmitter $eventEmitter ) {
+								DonationTokenFetcher $tokenFetcher, EventEmitter $eventEmitter,
+								CreatePaymentService $paymentService
+	) {
 		$this->donationRepository = $donationRepository;
 		$this->donationValidator = $donationValidator;
 		$this->policyValidator = $policyValidator;
 		$this->notifier = $notifier;
-		$this->transferCodeGenerator = $transferCodeGenerator;
 		$this->tokenFetcher = $tokenFetcher;
 		$this->eventEmitter = $eventEmitter;
+		$this->paymentService = $paymentService;
 	}
 
 	public function addDonation( AddDonationRequest $donationRequest ): AddDonationResponse {
@@ -53,7 +60,11 @@ class AddDonationUseCase {
 			return AddDonationResponse::newFailureResponse( $validationResult->getViolations() );
 		}
 
-		$donation = $this->newDonationFromRequest( $donationRequest );
+		$paymentResult = $this->paymentService->createPayment( $this->getPaymentRequestForDonor( $donationRequest ) );
+		if ( $paymentResult instanceof FailureResponse ) {
+			throw new RefactoringException( 'TODO: Implement returning error response with the violations from $paymentResult' );
+		}
+		$donation = $this->newDonationFromRequest( $donationRequest, $paymentResult->paymentId );
 
 		if ( $this->policyValidator->needsModeration( $donationRequest ) ) {
 			$donation->notifyOfPolicyValidationFailure();
@@ -78,15 +89,11 @@ class AddDonationUseCase {
 		);
 	}
 
-	private function newDonationFromRequest( AddDonationRequest $donationRequest ): Donation {
-		// TODO replace PaymentFactory with "Create payment" use case, using determining the correct branch
-		$paymentFactory = new PaymentFactory( $this->transferCodeGenerator );
-		$payment = $paymentFactory->getPaymentFromRequest( $donationRequest );
-
+	private function newDonationFromRequest( AddDonationRequest $donationRequest, int $paymentId ): Donation {
 		$donation = new Donation(
 			null,
 			$this->getPersonalInfoFromRequest( $donationRequest ),
-			$payment->getId(),
+			$paymentId,
 			$donationRequest->getOptIn() === '1',
 			$this->newTrackingInfoFromRequest( $donationRequest )
 		);
@@ -151,10 +158,27 @@ class AddDonationUseCase {
 	}
 
 	private function sendDonationConfirmationEmail( Donation $donation ): void {
-		// TODO pass in the payment as a parameter instead of asking the donation
+		// TODO change logic - Check payment response if payment has completed instead of checking donation
 		if ( $donation->getDonor()->hasEmailAddress() && !$donation->hasBookablePayment() ) {
 			$this->notifier->sendConfirmationFor( $donation );
 		}
+	}
+
+	private function getPaymentRequestForDonor( AddDonationRequest $request ): PaymentCreationRequest {
+		$paymentRequest = $request->getPaymentCreationRequest();
+		$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
+		if ( $request->donorIsAnonymous() ) {
+			$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR;
+		}
+
+		return new PaymentCreationRequest(
+			$paymentRequest->amountInEuroCents,
+			$paymentRequest->interval,
+			$paymentRequest->paymentType,
+			$paymentRequest->iban,
+			$paymentRequest->bic,
+			$paymentReferenceCodePrefix
+		);
 	}
 
 }
