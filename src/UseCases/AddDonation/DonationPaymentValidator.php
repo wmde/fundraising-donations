@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\PaymentContext\Domain\DomainSpecificPaymentValidator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResponse;
 
@@ -67,9 +68,10 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 	 *
 	 * @param Euro $amount
 	 * @param PaymentInterval $interval
+	 * @param PaymentType $paymentType
 	 * @return ValidationResponse
 	 */
-	public function validatePaymentData( Euro $amount, PaymentInterval $interval ): ValidationResponse {
+	public function validatePaymentData( Euro $amount, PaymentInterval $interval, PaymentType $paymentType ): ValidationResponse {
 		$amountInCents = $amount->getEuroCents();
 
 		if ( $amountInCents < $this->minimumAmount->getEuroCents() ) {
