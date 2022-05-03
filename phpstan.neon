@@ -11,7 +11,6 @@ parameters:
 			- tests/Data/ValidPayPalNotificationRequest.php
 			- tests/Data/ValidSofortNotificationRequest.php
 			- tests/Integration/DataAccess/UniqueTransferCodeGeneratorTest.php
-			- tests/Integration/UseCases/AddDonation/AddDonationPolicyValidatorTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationValidatorTest.php
 			- tests/Integration/UseCases/CancelDonation/CancelDonationUseCaseTest.php
