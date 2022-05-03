@@ -19,7 +19,6 @@ use WMDE\FunValidators\Validators\TextPolicyValidator;
 class ModerationServiceTest extends TestCase {
 
 	public function testTooHighAmountGiven_needsModerationReturnsTrue(): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$policyValidator = new ModerationService(
 			$this->newFailingAmountValidator(),
 			$this->newSucceedingTextPolicyValidator()
@@ -28,7 +27,6 @@ class ModerationServiceTest extends TestCase {
 	}
 
 	public function testGivenBadWords_needsModerationReturnsTrue(): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$policyValidator = new ModerationService(
 			$this->newSucceedingAmountValidator(),
 			$this->newFailingTextPolicyValidator()
@@ -37,7 +35,6 @@ class ModerationServiceTest extends TestCase {
 	}
 
 	public function testGivenBadWordsWithAnonymousRequest_needsModerationReturnsFalse(): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$policyValidator = new ModerationService(
 			$this->newSucceedingAmountValidator(),
 			$this->newFailingTextPolicyValidator()
@@ -60,7 +57,6 @@ class ModerationServiceTest extends TestCase {
 	}
 
 	private function newFailingAmountValidator(): AmountPolicyValidator {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$amountPolicyValidator = $this->createMock( AmountPolicyValidator::class );
 		$amountPolicyValidator->method( 'validate' )->willReturn(
 			new ValidationResult( new ConstraintViolation( 1000, 'too-high', 'amount' ) )
@@ -69,21 +65,18 @@ class ModerationServiceTest extends TestCase {
 	}
 
 	private function newSucceedingAmountValidator(): AmountPolicyValidator {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$amountPolicyValidator = $this->createMock( AmountPolicyValidator::class );
 		$amountPolicyValidator->method( 'validate' )->willReturn( new ValidationResult() );
 		return $amountPolicyValidator;
 	}
 
 	private function newSucceedingTextPolicyValidator(): TextPolicyValidator {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$succeedingTextPolicyValidator = $this->createMock( TextPolicyValidator::class );
 		$succeedingTextPolicyValidator->method( 'textIsHarmless' )->willReturn( true );
 		return $succeedingTextPolicyValidator;
 	}
 
 	private function newFailingTextPolicyValidator(): TextPolicyValidator {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$failingTextPolicyValidator = $this->createMock( TextPolicyValidator::class );
 		$failingTextPolicyValidator->method( 'hasHarmlessContent' )
 			->willReturn( false );
@@ -92,7 +85,6 @@ class ModerationServiceTest extends TestCase {
 
 	/** @dataProvider allowedEmailAddressProvider */
 	public function testWhenEmailAddressIsNotForbidden_isAutoDeletedReturnsFalse( string $emailAddress ): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorEmailAddress( $emailAddress );
@@ -110,7 +102,6 @@ class ModerationServiceTest extends TestCase {
 
 	/** @dataProvider forbiddenEmailsProvider */
 	public function testWhenEmailAddressIsForbidden_isAutoDeletedReturnsTrue( string $emailAddress ): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorEmailAddress( $emailAddress );
