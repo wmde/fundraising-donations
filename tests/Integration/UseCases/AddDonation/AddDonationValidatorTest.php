@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
@@ -62,17 +61,6 @@ class AddDonationValidatorTest extends TestCase {
 			$this->donationValidator->validate( $request ),
 			AddDonationValidationResult::SOURCE_DONOR_COMPANY
 		);
-	}
-
-	public function testAmountTooLow_validatorReturnsFalse(): void {
-		$this->markTestIncomplete( 'TODO: Create DomainSpecificPaymentValidator implementation for amount checking, move this test to Fundraising App integration test' );
-		$request = ValidAddDonationRequest::getRequest();
-		$request->setAmountInEuroCents( Euro::newFromCents( 50 ) );
-
-		$result = $this->donationValidator->validate( $request );
-		$this->assertFalse( $result->isSuccessful() );
-
-		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_PAYMENT_AMOUNT );
 	}
 
 	public function testDonorWithLongFields_validationFails(): void {
