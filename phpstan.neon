@@ -4,7 +4,6 @@ parameters:
 	# TODO remove these when working on the payment refactoring tasks
 	excludePaths:
 		analyse:
-			- src/UseCases/AddDonation/AddDonationValidator.php
 			- src/UseCases/AddDonation/PaymentFactory.php
 			- src/UseCases/HandlePayPalPaymentNotification/HandlePayPalPaymentCompletionNotificationUseCase.php
 			- src/UseCases/SofortPaymentNotification/SofortPaymentNotificationUseCase.php
