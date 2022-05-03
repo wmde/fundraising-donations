@@ -6,7 +6,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonatio
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
@@ -25,7 +24,9 @@ use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentReferenceCodeGenerator;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\FunValidators\ConstraintViolation;
 
 /**
@@ -209,21 +210,27 @@ class AddDonationUseCaseTest extends TestCase {
 
 	private function newMinimumDonationRequest(): AddDonationRequest {
 		$donationRequest = new AddDonationRequest();
-		$donationRequest->setAmount( Euro::newFromString( '1.00' ) );
-		$donationRequest->setPaymentType( PaymentMethod::BANK_TRANSFER );
+		$donationRequest->setPaymentCreationRequest( new PaymentCreationRequest(
+			100,
+			PaymentInterval::OneTime->value,
+			'UEB'
+		) );
 		$donationRequest->setDonorType( DonorType::ANONYMOUS() );
 		return $donationRequest;
 	}
 
 	private function newInvalidDonationRequest(): AddDonationRequest {
 		$donationRequest = new AddDonationRequest();
-		$donationRequest->setPaymentType( PaymentMethod::DIRECT_DEBIT );
-		$donationRequest->setAmount( Euro::newFromInt( 0 ) );
+		$donationRequest->setPaymentCreationRequest( new PaymentCreationRequest(
+			100,
+			PaymentInterval::OneTime->value,
+			'BEZ'
+		) );
 		$donationRequest->setDonorType( DonorType::ANONYMOUS() );
 		return $donationRequest;
 	}
 
-	public function testGivenInvalidRequest_noConfirmationEmailIsSend(): void {
+	public function testGivenInvalidRequest_noConfirmationEmailIsSent(): void {
 		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
 		$mailer = $this->newMailer();
 

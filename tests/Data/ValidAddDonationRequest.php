@@ -4,22 +4,17 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
-use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
-use WMDE\Fundraising\PaymentContext\Domain\PaymentTypes;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 
 class ValidAddDonationRequest {
 
 	public static function getRequest(): AddDonationRequest {
 		$request = new AddDonationRequest();
-		$request->setAmount( Euro::newFromInt( 5 ) );
-		$request->setIban( ValidPayments::PAYMENT_IBAN );
-		$request->setBic( ValidPayments::PAYMENT_BIC );
-		$request->setInterval( ValidDonation::PAYMENT_INTERVAL_IN_MONTHS );
+		$request->setPaymentCreationRequest( self::newPaymentCreationRequest() );
 		$request->setOptIn( (string)ValidDonation::OPTS_INTO_NEWSLETTER );
-		$request->setPaymentType( PaymentTypes::DirectDebit->value );
-
 		$request->setDonorType( DonorType::PERSON() );
 		$request->setDonorSalutation( ValidDonation::DONOR_SALUTATION );
 		$request->setDonorTitle( ValidDonation::DONOR_TITLE );
@@ -33,5 +28,15 @@ class ValidAddDonationRequest {
 		$request->setDonorEmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS );
 
 		return $request;
+	}
+
+	public static function newPaymentCreationRequest(): PaymentCreationRequest {
+		return new PaymentCreationRequest(
+			500,
+			PaymentInterval::OneTime->value,
+			'BEZ',
+			ValidPayments::PAYMENT_IBAN,
+			ValidPayments::PAYMENT_BIC
+		);
 	}
 }
