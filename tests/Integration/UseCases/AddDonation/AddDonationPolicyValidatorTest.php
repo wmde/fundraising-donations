@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
+use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
 use WMDE\FunValidators\ConstraintViolation;
@@ -13,14 +14,10 @@ use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
  * @covers WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator
- *
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
-class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
+class AddDonationPolicyValidatorTest extends TestCase {
 
 	public function testTooHighAmountGiven_needsModerationReturnsTrue(): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$policyValidator = new AddDonationPolicyValidator(
 			$this->newFailingAmountValidator(),
 			$this->newSucceedingTextPolicyValidator()
@@ -29,7 +26,6 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testGivenBadWords_needsModerationReturnsTrue(): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$policyValidator = new AddDonationPolicyValidator(
 			$this->newSucceedingAmountValidator(),
 			$this->newFailingTextPolicyValidator()
@@ -38,11 +34,7 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	private function newFailingAmountValidator(): AmountPolicyValidator {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
-		$amountPolicyValidator = $this->getMockBuilder( AmountPolicyValidator::class )
-			->disableOriginalConstructor()
-			->getMock();
-
+		$amountPolicyValidator = $this->createMock( AmountPolicyValidator::class );
 		$amountPolicyValidator->method( 'validate' )->willReturn(
 			new ValidationResult( new ConstraintViolation( 1000, 'too-high', 'amount' ) )
 		);
@@ -50,24 +42,18 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	private function newSucceedingAmountValidator(): AmountPolicyValidator {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
-		$amountPolicyValidator = $this->getMockBuilder( AmountPolicyValidator::class )
-			->disableOriginalConstructor()
-			->getMock();
-
+		$amountPolicyValidator = $this->createMock( AmountPolicyValidator::class );
 		$amountPolicyValidator->method( 'validate' )->willReturn( new ValidationResult() );
 		return $amountPolicyValidator;
 	}
 
 	private function newSucceedingTextPolicyValidator(): TextPolicyValidator {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$succeedingTextPolicyValidator = $this->createMock( TextPolicyValidator::class );
 		$succeedingTextPolicyValidator->method( 'textIsHarmless' )->willReturn( true );
 		return $succeedingTextPolicyValidator;
 	}
 
 	private function newFailingTextPolicyValidator(): TextPolicyValidator {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
 		$failingTextPolicyValidator = $this->createMock( TextPolicyValidator::class );
 		$failingTextPolicyValidator->method( 'hasHarmlessContent' )
 			->willReturn( false );
@@ -75,9 +61,8 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/** @dataProvider allowedEmailAddressProvider */
-	public function testWhenEmailAddressIsNotBlacklisted_isAutoDeletedReturnsFalse( string $emailAddress ): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
-		$policyValidator = $this->newPolicyValidatorWithEmailBlacklist();
+	public function testWhenEmailAddressIsNotForbidden_isAutoDeletedReturnsFalse( string $emailAddress ): void {
+		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorEmailAddress( $emailAddress );
 
@@ -92,17 +77,16 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 		];
 	}
 
-	/** @dataProvider blacklistedEmailAddressProvider */
-	public function testWhenEmailAddressIsBlacklisted_isAutoDeletedReturnsTrue( string $emailAddress ): void {
-		$this->markTestIncomplete( 'This should work when we changed the amount field in request to int and removed the error' );
-		$policyValidator = $this->newPolicyValidatorWithEmailBlacklist();
+	/** @dataProvider forbiddenEmailsProvider */
+	public function testWhenEmailAddressIsForbidden_isAutoDeletedReturnsTrue( string $emailAddress ): void {
+		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorEmailAddress( $emailAddress );
 
 		$this->assertTrue( $policyValidator->isAutoDeleted( $request ) );
 	}
 
-	public function blacklistedEmailAddressProvider(): array {
+	public function forbiddenEmailsProvider(): array {
 		return [
 			[ 'blocked.person@bar.baz' ],
 			[ 'test@example.com' ],
@@ -110,14 +94,11 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 		];
 	}
 
-	private function newPolicyValidatorWithEmailBlacklist(): AddDonationPolicyValidator {
-		$policyValidator = new AddDonationPolicyValidator(
+	private function newPolicyValidatorWithForbiddenEmails(): AddDonationPolicyValidator {
+		return new AddDonationPolicyValidator(
 			$this->newSucceedingAmountValidator(),
 			$this->newSucceedingTextPolicyValidator(),
 			[ '/^blocked.person@bar\.baz$/', '/@example.com$/i' ]
 		);
-
-		return $policyValidator;
 	}
-
 }
