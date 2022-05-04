@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification;
 
-use DomainException;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -63,12 +62,7 @@ class CreditCardNotificationUseCase {
 	}
 
 	private function handleRequest( CreditCardPaymentNotificationRequest $request, Donation $donation ): CreditCardNotificationResponse {
-		try {
-			$donation->confirmBooked( $this->newCreditCardDataFromRequest( $request ) );
-		}
-		catch ( DomainException $e ) {
-			return CreditCardNotificationResponse::newFailureResponse( CreditCardNotificationResponse::DOMAIN_ERROR, $e );
-		}
+		$donation->confirmBooked();
 
 		try {
 			$this->repository->storeDonation( $donation );
@@ -84,8 +78,8 @@ class CreditCardNotificationUseCase {
 		return CreditCardNotificationResponse::newSuccessResponse( null );
 	}
 
-	private function newCreditCardDataFromRequest( CreditCardPaymentNotificationRequest $request ): array {
-		/*
+	/*private function newCreditCardDataFromRequest( CreditCardPaymentNotificationRequest $request ): array {
+
 		return ( new CreditCardTransactionData() )
 			->setTransactionId( $request->getTransactionId() )
 			->setTransactionStatus( 'processed' )
@@ -98,7 +92,7 @@ class CreditCardNotificationUseCase {
 			->setTitle( $request->getTitle() )
 			->setCountryCode( $request->getCountry() )
 			->setCurrencyCode( $request->getCurrency() );
-		*/
+
 		return [];
-	}
+	}*/
 }
