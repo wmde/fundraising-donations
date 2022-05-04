@@ -165,7 +165,7 @@ class Donation {
 		$this->cancelled = false;
 	}
 
-	public function confirmBooked( array $paymentTransactionData = [] ): void {
+	public function confirmBooked(): void {
 		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
 			$this->makeCommentPrivate();
 		}
@@ -251,5 +251,4 @@ class Donation {
 	public function donorIsAnonymous(): bool {
 		return $this->donor instanceof AnonymousDonor;
 	}
-
 }
