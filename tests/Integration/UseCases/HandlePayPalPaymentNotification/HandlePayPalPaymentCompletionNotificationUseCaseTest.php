@@ -4,12 +4,12 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\HandlePayPalPaymentNotification;
 
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\DonationContext\Services\PaymentBookingService;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayPalNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
@@ -17,101 +17,48 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
+use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\FailureResponse;
+use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\FollowUpSuccessResponse;
+use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase
- *
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
 class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 	use DonationEventLoggerAsserter;
 
-	public function testWhenRepositoryThrowsException_errorResponseIsReturned(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ) ),
-			new FailingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$reponse = $useCase->handleNotification( $request );
-		$this->assertFalse( $reponse->notificationWasHandled() );
-		$this->assertTrue( $reponse->hasErrors() );
-	}
-
 	public function testWhenAuthorizationFails_unhandledResponseIsReturned(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( ValidDonation::newIncompletePayPalDonation() );
-
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new FailingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
+		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
+		$useCase = $this->givenNewUseCase(
+			authorizer: new FailingDonationAuthorizer()
 		);
 
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
 		$this->assertFalse( $useCase->handleNotification( $request )->notificationWasHandled() );
 	}
 
 	public function testWhenAuthorizationSucceeds_successResponseIsReturned(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( ValidDonation::newIncompletePayPalDonation() );
-
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
+		$useCase = $this->givenNewUseCase();
+
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 	}
 
-	public function testWhenPaymentTypeIsNonPayPal_unhandledResponseIsReturned(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( ValidDonation::newDirectDebitDonation() );
-
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-
-		$this->assertFalse( $useCase->handleNotification( $request )->notificationWasHandled() );
-	}
-
 	public function testWhenAuthorizationSucceeds_confirmationMailIsSent(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
 		$donation = ValidDonation::newIncompletePayPalDonation();
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( $donation );
 
-		$mailer = $this->getMailer();
-		$mailer->expects( $this->once() )
+		$notifier = $this->createMock( DonationConfirmationNotifier::class );
+		$notifier->expects( $this->once() )
 			->method( 'sendConfirmationFor' )
 			->with( $donation );
 
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$mailer,
-			$this->getEventLogger()
+		$fakeRepository = new FakeDonationRepository( $donation );
+		$useCase = $this->givenNewUseCase(
+			repository: $fakeRepository,
+			notifier: $notifier
 		);
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
@@ -119,52 +66,47 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	}
 
 	public function testWhenAuthorizationSucceeds_donationIsStored(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
 		$donation = ValidDonation::newIncompletePayPalDonation();
 		$repositorySpy = new DonationRepositorySpy( $donation );
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$repositorySpy,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
+		$useCase = $this->givenNewUseCase(
+			repository: $repositorySpy,
 		);
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 		$this->assertCount( 1, $repositorySpy->getStoreDonationCalls() );
 	}
 
-	public function testWhenAuthorizationSucceeds_donationIsBooked(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
+	public function testWhenAuthorizationSucceeds_paymentIsBooked(): void {
 		$donation = ValidDonation::newIncompletePayPalDonation();
 		$repository = new FakeDonationRepository( $donation );
-
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$repository,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
+
+		$paymentBookingServiceMock = $this->createMock( PaymentBookingService::class );
+		$paymentBookingServiceMock
+			->expects( $this->once() )
+			->method( 'bookPayment' )
+			->with( $donation->getPaymentId(), $request->bookingData )
+			->willReturn( new SuccessResponse() );
+
+		$useCase = $this->givenNewUseCase(
+			repository: $repository,
+			paymentBookingService: $paymentBookingServiceMock
 		);
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
-		$this->assertTrue( $repository->getDonationById( $donation->getId() )->isBooked() );
 	}
 
 	public function testWhenAuthorizationSucceeds_bookingEventIsLogged(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
 		$donation = ValidDonation::newIncompletePayPalDonation();
-		$repositorySpy = new DonationRepositorySpy( $donation );
-
+		$repository = new FakeDonationRepository( $donation );
 		$eventLogger = new DonationEventLoggerSpy();
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$repositorySpy,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$eventLogger
+		$useCase = $this->givenNewUseCase(
+			repository: $repository,
+			eventLogger: $eventLogger
 		);
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
@@ -172,8 +114,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertEventLogContainsExpression( $eventLogger, $donation->getId(), '/booked/' );
 	}
 
-	public function testGivenNewTransactionIdForBookedDonation_transactionIdShowsUpInChildPayments(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
+	public function testGivenNewTransactionIdForBookedDonation_createsNewDonation(): void {
 		$donation = ValidDonation::newBookedPayPalDonation();
 		$transactionId = '16R12136PU8783961';
 
@@ -182,272 +123,125 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
 
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
+		$useCase = $this->givenNewUseCase(
+			repository: $fakeRepository,
+			paymentBookingService: $this->createFollowUpSucceedingPaymentBookingServiceStub(),
 		);
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 
-		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $payment */
-		$payment = $fakeRepository->getDonationById( $donation->getId() )->getPaymentMethod();
+		$repositoryCalls = $fakeRepository->getDonations();
 
-		$this->assertTrue(
-			$payment->getPayPalData()->hasChildPayment( $transactionId ),
-			'Parent payment must have new transaction ID in its list'
-		);
-	}
+		$this->assertCount( 2, $repositoryCalls );
 
-	public function testGivenNewTransactionIdForBookedDonation_childTransactionWithSameDataIsCreated(): void {
-		// TODO assert donation was created with followup payment id
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$donation = ValidDonation::newBookedPayPalDonation();
-		$donation->setOptsIntoDonationReceipt( true );
-		$transactionId = '16R12136PU8783961';
-
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( $donation );
-
-		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
-
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-
-		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
-
-		$donation = $fakeRepository->getDonationById( $donation->getId() );
-		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $payment */
-		$payment = $donation->getPaymentMethod();
-		$childDonation = $fakeRepository->getDonationById(
-			$payment->getPayPalData()->getChildPaymentEntityId( $transactionId )
-		);
-		$this->assertNotNull( $childDonation );
-		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $childDonationPaymentMethod */
-		$childDonationPaymentMethod = $childDonation->getPaymentMethod();
-		$this->assertEquals( $transactionId, $childDonationPaymentMethod->getPayPalData()->getPaymentId() );
-		$this->assertEquals( $donation->getAmount(), $childDonation->getAmount() );
-		$this->assertEquals( $donation->getDonor(), $childDonation->getDonor() );
-		$this->assertEquals( $donation->getPaymentIntervalInMonths(), $childDonation->getPaymentIntervalInMonths() );
-		$this->assertTrue( $childDonation->isBooked() );
-		$this->assertTrue( $childDonation->getOptsIntoDonationReceipt() );
+		[ $donation, $followupUpDonation ] = array_values( $repositoryCalls );
+		$this->assertNotSame( $followupUpDonation->getId(), $donation->getId() );
+		$this->assertEquals( $followupUpDonation->getDonor(), $donation->getDonor() );
+		$this->assertEquals( $followupUpDonation->getTrackingInfo(), $donation->getTrackingInfo() );
+		$this->assertEquals( $followupUpDonation->getOptsIntoNewsletter(), $donation->getOptsIntoNewsletter() );
+		$this->assertFalse( $followupUpDonation->isExported() );
 	}
 
 	public function testGivenNewTransactionIdForBookedDonation_childCreationEventIsLogged(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
 		$donation = ValidDonation::newBookedPayPalDonation();
 		$transactionId = '16R12136PU8783961';
-
 		$fakeRepository = new FakeDonationRepository();
 		$fakeRepository->storeDonation( $donation );
 
-		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
-
 		$eventLogger = new DonationEventLoggerSpy();
-
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$eventLogger
+		$useCase = $this->givenNewUseCase(
+			repository: $fakeRepository,
+			paymentBookingService: $this->createFollowUpSucceedingPaymentBookingServiceStub(),
+			eventLogger: $eventLogger
 		);
+
+		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 
-		$donation = $fakeRepository->getDonationById( $donation->getId() );
-		/** @var \WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment $payment */
-		$payment = $donation->getPaymentMethod();
-		$childDonationId = $payment->getPayPalData()->getChildPaymentEntityId( $transactionId );
+		$repositoryCalls = $fakeRepository->getDonations();
+
+		$this->assertCount( 2, $repositoryCalls );
+
+		[ $donation, $followupUpDonation ] = array_values( $repositoryCalls );
 
 		$this->assertEventLogContainsExpression(
 			$eventLogger,
 			$donation->getId(),
-			'/child donation.*' . $childDonationId . '/'
+			'/child donation.*' . $followupUpDonation->getId() . '/'
 		);
 		$this->assertEventLogContainsExpression(
 			$eventLogger,
-			$childDonationId,
+			$followupUpDonation->getId(),
 			'/parent donation.*' . $donation->getId() . '/'
 		);
 	}
 
-	public function testGivenExistingTransactionIdForBookedDonation_handlerReturnsFalse(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( ValidDonation::newBookedPayPalDonation() );
+	public function testFailingPaymentBookingService_notificationIsNotHandled(): void {
+		$errorMessage = 'Could not book payment - server is tired';
+		$failingPaymentService = $this->createStub( PaymentBookingService::class );
+		$failingPaymentService->method( 'bookPayment' )->willReturn( new FailureResponse( $errorMessage ) );
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
 
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
+		$useCase = $this->givenNewUseCase(
+			paymentBookingService: $failingPaymentService
 		);
 
-		$this->assertFalse( $useCase->handleNotification( $request )->notificationWasHandled() );
-	}
+		$response = $useCase->handleNotification( $request );
 
-	public function testGivenTransactionIsAlreadyBookedForDonation_notificationIsNotHandled(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$transactionId = '16R12136PU8783961';
-		$donation = ValidDonation::newBookedPayPalDonation( $transactionId );
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( $donation );
-		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-
-		$result = $useCase->handleNotification( $request );
-
-		$this->assertFalse( $result->notificationWasHandled() );
-		$this->assertNotEmpty( $result->getContext()['message'] );
-		$this->assertStringContainsString( 'already booked', $result->getContext()['message'] );
-	}
-
-	public function testGivenTransactionIdInBookedChildDonation_notificationIsNotHandled(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$transactionId = '16R12136PU8783961';
-		$fakeChildEntityId = 2;
-		$donation = ValidDonation::newBookedPayPalDonation();
-		$donation->getPaymentMethod()->getPaypalData()->addChildPayment( $transactionId, $fakeChildEntityId );
-		$fakeRepository = new FakeDonationRepository();
-		$fakeRepository->storeDonation( $donation );
-		$request = ValidPayPalNotificationRequest::newDuplicatePayment( $donation->getId(), $transactionId );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$fakeRepository,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-
-		$result = $useCase->handleNotification( $request );
-
-		$this->assertFalse( $result->notificationWasHandled() );
-		$this->assertNotEmpty( $result->getContext()['message'] );
-		$this->assertStringContainsString( 'already booked', $result->getContext()['message'] );
-	}
-
-	public function testWhenNotificationIsForNonExistingDonation_newDonationIsCreated(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$repositorySpy = new DonationRepositorySpy();
-
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 12345 );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$repositorySpy,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-
-		$useCase->handleNotification( $request );
-
-		$storeDonationCalls = $repositorySpy->getStoreDonationCalls();
-		$this->assertCount( 1, $storeDonationCalls, 'Donation is stored' );
-		$this->assertNull( $storeDonationCalls[0]->getId(), 'ID is not taken from request' );
-		$this->assertDonationIsCreatedWithNotficationRequestData( $storeDonationCalls[0] );
-	}
-
-	public function testGivenRecurringPaymentForIncompleteDonation_donationIsBooked(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$donation = ValidDonation::newIncompletePayPalDonation();
-		$repositorySpy = new DonationRepositorySpy( $donation );
-
-		$request = ValidPayPalNotificationRequest::newRecurringPayment( $donation->getId() );
-
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			$repositorySpy,
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$this->getEventLogger()
-		);
-
-		$useCase->handleNotification( $request );
-		$donation = $repositorySpy->getDonationById( $donation->getId() );
-
-		$this->assertCount( 1, $repositorySpy->getStoreDonationCalls() );
-		$this->assertEquals( $donation, $repositorySpy->getStoreDonationCalls()[0] );
-		$this->assertTrue( $donation->isBooked() );
-	}
-
-	public function testWhenNotificationIsForNonExistingDonation_confirmationMailIsSent(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 12345 );
-		$mailer = $this->getMailer();
-		$mailer->expects( $this->once() )
-			->method( 'sendConfirmationFor' )
-			->with( $this->anything() );
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			new FakeDonationRepository(),
-			new SucceedingDonationAuthorizer(),
-			$mailer,
-			$this->getEventLogger()
-		);
-
-		$useCase->handleNotification( $request );
-	}
-
-	public function testWhenNotificationIsForNonExistingDonation_bookingEventIsLogged(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 12345 );
-		$eventLogger = new DonationEventLoggerSpy();
-
-		$useCase = new HandlePayPalPaymentCompletionNotificationUseCase(
-			new FakeDonationRepository(),
-			new SucceedingDonationAuthorizer(),
-			$this->getMailer(),
-			$eventLogger
-		);
-
-		$useCase->handleNotification( $request );
-
-		$expectedAutogeneratedDonationId = 1;
-		$this->assertEventLogContainsExpression( $eventLogger, $expectedAutogeneratedDonationId, '/booked/' );
-	}
-
-	private function assertDonationIsCreatedWithNotficationRequestData( Donation $donation ): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$this->assertSame( 0, $donation->getPaymentIntervalInMonths(), 'Direct payments should be always one-off donations' );
-		$this->assertTrue( $donation->isBooked() );
-
-		$donor = $donation->getDonor();
-		$this->assertInstanceOf(
-			AnonymousDonor::class,
-			$donor,
-			'Paypal payments without assigned donation assume a private person.'
-		);
-
-		$payment = $donation->getPayment();
-		$this->assertSame( ValidPayPalNotificationRequest::AMOUNT_GROSS_CENTS, $payment->getAmount()->getEuroCents() );
-
-		/** @var PayPalData $paypalData */
-		$paypalData = $payment->getPaymentMethod()->getPaypalData();
-		$this->assertSame( ValidPayPalNotificationRequest::PAYER_ADDRESS_NAME, $paypalData->getAddressName() );
-
-		$this->assertNull( $donation->getOptsIntoDonationReceipt() );
+		$this->assertFalse( $response->notificationWasHandled() );
+		$this->assertSame( $errorMessage, $response->getMesssage(), 'Response should contain message from payment service' );
 	}
 
 	/**
-	 * @return DonationConfirmationNotifier&MockObject
+	 * Create a new use case with stubs that would make it pass
+	 *
+	 * @param DonationRepository|null $repository
+	 * @param DonationAuthorizer|null $authorizer
+	 * @param DonationConfirmationNotifier|null $notifier
+	 * @param PaymentBookingService|null $paymentBookingService
+	 * @param DonationEventLogger|null $eventLogger
+	 * @return HandlePayPalPaymentCompletionNotificationUseCase
 	 */
-	private function getMailer(): DonationConfirmationNotifier {
-		return $this->getMockBuilder( DonationConfirmationNotifier::class )->disableOriginalConstructor()->getMock();
+	private function givenNewUseCase(
+		?DonationRepository $repository = null,
+		?DonationAuthorizer $authorizer = null,
+		?DonationConfirmationNotifier $notifier = null,
+		?PaymentBookingService $paymentBookingService = null,
+		?DonationEventLogger $eventLogger = null,
+	): HandlePayPalPaymentCompletionNotificationUseCase {
+		return new HandlePayPalPaymentCompletionNotificationUseCase(
+			$repository ?? $this->createFakeRepository(),
+			authorizationService: $authorizer ?? new SucceedingDonationAuthorizer(),
+			notifier: $notifier ?? $this->createNotifierStub(),
+			paymentBookingService: $paymentBookingService ?? $this->createSucceedingPaymentBookingServiceStub(),
+			eventLogger: $eventLogger ?? $this->createEventLoggerStub()
+		);
 	}
 
-	/**
-	 * @return DonationEventLogger&MockObject
-	 */
-	private function getEventLogger(): DonationEventLogger {
-		return $this->createMock( DonationEventLogger::class );
+	private function createNotifierStub(): DonationConfirmationNotifier {
+		return $this->createStub( DonationConfirmationNotifier::class );
+	}
+
+	private function createEventLoggerStub(): DonationEventLogger {
+		return $this->createStub( DonationEventLogger::class );
+	}
+
+	private function createSucceedingPaymentBookingServiceStub(): PaymentBookingService|Stub {
+		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
+		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new SuccessResponse() );
+		return $paymentBookingServiceStub;
+	}
+
+	private function createFollowUpSucceedingPaymentBookingServiceStub(): PaymentBookingService|Stub {
+		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
+		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new FollowUpSuccessResponse( 1, 2 ) );
+		return $paymentBookingServiceStub;
+	}
+
+	private function createFakeRepository(): DonationRepository {
+		return new FakeDonationRepository( ValidDonation::newIncompletePayPalDonation() );
 	}
 
 }

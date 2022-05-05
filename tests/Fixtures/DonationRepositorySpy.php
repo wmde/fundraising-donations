@@ -41,6 +41,10 @@ class DonationRepositorySpy extends FakeDonationRepository {
 		return $this->storeDonationCalls;
 	}
 
+	public function noDonationsStored(): bool {
+		return count( $this->storeDonationCalls ) == 0;
+	}
+
 	/**
 	 * @param int $id
 	 *

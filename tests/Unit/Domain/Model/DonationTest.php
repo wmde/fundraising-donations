@@ -143,4 +143,15 @@ class DonationTest extends TestCase {
 		$donation->notifyOfPolicyValidationFailure();
 		$this->assertTrue( $donation->isMarkedForModeration() );
 	}
+
+	public function testCreateFollowupDonationForPayment_duplicatesRelevantFields(): void {
+		$donation = ValidDonation::newBookedPayPalDonation();
+		$followupUpDonation = $donation->createFollowupDonationForPayment( paymentId: 99 );
+
+		$this->assertSame( 99, $followupUpDonation->getPaymentId() );
+		$this->assertEquals( $followupUpDonation->getDonor(), $donation->getDonor() );
+		$this->assertEquals( $followupUpDonation->getTrackingInfo(), $donation->getTrackingInfo() );
+		$this->assertEquals( $followupUpDonation->getOptsIntoNewsletter(), $donation->getOptsIntoNewsletter() );
+		$this->assertFalse( $followupUpDonation->isExported() );
+	}
 }
