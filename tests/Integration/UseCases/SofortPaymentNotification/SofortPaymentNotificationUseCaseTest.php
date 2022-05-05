@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\SofortPaym
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Services\PaymentBookingService;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidSofortNotificationRequest;
@@ -38,7 +39,8 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			new FakeDonationRepository(),
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
-			$this->createStub( PaymentBookingService::class )
+			$this->createStub( PaymentBookingService::class ),
+			$this->createEventLoggerStub()
 		);
 
 		$request = ValidSofortNotificationRequest::newInstantPayment( 4711 );
@@ -56,7 +58,8 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			$fakeRepository,
 			new FailingDonationAuthorizer(),
 			$this->getMailer(),
-			$this->createStub( PaymentBookingService::class )
+			$this->createStub( PaymentBookingService::class ),
+			$this->createEventLoggerStub()
 		);
 
 		$request = ValidSofortNotificationRequest::newInstantPayment();
@@ -74,7 +77,8 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
-			$paymentBookingServiceStub
+			$paymentBookingServiceStub,
+			$this->createEventLoggerStub()
 		);
 
 		$request = ValidSofortNotificationRequest::newInstantPayment();
@@ -92,7 +96,8 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			$repositorySpy,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
-			$paymentBookingServiceStub
+			$paymentBookingServiceStub,
+			$this->createEventLoggerStub()
 		);
 
 		$request = ValidSofortNotificationRequest::newInstantPayment();
@@ -117,7 +122,8 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			$repository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
-			$paymentBookingServiceMock
+			$paymentBookingServiceMock,
+			$this->createEventLoggerStub()
 		);
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
@@ -134,7 +140,8 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
-			$paymentBookingServiceStub
+			$paymentBookingServiceStub,
+			$this->createEventLoggerStub()
 		);
 		$request = ValidSofortNotificationRequest::newInstantPayment();
 
@@ -160,7 +167,8 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$mailer,
-			$paymentBookingServiceStub
+			$paymentBookingServiceStub,
+			$this->createEventLoggerStub()
 		);
 
 		$request = ValidSofortNotificationRequest::newInstantPayment( 1 );
@@ -171,6 +179,10 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
 		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new SuccessResponse() );
 		return $paymentBookingServiceStub;
+	}
+
+	private function createEventLoggerStub(): DonationEventLogger {
+		return $this->createStub( DonationEventLogger::class );
 	}
 
 }

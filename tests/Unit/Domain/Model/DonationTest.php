@@ -144,6 +144,17 @@ class DonationTest extends TestCase {
 		return new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN );
 	}
 
+	public function testCreateFollowupDonationForPayment_duplicatesRelevantFields(): void {
+		$donation = ValidDonation::newBookedPayPalDonation();
+		$followupUpDonation = $donation->createFollowupDonationForPayment( paymentId: 99 );
+
+		$this->assertSame( 99, $followupUpDonation->getPaymentId() );
+		$this->assertEquals( $followupUpDonation->getDonor(), $donation->getDonor() );
+		$this->assertEquals( $followupUpDonation->getTrackingInfo(), $donation->getTrackingInfo() );
+		$this->assertEquals( $followupUpDonation->getOptsIntoNewsletter(), $donation->getOptsIntoNewsletter() );
+		$this->assertFalse( $followupUpDonation->isExported() );
+	}
+
 	public function testMarkForModerationNeedsAtLeastOneModerationReason(): void {
 		$donation = ValidDonation::newIncompletePayPalDonation();
 		$this->expectException( \LogicException::class );
