@@ -248,8 +248,8 @@ class Donation {
 		$this->cancelled = true;
 	}
 
-	public function setOptsIntoDonationReceipt( ?bool $optOut ): void {
-		$this->optsIntoDonationReceipt = $optOut;
+	public function setOptsIntoDonationReceipt( ?bool $optsIn ): void {
+		$this->optsIntoDonationReceipt = $optsIn;
 	}
 
 	public function getOptsIntoDonationReceipt(): ?bool {
@@ -258,5 +258,19 @@ class Donation {
 
 	public function donorIsAnonymous(): bool {
 		return $this->donor instanceof AnonymousDonor;
+	}
+
+	public function createFollowupDonationForPayment( int $paymentId ): self {
+		return new Donation(
+			null,
+			$this->getDonor(),
+			$paymentId,
+			$this->optsIntoNewsletter,
+			$this->getTrackingInfo(),
+			// We don't want to clone comments for followup donations because they would show up again in the feed.
+			// When we refactor the donation model,
+			// we can point the comment to the comment of the original donation (db relationship)
+			null
+		);
 	}
 }

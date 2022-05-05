@@ -49,6 +49,10 @@ class FakeDonationRepository implements DonationRepository {
 		$this->donationClones[$donation->getId()] = clone $donation;
 	}
 
+	public function getDonations() {
+		return $this->donations;
+	}
+
 	public function getDonationById( int $id ): ?Donation {
 		if ( $this->throwOnRead ) {
 			throw new GetDonationException();
