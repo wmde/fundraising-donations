@@ -80,7 +80,7 @@ class AddDonationUseCase {
 
 		$this->eventEmitter->emit( new DonationCreatedEvent( $donation->getId(), $donation->getDonor() ) );
 
-		$this->sendDonationConfirmationEmail( $donation );
+		$this->sendDonationConfirmationEmail( $donation, $paymentResult->paymentComplete );
 
 		return AddDonationResponse::newSuccessResponse(
 			$donation,
@@ -157,9 +157,8 @@ class AddDonationUseCase {
 		return $trackingInfo->freeze()->assertNoNullFields();
 	}
 
-	private function sendDonationConfirmationEmail( Donation $donation ): void {
-		// TODO change logic - Check payment response if payment has completed instead of checking donation
-		if ( $donation->getDonor()->hasEmailAddress() && !$donation->hasBookablePayment() ) {
+	private function sendDonationConfirmationEmail( Donation $donation, bool $paymentIsComplete ): void {
+		if ( $donation->getDonor()->hasEmailAddress() && $paymentIsComplete ) {
 			$this->notifier->sendConfirmationFor( $donation );
 		}
 	}
