@@ -16,7 +16,8 @@ class SucceedingPaymentServiceStub implements CreatePaymentService {
 	public function __construct( ?PaymentCreationSucceeded $successResponse = null ) {
 		$this->successResponse = $successResponse ?? new PaymentCreationSucceeded(
 				ValidPayments::ID_BANK_TRANSFER,
-				new NullGenerator()
+				new NullGenerator(),
+				true
 			);
 	}
 
