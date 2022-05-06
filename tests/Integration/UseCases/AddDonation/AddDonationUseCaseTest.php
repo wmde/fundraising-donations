@@ -15,17 +15,18 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\CreatePaymentServiceSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeEventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingPaymentServiceStub;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\CreatePaymentService;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
@@ -45,160 +46,52 @@ class AddDonationUseCaseTest extends TestCase {
 	private const ACCESS_TOKEN = 'kindly allow me access';
 
 	public function testWhenValidationSucceeds_successResponseIsCreated(): void {
-		$useCase = $this->newValidationSucceedingUseCase();
+		$useCase = $this->makeUseCase();
 
-		$this->assertTrue( $useCase->addDonation( $this->newMinimumDonationRequest() )->isSuccessful() );
+		$response = $useCase->addDonation( $this->newMinimumDonationRequest() );
+
+		$this->assertTrue( $response->isSuccessful() );
 	}
 
 	public function testWhenAnonymousDonationIsMade_correctBankTransferPrefixIsAdded(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$useCase = $this->newActiveBankTransferCodeGeneratorUseCase();
-		$donationRequest = $this->newMinimumDonationRequest();
+		$paymentService = new CreatePaymentServiceSpy();
+		$useCase = $this->makeUseCase( paymentService: $paymentService );
 
-		$response = $useCase->addDonation( $donationRequest );
+		$useCase->addDonation( $this->newMinimumDonationRequest() );
 
-		self::assertStringStartsWith( 'XR', $response->getDonation()->getPaymentMethod()->getBankTransferCode() );
+		$lastRequest = $paymentService->getLastRequest();
+		$this->assertSame( 'XR', $lastRequest->transferCodePrefix );
 	}
 
 	public function testWhenPrivateDonationIsMade_correctBankTransferPrefixIsAdded(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$useCase = $this->newActiveBankTransferCodeGeneratorUseCase();
+		$paymentService = new CreatePaymentServiceSpy();
+		$useCase = $this->makeUseCase( paymentService: $paymentService );
 		$donationRequest = $this->newValidAddDonationRequestWithEmail( 'bill.gates@wikimedia.de' );
 
-		$response = $useCase->addDonation( $donationRequest );
+		$useCase->addDonation( $donationRequest );
 
-		self::assertStringStartsWith( 'XW', $response->getDonation()->getPaymentMethod()->getBankTransferCode() );
+		$lastRequest = $paymentService->getLastRequest();
+		$this->assertSame( 'XW', $lastRequest->transferCodePrefix );
 	}
 
 	public function testWhenCompanyDonationIsMade_correctBankTransferPrefixIsAdded(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$useCase = $this->newActiveBankTransferCodeGeneratorUseCase();
+		$paymentService = new CreatePaymentServiceSpy();
+		$useCase = $this->makeUseCase( paymentService: $paymentService );
 		$donationRequest = $this->newValidCompanyDonationRequest();
 
-		$response = $useCase->addDonation( $donationRequest );
+		$useCase->addDonation( $donationRequest );
 
-		self::assertStringStartsWith( 'XW', $response->getDonation()->getPaymentMethod()->getBankTransferCode() );
+		$lastRequest = $paymentService->getLastRequest();
+		$this->assertSame( 'XW', $lastRequest->transferCodePrefix );
 	}
 
-	private function newValidationSucceedingUseCase(): AddDonationUseCase {
-		return new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getSucceedingValidatorMock(),
-			$this->getSucceedingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			new EventEmitterSpy(),
-			new SucceedingPaymentServiceStub()
-		);
-	}
+	public function testWhenValidationFails_responseObjectContainsViolations(): void {
+		$constraintViolation = new ConstraintViolation( 'XX', 'name_not_valid' );
+		$useCase = $this->makeUseCase( donationValidator: $this->makeFakeFailingDonationValidator( $constraintViolation ) );
 
-	private function newActiveBankTransferCodeGeneratorUseCase(): AddDonationUseCase {
-		return new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getSucceedingValidatorMock(),
-			$this->getSucceedingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			new FakeEventEmitter(),
-			new SucceedingPaymentServiceStub(
-				new PaymentCreationSucceeded( ValidPayments::ID_BANK_TRANSFER, new NullGenerator() )
-			)
-		);
-	}
+		$result = $useCase->addDonation( $this->newInvalidDonationRequest() );
 
-	/**
-	 * @return DonationNotifier&MockObject
-	 */
-	private function newMailer(): DonationNotifier {
-		return $this->createMock( DonationNotifier::class );
-	}
-
-	private function newTokenFetcher(): DonationTokenFetcher {
-		return new FixedDonationTokenFetcher(
-			new DonationTokens(
-				self::ACCESS_TOKEN,
-				self::UPDATE_TOKEN
-			)
-		);
-	}
-
-	private function newRepository(): DonationRepository {
-		return new FakeDonationRepository();
-	}
-
-	public function testValidationFails_responseObjectContainsViolations(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$useCase = new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getFailingValidatorMock( new ConstraintViolation( 'foo', 'bar' ) ),
-			$this->getSucceedingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			new FakeEventEmitter()
-		);
-
-		$result = $useCase->addDonation( $this->newMinimumDonationRequest() );
-		$this->assertEquals( [ new ConstraintViolation( 'foo', 'bar' ) ], $result->getValidationErrors() );
-	}
-
-	public function testValidationFails_responseObjectContainsRequestObject(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$useCase = new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getFailingValidatorMock( new ConstraintViolation( 'foo', 'bar' ) ),
-			$this->getSucceedingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			new FakeEventEmitter()
-		);
-
-		$request = $this->newInvalidDonationRequest();
-		$useCase->addDonation( $request );
-		$this->assertEquals( $this->newInvalidDonationRequest(), $request );
-	}
-
-	private function getSucceedingValidatorMock(): AddDonationValidator {
-		$validator = $this->getMockBuilder( AddDonationValidator::class )
-			->disableOriginalConstructor()
-			->getMock();
-
-		$validator->method( 'validate' )->willReturn( new AddDonationValidationResult() );
-
-		return $validator;
-	}
-
-	private function getFailingValidatorMock( ConstraintViolation $violation ): AddDonationValidator {
-		$validator = $this->getMockBuilder( AddDonationValidator::class )
-			->disableOriginalConstructor()
-			->getMock();
-
-		$validator->method( 'validate' )->willReturn( new AddDonationValidationResult( $violation ) );
-
-		return $validator;
-	}
-
-	private function getSucceedingPolicyValidatorMock(): ModerationService {
-		$validator = $this->createStub( ModerationService::class );
-		$validator->method( 'moderateDonationRequest' )->willReturn( new ModerationResult() );
-		return $validator;
-	}
-
-	private function getFailingPolicyValidatorMock(): ModerationService {
-		$validator = $this->createStub( ModerationService::class );
-		$validator->method( 'needsModeration' )->willReturn( true );
-		$moderationResult = new ModerationResult();
-		$moderationResult->addModerationReason( new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH ) );
-		$validator->method( 'moderateDonationRequest' )->willReturn( $moderationResult );
-		return $validator;
-	}
-
-	private function getAutoDeletingPolicyValidatorMock(): ModerationService {
-		$validator = $this->createStub( ModerationService::class );
-		$validator->method( 'moderateDonationRequest' )->willReturn( new ModerationResult() );
-
-		$validator->method( 'isAutoDeleted' )->willReturn( true );
-
-		return $validator;
+		$this->assertEquals( [ $constraintViolation ], $result->getValidationErrors() );
 	}
 
 	private function newMinimumDonationRequest(): AddDonationRequest {
@@ -224,105 +117,70 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	public function testGivenInvalidRequest_noConfirmationEmailIsSent(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$mailer = $this->newMailer();
+		$mockNotifier = $this->makeNotifierStub();
+		$mockNotifier->expects( $this->never() )->method( 'sendConfirmationFor' );
 
-		$mailer->expects( $this->never() )->method( $this->anything() );
-
-		$useCase = new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getFailingValidatorMock( new ConstraintViolation( 'foo', 'bar' ) ),
-			$this->getSucceedingPolicyValidatorMock(),
-			$mailer,
-			$this->newTokenFetcher(),
-			new FakeEventEmitter()
-		);
+		$useCase = $this->makeUseCase( notifier:  $mockNotifier );
 
 		$useCase->addDonation( $this->newMinimumDonationRequest() );
 	}
 
 	public function testGivenValidRequest_confirmationEmailIsSent(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$mailer = $this->newMailer();
 		$donation = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
-
-		$mailer->expects( $this->once() )
+		$mockNotifier = $this->makeNotifierStub();
+		$mockNotifier->expects( $this->once() )
 			->method( 'sendConfirmationFor' )
 			->with( $this->isInstanceOf( Donation::class ) );
 
-		$useCase = $this->newUseCaseWithMailer( $mailer );
+		$useCase = $this->makeUseCase( notifier: $mockNotifier );
 
 		$useCase->addDonation( $donation );
 	}
 
 	public function testGivenValidRequest_moderationEmailIsSent(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$mailer = $this->newMailer();
-		$donation = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+		$mockNotifier = $this->createMock( DonationNotifier::class );
 
-		$mailer->expects( $this->once() )
+		$mockNotifier->expects( $this->once() )
 			->method( 'sendModerationNotificationToAdmin' )
 			->with( $this->isInstanceOf( Donation::class ) );
 
-		$useCase = $this->newUseCaseWithMailer( $mailer );
+		$donation = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+		$useCase = $this->makeUseCase( notifier: $mockNotifier );
 
 		$useCase->addDonation( $donation );
 	}
 
-	public function testGivenValidRequestWithExternalPaymentType_confirmationEmailIsNotSent(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$mailer = $this->newMailer();
+	public function testGivenValidRequest_withIncompletePayment_confirmationEmailIsNotSent(): void {
+		$paymentService = new SucceedingPaymentServiceStub( new PaymentCreationSucceeded(
+			paymentId: 1,
+			paymentProviderURLGenerator: new NullGenerator(),
+			paymentComplete: false
+		) );
+		$mockNotifier = $this->makeNotifierStub();
+		$mockNotifier->expects( $this->never() )->method( 'sendConfirmationFor' );
 
-		$mailer->expects( $this->never() )->method( 'sendConfirmationFor' );
-
-		$useCase = $this->newUseCaseWithMailer( $mailer );
+		$useCase = $this->makeUseCase( notifier: $mockNotifier, paymentService: $paymentService );
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
-		$request->setPaymentType( 'PPL' );
 		$useCase->addDonation( $request );
 	}
 
 	public function testGivenValidRequestWithPolicyViolation_donationIsModerated(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$useCase = new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getSucceedingValidatorMock(),
-			$this->getFailingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			new FakeEventEmitter()
-		);
+		$useCase = $this->makeUseCase( policyValidator: $this->makeFakeFailingModerationService() );
 
 		$response = $useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
+
 		$this->assertTrue( $response->getDonation()->isMarkedForModeration() );
 	}
 
 	public function testGivenPolicyViolationForExternalPaymentDonation_donationIsNotModerated(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$useCase = new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getSucceedingValidatorMock(),
-			$this->getFailingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			new FakeEventEmitter()
-		);
+		$this->markTestIncomplete( "TODO: Ask PM about rules. We removed this in main, but it might be a good idea to bring it back" );
+		$useCase = $this->makeUseCase( policyValidator: $this->makeFakeFailingModerationService() );
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
 		$request->setPaymentType( 'PPL' );
 		$response = $useCase->addDonation( $request );
 		$this->assertFalse( $response->getDonation()->isMarkedForModeration() );
-	}
-
-	private function newUseCaseWithMailer( DonationNotifier $mailer ): AddDonationUseCase {
-		return new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getSucceedingValidatorMock(),
-			$this->getSucceedingPolicyValidatorMock(),
-			$mailer,
-			$this->newTokenFetcher(),
-			new FakeEventEmitter()
-		);
 	}
 
 	private function newValidAddDonationRequestWithEmail( string $email ): AddDonationRequest {
@@ -361,9 +219,8 @@ class AddDonationUseCaseTest extends TestCase {
 		return $request;
 	}
 
-	public function testWhenAdditionWorks_successResponseContainsTokens(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$useCase = $this->newValidationSucceedingUseCase();
+	public function testSuccessResponseContainsTokens(): void {
+		$useCase = $this->makeUseCase();
 
 		$response = $useCase->addDonation( $this->newMinimumDonationRequest() );
 
@@ -374,17 +231,9 @@ class AddDonationUseCaseTest extends TestCase {
 	/**
 	 * TODO move 'covers' tag for DonationCreatedEvent here when we've improved the PHPCS definitions
 	 */
-	public function testWhenValidationSucceeds_eventIsEmitted(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
+	public function testEventIsEmittedAfterDonationWasStored(): void {
 		$eventEmitter = new EventEmitterSpy();
-		$useCase = new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getSucceedingValidatorMock(),
-			$this->getSucceedingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			$eventEmitter
-		);
+		$useCase = $this->makeUseCase( eventEmitter: $eventEmitter );
 
 		$useCase->addDonation( $this->newValidCompanyDonationRequest() );
 
@@ -396,59 +245,109 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsCancelled(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$repository = $this->newRepository();
-		$useCase = new AddDonationUseCase(
-			$repository,
-			$this->getSucceedingValidatorMock(),
-			$this->getAutoDeletingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			new FakeEventEmitter()
-		);
+		$repository = $this->makeDonationRepositoryStub();
+		$useCase = $this->makeUseCase( repository: $repository, policyValidator: $this->makeFakeAutodeletingPolicyValidator() );
 
 		$useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
+
 		$this->assertTrue( $repository->getDonationById( 1 )->isCancelled() );
 	}
 
 	public function testOptingIntoDonationReceipt_persistedInDonation(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$repository = $this->newRepository();
-		$useCase = new AddDonationUseCase(
-			$repository,
-			$this->getSucceedingValidatorMock(),
-			$this->getAutoDeletingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			new FakeEventEmitter()
-		);
+		$repository = $this->makeDonationRepositoryStub();
+		$useCase = $this->makeUseCase( repository: $repository );
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
 		$request->setOptsIntoDonationReceipt( true );
 
 		$useCase->addDonation( $request );
 
-		$this->assertSame( true, $repository->getDonationById( 1 )->getOptsIntoDonationReceipt() );
+		$this->assertTrue( $repository->getDonationById( 1 )->getOptsIntoDonationReceipt() );
 	}
 
 	public function testOptingOutOfDonationReceipt_persistedInDonation(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$repository = $this->newRepository();
-		$useCase = new AddDonationUseCase(
-			$repository,
-			$this->getSucceedingValidatorMock(),
-			$this->getAutoDeletingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTokenFetcher(),
-			new FakeEventEmitter()
-		);
+		$repository = $this->makeDonationRepositoryStub();
+		$useCase = $this->makeUseCase( repository: $repository );
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
 		$request->setOptsIntoDonationReceipt( false );
 
 		$useCase->addDonation( $request );
 
-		$this->assertSame( false, $repository->getDonationById( 1 )->getOptsIntoDonationReceipt() );
+		$this->assertFalse( $repository->getDonationById( 1 )->getOptsIntoDonationReceipt() );
+	}
+
+	private function makeUseCase(
+		?DonationRepository $repository = null,
+		?AddDonationValidator $donationValidator = null,
+		?ModerationService $policyValidator = null,
+		?DonationNotifier $notifier = null,
+		?DonationTokenFetcher $tokenFetcher = null,
+		?EventEmitter $eventEmitter = null,
+		?CreatePaymentService $paymentService = null,
+	) {
+		return new AddDonationUseCase(
+			$repository ?? $this->makeDonationRepositoryStub(),
+			$donationValidator ?? $this->makeFakeSucceedingDonationValidator(),
+			$policyValidator ?? $this->makeFakeSucceedingModerationService(),
+			$notifier ?? $this->makeNotifierStub(),
+			$tokenFetcher ?? $this->makeFakeTokenFetcher(),
+			$eventEmitter ?? new EventEmitterSpy(),
+			$paymentService ?? new SucceedingPaymentServiceStub()
+		);
+	}
+
+	private function makeDonationRepositoryStub(): DonationRepository {
+		return new FakeDonationRepository();
+	}
+
+	private function makeFakeSucceedingDonationValidator(): AddDonationValidator {
+		$validator = $this->createStub( AddDonationValidator::class );
+		$validator->method( 'validate' )->willReturn( new AddDonationValidationResult() );
+		return $validator;
+	}
+
+	private function makeFakeFailingDonationValidator( ConstraintViolation $violation ): AddDonationValidator {
+		$validator = $this->createStub( AddDonationValidator::class );
+		$validator->method( 'validate' )->willReturn( new AddDonationValidationResult( $violation ) );
+		return $validator;
+	}
+
+	private function makeFakeSucceedingModerationService(): ModerationService {
+		$validator = $this->createStub( ModerationService::class );
+		$validator->method( 'moderateDonationRequest' )->willReturn( new ModerationResult() );
+		return $validator;
+	}
+
+	private function makeFakeFailingModerationService(): ModerationService {
+		$result = new ModerationResult();
+		$result->addModerationReason( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
+		$validator = $this->createStub( ModerationService::class );
+		$validator->method( 'moderateDonationRequest' )->willReturn( $result );
+		return $validator;
+	}
+
+	private function makeFakeAutodeletingPolicyValidator(): ModerationService {
+		$validator = $this->createStub( ModerationService::class );
+		$validator->method( 'moderateDonationRequest' )->willReturn( new ModerationResult() );
+		$validator->method( 'isAutoDeleted' )->willReturn( true );
+		return $validator;
+	}
+
+	/**
+	 * @return DonationNotifier&MockObject
+	 */
+	private function makeNotifierStub(): DonationNotifier {
+		return $this->createStub( DonationNotifier::class );
+	}
+
+	private function makeFakeTokenFetcher(): DonationTokenFetcher {
+		return new FixedDonationTokenFetcher(
+			new DonationTokens(
+				self::ACCESS_TOKEN,
+				self::UPDATE_TOKEN
+			)
+		);
 	}
 
 }
