@@ -4,12 +4,11 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CreditCardPaymentNotification;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
-use WMDE\Euro\Euro;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
-use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\DonationContext\Services\PaymentBookingService;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidCreditCardNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
@@ -17,181 +16,163 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
-use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
+use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\FailureResponse;
+use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase
  *
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
  */
 class CreditCardNotificationUseCaseTest extends TestCase {
 
 	use DonationEventLoggerAsserter;
 
-	/** @var DoctrineDonationRepository|FakeDonationRepository|DonationRepositorySpy */
-	private $repository;
-	private $authorizer;
-	/** @var DonationNotifier&MockObject */
-	private $mailer;
-	private $eventLogger;
-	private $creditCardService;
-
-	public function setUp(): void {
-		$this->repository = new FakeDonationRepository();
-		$this->authorizer = new SucceedingDonationAuthorizer();
-		$this->mailer = $this->newMailer();
-		$this->eventLogger = $this->newEventLogger();
-	}
-
-	public function testWhenRepositoryThrowsException_handlerReturnsFailure(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$throwingEM = ThrowingEntityManager::newInstance( $this );
-		$this->repository = new DoctrineDonationRepository( $throwingEM, new ModerationReasonRepository( $throwingEM ) );
-		$this->authorizer = new FailingDonationAuthorizer();
-		$useCase = $this->newCreditCardNotificationUseCase();
-		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
-
-		$response = $useCase->handleNotification( $request );
-
-		$this->assertFalse( $response->isSuccessful() );
-		$this->assertSame( CreditCardNotificationResponse::DATABASE_ERROR, $response->getErrorMessage() );
-		$this->assertNotNull( $response->getLowLevelError() );
-	}
-
 	public function testWhenAuthorizationFails_handlerReturnsFailure(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$this->authorizer = new FailingDonationAuthorizer();
-		$this->repository->storeDonation( ValidDonation::newIncompleteCreditCardDonation() );
-
-		$useCase = $this->newCreditCardNotificationUseCase();
+		$authorizer = new FailingDonationAuthorizer();
+		$repository = new FakeDonationRepository( ValidDonation::newIncompleteCreditCardDonation() );
+		$useCase = $this->newCreditCardNotificationUseCase(
+			donationRepository: $repository,
+			authorizer: $authorizer
+		);
 
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 
 		$response = $useCase->handleNotification( $request );
 
-		$this->assertFalse( $response->isSuccessful() );
-		$this->assertStringContainsString( CreditCardNotificationResponse::AUTHORIZATION_FAILED, $response->getErrorMessage() );
-		$this->assertNull( $response->getLowLevelError() );
+		$this->assertFalse( $response->notificationWasHandled() );
+		$this->assertSame( 'Wrong access code for donation', $response->getMesssage() );
 	}
 
 	public function testWhenAuthorizationSucceeds_handlerReturnsSuccess(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$this->repository->storeDonation( ValidDonation::newIncompleteCreditCardDonation() );
-		$useCase = $this->newCreditCardNotificationUseCase();
+		$repository = new FakeDonationRepository( ValidDonation::newIncompleteCreditCardDonation() );
+		$useCase = $this->newCreditCardNotificationUseCase(
+			donationRepository: $repository,
+		);
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 
 		$response = $useCase->handleNotification( $request );
 
-		$this->assertTrue( $response->isSuccessful() );
-	}
-
-	public function testWhenPaymentTypeIsIncorrect_handlerReturnsFailure(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$this->repository->storeDonation( ValidDonation::newDirectDebitDonation() );
-		$useCase = $this->newCreditCardNotificationUseCase();
-		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
-
-		$response = $useCase->handleNotification( $request );
-
-		$this->assertFalse( $response->isSuccessful() );
-		$this->assertStringContainsString( CreditCardNotificationResponse::PAYMENT_TYPE_MISMATCH, $response->getErrorMessage() );
-		$this->assertNull( $response->getLowLevelError(), 'Payment verification does not create an exception' );
+		$this->assertTrue( $response->notificationWasHandled() );
 	}
 
 	public function testWhenAuthorizationSucceeds_confirmationMailIsSent(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
-		$this->repository->storeDonation( $donation );
-		$this->mailer->expects( $this->once() )
+		$repository = new FakeDonationRepository( $donation );
+
+		$mailer = $this->createMock( DonationNotifier::class );
+		$mailer->expects( $this->once() )
 			->method( 'sendConfirmationFor' )
 			->with( $donation );
-		$useCase = $this->newCreditCardNotificationUseCase();
+		$useCase = $this->newCreditCardNotificationUseCase(
+			donationRepository: $repository,
+			notifier: $mailer
+		);
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 
-		$response = $useCase->handleNotification( $request );
-
-		$this->assertTrue( $response->isSuccessful() );
-		$this->assertNull( $response->getLowLevelError() );
+		$useCase->handleNotification( $request );
 	}
 
 	public function testWhenAuthorizationSucceeds_donationIsStored(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
-		$this->repository = new DonationRepositorySpy( $donation );
+		$repository = new DonationRepositorySpy( $donation );
 
-		$useCase = $this->newCreditCardNotificationUseCase();
+		$useCase = $this->newCreditCardNotificationUseCase(
+			donationRepository: $repository,
+		);
 
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 		$useCase->handleNotification( $request );
-		$this->assertCount( 1, $this->repository->getStoreDonationCalls() );
+		$this->assertCount( 1, $repository->getStoreDonationCalls() );
 	}
 
-	public function testWhenAuthorizationSucceeds_donationIsBooked(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
+	public function testWhenAuthorizationSucceeds_paymentIsBooked(): void {
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
-		$this->repository = new DonationRepositorySpy( $donation );
-
-		$useCase = $this->newCreditCardNotificationUseCase();
-
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
+		$repository = new FakeDonationRepository( $donation );
+
+		$paymentBookingServiceMock = $this->createMock( PaymentBookingService::class );
+		$paymentBookingServiceMock
+			->expects( $this->once() )
+			->method( 'bookPayment' )
+			->with( $donation->getPaymentId(), $request->bookingData )
+			->willReturn( new SuccessResponse() );
+
+		$useCase = $this->newCreditCardNotificationUseCase(
+			donationRepository: $repository,
+			paymentBookingService: $paymentBookingServiceMock,
+		);
 		$useCase->handleNotification( $request );
-		$this->assertTrue( $this->repository->getDonationById( $donation->getId() )->isBooked() );
 	}
 
 	public function testWhenAuthorizationSucceeds_bookingEventIsLogged(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
-		$this->repository = new DonationRepositorySpy( $donation );
-		$this->eventLogger = new DonationEventLoggerSpy();
+		$repository = new DonationRepositorySpy( $donation );
+		$eventLogger = new DonationEventLoggerSpy();
 
-		$useCase = $this->newCreditCardNotificationUseCase();
+		$useCase = $this->newCreditCardNotificationUseCase(
+			donationRepository: $repository,
+			eventLogger: $eventLogger
+		);
 
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 		$useCase->handleNotification( $request );
 
-		$this->assertEventLogContainsExpression( $this->eventLogger, $donation->getId(), '/booked/' );
+		$this->assertEventLogContainsExpression( $eventLogger, $donation->getId(), '/booked/' );
 	}
 
-	/**
-	 * @return DonationNotifier&MockObject
-	 */
-	private function newMailer(): DonationNotifier {
-		return $this->getMockBuilder( DonationNotifier::class )->disableOriginalConstructor()->getMock();
-	}
-
-	/**
-	 * @return DonationEventLogger^MockObject
-	 */
-	private function newEventLogger(): DonationEventLogger {
-		return $this->createMock( DonationEventLogger::class );
-	}
-
-	private function newCreditCardNotificationUseCase(): CreditCardNotificationUseCase {
-		return new CreditCardNotificationUseCase(
-			$this->repository,
-			$this->authorizer,
-			$this->mailer,
-			$this->eventLogger
+	public function testWhenPaymentBookingServiceFails_handlerReturnsFailure(): void {
+		$repository = new FakeDonationRepository( ValidDonation::newIncompleteCreditCardDonation() );
+		$paymentService = $this->createFailingPaymentBookingService();
+		$useCase = $this->newCreditCardNotificationUseCase(
+			donationRepository: $repository,
+			paymentBookingService: $paymentService
 		);
-	}
-
-	public function testWhenPaymentAmountMismatches_handlerReturnsFailure(): void {
-		$this->markTestIncomplete( 'TODO: Consolidate booking use cases' );
-		$this->repository->storeDonation( ValidDonation::newIncompleteCreditCardDonation() );
-		$useCase = $this->newCreditCardNotificationUseCase();
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
-		$request->setAmount( Euro::newFromInt( 35505 ) );
 
 		$response = $useCase->handleNotification( $request );
 
-		$this->assertFalse( $response->isSuccessful() );
-		$this->assertStringContainsString( CreditCardNotificationResponse::AMOUNT_MISMATCH, $response->getErrorMessage() );
-		$this->assertNull( $response->getLowLevelError(), 'Amount verification does not create an exception' );
+		$this->assertFalse( $response->notificationWasHandled() );
+		$this->assertSame( 'Amount does not match', $response->getMesssage() );
+	}
+
+	private function newCreditCardNotificationUseCase(
+		?DonationRepository $donationRepository = null,
+		?DonationAuthorizer $authorizer = null,
+		?DonationNotifier $notifier = null,
+		?PaymentBookingService $paymentBookingService = null,
+		?DonationEventLogger $eventLogger = null
+
+	): CreditCardNotificationUseCase {
+		return new CreditCardNotificationUseCase(
+			$donationRepository ?? new FakeDonationRepository(),
+			$authorizer ?? new SucceedingDonationAuthorizer(),
+			$notifier ?? $this->createNotifierStub(),
+			$paymentBookingService ?? $this->createSucceedingPaymentBookingService(),
+			$eventLogger ?? $this->createEventLoggerStub()
+		);
+	}
+
+	private function createNotifierStub(): DonationNotifier {
+		return $this->createStub( DonationNotifier::class );
+	}
+
+	private function createSucceedingPaymentBookingService(): PaymentBookingService {
+		$service = $this->createStub( PaymentBookingService::class );
+		$service->method( 'bookPayment' )->willReturn( new SuccessResponse() );
+		return $service;
+	}
+
+	private function createEventLoggerStub(): DonationEventLogger {
+		return $this->createStub( DonationEventLogger::class );
+	}
+
+	private function createFailingPaymentBookingService(): PaymentBookingService {
+		$service = $this->createStub( PaymentBookingService::class );
+		$service->method( 'bookPayment' )->willReturn( new FailureResponse( 'Amount does not match' ) );
+		return $service;
 	}
 
 }
