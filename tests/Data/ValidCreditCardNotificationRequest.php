@@ -4,16 +4,11 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
-use WMDE\Euro\Euro;
-use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardPaymentNotificationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\NotificationRequest;
 
-/**
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- */
 class ValidCreditCardNotificationRequest {
 
-	public const AMOUNT = 13.37;
+	public const AMOUNT = 1337;
 	public const PAYMENT_ID = 'customer.prefix-ID2tbnag4a9u';
 	public const CUSTOMER_ID = 'e20fb9d5281c1bca1901c19f6e46213191bb4c17';
 	public const SESSION_ID = 'CC13064b2620f4028b7d340e3449676213336a4d';
@@ -23,25 +18,31 @@ class ValidCreditCardNotificationRequest {
 	public const TITLE = 'Your generous donation';
 	public const COUNTRY_CODE = 'DE';
 	public const CURRENCY_CODE = 'EUR';
+	public const NOTIFICATION_TYPE_BILLING = 'billing';
 
-	public static function newBillingNotification( int $donationId ): CreditCardPaymentNotificationRequest {
-		return self::newBaseRequest()
-			->setDonationId( $donationId )
-			->setNotificationType( CreditCardPaymentNotificationRequest::NOTIFICATION_TYPE_BILLING );
+	public static function newBillingNotification( int $donationId ): NotificationRequest {
+		return new NotificationRequest(
+			array_merge(
+				self::newBaseBookingData(),
+				[
+					'function' => self::NOTIFICATION_TYPE_BILLING
+				]
+			),
+			$donationId
+		);
 	}
 
-	private static function newBaseRequest(): CreditCardPaymentNotificationRequest {
-		return ( new CreditCardPaymentNotificationRequest() )
-			->setTransactionId( self::PAYMENT_ID )
-			->setAmount( Euro::newFromFloat( self::AMOUNT ) )
-			->setCustomerId( self::CUSTOMER_ID )
-			->setSessionId( self::SESSION_ID )
-			->setAuthId( self::AUTH_ID )
-			->setToken( self::TOKEN )
-			->setUpdateToken( self::UPDATE_TOKEN )
-			->setTitle( self::TITLE )
-			->setCountry( self::COUNTRY_CODE )
-			->setCurrency( self::CURRENCY_CODE );
+	private static function newBaseBookingData(): array {
+		return [
+			'transactionId' => self::PAYMENT_ID,
+			'amount' => self::AMOUNT,
+			'customerId' => self::CUSTOMER_ID,
+			'sessionId' => self::SESSION_ID,
+			'auth' => self::AUTH_ID,
+			'title' => self::TITLE,
+			'country' => self::COUNTRY_CODE,
+			'currency' => self::CURRENCY_CODE,
+		];
 	}
 
 }
