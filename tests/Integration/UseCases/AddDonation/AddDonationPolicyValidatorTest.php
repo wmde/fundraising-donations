@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
@@ -43,6 +44,35 @@ class AddDonationPolicyValidatorTest extends TestCase {
 		$request->setDonorType( DonorType::ANONYMOUS() );
 
 		$this->assertFalse( $policyValidator->needsModeration( $request ) );
+	}
+
+	/**
+	 * @dataProvider paymentTypeProvider
+	 */
+	public function testGivenExternalPayment_needsModerationReturnsFalse( string $paymentType, bool $expectedNeedsModeration ): void {
+		$policyValidator = new AddDonationPolicyValidator(
+			$this->newFailingAmountValidator(),
+			$this->newFailingTextPolicyValidator()
+		);
+		$request = ValidAddDonationRequest::getRequest();
+		$request->setPaymentCreationRequest( new PaymentCreationRequest(
+			100,
+			0,
+			$paymentType
+		) );
+
+		$this->assertSame( $expectedNeedsModeration, $policyValidator->needsModeration( $request ) );
+	}
+
+	/**
+	 * @return iterable<array{string,boolean}>
+	 */
+	public function paymentTypeProvider(): iterable {
+		yield 'Paypal does not need moderation' => [ 'PPL', false ];
+		yield 'Credit Card does not need moderation' => [ 'MCP', false ];
+		yield 'Sofort does not need moderation' => [ 'SUB', false ];
+		yield 'Direct Debit needs moderation' => [ 'BEZ', true ];
+		yield 'Bank Transfer needs moderation' => [ 'UEB', true ];
 	}
 
 	private function newFailingAmountValidator(): AmountPolicyValidator {

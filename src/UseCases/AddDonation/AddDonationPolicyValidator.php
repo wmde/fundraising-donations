@@ -20,6 +20,21 @@ use WMDE\FunValidators\Validators\TextPolicyValidator;
  */
 class AddDonationPolicyValidator {
 
+	/**
+	 * This is a list of payment type strings where we'll not apply the moderation.
+	 *
+	 * Currently, it's the list of payments provided by an external payment provider.
+	 * The reasoning behind this is that either the payment will be incomplete
+	 * (because the user did not complete it on the page of the payment provider),
+	 * so it doesn't need to be moderated.
+	 *
+	 * If the user completes the payment, the moderation rules also don't apply,
+	 * because we already got the money. In case of high donations,
+	 * the fundraising department has processes in place to handle those.
+	 * In case of offensive words, we don't care ;-)
+	 */
+	private const PAYMENT_TYPES_THAT_SKIP_MODERATION = [ 'PPL', 'MCP', 'SUB' ];
+
 	private AmountPolicyValidator $amountPolicyValidator;
 	private TextPolicyValidator $textPolicyValidator;
 	/**
@@ -35,6 +50,9 @@ class AddDonationPolicyValidator {
 	}
 
 	public function needsModeration( AddDonationRequest $request ): bool {
+		if ( $this->paymentTypeBypassesModeration( $request->getPaymentCreationRequest()->paymentType ) ) {
+			return false;
+		}
 		$violations = array_merge(
 			$this->getAmountViolations( $request ),
 			$this->getBadWordViolations( $request )
@@ -116,5 +134,9 @@ class AddDonationPolicyValidator {
 				$paymentRequest->interval
 			)->getViolations()
 		);
+	}
+
+	private function paymentTypeBypassesModeration( string $paymentType ): bool {
+		return in_array( $paymentType, self::PAYMENT_TYPES_THAT_SKIP_MODERATION );
 	}
 }
