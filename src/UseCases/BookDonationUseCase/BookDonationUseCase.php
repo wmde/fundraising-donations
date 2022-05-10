@@ -44,6 +44,7 @@ class BookDonationUseCase {
 
 	private function handleRequestForDonation( NotificationRequest $request, Donation $donation ): NotificationResponse {
 		$donationId = $donation->getId();
+		$isFollowupPayment = false;
 
 		if ( !$this->authorizationService->systemCanModifyDonation( $donationId ) ) {
 			return NotificationResponse::newUnhandledResponse( 'Wrong access code for donation' );
@@ -55,15 +56,18 @@ class BookDonationUseCase {
 		}
 		if ( $result instanceof FollowUpSuccessResponse ) {
 			$donation = $donation->createFollowupDonationForPayment( $result->childPaymentId );
+			$isFollowupPayment = true;
 		}
 		$donation->confirmBooked();
 
 		$this->repository->storeDonation( $donation );
-
-		$this->notifier->sendConfirmationFor( $donation );
 		$this->eventLogger->log( $donation->getId(), 'book_donation_use_case: booked' );
 
-		$this->logChildDonationCreatedEvent( intval( $donationId ), intval( $donation->getId() ) );
+		if ( $isFollowupPayment ) {
+			$this->logChildDonationCreatedEvent( intval( $donationId ), intval( $donation->getId() ) );
+		} else {
+			$this->notifier->sendConfirmationFor( $donation );
+		}
 
 		return NotificationResponse::newSuccessResponse();
 	}
