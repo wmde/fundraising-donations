@@ -1,9 +1,5 @@
 parameters:
 	ignoreErrors:
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\PaymentContext\\\\Domain\\\\Model\\\\PaymentMethod\\:\\:getBankTransferCode\\(\\)\\.$#"
-			count: 3
-			path: tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
 
 		-
 			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationAuthorizer\\:\\:hasAuthorizedAsAdmin\\(\\)\\.$#"
