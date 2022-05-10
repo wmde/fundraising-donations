@@ -23,6 +23,7 @@ use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorResponse;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidator;
+use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 use WMDE\FunValidators\ConstraintViolation;
 
 /**
@@ -247,7 +248,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 	}
 
 	private function newConfirmationMailer(): DonationMailer {
-		return new DonationMailer( $this->templateMailer, $this->templateMailer, 'spenden@wikimedia.de' );
+		return new DonationMailer( $this->templateMailer, $this->templateMailer, $this->createStub( GetPaymentUseCase::class ), 'spenden@wikimedia.de' );
 	}
 
 }

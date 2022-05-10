@@ -5,7 +5,6 @@ parameters:
 	excludePaths:
 		analyse:
 			- src/DataAccess/Migrations/
-			- src/Infrastructure/DonationMailer.php
 			- src/UseCases/AddDonation/PaymentFactory.php
 			- tests/Integration/DataAccess/UniqueTransferCodeGeneratorTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
