@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CreditCardPaymentNotification;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\CreditCardPaymentNotification;
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
