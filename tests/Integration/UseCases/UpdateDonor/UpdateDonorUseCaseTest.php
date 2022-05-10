@@ -10,6 +10,7 @@ use WMDE\Fundraising\DonationContext\Domain\Event\DonorUpdatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
@@ -39,7 +40,6 @@ class UpdateDonorUseCaseTest extends TestCase {
 	}
 
 	public function testGivenAnonymousDonationAndValidAddressPersonalData_donationIsUpdated() {
-		$this->markTestIncomplete( 'This should work again when the donation confirmation mailer gets its info from the "get payment" use case' );
 		$repository = $this->newRepository();
 		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
@@ -53,7 +53,6 @@ class UpdateDonorUseCaseTest extends TestCase {
 	}
 
 	public function testGivenAnonymousDonationAndValidCompanyAddressData_donationIsUpdated() {
-		$this->markTestIncomplete( 'This should work again when the donation confirmation mailer gets its info from the "get payment" use case' );
 		$repository = $this->newRepository();
 		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
@@ -67,26 +66,29 @@ class UpdateDonorUseCaseTest extends TestCase {
 	}
 
 	public function testGivenAnonymousDonationAndValidAddressData_confirmationMailIsSent() {
-		$this->markTestIncomplete( 'This should work again when the donation confirmation mailer gets its info from the "get payment" use case' );
 		$repository = $this->newRepository();
-		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
+
+		$mailer = $this->createMock( DonationConfirmationMailer::class );
+		$mailer->expects( $this->once() )
+			->method( 'sendConfirmationFor' )
+			->with( $donation );
+
+		$useCase = $this->newUpdateDonorUseCase( $repository, confirmationMailer: $mailer );
+
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
 
 		$useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
-
-		$this->templateMailer->assertCalledOnce();
 	}
 
 	public function testGivenDonationWithAddressData_donationUpdateFails() {
-		$this->markTestIncomplete( 'This should work again when the donation confirmation mailer gets its info from the "get payment" use case' );
 		$repository = $this->newRepository();
-		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newDirectDebitDonation();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
 
+		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
 		$this->assertFalse( $response->isSuccessful() );
@@ -95,16 +97,11 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 	public function testGivenFailingAuthorizer_donationUpdateFails() {
 		$repository = $this->newRepository();
-		$useCase = new UpdateDonorUseCase(
-			new FailingDonationAuthorizer(),
-			$this->newDonorValidator(),
-			$repository,
-			$this->newConfirmationMailer(),
-			new FakeEventEmitter()
-		);
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
+
+		$useCase = $this->newUpdateDonorUseCase( $repository, donationAuthorizer: new FailingDonationAuthorizer() );
 
 		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
@@ -114,11 +111,12 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 	public function testGivenExportedDonation_donationUpdateFails() {
 		$repository = $this->newRepository();
-		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$donation->markAsExported();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
+
+		$useCase = $this->newUpdateDonorUseCase( $repository );
 
 		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
@@ -128,12 +126,13 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 	public function testGivenCanceledDonation_donationUpdateFails() {
 		$repository = $this->newRepository();
-		$useCase = $this->newUpdateDonorUseCase( $repository );
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->setDonor( new AnonymousDonor() );
 		$donation->cancel();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
+
+		$useCase = $this->newUpdateDonorUseCase( $repository );
 
 		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
@@ -147,16 +146,11 @@ class UpdateDonorUseCaseTest extends TestCase {
 		$validator->method( 'validateDonorData' )->willReturn(
 			new UpdateDonorValidationResult( new ConstraintViolation( '', 'invalid_first_name', 'first_name' ) )
 		);
-		$useCase = new UpdateDonorUseCase(
-			$this->newDonationAuthorizer(),
-			$validator,
-			$repository,
-			$this->newConfirmationMailer(),
-			new FakeEventEmitter()
-		);
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
+
+		$useCase = $this->newUpdateDonorUseCase( $repository, donorValidator: $validator );
 
 		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 
@@ -165,22 +159,15 @@ class UpdateDonorUseCaseTest extends TestCase {
 	}
 
 	public function testOnUpdateAddress_emitsEvent() {
-		$this->markTestIncomplete( 'This should work again when the donation confirmation mailer gets its info from the "get payment" use case' );
 		$repository = $this->newRepository();
 		$eventEmitter = new EventEmitterSpy();
-		$useCase = new UpdateDonorUseCase(
-			$this->newDonationAuthorizer(),
-			$this->createMock( UpdateDonorValidator::class ),
-			$repository,
-			$this->newConfirmationMailer(),
-			$eventEmitter
-		);
 		$donation = ValidDonation::newBookedAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
 		$donationId = $donation->getId();
 		$previousDonor = $donation->getDonor();
 		$updateDonorRequest = $this->newUpdateDonorRequestForPerson( $donationId );
 
+		$useCase = $this->newUpdateDonorUseCase( $repository, eventEmitter: $eventEmitter );
 		$useCase->updateDonor( $updateDonorRequest );
 
 		/** @var DonorUpdatedEvent[] $events */
@@ -209,13 +196,13 @@ class UpdateDonorUseCaseTest extends TestCase {
 		return $validator;
 	}
 
-	private function newUpdateDonorUseCase( DonationRepository $repository ): UpdateDonorUseCase {
+	private function newUpdateDonorUseCase( DonationRepository $repository, ?DonationConfirmationMailer $confirmationMailer = null, ?EventEmitter $eventEmitter = null, ?UpdateDonorValidator $donorValidator = null, ?DonationAuthorizer $donationAuthorizer = null ): UpdateDonorUseCase {
 		return new UpdateDonorUseCase(
-			$this->newDonationAuthorizer(),
-			$this->newDonorValidator(),
+			$donationAuthorizer ?? $this->newDonationAuthorizer(),
+			$donorValidator ?? $this->newDonorValidator(),
 			$repository,
-			$this->newConfirmationMailer(),
-			new FakeEventEmitter()
+			$confirmationMailer ?? $this->newConfirmationMailer(),
+			$eventEmitter ?? new FakeEventEmitter()
 		);
 	}
 
@@ -247,7 +234,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 	}
 
 	private function newConfirmationMailer(): DonationConfirmationMailer {
-		return new DonationConfirmationMailer( $this->templateMailer );
+		return $this->createStub( DonationConfirmationMailer::class );
 	}
 
 }

@@ -9,9 +9,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
-/**
- * @license GPL-2.0-or-later
- */
 class DonationConfirmationMailer implements DonationConfirmationNotifier {
 
 	public function __construct(
