@@ -17,7 +17,7 @@ use WMDE\FunValidators\Validators\TextPolicyValidator;
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\ModerationService
  */
-class AddDonationPolicyValidatorTest extends TestCase {
+class ModerationServiceTest extends TestCase {
 
 	public function testTooHighAmountGiven_needsModerationReturnsTrue(): void {
 		$policyValidator = new ModerationService(

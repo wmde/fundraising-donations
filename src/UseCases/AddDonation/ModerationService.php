@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationResult;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
@@ -42,6 +43,8 @@ class ModerationService {
 	 */
 	private array $forbiddenEmailAddresses;
 
+	private ModerationResult $result;
+
 	public function __construct( AmountPolicyValidator $amountPolicyValidator, TextPolicyValidator $textPolicyValidator,
 		array $forbiddenEmailAddresses = [] ) {
 		$this->amountPolicyValidator = $amountPolicyValidator;
@@ -49,16 +52,26 @@ class ModerationService {
 		$this->forbiddenEmailAddresses = $forbiddenEmailAddresses;
 	}
 
-	public function needsModeration( AddDonationRequest $request ): bool {
+	/**
+	 * We'll use this for https://phabricator.wikimedia.org/T306685
+	 *
+	 * @param AddDonationRequest $request
+	 * @return ModerationResult
+	 */
+	public function moderateDonationRequest( AddDonationRequest $request ): ModerationResult {
+		$this->result = new ModerationResult();
 		if ( $this->paymentTypeBypassesModeration( $request->getPaymentCreationRequest()->paymentType ) ) {
-			return false;
+			return $this->result;
 		}
-		$violations = array_merge(
-			$this->getAmountViolations( $request ),
-			$this->getBadWordViolations( $request )
-		);
 
-		return !empty( $violations );
+		$this->getAmountViolations( $request );
+		$this->getBadWordViolations( $request );
+
+		return $this->result;
+	}
+
+	public function needsModeration( AddDonationRequest $request ): bool {
+		return $this->moderateDonationRequest( $request )->needsModeration();
 	}
 
 	/**
@@ -70,14 +83,14 @@ class ModerationService {
 	 *
 	 * @param AddDonationRequest $request
 	 * @return bool
-	 * @deprecated This has not been used after 2016 and might be removed.
+	 * @deprecated This has not been used after 2016 and might be removed. See https://phabricator.wikimedia.org/T280391
 	 */
 	public function isAutoDeleted( AddDonationRequest $request ): bool {
 		if ( $request->donorIsAnonymous() ) {
 			return false;
 		}
-		foreach ( $this->forbiddenEmailAddresses as $blacklistEntry ) {
-			if ( preg_match( $blacklistEntry, $request->getDonorEmailAddress() ) ) {
+		foreach ( $this->forbiddenEmailAddresses as $blocklistEntry ) {
+			if ( preg_match( $blocklistEntry, $request->getDonorEmailAddress() ) ) {
 				return true;
 			}
 		}
@@ -93,47 +106,42 @@ class ModerationService {
 	 * it will not lead to validation for anonymous users.
 	 *
 	 * @param AddDonationRequest $request
-	 * @return array
 	 */
-	private function getBadWordViolations( AddDonationRequest $request ): array {
+	private function getBadWordViolations( AddDonationRequest $request ): void {
 		if ( $request->donorIsAnonymous() ) {
-			return [];
+			return;
 		}
 
-		return array_merge(
-			$this->getPolicyViolationsForField( $request->getDonorFirstName(), Result::SOURCE_DONOR_FIRST_NAME ),
-			$this->getPolicyViolationsForField( $request->getDonorLastName(), Result::SOURCE_DONOR_LAST_NAME ),
-			$this->getPolicyViolationsForField( $request->getDonorCompany(), Result::SOURCE_DONOR_COMPANY ),
-			$this->getPolicyViolationsForField(
-				$request->getDonorStreetAddress(),
-				Result::SOURCE_DONOR_STREET_ADDRESS
-			),
-			$this->getPolicyViolationsForField( $request->getDonorCity(), Result::SOURCE_DONOR_CITY )
+		$this->getPolicyViolationsForField( $request->getDonorFirstName(), Result::SOURCE_DONOR_FIRST_NAME );
+		$this->getPolicyViolationsForField( $request->getDonorLastName(), Result::SOURCE_DONOR_LAST_NAME );
+		$this->getPolicyViolationsForField( $request->getDonorCompany(), Result::SOURCE_DONOR_COMPANY );
+		$this->getPolicyViolationsForField(
+			$request->getDonorStreetAddress(),
+			Result::SOURCE_DONOR_STREET_ADDRESS
 		);
+		$this->getPolicyViolationsForField( $request->getDonorCity(), Result::SOURCE_DONOR_CITY );
 	}
 
-	private function getPolicyViolationsForField( string $fieldContent, string $fieldName ): array {
+	private function getPolicyViolationsForField( string $fieldContent, string $fieldName ): void {
 		if ( $fieldContent === '' ) {
-			return [];
+			return;
 		}
 		if ( $this->textPolicyValidator->textIsHarmless( $fieldContent ) ) {
-			return [];
+			return;
 		}
-		return [ new ConstraintViolation( $fieldContent, Result::VIOLATION_TEXT_POLICY, $fieldName ) ];
+		$this->result->addModerationReason( new ConstraintViolation( $fieldContent, Result::VIOLATION_TEXT_POLICY, $fieldName ) );
 	}
 
-	private function getAmountViolations( AddDonationRequest $request ): array {
+	private function getAmountViolations( AddDonationRequest $request ): void {
 		$paymentRequest = $request->getPaymentCreationRequest();
-		return array_map(
-			static function ( ConstraintViolation $violation ) {
-				$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
-				return $violation;
-			},
-			$this->amountPolicyValidator->validate(
-				$paymentRequest->amountInEuroCents / 100,
-				$paymentRequest->interval
-			)->getViolations()
-		);
+		$amountViolations = $this->amountPolicyValidator->validate(
+			$paymentRequest->amountInEuroCents / 100,
+			$paymentRequest->interval
+		)->getViolations();
+		foreach ( $amountViolations as $violation ) {
+			$violation->setSource( Result::SOURCE_PAYMENT_AMOUNT );
+			$this->result->addModerationReason( $violation );
+		}
 	}
 
 	private function paymentTypeBypassesModeration( string $paymentType ): bool {
