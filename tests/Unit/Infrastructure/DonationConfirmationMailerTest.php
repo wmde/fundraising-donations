@@ -21,17 +21,15 @@ class DonationConfirmationMailerTest extends TestCase {
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
 		$donation = ValidDonation::newBankTransferDonation();
 		$paymentService = $this->createMock( GetPaymentUseCase::class );
-		$paymentService->expects($this->once() )
+		$paymentService->expects( $this->once() )
 			->method( 'getPaymentDataArray' )
 			->with( $donation->getPaymentId() )
-			->willReturn(
-		[
+			->willReturn( [
 				'amount' => ValidDonation::DONATION_AMOUNT,
 				'interval' => ValidDonation::PAYMENT_INTERVAL_IN_MONTHS,
 				'paymentType' => 'UEB',
 				'ueb_code' => ValidPayments::PAYMENT_BANK_TRANSFER_CODE
-			]
-		);
+			] );
 		$confirmationMailer = new DonationConfirmationMailer( $mailerSpy, $paymentService );
 
 		$confirmationMailer->sendConfirmationFor( $donation );
@@ -57,7 +55,10 @@ class DonationConfirmationMailerTest extends TestCase {
 
 	public function testGivenAnonymousDonationMailerDoesNothing(): void {
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
-		$confirmationMailer = new DonationConfirmationMailer( $mailerSpy );
+		$confirmationMailer = new DonationConfirmationMailer(
+			$mailerSpy,
+			$this->createStub( GetPaymentUseCase::class )
+		);
 		$donation = ValidDonation::newBookedAnonymousPayPalDonation();
 
 		$confirmationMailer->sendConfirmationFor( $donation );
