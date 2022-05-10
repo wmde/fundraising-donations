@@ -10,7 +10,10 @@ use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingTemplateMailer;
+use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\Infrastructure\DonationMailer
@@ -20,10 +23,11 @@ class DonationConfirmationMailerTest extends TestCase {
 	private const ADMIN_EMAIL = 'picard@starfleet.com';
 
 	public function testTemplateDataContainsAllNecessaryDonationInformation(): void {
-		$this->markTestIncomplete( 'Donation confirmation mailer needs "get payment" use case to get payment info. ' );
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
-		$confirmationMailer = new DonationMailer( $mailerSpy, $mailerSpy, self::ADMIN_EMAIL );
 		$donation = ValidDonation::newBankTransferDonation();
+		$paymentService = $this->getMockPaymentService( $donation->getPaymentId(), ValidPayments::newBankTransferPayment()->getDisplayValues() );
+
+		$confirmationMailer = new DonationMailer( $mailerSpy, new ThrowingTemplateMailer(), $paymentService, self::ADMIN_EMAIL );
 
 		$confirmationMailer->sendConfirmationFor( $donation );
 
@@ -37,10 +41,11 @@ class DonationConfirmationMailerTest extends TestCase {
 			'donation' => [
 				'id' => $donation->getId(),
 				'amount' => ValidDonation::DONATION_AMOUNT,
+				'amountInCents' => intval( ValidDonation::DONATION_AMOUNT * 100 ),
 				'interval' => ValidDonation::PAYMENT_INTERVAL_IN_MONTHS,
 				'needsModeration' => false,
 				'paymentType' => 'UEB',
-				'bankTransferCode' => ValidDonation::PAYMENT_BANK_TRANSFER_CODE,
+				'bankTransferCode' => ValidPayments::PAYMENT_BANK_TRANSFER_CODE,
 				'receiptOptIn' => null,
 				'moderationFlags' => [],
 			]
@@ -48,14 +53,18 @@ class DonationConfirmationMailerTest extends TestCase {
 	}
 
 	public function testTemplateDataContainsModerationInformation(): void {
-		$this->markTestIncomplete( 'Donation confirmation mailer needs "get payment" use case to get payment info. ' );
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
-		$confirmationMailer = new DonationMailer( $mailerSpy, $mailerSpy, self::ADMIN_EMAIL );
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration(
 			new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH, 'amount' ),
 			new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'email' ),
 			new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'street' ),
+		);
+		$confirmationMailer = new DonationMailer(
+			$mailerSpy,
+			new ThrowingTemplateMailer(),
+			$this->getMockPaymentService( $donation->getPaymentId(), ValidPayments::newBankTransferPayment()->getDisplayValues() ),
+			self::ADMIN_EMAIL
 		);
 
 		$confirmationMailer->sendConfirmationFor( $donation );
@@ -73,8 +82,8 @@ class DonationConfirmationMailerTest extends TestCase {
 
 	public function testGivenAnonymousDonationMailerDoesNothing(): void {
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
-		$confirmationMailer = new DonationMailer( $mailerSpy, $mailerSpy, self::ADMIN_EMAIL );
 		$donation = ValidDonation::newBookedAnonymousPayPalDonation();
+		$confirmationMailer = new DonationMailer( $mailerSpy, new ThrowingTemplateMailer(), $this->createStub( GetPaymentUseCase::class ), self::ADMIN_EMAIL );
 
 		$confirmationMailer->sendConfirmationFor( $donation );
 
@@ -83,7 +92,7 @@ class DonationConfirmationMailerTest extends TestCase {
 
 	public function testGivenUnmoderatedDonation_adminIsNotNotified(): void {
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
-		$confirmationMailer = new DonationMailer( $mailerSpy, $mailerSpy, self::ADMIN_EMAIL );
+		$confirmationMailer = new DonationMailer( new ThrowingTemplateMailer(), $mailerSpy,  $this->createStub( GetPaymentUseCase::class ), self::ADMIN_EMAIL );
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$confirmationMailer->sendModerationNotificationToAdmin( $donation );
@@ -95,11 +104,17 @@ class DonationConfirmationMailerTest extends TestCase {
 	 * @dataProvider moderationReasonProvider
 	 */
 	public function testGivenModeratedDonation_adminIsNotNotifiedOfAnyModerationExceptAmountTooHigh( array $moderationReasons, int $expectedMailCount ): void {
-		$this->markTestIncomplete( 'Donation confirmation mailer needs "get payment" use case to get payment info. ' );
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
-		$confirmationMailer = new DonationMailer( $mailerSpy, $mailerSpy, self::ADMIN_EMAIL );
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->markForModeration( ...$moderationReasons );
+		$paymentService = $this->createStub( GetPaymentUseCase::class );
+		$paymentService->method( 'getPaymentDataArray' )->willReturn( ValidPayments::newDirectDebitPayment()->getDisplayValues() );
+		$confirmationMailer = new DonationMailer(
+			new ThrowingTemplateMailer(),
+			$mailerSpy,
+			$paymentService,
+			self::ADMIN_EMAIL
+		);
 
 		$confirmationMailer->sendModerationNotificationToAdmin( $donation );
 
@@ -120,11 +135,15 @@ class DonationConfirmationMailerTest extends TestCase {
 	}
 
 	public function testTemplateDataForAdminContainsAllNecessaryDonationInformation(): void {
-		$this->markTestIncomplete( 'Donation confirmation mailer needs "get payment" use case to get payment info. ' );
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
-		$confirmationMailer = new DonationMailer( $mailerSpy, $mailerSpy, self::ADMIN_EMAIL );
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration( new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH, 'amount' ) );
+		$confirmationMailer = new DonationMailer(
+			new ThrowingTemplateMailer(),
+			$mailerSpy,
+			$this->getMockPaymentService( $donation->getPaymentId(), ValidPayments::newBankTransferPayment()->getDisplayValues() ),
+			self::ADMIN_EMAIL
+		);
 
 		$confirmationMailer->sendModerationNotificationToAdmin( $donation );
 
@@ -135,5 +154,19 @@ class DonationConfirmationMailerTest extends TestCase {
 				'AMOUNT_TOO_HIGH' => true,
 			],
 		] );
+	}
+
+	/**
+	 * @param int $paymentId
+	 * @param array<string,mixed> $returnTemplateData
+	 * @return GetPaymentUseCase
+	 */
+	private function getMockPaymentService( int $paymentId, array $returnTemplateData ): GetPaymentUseCase {
+		$paymentService = $this->createMock( GetPaymentUseCase::class );
+		$paymentService->expects( $this->once() )
+			->method( 'getPaymentDataArray' )
+			->with( $paymentId )
+			->willReturn( $returnTemplateData );
+		return $paymentService;
 	}
 }
