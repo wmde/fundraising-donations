@@ -8,7 +8,9 @@ use PHPUnit\Framework\TestCase;
 use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
+use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer
@@ -16,10 +18,21 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
 class DonationConfirmationMailerTest extends TestCase {
 
 	public function testTemplateDataContainsAllNecessaryDonationInformation(): void {
-		$this->markTestIncomplete( 'Donation confirmation mailer needs "get payment" use case to get payment info. ' );
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
-		$confirmationMailer = new DonationConfirmationMailer( $mailerSpy );
 		$donation = ValidDonation::newBankTransferDonation();
+		$paymentService = $this->createMock( GetPaymentUseCase::class );
+		$paymentService->expects($this->once() )
+			->method( 'getPaymentDataArray' )
+			->with( $donation->getPaymentId() )
+			->willReturn(
+		[
+				'amount' => ValidDonation::DONATION_AMOUNT,
+				'interval' => ValidDonation::PAYMENT_INTERVAL_IN_MONTHS,
+				'paymentType' => 'UEB',
+				'ueb_code' => ValidPayments::PAYMENT_BANK_TRANSFER_CODE
+			]
+		);
+		$confirmationMailer = new DonationConfirmationMailer( $mailerSpy, $paymentService );
 
 		$confirmationMailer->sendConfirmationFor( $donation );
 
@@ -36,7 +49,7 @@ class DonationConfirmationMailerTest extends TestCase {
 				'interval' => ValidDonation::PAYMENT_INTERVAL_IN_MONTHS,
 				'needsModeration' => false,
 				'paymentType' => 'UEB',
-				'bankTransferCode' => ValidDonation::PAYMENT_BANK_TRANSFER_CODE,
+				'bankTransferCode' => ValidPayments::PAYMENT_BANK_TRANSFER_CODE,
 				'receiptOptIn' => null,
 			]
 		] );
