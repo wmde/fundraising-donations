@@ -173,16 +173,6 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertTrue( $response->getDonation()->isMarkedForModeration() );
 	}
 
-	public function testGivenPolicyViolationForExternalPaymentDonation_donationIsNotModerated(): void {
-		$this->markTestIncomplete( "TODO: Ask PM about rules. We removed this in main, but it might be a good idea to bring it back" );
-		$useCase = $this->makeUseCase( policyValidator: $this->makeFakeFailingModerationService() );
-
-		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
-		$request->setPaymentType( 'PPL' );
-		$response = $useCase->addDonation( $request );
-		$this->assertFalse( $response->getDonation()->isMarkedForModeration() );
-	}
-
 	private function newValidAddDonationRequestWithEmail( string $email ): AddDonationRequest {
 		$request = $this->newMinimumDonationRequest();
 
