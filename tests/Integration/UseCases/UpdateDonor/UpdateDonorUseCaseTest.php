@@ -18,7 +18,6 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeEventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorResponse;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorUseCase;
@@ -32,12 +31,6 @@ use WMDE\FunValidators\ConstraintViolation;
  * @covers \WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidationResult
  */
 class UpdateDonorUseCaseTest extends TestCase {
-
-	private TemplateBasedMailerSpy $templateMailer;
-
-	protected function setUp(): void {
-		$this->templateMailer = new TemplateBasedMailerSpy( $this );
-	}
 
 	public function testGivenAnonymousDonationAndValidAddressPersonalData_donationIsUpdated() {
 		$repository = $this->newRepository();
