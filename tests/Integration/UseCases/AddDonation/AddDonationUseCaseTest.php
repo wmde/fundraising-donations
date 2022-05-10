@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
@@ -114,7 +113,7 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	public function testGivenInvalidRequest_noConfirmationEmailIsSent(): void {
-		$mockNotifier = $this->makeNotifierStub();
+		$mockNotifier = $this->createMock( DonationConfirmationNotifier::class );
 		$mockNotifier->expects( $this->never() )->method( $this->anything() );
 
 		$useCase = $this->makeUseCase( notifier:  $mockNotifier );
@@ -123,7 +122,7 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	public function testGivenValidRequest_confirmationEmailIsSent(): void {
-		$mockNotifier = $this->makeNotifierStub();
+		$mockNotifier = $this->createMock( DonationConfirmationNotifier::class );
 		$mockNotifier->expects( $this->once() )
 			->method( 'sendConfirmationFor' )
 			->with( $this->isInstanceOf( Donation::class ) );
@@ -140,7 +139,7 @@ class AddDonationUseCaseTest extends TestCase {
 			paymentProviderURLGenerator: new NullGenerator(),
 			paymentComplete: false
 		) );
-		$mockNotifier = $this->makeNotifierStub();
+		$mockNotifier = $this->createMock( DonationConfirmationNotifier::class );
 		$mockNotifier->expects( $this->never() )->method( $this->anything() );
 
 		$useCase = $this->makeUseCase( notifier: $mockNotifier, paymentService: $paymentService );
@@ -306,9 +305,6 @@ class AddDonationUseCaseTest extends TestCase {
 		return $validator;
 	}
 
-	/**
-	 * @return DonationConfirmationNotifier&MockObject
-	 */
 	private function makeNotifierStub(): DonationConfirmationNotifier {
 		return $this->createStub( DonationConfirmationNotifier::class );
 	}
