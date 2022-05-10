@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\HandlePayPalPaymentNotification;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\HandlePayPalPaymentNotification;
 
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;

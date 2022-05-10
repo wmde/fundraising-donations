@@ -2,7 +2,7 @@
 
 declare( strict_types = 1 );
 
-namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\SofortPaymentNotification;
+namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\SofortPaymentNotification;
 
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
