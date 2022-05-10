@@ -19,7 +19,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingPaymentServiceStub;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
@@ -251,13 +251,13 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	private function makeUseCase(
-		?DonationRepository $repository = null,
-		?AddDonationValidator $donationValidator = null,
-		?AddDonationPolicyValidator $policyValidator = null,
+		?DonationRepository           $repository = null,
+		?AddDonationValidator         $donationValidator = null,
+		?ModerationService            $policyValidator = null,
 		?DonationConfirmationNotifier $notifier = null,
-		?DonationTokenFetcher $tokenFetcher = null,
-		?EventEmitter $eventEmitter = null,
-		?CreatePaymentService $paymentService = null,
+		?DonationTokenFetcher         $tokenFetcher = null,
+		?EventEmitter                 $eventEmitter = null,
+		?CreatePaymentService         $paymentService = null,
 	) {
 		return new AddDonationUseCase(
 			$repository ?? $this->makeDonationRepositoryStub(),
@@ -286,20 +286,20 @@ class AddDonationUseCaseTest extends TestCase {
 		return $validator;
 	}
 
-	private function makeFakeSucceedingPolicyValidator(): AddDonationPolicyValidator {
-		$validator = $this->createStub( AddDonationPolicyValidator::class );
+	private function makeFakeSucceedingPolicyValidator(): ModerationService {
+		$validator = $this->createStub( ModerationService::class );
 		$validator->method( 'needsModeration' )->willReturn( false );
 		return $validator;
 	}
 
-	private function makeFakeFailingPolicyValidator(): AddDonationPolicyValidator {
-		$validator = $this->createStub( AddDonationPolicyValidator::class );
+	private function makeFakeFailingPolicyValidator(): ModerationService {
+		$validator = $this->createStub( ModerationService::class );
 		$validator->method( 'needsModeration' )->willReturn( true );
 		return $validator;
 	}
 
-	private function makeFakeAutodeletingPolicyValidator(): AddDonationPolicyValidator {
-		$validator = $this->createStub( AddDonationPolicyValidator::class );
+	private function makeFakeAutodeletingPolicyValidator(): ModerationService {
+		$validator = $this->createStub( ModerationService::class );
 		$validator->method( 'needsModeration' )->willReturn( false );
 		$validator->method( 'isAutoDeleted' )->willReturn( true );
 		return $validator;

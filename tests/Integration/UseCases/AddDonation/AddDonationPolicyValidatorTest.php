@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonatio
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\ModerationService;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
@@ -15,12 +15,12 @@ use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\ModerationService
  */
 class AddDonationPolicyValidatorTest extends TestCase {
 
 	public function testTooHighAmountGiven_needsModerationReturnsTrue(): void {
-		$policyValidator = new AddDonationPolicyValidator(
+		$policyValidator = new ModerationService(
 			$this->newFailingAmountValidator(),
 			$this->newSucceedingTextPolicyValidator()
 		);
@@ -28,7 +28,7 @@ class AddDonationPolicyValidatorTest extends TestCase {
 	}
 
 	public function testGivenBadWords_needsModerationReturnsTrue(): void {
-		$policyValidator = new AddDonationPolicyValidator(
+		$policyValidator = new ModerationService(
 			$this->newSucceedingAmountValidator(),
 			$this->newFailingTextPolicyValidator()
 		);
@@ -36,7 +36,7 @@ class AddDonationPolicyValidatorTest extends TestCase {
 	}
 
 	public function testGivenBadWordsWithAnonymousRequest_needsModerationReturnsFalse(): void {
-		$policyValidator = new AddDonationPolicyValidator(
+		$policyValidator = new ModerationService(
 			$this->newSucceedingAmountValidator(),
 			$this->newFailingTextPolicyValidator()
 		);
@@ -50,7 +50,7 @@ class AddDonationPolicyValidatorTest extends TestCase {
 	 * @dataProvider paymentTypeProvider
 	 */
 	public function testGivenExternalPayment_needsModerationReturnsFalse( string $paymentType, bool $expectedNeedsModeration ): void {
-		$policyValidator = new AddDonationPolicyValidator(
+		$policyValidator = new ModerationService(
 			$this->newFailingAmountValidator(),
 			$this->newFailingTextPolicyValidator()
 		);
@@ -136,8 +136,8 @@ class AddDonationPolicyValidatorTest extends TestCase {
 		];
 	}
 
-	private function newPolicyValidatorWithForbiddenEmails(): AddDonationPolicyValidator {
-		return new AddDonationPolicyValidator(
+	private function newPolicyValidatorWithForbiddenEmails(): ModerationService {
+		return new ModerationService(
 			$this->newSucceedingAmountValidator(),
 			$this->newSucceedingTextPolicyValidator(),
 			[ '/^blocked.person@bar\.baz$/', '/@example.com$/i' ]
