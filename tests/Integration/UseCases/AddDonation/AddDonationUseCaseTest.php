@@ -15,11 +15,10 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\CreatePaymentServiceSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeEventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\CreatePaymentServiceSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingPaymentServiceStub;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
@@ -156,23 +155,6 @@ class AddDonationUseCaseTest extends TestCase {
 		$response = $useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
 
 		$this->assertTrue( $response->getDonation()->isMarkedForModeration() );
-	}
-
-	public function testGivenPolicyViolationForExternalPaymentDonation_donationIsNotModerated(): void {
-		$this->markTestIncomplete( 'Incomplete due to payment refactoring' );
-		$useCase = new AddDonationUseCase(
-			$this->makeDonationRepositoryStub(),
-			$this->makeFakeSucceedingDonationValidator(),
-			$this->makeFakeFailingPolicyValidator(),
-			$this->makeNotifierStub(),
-			$this->makeFakeTokenFetcher(),
-			new FakeEventEmitter()
-		);
-
-		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
-		$request->setPaymentType( 'PPL' );
-		$response = $useCase->addDonation( $request );
-		$this->assertFalse( $response->getDonation()->isMarkedForModeration() );
 	}
 
 	private function newValidAddDonationRequestWithEmail( string $email ): AddDonationRequest {
