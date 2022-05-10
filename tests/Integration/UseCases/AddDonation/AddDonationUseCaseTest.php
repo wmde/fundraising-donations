@@ -19,12 +19,12 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingPaymentServiceStub;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\CreatePaymentService;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\NullGenerator;
@@ -251,13 +251,13 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	private function makeUseCase(
-		?DonationRepository           $repository = null,
-		?AddDonationValidator         $donationValidator = null,
-		?ModerationService            $policyValidator = null,
+		?DonationRepository $repository = null,
+		?AddDonationValidator $donationValidator = null,
+		?ModerationService $policyValidator = null,
 		?DonationConfirmationNotifier $notifier = null,
-		?DonationTokenFetcher         $tokenFetcher = null,
-		?EventEmitter                 $eventEmitter = null,
-		?CreatePaymentService         $paymentService = null,
+		?DonationTokenFetcher $tokenFetcher = null,
+		?EventEmitter $eventEmitter = null,
+		?CreatePaymentService $paymentService = null,
 	) {
 		return new AddDonationUseCase(
 			$repository ?? $this->makeDonationRepositoryStub(),
