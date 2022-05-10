@@ -111,6 +111,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 
+		$this->assertCount( 1, $eventLogger->getLogCalls() );
 		$this->assertEventLogContainsExpression( $eventLogger, $donation->getId(), '/booked/' );
 	}
 
@@ -165,6 +166,11 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		[ $donation, $followupUpDonation ] = array_values( $repositoryCalls );
 
+		$this->assertCount(
+			3,
+			$eventLogger->getLogCalls(),
+			'booking of the new donation and linking of parent and child donations should be logged'
+		);
 		$this->assertEventLogContainsExpression(
 			$eventLogger,
 			$donation->getId(),
@@ -175,6 +181,20 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 			$followupUpDonation->getId(),
 			'/parent donation.*' . $donation->getId() . '/'
 		);
+	}
+
+	public function testGivenNewTransactionIdForBookedDonation_noConfirmationMailIsSent(): void {
+		$notifier = $this->createMock( DonationConfirmationNotifier::class );
+		$notifier->expects( $this->never() )
+			->method( 'sendConfirmationFor' );
+
+		$useCase = $this->givenNewUseCase(
+			notifier: $notifier,
+			paymentBookingService: $this->createFollowUpSucceedingPaymentBookingServiceStub(),
+		);
+
+		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
+		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 	}
 
 	public function testFailingPaymentBookingService_notificationIsNotHandled(): void {
