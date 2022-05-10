@@ -1,13 +1,2 @@
 includes:
 	- phpstan-baseline.neon
-parameters:
-	# TODO remove these when working on the payment refactoring tasks
-	excludePaths:
-		analyse:
-			- src/DataAccess/Migrations/
-			- src/UseCases/AddDonation/PaymentFactory.php
-			- tests/Integration/DataAccess/UniqueTransferCodeGeneratorTest.php
-			- tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
-			- tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
-			- tests/Unit/Infrastructure/DonationConfirmationMailerTest.php
-			- tests/Unit/UseCases/AddDonation/AddDonationRequestTest.php
