@@ -33,16 +33,16 @@ class AddDonationUseCase {
 
 	private DonationRepository $donationRepository;
 	private AddDonationValidator $donationValidator;
-	private AddDonationPolicyValidator $policyValidator;
+	private ModerationService $policyValidator;
 	private DonationConfirmationNotifier $notifier;
 	private DonationTokenFetcher $tokenFetcher;
 	private EventEmitter $eventEmitter;
 	private CreatePaymentService $paymentService;
 
-	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
-								AddDonationPolicyValidator $policyValidator, DonationConfirmationNotifier $notifier,
-								DonationTokenFetcher $tokenFetcher, EventEmitter $eventEmitter,
-								CreatePaymentService $paymentService
+	public function __construct(DonationRepository   $donationRepository, AddDonationValidator $donationValidator,
+	                            ModerationService    $policyValidator, DonationConfirmationNotifier $notifier,
+	                            DonationTokenFetcher $tokenFetcher, EventEmitter $eventEmitter,
+	                            CreatePaymentService $paymentService
 	) {
 		$this->donationRepository = $donationRepository;
 		$this->donationValidator = $donationValidator;

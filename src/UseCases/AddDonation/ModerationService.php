@@ -10,7 +10,7 @@ use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * This validator is for checking if a donation request is valid, but needs moderation / immediate deletion.
+ * This class is for checking if needs moderation / immediate deletion.
  * It will be applied **after** the use case has created the donation.
  *
  * Moderation reasons can be either amounts that are too high (but still plausible) or text policy violations in
@@ -18,7 +18,7 @@ use WMDE\FunValidators\Validators\TextPolicyValidator;
  *
  * For forbidden email addresses, we immediately delete the donation.
  */
-class AddDonationPolicyValidator {
+class ModerationService {
 
 	/**
 	 * This is a list of payment type strings where we'll not apply the moderation.
