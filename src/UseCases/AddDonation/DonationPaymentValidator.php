@@ -50,7 +50,7 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 	 * @param int $minimumAmountInEuros
 	 * @param int $maximumAmountInEuros Absolute maximum amount. We don't accept donations that are higher,
 	 *          because we don't expect donations *that* big through our form.
-	 *          The {@see AddDonationPolicyValidator} will flag suspiciously high amounts below this
+	 *          The {@see ModerationService} will flag suspiciously high amounts below this
 	 *          validator threshold for moderation.
 	 */
 	public function __construct(
