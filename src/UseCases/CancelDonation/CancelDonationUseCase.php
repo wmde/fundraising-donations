@@ -12,27 +12,20 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
+use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\CancelPaymentUseCase;
+use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\FailureResponse;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class CancelDonationUseCase {
 
 	private const LOG_MESSAGE_DONATION_STATUS_CHANGE = 'frontend: storno';
 	private const LOG_MESSAGE_DONATION_STATUS_CHANGE_BY_ADMIN = 'cancelled by user: %s';
 
-	private $donationRepository;
-	private $mailer;
-	private $authorizationService;
-	private $donationLogger;
-
-	public function __construct( DonationRepository $donationRepository, TemplateMailerInterface $mailer,
-		DonationAuthorizer $authorizationService, DonationEventLogger $donationLogger ) {
-		$this->donationRepository = $donationRepository;
-		$this->mailer = $mailer;
-		$this->authorizationService = $authorizationService;
-		$this->donationLogger = $donationLogger;
+	public function __construct(
+		private DonationRepository $donationRepository,
+		private TemplateMailerInterface $mailer,
+		private DonationAuthorizer $authorizationService,
+		private DonationEventLogger $donationLogger,
+		private CancelPaymentUseCase $cancelPaymentUseCase ) {
 	}
 
 	public function cancelDonation( CancelDonationRequest $cancellationRequest ): CancelDonationResponse {
@@ -51,12 +44,12 @@ class CancelDonationUseCase {
 			return $this->newFailureResponse( $cancellationRequest );
 		}
 
-		try {
-			$donation->cancel();
-		}
-		catch ( \RuntimeException $ex ) {
+		$cancelPaymentResponse = $this->cancelPaymentUseCase->cancelPayment( $donation->getPaymentId() );
+		if ( $cancelPaymentResponse instanceof FailureResponse ) {
 			return $this->newFailureResponse( $cancellationRequest );
 		}
+
+		$donation->cancel();
 
 		try {
 			$this->donationRepository->storeDonation( $donation );

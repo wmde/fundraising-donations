@@ -12,7 +12,6 @@ parameters:
 			- tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
 			- tests/Integration/UseCases/AddDonation/AddDonationValidatorTest.php
 			- tests/Integration/UseCases/AddDonation/ModerationServiceTest.php
-			- tests/Integration/UseCases/CancelDonation/CancelDonationUseCaseTest.php
 			- tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
 			- tests/Unit/Infrastructure/DonationConfirmationMailerTest.php
 			- tests/Unit/UseCases/AddDonation/AddDonationRequestTest.php

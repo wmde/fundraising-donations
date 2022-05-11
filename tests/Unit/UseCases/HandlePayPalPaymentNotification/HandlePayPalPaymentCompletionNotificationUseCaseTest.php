@@ -184,7 +184,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	}
 
 	public function testGivenNewTransactionIdForBookedDonation_noConfirmationMailIsSent(): void {
-		$notifier = $this->createMock( DonationConfirmationNotifier::class );
+		$notifier = $this->createMock( DonationNotifier::class );
 		$notifier->expects( $this->never() )
 			->method( 'sendConfirmationFor' );
 
