@@ -41,7 +41,7 @@ class AddDonationValidatorTest extends TestCase {
 
 	public function testGivenValidDonation_validationIsSuccessful(): void {
 		$request = ValidAddDonationRequest::getRequest();
-		$this->assertEmpty( $this->donationValidator->validate( $request )->getViolations() );
+		$this->assertCount( 0, $this->donationValidator->validate( $request )->getViolations() );
 	}
 
 	public function testGivenAnonymousDonorAndEmptyAddressFields_validatorReturnsNoViolations(): void {
@@ -59,7 +59,7 @@ class AddDonationValidatorTest extends TestCase {
 		$request->setDonorCountryCode( '' );
 		$request->setDonorEmailAddress( '' );
 
-		$this->assertEmpty( $this->donationValidator->validate( $request )->getViolations() );
+		$this->assertCount( 0, $this->donationValidator->validate( $request )->getViolations() );
 	}
 
 	public function testGivenNoPaymentType_validatorReturnsFalse(): void {
