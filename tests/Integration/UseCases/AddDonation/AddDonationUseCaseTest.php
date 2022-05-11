@@ -209,12 +209,15 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	public function testSuccessResponseContainsTokens(): void {
-		$useCase = $this->makeUseCase();
+		$returnedTokens = new DonationTokens( 'a110-acce55', 'a110-00d8e' );
+		$useCase = $this->makeUseCase(
+			tokenFetcher: $this->makeFakeTokenFetcher( $returnedTokens )
+		);
 
 		$response = $useCase->addDonation( $this->newMinimumDonationRequest() );
 
-		$this->assertSame( self::UPDATE_TOKEN, $response->getUpdateToken() );
-		$this->assertSame( self::ACCESS_TOKEN, $response->getAccessToken() );
+		$this->assertSame( 'a110-acce55', $response->getAccessToken() );
+		$this->assertSame( 'a110-00d8e', $response->getUpdateToken() );
 	}
 
 	/**
@@ -327,13 +330,12 @@ class AddDonationUseCaseTest extends TestCase {
 		return $this->createStub( DonationNotifier::class );
 	}
 
-	private function makeFakeTokenFetcher(): DonationTokenFetcher {
-		return new FixedDonationTokenFetcher(
-			new DonationTokens(
+	private function makeFakeTokenFetcher( ?DonationTokens $tokens = null ): DonationTokenFetcher {
+		$tokens = $tokens ?? new DonationTokens(
 				self::ACCESS_TOKEN,
 				self::UPDATE_TOKEN
-			)
-		);
+			);
+		return new FixedDonationTokenFetcher( $tokens );
 	}
 
 }
