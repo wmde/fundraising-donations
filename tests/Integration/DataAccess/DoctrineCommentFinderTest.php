@@ -38,7 +38,7 @@ class DoctrineCommentFinderTest extends \PHPUnit\Framework\TestCase {
 	public function testWhenThereAreNoComments_anEmptyListIsReturned(): void {
 		$repository = $this->newDbalCommentRepository();
 
-		$this->assertEmpty( $repository->getPublicComments( 10 ) );
+		$this->assertCount( 0, $repository->getPublicComments( 10 ) );
 	}
 
 	public function testWhenThereAreLessCommentsThanTheLimit_theyAreAllReturned(): void {
