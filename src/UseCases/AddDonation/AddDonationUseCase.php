@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
+use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
@@ -21,6 +22,8 @@ use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\RefactoringException;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\PaymentProviderURLGenerator;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\RequestContext;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 
@@ -88,7 +91,8 @@ class AddDonationUseCase {
 		return AddDonationResponse::newSuccessResponse(
 			$donation,
 			$tokens->getUpdateToken(),
-			$tokens->getAccessToken()
+			$tokens->getAccessToken(),
+			$this->generatePaymentProviderUrl( $paymentResult->paymentProviderURLGenerator, $donation, $tokens )
 		);
 	}
 
@@ -181,6 +185,29 @@ class AddDonationUseCase {
 			$paymentRequest->bic,
 			$paymentReferenceCodePrefix
 		);
+	}
+
+	private function generatePaymentProviderUrl( PaymentProviderURLGenerator $paymentProviderURLGenerator, Donation $donation, DonationTokens $tokens ): string {
+		$name = $donation->getDonor()->getName()->toArray();
+		return $paymentProviderURLGenerator->generateURL( new RequestContext(
+			$donation->getId(),
+			$this->generatePayPalInvoiceId( $donation ),
+			$tokens->getUpdateToken(),
+			$tokens->getAccessToken(),
+			$name['firstName'] ?? '',
+			$name['lastName'] ?? '',
+		) );
+	}
+
+	/**
+	 * We use the donation primary key as the InvoiceId because they're unique
+	 * But we prepend a letter to make sure they don't clash with memberships
+	 *
+	 * @param Donation $donation
+	 * @return string
+	 */
+	private function generatePayPalInvoiceId( Donation $donation ): string {
+		return 'D' . $donation->getId();
 	}
 
 }
