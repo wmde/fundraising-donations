@@ -19,6 +19,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingPaymentServiceStub;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\UrlGeneratorSpy;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
@@ -28,6 +29,7 @@ use WMDE\Fundraising\DonationContext\UseCases\AddDonation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\NullGenerator;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\PaymentProviderURLGenerator;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as PaymentCreationSucceeded;
 use WMDE\FunValidators\ConstraintViolation;
@@ -40,6 +42,7 @@ class AddDonationUseCaseTest extends TestCase {
 
 	private const UPDATE_TOKEN = 'a very nice token';
 	private const ACCESS_TOKEN = 'kindly allow me access';
+	private const PAYMENT_PROVIDER_URL = 'https://paypal.example.com/';
 
 	public function testWhenValidationSucceeds_successResponseIsCreated(): void {
 		$useCase = $this->makeUseCase();
@@ -204,6 +207,49 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertSame( 'a110-00d8e', $response->getUpdateToken() );
 	}
 
+	public function testSuccessResponseContainsGeneratedUrl(): void {
+		$urlGeneratorStub = $this->createStub( PaymentProviderURLGenerator::class );
+		$urlGeneratorStub->method( 'generateURL' )->willReturn( self::PAYMENT_PROVIDER_URL );
+		$useCase = $this->makeUseCase(
+			paymentService: $this->makeSuccessfulPaymentServiceWithUrlGenerator( $urlGeneratorStub )
+		);
+
+		$response = $useCase->addDonation( $this->newMinimumDonationRequest() );
+
+		$this->assertSame( self::PAYMENT_PROVIDER_URL, $response->getPaymentProviderRedirectUrl() );
+	}
+
+	public function testUrlGeneratorGetsDonationData(): void {
+		$urlGenerator = new UrlGeneratorSpy();
+		$useCase = $this->makeUseCase(
+			paymentService: $this->makeSuccessfulPaymentServiceWithUrlGenerator( $urlGenerator )
+		);
+
+		$response = $useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'irrelevant@example.com' ) );
+		$donation = $response->getDonation();
+
+		$context = $urlGenerator->getLastContext();
+		$this->assertSame( $donation->getId(), $context->itemId );
+		$this->assertSame( 'D' . $donation->getId(), $context->invoiceId );
+		$this->assertSame( $response->getAccessToken(), $context->accessToken );
+		$this->assertSame( $response->getUpdateToken(), $context->updateToken );
+		$this->assertSame( ValidDonation::DONOR_FIRST_NAME, $context->firstName );
+		$this->assertSame( ValidDonation::DONOR_LAST_NAME, $context->lastName );
+	}
+
+	public function testGivenAnonymousDonation_UrlGeneratorGetsEmptyNames(): void {
+		$urlGenerator = new UrlGeneratorSpy();
+		$useCase = $this->makeUseCase(
+			paymentService: $this->makeSuccessfulPaymentServiceWithUrlGenerator( $urlGenerator )
+		);
+
+		$useCase->addDonation( $this->newMinimumDonationRequest() );
+
+		$context = $urlGenerator->getLastContext();
+		$this->assertSame( '', $context->firstName );
+		$this->assertSame( '', $context->lastName );
+	}
+
 	/**
 	 * TODO move 'covers' tag for DonationCreatedEvent here when we've improved the PHPCS definitions
 	 */
@@ -318,6 +364,16 @@ class AddDonationUseCaseTest extends TestCase {
 				self::UPDATE_TOKEN
 			);
 		return new FixedDonationTokenFetcher( $tokens );
+	}
+
+	private function makeSuccessfulPaymentServiceWithUrlGenerator( PaymentProviderURLGenerator $urlGeneratorStub ): CreatePaymentService {
+		$paymentService = $this->createStub( CreatePaymentService::class );
+		$paymentService->method( 'createPayment' )->willReturn( new PaymentCreationSucceeded(
+			1,
+			$urlGeneratorStub,
+			true
+		) );
+		return $paymentService;
 	}
 
 }
