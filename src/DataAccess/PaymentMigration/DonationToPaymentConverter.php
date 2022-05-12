@@ -116,9 +116,9 @@ class DonationToPaymentConverter {
 		return $this->result;
 	}
 
-	 private function getRows( int $idOffset, int $maxRowCount ): iterable {
-		if ( $maxRowCount === self::CONVERT_ALL ) {
-			$maxRowCount = $this->getMaxRowCount();
+	 private function getRows( int $idOffset, int $maxDonationId ): iterable {
+		if ( $maxDonationId === self::CONVERT_ALL ) {
+			$maxDonationId = $this->getMaxId();
 		}
 		$qb = $this->db->createQueryBuilder();
 		$qb->select( 'd.id', 'betrag AS amount', 'periode AS intervalInMonths', 'zahlweise AS paymentType',
@@ -126,25 +126,17 @@ class DonationToPaymentConverter {
 		)
 			 ->from( 'spenden', 'd' )
 			 ->leftJoin( 'd', 'donation_payment', 'p', 'd.payment_id = p.id' )
-			 ->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' )
-			->where( 'd.id > :offset' )
-			->setMaxResults( self::CHUNK_SIZE );
+			 ->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' );
 
-		for ( $offset = $idOffset; $offset < $maxRowCount; $offset += self::CHUNK_SIZE ) {
-			$qb->setParameter( 'offset', $offset );
-			$dbResult = $qb->executeQuery();
-			foreach ( $dbResult->iterateAssociative() as $row ) {
-				yield $row;
-			}
-		}
+		return new ChunkedQueryResultIterator( $qb, 'd.id', self::CHUNK_SIZE, $maxDonationId, $idOffset );
 	 }
 
-	private function getMaxRowCount(): int {
-		$rowCount = $this->db->executeQuery( "SELECT COUNT(id) FROM spenden" )->fetchOne();
-		if ( $rowCount === false ) {
-			throw new \RuntimeException( 'Could not get row count' );
+	private function getMaxId(): int {
+		$maxId = $this->db->executeQuery( "SELECT MAX(id) FROM spenden" )->fetchOne();
+		if ( $maxId === false ) {
+			throw new \RuntimeException( 'Could not get maximum ID' );
 		}
-		return $rowCount;
+		return $maxId;
 	}
 
 	private function newPayment( array $row ): Payment {
