@@ -143,7 +143,10 @@ class ValidPayments {
 	}
 
 	public static function newCreditCardBookingData(): array {
-		return [ 'transactionId' => self::CREDIT_CARD_TRANSACTION_ID ];
+		return [
+			'transactionId' => self::CREDIT_CARD_TRANSACTION_ID,
+			'amount' => 1337
+		];
 	}
 
 }
