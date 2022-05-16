@@ -45,7 +45,8 @@
 
 		"mikey179/vfsstream": "~1.6",
 		"wmde/fundraising-phpcs": "~6.0.0",
-		"wmde/psr-log-test-doubles": "~3.0"
+		"wmde/psr-log-test-doubles": "~3.0",
+		"doctrine/migrations": "^3.5"
 	},
 	"autoload": {
 		"psr-4": {
