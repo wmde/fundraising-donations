@@ -1,6 +1,6 @@
 <?php
 
-// A script to test payment migration
+// A script to test data quality in donations for migration to the new payments
 
 use Doctrine\DBAL\DriverManager;
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\DonationToPaymentConverter;
