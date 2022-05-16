@@ -15,7 +15,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentReferenceCode;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Repositories\PaymentIDRepository;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentIdRepository;
 
 class DonationToPaymentConverter {
 	private const PPL_LEGACY_KEY_MAP = [
@@ -59,7 +59,7 @@ class DonationToPaymentConverter {
 	private const CHUNK_SIZE = 2000;
 	public const CONVERT_ALL = -1;
 
-	private PaymentIDRepository $dummyIdGeneratorForFollowups;
+	private PaymentIdRepository $dummyIdGeneratorForFollowups;
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
 	private ConversionResult $result;
 
@@ -74,12 +74,16 @@ class DonationToPaymentConverter {
 
 	public function __construct(
 		private Connection $db,
-		private PaymentIDRepository $idGenerator,
+		private PaymentIdRepository $idGenerator,
+		private ?NewPaymentHandler $paymentHandler = null,
 	) {
 		$this->dummyIdGeneratorForFollowups = new NullGenerator();
 		$this->anonymisedPaymentReferenceCode = PaymentReferenceCode::newFromString( self::ANONYMOUS_REFERENCE_CODE );
 		$this->lostBookingDataPeriodStart = new \DateTimeImmutable( '2015-09-28 0:00:00' );
 		$this->lostBookingDataPeriodEnd = new \DateTimeImmutable( '2015-10-08 0:00:00' );
+		if ( $paymentHandler === null ) {
+			$this->paymentHandler = new NullPaymentHandler();
+		}
 	}
 
 	/**
@@ -107,7 +111,7 @@ class DonationToPaymentConverter {
 
 			try {
 				$payment = $this->newPayment( $row );
-				// We might actually save the payment here later
+				$this->paymentHandler->handlePayment( $payment );
 			} catch ( \Throwable $e ) {
 				$msg = $e->getMessage();
 				$this->result->addError( $msg, $row );
@@ -125,7 +129,7 @@ class DonationToPaymentConverter {
 			 'ueb_code AS transferCode', 'data', 'status', 'dt_new AS donationDate', 'ps.confirmed_at AS valuationDate',
 		)
 			 ->from( 'spenden', 'd' )
-			 ->leftJoin( 'd', 'donation_payment', 'p', 'd.payment_id = p.id' )
+			 ->leftJoin( 'd', 'donation_payment', 'p', 'd.legacy_payment_id = p.id' )
 			 ->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' );
 
 		return new ChunkedQueryResultIterator( $qb, 'd.id', self::CHUNK_SIZE, $maxDonationId, $idOffset );
@@ -135,6 +139,9 @@ class DonationToPaymentConverter {
 		$maxId = $this->db->executeQuery( "SELECT MAX(id) FROM spenden" )->fetchOne();
 		if ( $maxId === false ) {
 			throw new \RuntimeException( 'Could not get maximum ID' );
+		}
+		if ( $maxId === null ) {
+			return 0;
 		}
 		return $maxId;
 	}
