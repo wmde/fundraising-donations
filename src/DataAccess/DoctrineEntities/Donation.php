@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
-use WMDE\Fundraising\DonationContext\RefactoringException;
 
 class Donation {
 
@@ -75,6 +74,11 @@ class Donation {
 
 	private ?\DateTime $dtBackup = null;
 
+	/**
+	 * @deprecated Still here to allow for migration script, remove when production database is migrated
+	 * @var DonationPayment|null
+	 * @phpstan-ignore-next-line
+	 */
 	private ?DonationPayment $payment = null;
 
 	private int $paymentId;
@@ -345,23 +349,6 @@ class Donation {
 
 	public function getId(): ?int {
 		return $this->id;
-	}
-
-	/**
-	 * @deprecated
-	 * @return DonationPayment|null
-	 */
-	public function getPayment(): ?DonationPayment {
-		return $this->payment;
-	}
-
-	/**
-	 * @param DonationPayment $payment
-	 * @return void
-	 */
-	public function setPayment( DonationPayment $payment ) {
-		$this->payment = $payment;
-		throw new RefactoringException( 'This should be an integer ID, DonationPayment should be dropped' );
 	}
 
 	public function getPaymentId(): int {

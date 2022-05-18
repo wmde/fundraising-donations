@@ -19,12 +19,12 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
-use WMDE\Fundraising\DonationContext\RefactoringException;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\PaymentProviderURLGenerator;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\RequestContext;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
+use WMDE\FunValidators\ConstraintViolation;
 
 /**
  * @license GPL-2.0-or-later
@@ -65,7 +65,9 @@ class AddDonationUseCase {
 
 		$paymentResult = $this->paymentService->createPayment( $this->getPaymentRequestForDonor( $donationRequest ) );
 		if ( $paymentResult instanceof FailureResponse ) {
-			throw new RefactoringException( 'TODO: Implement returning error response with the violations from $paymentResult' );
+			return AddDonationResponse::newFailureResponse( [
+				new ConstraintViolation( $donationRequest->getPaymentCreationRequest(), $paymentResult->errorMessage, 'payment' )
+			] );
 		}
 		$donation = $this->newDonationFromRequest( $donationRequest, $paymentResult->paymentId );
 
