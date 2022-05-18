@@ -66,7 +66,6 @@ class AddDonationRequest {
 	 */
 	public function __construct() {
 		$this->donorType = DonorType::ANONYMOUS();
-		// TODO move prefixes from PaymentFactory
 		$this->paymentCreationRequestBuilder = new PaymentRequestBuilder();
 	}
 
