@@ -7,10 +7,6 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
-use WMDE\Fundraising\DonationContext\DummyPayment;
-use WMDE\Fundraising\DonationContext\RefactoringException;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BookablePayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
 
 /**
  * @license GPL-2.0-or-later
@@ -97,24 +93,6 @@ class Donation {
 		return Euro::newFromCents( 0 );
 	}
 
-	/**
-	 * @deprecated
-	 *
-	 * @return int
-	 */
-	public function getPaymentIntervalInMonths(): int {
-		throw new RefactoringException( 'You shall not ask donations for payment intervals!' );
-	}
-
-	/**
-	 * @deprecated
-	 *
-	 * @return string
-	 */
-	public function getPaymentMethodId(): string {
-		throw new RefactoringException( 'You shall not ask donations for payment method IDs!' );
-	}
-
 	public function getDonor(): Donor {
 		return $this->donor;
 	}
@@ -135,22 +113,8 @@ class Donation {
 		$this->comment = $comment;
 	}
 
-	/**
-	 * @deprecated Donation code should not interact with the payment entity,
-	 *      this is here for BC compatibility and should be gone at the end of the payment integration refactoring
-	 *
-	 * @return Payment
-	 */
-	public function getPayment(): Payment {
-		return DummyPayment::create();
-	}
-
 	public function getPaymentId(): int {
 		return $this->paymentId;
-	}
-
-	public function getPaymentMethod(): string {
-		throw new RefactoringException( 'You shall not ask donations for payment methods!' );
 	}
 
 	public function getOptsIntoNewsletter(): bool {
@@ -203,21 +167,8 @@ class Donation {
 		return $this->trackingInfo;
 	}
 
-	/**
-	 * @deprecated The donation should not know anything about the payment.
-	 *
-	 * @return bool
-	 */
-	public function hasBookablePayment(): bool {
-		return $this->getPayment() instanceof BookablePayment;
-	}
-
 	public function isMarkedForModeration(): bool {
 		return $this->moderationNeeded;
-	}
-
-	public function isBooked(): bool {
-		throw new RefactoringException( 'You shall not ask donations for payment booking state! Or at least check if this method is really needed' );
 	}
 
 	public function isExported(): bool {
