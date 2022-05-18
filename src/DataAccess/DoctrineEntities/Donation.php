@@ -8,7 +8,6 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
-use WMDE\Fundraising\DonationContext\RefactoringException;
 
 class Donation {
 
@@ -90,6 +89,12 @@ class Donation {
 
 	private Collection $moderationReasons;
 
+	/**
+	 * This is only here to support the migration code, will be removed
+	 *
+	 * @var DonationPayment|null
+	 * @phpstan-ignore-next-line
+	 */
 	private ?DonationPayment $payment = null;
 
 	private int $paymentId;
@@ -364,23 +369,6 @@ class Donation {
 
 	public function getId(): ?int {
 		return $this->id;
-	}
-
-	/**
-	 * @deprecated
-	 * @return DonationPayment|null
-	 */
-	public function getPayment(): ?DonationPayment {
-		return $this->payment;
-	}
-
-	/**
-	 * @param DonationPayment $payment
-	 * @return void
-	 */
-	public function setPayment( DonationPayment $payment ) {
-		$this->payment = $payment;
-		throw new RefactoringException( 'This should be an integer ID, DonationPayment should be dropped' );
 	}
 
 	public function getPaymentId(): int {

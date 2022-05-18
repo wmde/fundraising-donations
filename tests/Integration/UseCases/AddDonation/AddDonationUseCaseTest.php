@@ -33,6 +33,7 @@ use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\NullGenerator;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\PaymentProviderURLGenerator;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse as PaymentCreationFailed;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as PaymentCreationSucceeded;
 use WMDE\FunValidators\ConstraintViolation;
@@ -94,6 +95,17 @@ class AddDonationUseCaseTest extends TestCase {
 		$result = $useCase->addDonation( $this->newInvalidDonationRequest() );
 
 		$this->assertEquals( [ $constraintViolation ], $result->getValidationErrors() );
+	}
+
+	public function testWhenPaymentCreationFails_responseObjectContainsViolations(): void {
+		$request = $this->newMinimumDonationRequest();
+		$expectedViolation = new ConstraintViolation( $request->getPaymentCreationRequest(), 'payment_not_supported', 'payment' );
+		$useCase = $this->makeUseCase( paymentService: $this->makeFailingPaymentService( 'payment_not_supported' ) );
+
+		$result = $useCase->addDonation( $request );
+
+		$this->assertFalse( $result->isSuccessful() );
+		$this->assertEquals( [ $expectedViolation ], $result->getValidationErrors() );
 	}
 
 	private function newMinimumDonationRequest(): AddDonationRequest {
@@ -391,6 +403,12 @@ class AddDonationUseCaseTest extends TestCase {
 			$urlGeneratorStub,
 			true
 		) );
+		return $paymentService;
+	}
+
+	private function makeFailingPaymentService( string $message ): CreatePaymentService {
+		$paymentService = $this->createStub( CreatePaymentService::class );
+		$paymentService->method( 'createPayment' )->willReturn( new PaymentCreationFailed( $message ) );
 		return $paymentService;
 	}
 
