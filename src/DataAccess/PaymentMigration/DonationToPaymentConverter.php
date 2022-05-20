@@ -91,7 +91,7 @@ class DonationToPaymentConverter {
 	 *
 	 * Leave out parameters to convert all donations
 	 *
-	 * @param int $idOffset Starting donation ID
+	 * @param int $idOffset Starting donation ID (exclusive)
 	 * @param int $maxConversions Maximum number of donations to convert
 	 * @return ConversionResult
 	 */
@@ -103,15 +103,9 @@ class DonationToPaymentConverter {
 				$row['data'] = unserialize( base64_decode( $row['data'] ) );
 			}
 
-			// Skip payments
-			if ( $row['paymentType'] === 'MBK' ) {
-				$this->result->addWarning( 'Skipped MBK payment', $row );
-				continue;
-			}
-
 			try {
 				$payment = $this->newPayment( $row );
-				$this->paymentHandler->handlePayment( $payment );
+				$this->paymentHandler->handlePayment( $payment, intval( $row['id'] ) );
 			} catch ( \Throwable $e ) {
 				$msg = $e->getMessage();
 				$this->result->addError( $msg, $row );
@@ -120,7 +114,7 @@ class DonationToPaymentConverter {
 		return $this->result;
 	}
 
-	 private function getRows( int $idOffset, int $maxDonationId ): iterable {
+	 private function getRows( int $minDonationId, int $maxDonationId ): iterable {
 		if ( $maxDonationId === self::CONVERT_ALL ) {
 			$maxDonationId = $this->getMaxId();
 		}
@@ -132,7 +126,7 @@ class DonationToPaymentConverter {
 			 ->leftJoin( 'd', 'donation_payment', 'p', 'd.legacy_payment_id = p.id' )
 			 ->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' );
 
-		return new ChunkedQueryResultIterator( $qb, 'd.id', self::CHUNK_SIZE, $maxDonationId, $idOffset );
+		return new ChunkedQueryResultIterator( $qb, 'd.id', self::CHUNK_SIZE, $maxDonationId, $minDonationId );
 	 }
 
 	private function getMaxId(): int {
@@ -151,6 +145,7 @@ class DonationToPaymentConverter {
 			case 'PPL':
 				return $this->newPayPalPayment( $row );
 			case 'MCP':
+			case 'MBK':
 				return $this->newCreditCardPayment( $row );
 			case 'SUB':
 				return $this->newSofortPayment( $row );
@@ -182,6 +177,12 @@ class DonationToPaymentConverter {
 		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE || $row['status'] === Donation::STATUS_CANCELLED ) {
 			return $payment;
 		}
+		// Handle legacy payments
+		if ( $row['paymentType'] === 'MBK' ) {
+			$row['data']['ext_payment_id'] = 'unknown, legacy MBK payment';
+			$row['data']['mcp_amount'] = $row['amount'];
+			$this->result->addWarning( 'Converted MBK payment', $row );
+		}
 		if ( empty( $row['data']['ext_payment_id'] ) ) {
 			$donationDate = new \DateTimeImmutable( $row['donationDate'] );
 			if ( in_array( $row['id'], self::MANUALLY_BOOKED_DONATIONS ) ) {
@@ -193,7 +194,13 @@ class DonationToPaymentConverter {
 			}
 		}
 
-		$payment->bookPayment( $this->getBookingData( self::MCP_LEGACY_KEY_MAP, $row['data'] ), $this->dummyIdGeneratorForFollowups );
+		$payment->bookPayment(
+			$this->getBookingData(
+				self::MCP_LEGACY_KEY_MAP,
+				$row['data']
+			),
+			$this->dummyIdGeneratorForFollowups
+		);
 		return $payment;
 	}
 
@@ -241,9 +248,11 @@ class DonationToPaymentConverter {
 			}
 			$this->result->addWarning( 'Invalid date format for booked PayPal, ' . $solution, $row );
 		}
+
 		// TODO convert followup payments by looking at log message '/new transaction id to corresponding parent donation: (\d+)/'
-		$payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), $this->dummyIdGeneratorForFollowups );
-		return $payment;
+		// Replace payment with parent paypal payment, to create followup donations
+		$payment = $this->getParentPaypalPayment( $row ) ?? $payment;
+		return $payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), $this->idGenerator );
 	}
 
 	private function newSofortPayment( array $row ): SofortPayment {
@@ -339,5 +348,19 @@ class DonationToPaymentConverter {
 			$amount = '0';
 		}
 		return Euro::newFromString( $amount );
+	}
+
+	private function getParentPaypalPayment( array $row ): ?PayPalPayment {
+		$log = $row['data']['log'] ?? [];
+		foreach ( $log as $message ) {
+			if ( preg_match( '/new transaction id to corresponding parent donation: (\d+)/', $message, $matches ) ) {
+				$parentDonationPaymentId = $this->db->fetchOne( 'SELECT payment_id FROM spenden WHERE id=?', [ $matches[1] ] );
+				if ( $parentDonationPaymentId === false ) {
+					$this->result->addWarning( "Followup Payment: Could not find payment ID for donation", $row );
+				}
+				// TODO get payment by id, return it.
+			}
+		}
+		return null;
 	}
 }
