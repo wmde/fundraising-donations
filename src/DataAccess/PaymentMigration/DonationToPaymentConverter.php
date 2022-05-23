@@ -180,7 +180,7 @@ class DonationToPaymentConverter {
 		// Handle legacy payments
 		if ( $row['paymentType'] === 'MBK' ) {
 			$row['data']['ext_payment_id'] = 'unknown, legacy MBK payment';
-			$row['data']['mcp_amount'] = $row['amount'];
+			$row['data']['mcp_amount'] = $row['amount'] * 100;
 			$this->result->addWarning( 'Converted MBK payment', $row );
 		}
 		if ( empty( $row['data']['ext_payment_id'] ) ) {
@@ -249,7 +249,6 @@ class DonationToPaymentConverter {
 			$this->result->addWarning( 'Invalid date format for booked PayPal, ' . $solution, $row );
 		}
 
-		// TODO convert followup payments by looking at log message '/new transaction id to corresponding parent donation: (\d+)/'
 		// Replace payment with parent paypal payment, to create followup donations
 		$payment = $this->getParentPaypalPayment( $row ) ?? $payment;
 		return $payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), $this->idGenerator );
