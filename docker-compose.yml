@@ -11,7 +11,8 @@ services:
   database:
     image: mariadb:10.4
     environment:
-      - MYSQL_RANDOM_ROOT_PASSWORD=yes
+      #- MYSQL_RANDOM_ROOT_PASSWORD=yes
+      - MYSQL_ROOT_PASSWORD=toor
       - MYSQL_USER=fundraising
       - MYSQL_PASSWORD=INSECURE PASSWORD
       - MYSQL_DATABASE=fundraising
