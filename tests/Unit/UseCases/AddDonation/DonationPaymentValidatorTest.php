@@ -18,7 +18,7 @@ class DonationPaymentValidatorTest extends TestCase {
 	 * @dataProvider getValidAmounts
 	 */
 	public function testGivenValidAmount_validatorReturnsNoViolations( float $amount ): void {
-		$validator = new DonationPaymentValidator( 1, 100_000 );
+		$validator = new DonationPaymentValidator();
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromFloat( $amount ), PaymentInterval::OneTime, PaymentType::DirectDebit );
 
@@ -32,7 +32,7 @@ class DonationPaymentValidatorTest extends TestCase {
 	}
 
 	public function testGivenSmallAmount_validatorReturnsViolation(): void {
-		$validator = new DonationPaymentValidator( 1, 100_000 );
+		$validator = new DonationPaymentValidator();
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromCents( 99 ), PaymentInterval::OneTime, PaymentType::DirectDebit );
 
@@ -44,7 +44,7 @@ class DonationPaymentValidatorTest extends TestCase {
 	}
 
 	public function testGivenLargeAmount_validatorReturnsViolation(): void {
-		$validator = new DonationPaymentValidator( 1, 100_000 );
+		$validator = new DonationPaymentValidator();
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 100_000 ), PaymentInterval::OneTime, PaymentType::DirectDebit );
 
