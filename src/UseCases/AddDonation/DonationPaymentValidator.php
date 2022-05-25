@@ -28,6 +28,17 @@ use WMDE\FunValidators\ValidationResponse;
  *
  */
 class DonationPaymentValidator implements DomainSpecificPaymentValidator {
+
+	public const MINIMUM_AMOUNT_IN_EUROS = 1;
+
+	/** Absolute maximum amount (inclusive). We don't accept donations that are equal or higher,
+	 *  because we don't expect donations *that* big through our form.
+	 *
+	 * The {@see ModerationService} will flag suspiciously high amounts *below* this
+	 * validator threshold for moderation.
+	 */
+	public const MAXIMUM_AMOUNT_IN_EUROS = 100_000;
+
 	/**
 	 * Violation identifier for {@see ConstraintViolation}
 	 */
@@ -46,19 +57,9 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 	private Euro $minimumAmount;
 	private Euro $maximumAmount;
 
-	/**
-	 * @param int $minimumAmountInEuros
-	 * @param int $maximumAmountInEuros Absolute maximum amount. We don't accept donations that are higher,
-	 *          because we don't expect donations *that* big through our form.
-	 *          The {@see ModerationService} will flag suspiciously high amounts below this
-	 *          validator threshold for moderation.
-	 */
-	public function __construct(
-		int $minimumAmountInEuros,
-		int $maximumAmountInEuros
-	) {
-		$this->minimumAmount = Euro::newFromInt( $minimumAmountInEuros );
-		$this->maximumAmount = Euro::newFromInt( $maximumAmountInEuros );
+	public function __construct() {
+		$this->minimumAmount = Euro::newFromInt( self::MINIMUM_AMOUNT_IN_EUROS );
+		$this->maximumAmount = Euro::newFromInt( self::MAXIMUM_AMOUNT_IN_EUROS );
 	}
 
 	/**
@@ -68,7 +69,7 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 	 *
 	 * @param Euro $amount
 	 * @param PaymentInterval $interval
-	 * @param PaymentType $paymentType
+	 * @param PaymentType $paymentType Ignored, we allow all types and don't depend on the type for min/max amounts
 	 * @return ValidationResponse
 	 */
 	public function validatePaymentData( Euro $amount, PaymentInterval $interval, PaymentType $paymentType ): ValidationResponse {

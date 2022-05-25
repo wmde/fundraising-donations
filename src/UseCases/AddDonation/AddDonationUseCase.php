@@ -179,7 +179,7 @@ class AddDonationUseCase {
 			$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR;
 		}
 
-		return new PaymentCreationRequest(
+		$request = new PaymentCreationRequest(
 			$paymentRequest->amountInEuroCents,
 			$paymentRequest->interval,
 			$paymentRequest->paymentType,
@@ -187,6 +187,8 @@ class AddDonationUseCase {
 			$paymentRequest->bic,
 			$paymentReferenceCodePrefix
 		);
+		$request->setDomainSpecificPaymentValidator( new DonationPaymentValidator() );
+		return $request;
 	}
 
 	private function generatePaymentProviderUrl( PaymentProviderURLGenerator $paymentProviderURLGenerator, Donation $donation, DonationTokens $tokens ): string {
