@@ -7,6 +7,7 @@ use Doctrine\DBAL\Connection;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
+use WMDE\Fundraising\PaymentContext\Domain\Model\BookingDataTransformers\PayPalBookingTransformer;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\DirectDebitPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
@@ -76,6 +77,7 @@ class DonationToPaymentConverter {
 		private Connection $db,
 		private PaymentIdRepository $idGenerator,
 		private ?NewPaymentHandler $paymentHandler = null,
+		private ?PaypalParentFinder $paypalParentFinder = null,
 	) {
 		$this->dummyIdGeneratorForFollowups = new NullGenerator();
 		$this->anonymisedPaymentReferenceCode = PaymentReferenceCode::newFromString( self::ANONYMOUS_REFERENCE_CODE );
@@ -83,6 +85,9 @@ class DonationToPaymentConverter {
 		$this->lostBookingDataPeriodEnd = new \DateTimeImmutable( '2015-10-08 0:00:00' );
 		if ( $paymentHandler === null ) {
 			$this->paymentHandler = new NullPaymentHandler();
+		}
+		if ( $this->paypalParentFinder === null ) {
+			$this->paypalParentFinder = new NullPaypalParentFinder();
 		}
 	}
 
@@ -180,7 +185,7 @@ class DonationToPaymentConverter {
 		// Handle legacy payments
 		if ( $row['paymentType'] === 'MBK' ) {
 			$row['data']['ext_payment_id'] = 'unknown, legacy MBK payment';
-			$row['data']['mcp_amount'] = $row['amount'] * 100;
+			$row['data']['mcp_amount'] = $row['data']['mb_amount'] ?? $row['amount'];
 			$this->result->addWarning( 'Converted MBK payment', $row );
 		}
 		if ( empty( $row['data']['ext_payment_id'] ) ) {
@@ -192,6 +197,13 @@ class DonationToPaymentConverter {
 				$this->result->addWarning( 'Booked Credit card without transaction ID, 2015 error period', $row );
 				$row['data']['ext_payment_id'] = 'unknown, manually booked';
 			}
+		}
+		$bookingAmount = Euro::newFromString( $row['data']['mcp_amount'] ?? '0' );
+		if ( !$bookingAmount->equals( Euro::newFromString( $row['amount'] ) ) ) {
+			$row['data']['mcp_amount'] = Euro::newFromString( $row['amount'] )->getEuroCents();
+			$this->result->addWarning( "Different mcp_amount than donation amount, assumed donation amount", $row );
+		} else {
+			$row['data']['mcp_amount'] = $bookingAmount->getEuroCents();
 		}
 
 		$payment->bookPayment(
@@ -205,10 +217,11 @@ class DonationToPaymentConverter {
 	}
 
 	private function newPayPalPayment( array $row ): PayPalPayment {
+		$interval = $this->getPaymentIntervalForPaypal( $row );
 		$payment = new PayPalPayment(
 			$this->idGenerator->getNewID(),
 			$this->getAmount( $row ),
-			PaymentInterval::from( intval( $row['intervalInMonths'] ) )
+			PaymentInterval::from( $interval )
 		);
 		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE || $row['status'] === Donation::STATUS_CANCELLED ) {
 			return $payment;
@@ -227,31 +240,35 @@ class DonationToPaymentConverter {
 			$log = $row['data']['log'] ?? [];
 			foreach ( $log as $date => $logmsg ) {
 				if ( $logmsg === 'paypal_handler: booked' ) {
-					$row['data']['ext_payment_timestamp'] = $date;
+					$row['data']['ext_payment_timestamp'] = $this->newPaypalPaymentDate( $date );
 					$this->result->addWarning( 'Booked Paypal payment without timestamp, restored from log', $row );
 					break;
 				}
 			}
 			if ( empty( $row['data']['ext_payment_timestamp'] ) ) {
 				$this->result->addWarning( 'Booked Paypal payment without timestamp, assumed donation date', $row );
-				$row['data']['ext_payment_timestamp'] = $row['donationDate'];
+				$row['data']['ext_payment_timestamp'] = $this->newPaypalPaymentDate( $row['donationDate'] );
 			}
-		} elseif ( !\DateTimeImmutable::createFromFormat( 'Y-m-d H:i:s', $row['data']['ext_payment_timestamp'] ) ) {
+		} elseif ( !\DateTimeImmutable::createFromFormat( PayPalBookingTransformer::PAYPAL_DATE_FORMAT, $row['data']['ext_payment_timestamp'] ) ) {
 			$solution = 'created from donation date';
+			$oldRow = $row;
 			try {
-
-				$bookingDate = new \DateTimeImmutable( $row['data']['ext_payment_timestamp'] );
-				$row['data']['ext_payment_timestamp'] = $bookingDate->format( 'Y-m-d H:i:s' );
+				$row['data']['ext_payment_timestamp'] = $this->newPaypalPaymentDate( $row['data']['ext_payment_timestamp'] );
 				$solution = 'reformatted existing date';
 			} catch ( \Exception ) {
-				$row['data']['ext_payment_timestamp'] = $row['donationDate'];
+				$row['data']['ext_payment_timestamp'] = $this->newPaypalPaymentDate( $row['donationDate'] );
 			}
-			$this->result->addWarning( 'Invalid date format for booked PayPal, ' . $solution, $row );
+			$this->result->addWarning( 'Invalid date format for booked PayPal, ' . $solution, $oldRow );
 		}
 
-		// Replace payment with parent paypal payment, to create followup donations
-		$payment = $this->getParentPaypalPayment( $row ) ?? $payment;
+		// Replace payment with parent PayPal payment, to create followup donations
+		$payment = $this->paypalParentFinder->getParentPaypalPayment( $row, $this->result ) ?? $payment;
 		return $payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), $this->idGenerator );
+	}
+
+	private function newPaypalPaymentDate( string $dateSource ): string {
+		return ( new \DateTimeImmutable( $dateSource ) )
+			->format( PayPalBookingTransformer::PAYPAL_DATE_FORMAT );
 	}
 
 	private function newSofortPayment( array $row ): SofortPayment {
@@ -349,17 +366,31 @@ class DonationToPaymentConverter {
 		return Euro::newFromString( $amount );
 	}
 
-	private function getParentPaypalPayment( array $row ): ?PayPalPayment {
-		$log = $row['data']['log'] ?? [];
-		foreach ( $log as $message ) {
-			if ( preg_match( '/new transaction id to corresponding parent donation: (\d+)/', $message, $matches ) ) {
-				$parentDonationPaymentId = $this->db->fetchOne( 'SELECT payment_id FROM spenden WHERE id=?', [ $matches[1] ] );
-				if ( $parentDonationPaymentId === false ) {
-					$this->result->addWarning( "Followup Payment: Could not find payment ID for donation", $row );
-				}
-				// TODO get payment by id, return it.
-			}
+	/**
+	 * Get adapted interval
+	 *
+	 * For parent payments with interval 0, check if the booking data is really a subscription
+	 * or just an accidental double-booking. O
+	 *
+	 * @param array $row
+	 * @return int
+	 */
+	private function getPaymentIntervalForPaypal( array $row ): int {
+		$interval = intval( $row['intervalInMonths'] );
+		if ( $interval > 0 ) {
+			return $interval;
 		}
-		return null;
+		$log = $row['data']['log'] ?? [];
+		$log = array_filter( $log, fn( $msg ) => str_contains( $msg, 'new transaction id to corresponding child donation' ) );
+		// If Payment is not a parent payment, we don't care
+		if ( empty( $log ) ) {
+			return $interval;
+		}
+		if ( empty( $row['data']['ext_subscr_id'] ) ) {
+			$this->result->addWarning( 'Recurring paypal payment with interval 0, corrected to one-time-payment', $row );
+		} else {
+			$this->result->addError( 'Recurring paypal payment with interval 0 and subscription ID', $row );
+		}
+		return 0;
 	}
 }
