@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\DonationPaymentValidator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 use WMDE\FunValidators\ConstraintViolation;
 
 /**
@@ -17,9 +18,9 @@ class DonationPaymentValidatorTest extends TestCase {
 	 * @dataProvider getValidAmounts
 	 */
 	public function testGivenValidAmount_validatorReturnsNoViolations( float $amount ): void {
-		$validator = new DonationPaymentValidator( 1, 100_000 );
+		$validator = new DonationPaymentValidator();
 
-		$validationResult = $validator->validatePaymentData( Euro::newFromFloat( $amount ), PaymentInterval::OneTime );
+		$validationResult = $validator->validatePaymentData( Euro::newFromFloat( $amount ), PaymentInterval::OneTime, PaymentType::CreditCard );
 
 		$this->assertTrue( $validationResult->isSuccessful() );
 	}
@@ -31,9 +32,9 @@ class DonationPaymentValidatorTest extends TestCase {
 	}
 
 	public function testGivenSmallAmount_validatorReturnsViolation(): void {
-		$validator = new DonationPaymentValidator( 1, 100_000 );
+		$validator = new DonationPaymentValidator();
 
-		$validationResult = $validator->validatePaymentData( Euro::newFromCents( 99 ), PaymentInterval::OneTime );
+		$validationResult = $validator->validatePaymentData( Euro::newFromCents( 99 ), PaymentInterval::OneTime, PaymentType::CreditCard );
 
 		$this->assertFalse( $validationResult->isSuccessful() );
 		$this->assertEquals(
@@ -43,9 +44,9 @@ class DonationPaymentValidatorTest extends TestCase {
 	}
 
 	public function testGivenLargeAmount_validatorReturnsViolation(): void {
-		$validator = new DonationPaymentValidator( 1, 100_000 );
+		$validator = new DonationPaymentValidator();
 
-		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 100_000 ), PaymentInterval::OneTime );
+		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 100_000 ), PaymentInterval::OneTime, PaymentType::CreditCard );
 
 		$this->assertFalse( $validationResult->isSuccessful() );
 		$this->assertEquals(
