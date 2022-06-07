@@ -29,7 +29,7 @@ $warningCount = array_reduce($warnings, fn(int $acc, ResultObject $error) => $ac
 // TODO Move counts into AnalysisResult and get more accurate warning count by ignoring duplicate donation IDs?
 //    One donation can have multiple warnings, e.g. paypal payments without payer id and timestamp
 
-printf( "Processed %d donations, with %d errors (%.2f%%) and %d warnings (%.2f%%)\n",
+printf( "\nProcessed %d donations, with %d errors (%.2f%%) and %d warnings (%.2f%%)\n",
 	$processedPayments,
 	$errorCount,
 	( $errorCount * 100 ) / $processedPayments,

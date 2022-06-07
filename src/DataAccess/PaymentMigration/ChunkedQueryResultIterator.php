@@ -41,7 +41,6 @@ class ChunkedQueryResultIterator implements \IteratorAggregate {
 	}
 
 	public function getIterator(): \Traversable {
-		printf( "Getting iterator starting at %d, ending with %d, chunk size %d\n", $this->offsetStart, $this->maxOffset, $this->chunkSize );
 		$this->qb->setMaxResults( $this->chunkSize );
 		$this->qb->andWhere( $this->qb->expr()->gt( $this->offsetField, ':offset' ) );
 
@@ -55,7 +54,6 @@ class ChunkedQueryResultIterator implements \IteratorAggregate {
 				}
 				$this->qb->setMaxResults( $remainingRowCount );
 			}
-			printf( "Iterating rows %d-%d\n", $offset, $offset + ( $remainingRowCount ?? $this->chunkSize ) );
 
 			$this->qb->setParameter( 'offset', $offset );
 			$dbResult = $this->qb->executeQuery();
