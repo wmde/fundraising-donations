@@ -8,7 +8,7 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\BookPaymentUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
-class PaymentBookingServiceWithUseCase {
+class PaymentBookingServiceWithUseCase implements PaymentBookingService {
 
 	public function __construct(
 		private readonly BookPaymentUseCase $bookPaymentUseCase
