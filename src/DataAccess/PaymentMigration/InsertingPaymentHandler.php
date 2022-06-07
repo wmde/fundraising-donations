@@ -33,7 +33,6 @@ class InsertingPaymentHandler implements NewPaymentHandler {
 	}
 
 	private function flush(): void {
-		$flushStart = microtime( true );
 		try {
 			$this->entityManager->flush();
 		} catch ( \Exception $e ) {
@@ -42,18 +41,14 @@ class InsertingPaymentHandler implements NewPaymentHandler {
 			die( $e->getMessage() );
 		}
 		$this->entityManager->clear();
-		$flushEnd = microtime( true );
 
 		$this->startTransactionIfNeeded();
-		printf( "Took %2.5f seconds to commit payments\n", $flushEnd - $flushStart );
 		$stmt = $this->entityManager->getConnection()->prepare( "UPDATE spenden SET payment_id=? WHERE id=?" );
 		foreach ( $this->paymentIdCollection as $donationId => $paymentId ) {
 			$stmt->executeQuery( [ $paymentId, $donationId ] );
 		}
 		$this->commit();
 		$this->paymentIdCollection->clear();
-		$updateEnd = microtime( true );
-		printf( "Took %2.5f seconds to update donations\n", $updateEnd - $flushEnd );
 	}
 
 	private function startTransactionIfNeeded(): void {
