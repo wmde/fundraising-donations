@@ -48,7 +48,7 @@ $result = $converter->convertDonations( getStartingDonationId( $db ), DonationTo
 $paymentHandler->flushRemaining();
 $conversionEnd = microtime(true);
 
-printf("Took %d seconds to convert %d donations\n",$conversionEnd-$conversionStart, $result->getDonationCount() );
+printf("\nTook %d seconds to convert %d donations\n",$conversionEnd-$conversionStart, $result->getDonationCount() );
 
 $errors = $result->getErrors();
 if ( count( $errors ) > 0 ) {

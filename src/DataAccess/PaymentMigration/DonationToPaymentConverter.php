@@ -78,6 +78,7 @@ class DonationToPaymentConverter {
 		private PaymentIdRepository $idGenerator,
 		private ?NewPaymentHandler $paymentHandler = null,
 		private ?PaypalParentFinder $paypalParentFinder = null,
+		private ?ProgressPrinter $progressPrinter = null
 	) {
 		$this->dummyIdGeneratorForFollowups = new NullGenerator();
 		$this->anonymisedPaymentReferenceCode = PaymentReferenceCode::newFromString( self::ANONYMOUS_REFERENCE_CODE );
@@ -89,6 +90,9 @@ class DonationToPaymentConverter {
 		if ( $this->paypalParentFinder === null ) {
 			$this->paypalParentFinder = new NullPaypalParentFinder();
 		}
+		if ( $this->progressPrinter === null ) {
+			$this->progressPrinter = new ProgressPrinter();
+		}
 	}
 
 	/**
@@ -97,32 +101,35 @@ class DonationToPaymentConverter {
 	 * Leave out parameters to convert all donations
 	 *
 	 * @param int $idOffset Starting donation ID (exclusive)
-	 * @param int $maxConversions Maximum number of donations to convert
+	 * @param int $maxDonationId End donation ID
 	 * @return ConversionResult
 	 */
-	public function convertDonations( int $idOffset = 0, int $maxConversions = self::CONVERT_ALL ): ConversionResult {
+	public function convertDonations( int $idOffset = 0, int $maxDonationId = self::CONVERT_ALL ): ConversionResult {
 		$this->result = new ConversionResult();
-		foreach ( $this->getRows( $idOffset, $maxConversions ) as $row ) {
+		if ( $maxDonationId === self::CONVERT_ALL ) {
+			$maxDonationId = $this->getMaxId();
+		}
+		$this->progressPrinter->initialize( $maxDonationId - $idOffset );
+		foreach ( $this->getRows( $idOffset, $maxDonationId ) as $row ) {
 			$this->result->addRow();
 			if ( $row['data'] ) {
 				$row['data'] = unserialize( base64_decode( $row['data'] ) );
 			}
 
+			$donationId = intval( $row['id'] );
 			try {
 				$payment = $this->newPayment( $row );
-				$this->paymentHandler->handlePayment( $payment, intval( $row['id'] ) );
+				$this->paymentHandler->handlePayment( $payment, $donationId );
 			} catch ( \Throwable $e ) {
 				$msg = $e->getMessage();
 				$this->result->addError( $msg, $row );
 			}
+			$this->progressPrinter->printProgress( $donationId );
 		}
 		return $this->result;
 	}
 
 	 private function getRows( int $minDonationId, int $maxDonationId ): iterable {
-		if ( $maxDonationId === self::CONVERT_ALL ) {
-			$maxDonationId = $this->getMaxId();
-		}
 		$qb = $this->db->createQueryBuilder();
 		$qb->select( 'd.id', 'betrag AS amount', 'periode AS intervalInMonths', 'zahlweise AS paymentType',
 			 'ueb_code AS transferCode', 'data', 'status', 'dt_new AS donationDate', 'ps.confirmed_at AS valuationDate',
