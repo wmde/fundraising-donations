@@ -5,20 +5,18 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests;
 
 use Doctrine\Common\Annotations\AnnotationReader;
-use Doctrine\Common\Annotations\AnnotationRegistry;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
-use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\Tools\Setup;
+use Doctrine\ORM\ORMSetup;
 use Gedmo\Timestampable\TimestampableListener;
 use WMDE\Fundraising\DonationContext\DonationContextFactory;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
+use WMDE\Fundraising\PaymentContext\PaymentContextFactory;
 
 class TestDonationContextFactory {
 
-	private Configuration $doctrineConfig;
 	private DonationContextFactory $contextFactory;
 	private array $config;
 
@@ -27,10 +25,8 @@ class TestDonationContextFactory {
 
 	public function __construct( array $config ) {
 		$this->config = $config;
-		$this->doctrineConfig = Setup::createConfiguration( true );
 		$this->contextFactory = new DonationContextFactory(
 			$config,
-			$this->doctrineConfig
 		);
 		$this->contextFactory->setTokenGenerator( new FixedTokenGenerator() );
 		$this->entityManager = null;
@@ -52,10 +48,15 @@ class TestDonationContextFactory {
 	}
 
 	private function newEntityManager( array $eventSubscribers = [] ): EntityManager {
-		AnnotationRegistry::registerLoader( 'class_exists' );
-		$this->doctrineConfig->setMetadataDriverImpl( $this->contextFactory->newMappingDriver() );
+		$config = ORMSetup::createXMLMetadataConfiguration( [
+			DonationContextFactory::DOCTRINE_CLASS_MAPPING_DIRECTORY,
+			PaymentContextFactory::DOCTRINE_CLASS_MAPPING_DIRECTORY
+		] );
+		$conn = $this->getConnection();
+		$paymentContext = new PaymentContextFactory();
+		$paymentContext->registerCustomTypes( $conn );
 
-		$entityManager = EntityManager::create( $this->getConnection(), $this->doctrineConfig );
+		$entityManager = EntityManager::create( $conn, $config );
 
 		$this->setupEventSubscribers( $entityManager->getEventManager(), $eventSubscribers );
 
