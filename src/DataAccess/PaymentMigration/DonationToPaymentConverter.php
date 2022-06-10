@@ -63,6 +63,7 @@ class DonationToPaymentConverter {
 	private PaymentIdRepository $dummyIdGeneratorForFollowups;
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
 	private ConversionResult $result;
+	private array $doubleBookedPayPalChildIds = [];
 
 	/**
 	 * In 2015 we had an error in the old fundraising app where we lost booking data.
@@ -395,9 +396,27 @@ class DonationToPaymentConverter {
 		}
 		if ( empty( $row['data']['ext_subscr_id'] ) ) {
 			$this->result->addWarning( 'Recurring paypal payment with interval 0, corrected to one-time-payment', $row );
+			$this->addDoubleBookedIds( intval( $row['id'] ), $log );
 		} else {
 			$this->result->addError( 'Recurring paypal payment with interval 0 and subscription ID', $row );
 		}
 		return 0;
+	}
+
+	private function addDoubleBookedIds( int $donationId, array $log ) {
+		foreach ( $log as $msg ) {
+			if ( preg_match( '/new transaction id to corresponding child donation: ?(\d+)/', $msg, $matches ) ) {
+				$childId = intval( $matches[1] );
+				if ( isset( $this->doubleBookedPayPalChildIds[$donationId] ) ) {
+					$this->doubleBookedPayPalChildIds[$donationId][] = $childId;
+				} else {
+					$this->doubleBookedPayPalChildIds[$donationId] = [ $childId ];
+				}
+			}
+		}
+	}
+
+	public function getDoubleBookedPayPalChildIds(): array {
+		return $this->doubleBookedPayPalChildIds;
 	}
 }
