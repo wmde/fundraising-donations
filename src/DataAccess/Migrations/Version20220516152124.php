@@ -9,7 +9,7 @@ use Doctrine\Migrations\AbstractMigration;
 
 final class Version20220516152124 extends AbstractMigration {
 	public function getDescription(): string {
-		return 'Use new payment domain';
+		return 'Use new payment domain for donations';
 	}
 
 	public function up( Schema $schema ): void {
@@ -19,8 +19,7 @@ final class Version20220516152124 extends AbstractMigration {
 	}
 
 	public function down( Schema $schema ): void {
-		$this->addSql( 'ALTER TABLE spenden DROP COLUMN payment_id INTEGER DEFAULT 0' );
-		// TODO ask team - should we delete payments here? Should we add cascade or manually delete each payment type
+		$this->addSql( 'ALTER TABLE spenden DROP COLUMN payment_id' );
 		$this->addSql( 'ALTER TABLE spenden CHANGE COLUMN legacy_payment_id payment_id INTEGER' );
 	}
 }
