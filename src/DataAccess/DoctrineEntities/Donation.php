@@ -74,13 +74,6 @@ class Donation {
 
 	private ?\DateTime $dtBackup = null;
 
-	/**
-	 * @deprecated Still here to allow for migration script, remove when production database is migrated
-	 * @var DonationPayment|null
-	 * @phpstan-ignore-next-line
-	 */
-	private ?DonationPayment $payment = null;
-
 	private int $paymentId;
 
 	public function setDonorFullName( string $donorFullName ): self {
