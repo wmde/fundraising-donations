@@ -39,7 +39,6 @@
 		"ext-pdo_sqlite": "*",
 		"symfony/cache": "^6.0",
 		"phpunit/phpunit": "~9.5.1",
-		"codeception/specify": "~2.0",
 		"phpstan/phpstan": "^1.0",
 		"phpmd/phpmd": "~2.6",
 
