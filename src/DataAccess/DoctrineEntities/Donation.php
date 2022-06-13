@@ -125,14 +125,6 @@ class Donation {
 
 	private Collection $moderationReasons;
 
-	/**
-	 * This is only here to support the migration code, will be removed
-	 *
-	 * @var DonationPayment|null
-	 * @phpstan-ignore-next-line
-	 */
-	private ?DonationPayment $payment = null;
-
 	private int $paymentId;
 
 	public function __construct() {
