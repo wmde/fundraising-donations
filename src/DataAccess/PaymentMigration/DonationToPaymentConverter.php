@@ -64,6 +64,7 @@ class DonationToPaymentConverter {
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
 	private ConversionResult $result;
 	private array $doubleBookedPayPalChildIds = [];
+	private int $syntheticTransactionIdCounter = 1;
 
 	/**
 	 * In 2015 we had an error in the old fundraising app where we lost booking data.
@@ -268,6 +269,11 @@ class DonationToPaymentConverter {
 			}
 			$this->result->addWarning( 'Invalid date format for booked PayPal, ' . $solution, $oldRow );
 		}
+		if ( empty( $row['data']['ext_payment_id'] ) ) {
+			$this->result->addWarning( 'Booked Paypal payment without transaction ID, generated synthetic one', $row );
+			$row['data']['ext_payment_id'] = sprintf( "FAKE-%06d", $this->syntheticTransactionIdCounter );
+			$this->syntheticTransactionIdCounter++;
+		}
 
 		// Replace payment with parent PayPal payment, to create followup donations
 		$payment = $this->paypalParentFinder->getParentPaypalPayment( $row, $this->result ) ?? $payment;
@@ -292,6 +298,7 @@ class DonationToPaymentConverter {
 			$this->getPaymentReferenceCode( $row )
 		);
 		if ( $row['status'] === Donation::STATUS_EXTERNAL_INCOMPLETE || $row['status'] === Donation::STATUS_CANCELLED ) {
+			$this->anonymiseReferenceCodeIfNeeded( $payment );
 			return $payment;
 		}
 		if ( empty( $row['valuationDate'] ) ) {
@@ -304,10 +311,14 @@ class DonationToPaymentConverter {
 			'valuationDate' => ( new \DateTimeImmutable( $row['valuationDate'] ) )->format( DATE_ATOM )
 		];
 		$payment->bookPayment( $bookingData, $this->dummyIdGeneratorForFollowups );
+		$this->anonymiseReferenceCodeIfNeeded( $payment );
+		return $payment;
+	}
+
+	private function anonymiseReferenceCodeIfNeeded( SofortPayment|BankTransferPayment $payment ): void {
 		if ( $payment->getPaymentReferenceCode() === self::ANONYMOUS_REFERENCE_CODE ) {
 			$payment->anonymise();
 		}
-		return $payment;
 	}
 
 	private function newDirectDebitPayment( array $row ): DirectDebitPayment {
@@ -345,9 +356,7 @@ class DonationToPaymentConverter {
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) ),
 			$paymentReferenceCode
 		);
-		if ( $payment->getPaymentReferenceCode() === self::ANONYMOUS_REFERENCE_CODE ) {
-			$payment->anonymise();
-		}
+		$this->anonymiseReferenceCodeIfNeeded( $payment );
 		if ( $row['status'] == Donation::STATUS_CANCELLED ) {
 			$payment->cancel();
 		}
@@ -389,7 +398,7 @@ class DonationToPaymentConverter {
 			return $interval;
 		}
 		$log = $row['data']['log'] ?? [];
-		$log = array_filter( $log, fn( $msg ) => str_contains( $msg, 'new transaction id to corresponding child donation' ) );
+		$log = array_filter( $log, fn( $msg ) => preg_match( '/new transaction id (?:to )?corresponding child donation/', $msg ) );
 		// If Payment is not a parent payment, we don't care
 		if ( empty( $log ) ) {
 			return $interval;
@@ -405,7 +414,7 @@ class DonationToPaymentConverter {
 
 	private function addDoubleBookedIds( int $donationId, array $log ) {
 		foreach ( $log as $msg ) {
-			if ( preg_match( '/new transaction id to corresponding child donation: ?(\d+)/', $msg, $matches ) ) {
+			if ( preg_match( '/new transaction id (?:to )?corresponding child donation: ?(\d+)/', $msg, $matches ) ) {
 				$childId = intval( $matches[1] );
 				if ( isset( $this->doubleBookedPayPalChildIds[$donationId] ) ) {
 					$this->doubleBookedPayPalChildIds[$donationId][] = $childId;
