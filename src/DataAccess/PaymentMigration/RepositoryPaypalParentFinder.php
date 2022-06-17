@@ -19,7 +19,7 @@ class RepositoryPaypalParentFinder implements PaypalParentFinder {
 	public function getParentPaypalPayment( array $row, ConversionResult $result ): ?PayPalPayment {
 		$log = $row['data']['log'] ?? [];
 		foreach ( $log as $message ) {
-			if ( preg_match( '/new transaction id to corresponding parent donation: (\d+)/', $message, $matches ) ) {
+			if ( preg_match( '/new transaction id (?:to )corresponding parent donation: (\d+)/', $message, $matches ) ) {
 				try {
 					$parentDonationPaymentId = $this->paymentIdFinder->findPaymentIdForDonation( intval( $matches[1] ) );
 				} catch ( \RuntimeException $e ) {
