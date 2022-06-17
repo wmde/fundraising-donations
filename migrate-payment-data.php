@@ -55,6 +55,7 @@ if ( count( $errors ) > 0 ) {
 	echo "\nThere were errors during the data migration!\n";
 	foreach($errors as $type => $error) {
 		printf("%s: %d\n", $type, $error->getItemCount());
+		print_r($error->getItemSample());
 	}
 	exit(1);
 }

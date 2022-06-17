@@ -34,6 +34,7 @@ printf( "\nProcessed %d donations, with %d errors (%.2f%%) and %d warnings (%.2f
 	( $warningCount * 100 ) / $processedPayments
 );
 
+ksort($warnings);
 echo "\nWarnings\n";
 echo "--------\n";
 printf("|Error|Donations affected|Date Range|\n");
@@ -43,7 +44,7 @@ foreach($warnings as $type => $warning) {
 	$upper = new DateTimeImmutable($dateRange->getUpperBound());
 	$warningCount = $warning->getItemCount();
 	$percentageOfDonations = ( $warningCount * 100 ) / $processedPayments;
-	printf("|%-60s: | %d (%.2f%%) | (%s - %s) |\n", $type, $warningCount, $percentageOfDonations, $lower->format('Y-m-d'), $upper->format('Y-m-d') );
+	printf("|%-70s: | %d (%.2f%%) | (%s - %s) |\n", $type, $warningCount, $percentageOfDonations, $lower->format('Y-m-d'), $upper->format('Y-m-d') );
 }
 
 $doubleBookings = $converter->getDoubleBookedPayPalChildIds();
