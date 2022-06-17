@@ -37,7 +37,7 @@ class DonationConfirmationMailer implements DonationConfirmationNotifier {
 				'interval' => $paymentInfo['interval'],
 				'paymentType' => $paymentInfo['paymentType'],
 				'needsModeration' => $donation->isMarkedForModeration(),
-				'bankTransferCode' => $paymentInfo['ueb_code'],
+				'bankTransferCode' => $paymentInfo['ueb_code'] ?? '',
 				'receiptOptIn' => $donation->getOptsIntoDonationReceipt(),
 			]
 		];
