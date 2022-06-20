@@ -77,7 +77,6 @@ class DonationToPaymentConverter {
 
 	public function __construct(
 		private Connection $db,
-		private PaymentIDRepository $idGenerator,
 		private ?NewPaymentHandler $paymentHandler = null,
 		private ?PaypalParentFinder $paypalParentFinder = null,
 		private ?ProgressPrinter $progressPrinter = null
@@ -184,7 +183,7 @@ class DonationToPaymentConverter {
 
 	private function newCreditCardPayment( array $row ): CreditCardPayment {
 		$payment = new CreditCardPayment(
-			$this->idGenerator->getNewID(),
+			intval( $row['id'] ),
 			$this->getAmount( $row ),
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) )
 		);
@@ -228,7 +227,7 @@ class DonationToPaymentConverter {
 	private function newPayPalPayment( array $row ): PayPalPayment {
 		$interval = $this->getPaymentIntervalForPaypal( $row );
 		$payment = new PayPalPayment(
-			$this->idGenerator->getNewID(),
+			intval( $row['id'] ),
 			$this->getAmount( $row ),
 			PaymentInterval::from( $interval )
 		);
@@ -277,7 +276,7 @@ class DonationToPaymentConverter {
 
 		// Replace payment with parent PayPal payment, to create followup donations
 		$payment = $this->paypalParentFinder->getParentPaypalPayment( $row, $this->result ) ?? $payment;
-		return $payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), $this->idGenerator );
+		return $payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), new OneTimeIdGenerator( intval( $row['id'] ) ) );
 	}
 
 	private function newPaypalPaymentDate( string $dateSource ): string {
@@ -292,7 +291,7 @@ class DonationToPaymentConverter {
 			$interval = PaymentInterval::OneTime;
 		}
 		$payment = SofortPayment::create(
-			$this->idGenerator->getNewID(),
+			intval( $row['id'] ),
 			$this->getAmount( $row ),
 			$interval,
 			$this->getPaymentReferenceCode( $row )
@@ -333,7 +332,7 @@ class DonationToPaymentConverter {
 			$anonymous = false;
 		}
 		$payment = DirectDebitPayment::create(
-			$this->idGenerator->getNewID(),
+			intval( $row['id'] ),
 			$this->getAmount( $row ),
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) ),
 			$iban,
@@ -351,7 +350,7 @@ class DonationToPaymentConverter {
 	private function newBankTransferPayment( array $row ): BankTransferPayment {
 		$paymentReferenceCode = $this->getPaymentReferenceCode( $row );
 		$payment = BankTransferPayment::create(
-			$this->idGenerator->getNewID(),
+			intval( $row['id'] ),
 			$this->getAmount( $row ),
 			PaymentInterval::from( intval( $row['intervalInMonths'] ) ),
 			$paymentReferenceCode

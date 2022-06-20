@@ -38,10 +38,9 @@ $ormConfig = ORMSetup::createXMLMetadataConfiguration([ PaymentContextFactory::D
 $entityManager = EntityManager::create( $db, $ormConfig );
 
 $paymentIdCollection = new DonationPaymentIdCollection();
-$paymentIdGenerator = new SequentialPaymentIdGenerator(1);
 $paymentHandler = new InsertingPaymentHandler( $entityManager, $paymentIdCollection );
 $parentFinder = new RepositoryPaypalParentFinder( $entityManager, new PaymentIdFinder( $db, $paymentIdCollection ) );
-$converter = new DonationToPaymentConverter( $db, $paymentIdGenerator, $paymentHandler, $parentFinder );
+$converter = new DonationToPaymentConverter( $db, $paymentHandler, $parentFinder );
 
 $conversionStart = microtime(true);
 $result = $converter->convertDonations( getStartingDonationId( $db ), DonationToPaymentConverter::CONVERT_ALL );
