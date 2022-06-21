@@ -73,6 +73,8 @@ class AddDonationUseCase {
 
 		if ( $this->policyValidator->needsModeration( $donationRequest ) ) {
 			$donation->notifyOfPolicyValidationFailure();
+			//TODO send mail depending on moderation topic here? or with the confirmationmailer?
+			//TODO if amount too high violation, an email should also be sent to spenden@wikimedia.de
 		}
 
 		if ( $this->policyValidator->isAutoDeleted( $donationRequest ) ) {
