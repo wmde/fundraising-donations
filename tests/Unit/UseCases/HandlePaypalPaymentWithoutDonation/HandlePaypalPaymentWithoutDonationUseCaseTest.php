@@ -16,6 +16,7 @@ use WMDE\Fundraising\PaymentContext\UseCases\CreateBookedPayPalPayment\SuccessRe
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\HandlePaypalPaymentWithoutDonation\HandlePaypalPaymentWithoutDonationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
  */
 class HandlePaypalPaymentWithoutDonationUseCaseTest extends TestCase {
 

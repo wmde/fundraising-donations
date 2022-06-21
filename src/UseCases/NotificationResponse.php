@@ -5,41 +5,26 @@ namespace WMDE\Fundraising\DonationContext\UseCases;
 
 class NotificationResponse {
 
-	private bool $wasHandled;
-	private bool $notificationFailed;
-	private string $message;
-
-	private function __construct( bool $notificationWasHandled, bool $isError, string $message = '' ) {
-		$this->wasHandled = $notificationWasHandled;
-		$this->notificationFailed = $isError;
-		$this->message = $message;
+	private function __construct( private readonly string $message = '' ) {
 	}
 
 	public static function newSuccessResponse(): self {
-		return new self( true, false );
-	}
-
-	/**
-	 * @todo Check if this method is really required when booking Use Cases are refactored
-	 *
-	 * @param string $message
-	 *
-	 * @return self
-	 */
-	public static function newUnhandledResponse( string $message ): self {
-		return new self( false, false, $message );
+		return new self( '' );
 	}
 
 	public static function newFailureResponse( string $message ): self {
-		return new self( false, true, $message );
+		if ( $message === '' ) {
+			throw new \DomainException( 'Failure response must not be empty' );
+		}
+		return new self( $message );
 	}
 
 	public function notificationWasHandled(): bool {
-		return $this->wasHandled;
+		return $this->message === '';
 	}
 
 	public function hasErrors(): bool {
-		return $this->notificationFailed;
+		return $this->message !== '';
 	}
 
 	public function getMesssage(): string {

@@ -24,6 +24,7 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
  *
  */
 class CreditCardNotificationUseCaseTest extends TestCase {
@@ -42,7 +43,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 
 		$response = $useCase->handleNotification( $request );
 
-		$this->assertFalse( $response->notificationWasHandled() );
+		$this->assertTrue( $response->hasErrors() );
 		$this->assertSame( 'Wrong access code for donation', $response->getMesssage() );
 	}
 
@@ -134,7 +135,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 
 		$response = $useCase->handleNotification( $request );
 
-		$this->assertFalse( $response->notificationWasHandled() );
+		$this->assertTrue( $response->hasErrors() );
 		$this->assertSame( 'Amount does not match', $response->getMesssage() );
 	}
 
