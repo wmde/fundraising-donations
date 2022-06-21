@@ -6,6 +6,15 @@ namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
 
+/**
+ * This class represents the donation data in the database.
+ *
+ * As long as the database is not fully normalized, we still have many deprecated properties in here,
+ * which we use in the Fundraising Operation center queries. You can remove the deprecated properties when
+ * the Fundraising Operation Center does not query the columns any more.
+ *
+ * See https://phabricator.wikimedia.org/T203679 (database refactoring ticket)
+ */
 class Donation {
 
 	// direct debit
@@ -23,8 +32,8 @@ class Donation {
 	public const STATUS_CANCELLED = 'D';
 
 	/**
-	 * @deprecated since 6.1; This status is defined for historical reasons. It should not be used to define a
-	 * donation's status anymore.
+	 * @deprecated This status is defined for historical reasons. It should not be used to define a
+	 * donation's status any more. To mark donations as exported, set dtGruen instead.
 	 */
 	public const STATUS_EXPORTED = 'E';
 
@@ -44,10 +53,25 @@ class Donation {
 
 	private string $publicRecord = '';
 
+	/**
+	 * @deprecated Remove when Fundraising Operation Center does not query this any more
+	 *
+	 * @var string|null
+	 */
 	private ?string $amount = null;
 
+	/**
+	 * @deprecated Remove when Fundraising Operation Center does not query this any more
+	 *
+	 * @var int
+	 */
 	private int $paymentIntervalInMonths = 0;
 
+	/**
+	 * @deprecated Remove when Fundraising Operation Center does not query this any more
+	 *
+	 * @var string
+	 */
 	private string $paymentType = 'BEZ';
 
 	private string $comment = '';
@@ -68,8 +92,20 @@ class Donation {
 
 	private ?\DateTime $deletionTime = null;
 
+	/**
+	 * Legacy "Exported" date
+	 *
+	 * @deprecated Use {@see dtGruen} instead
+	 *
+	 * @var \DateTime|null
+	 */
 	private ?\DateTime $dtExp = null;
 
+	/**
+	 * Export date, null means unexported donation
+	 *
+	 * @var \DateTime|null
+	 */
 	private ?\DateTime $dtGruen = null;
 
 	private ?\DateTime $dtBackup = null;
@@ -165,28 +201,52 @@ class Donation {
 		return $this->publicRecord;
 	}
 
+	/**
+	 * @deprecated Set payment ID instead
+	 *
+	 * @param string $amount
+	 * @return $this
+	 */
 	public function setAmount( string $amount ): self {
 		$this->amount = $amount;
 
 		return $this;
 	}
 
+	/**
+	 * @deprecated Use payment ID to join payments table or to get payment entity
+	 *
+	 * @return string
+	 */
 	public function getAmount(): string {
 		return $this->amount ?? '0';
 	}
 
+	/**
+	 * @deprecated Set payment ID instead
+	 *
+	 * @param int $paymentIntervalInMonths
+	 * @return $this
+	 */
 	public function setPaymentIntervalInMonths( int $paymentIntervalInMonths ): self {
 		$this->paymentIntervalInMonths = $paymentIntervalInMonths;
 
 		return $this;
 	}
 
+	/**
+	 * @deprecated Use payment ID to join payments table or to get payment entity
+	 *
+	 * @return int
+	 */
 	public function getPaymentIntervalInMonths(): int {
 		return $this->paymentIntervalInMonths;
 	}
 
 	/**
 	 * Set payment type short code
+	 *
+	 * @deprecated Set payment ID instead
 	 *
 	 * @param string $paymentType
 	 * @return self
@@ -199,6 +259,8 @@ class Donation {
 
 	/**
 	 * Get payment type short code
+	 *
+	 * @deprecated Use payment ID to join payments table or to get payment entity
 	 *
 	 * @return string
 	 */
