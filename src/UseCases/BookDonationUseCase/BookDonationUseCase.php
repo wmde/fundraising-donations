@@ -47,12 +47,12 @@ class BookDonationUseCase {
 		$isFollowupPayment = false;
 
 		if ( !$this->authorizationService->systemCanModifyDonation( $donationId ) ) {
-			return NotificationResponse::newUnhandledResponse( 'Wrong access code for donation' );
+			return NotificationResponse::newFailureResponse( 'Wrong access code for donation' );
 		}
 
 		$result = $this->paymentBookingService->bookPayment( $donation->getPaymentId(), $request->bookingData );
 		if ( $result instanceof FailureResponse ) {
-			return NotificationResponse::newUnhandledResponse( $result->message );
+			return NotificationResponse::newFailureResponse( $result->message );
 		}
 		if ( $result instanceof FollowUpSuccessResponse ) {
 			$donation = $donation->createFollowupDonationForPayment( $result->childPaymentId );
