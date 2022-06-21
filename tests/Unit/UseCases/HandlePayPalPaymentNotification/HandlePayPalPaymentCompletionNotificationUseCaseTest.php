@@ -26,12 +26,13 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
  */
 class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 	use DonationEventLoggerAsserter;
 
-	public function testWhenAuthorizationFails_unhandledResponseIsReturned(): void {
+	public function testWhenAuthorizationFails_failureResponseIsReturned(): void {
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
 		$useCase = $this->givenNewUseCase(
 			authorizer: new FailingDonationAuthorizer()
