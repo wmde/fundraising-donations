@@ -188,14 +188,14 @@ class LegacyToDomainConverterTest extends TestCase {
 
 	public function testGivenDonationWithModerationReasons_converterMarksDonationAsToBeModerated(): void {
 		$doctrineDonation = ValidDoctrineDonation::newBankTransferDonation();
-		$moderationReason = new ModerationReason(ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN);
-		$doctrineDonation->setModerationReasons($moderationReason );
+		$moderationReason = new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN );
+		$doctrineDonation->setModerationReasons( $moderationReason );
 		$converter = new LegacyToDomainConverter();
 
 		$donation = $converter->createFromLegacyObject( $doctrineDonation );
 
 		$this->assertTrue( $donation->isMarkedForModeration() );
-		$this->assertSame($moderationReason, $donation->getModerationReasons()[0]);
+		$this->assertSame( $moderationReason, $donation->getModerationReasons()[0] );
 	}
 
 	/**

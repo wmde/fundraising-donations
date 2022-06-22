@@ -68,7 +68,7 @@ class AddCommentUseCase {
 		$donation->addComment( $this->newComment( $donation, $addCommentRequest ) );
 
 		if ( !$this->commentTextPassesValidation( $addCommentRequest->getCommentText() ) ) {
-			$donation->markForModeration(new ModerationReason(ModerationIdentifier::COMMENT_CONTENT_VIOLATION));
+			$donation->markForModeration( new ModerationReason( ModerationIdentifier::COMMENT_CONTENT_VIOLATION ) );
 
 			$successMessage = 'comment_success_needs_moderation';
 		}

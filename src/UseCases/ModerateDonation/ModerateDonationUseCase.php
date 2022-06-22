@@ -8,7 +8,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
 class ModerateDonationUseCase {
 
@@ -17,10 +17,10 @@ class ModerateDonationUseCase {
 
 	private DonationRepository $donationRepository;
 	private DonationEventLogger $donationLogger;
-	private DonationConfirmationNotifier $notifier;
+	private DonationNotifier $notifier;
 	private NotificationLog $notificationLog;
 
-	public function __construct( DonationRepository $donationRepository, DonationEventLogger $donationLogger, DonationConfirmationNotifier $notifier, NotificationLog $notificationLog ) {
+	public function __construct( DonationRepository $donationRepository, DonationEventLogger $donationLogger, DonationNotifier $notifier, NotificationLog $notificationLog ) {
 		$this->donationRepository = $donationRepository;
 		$this->donationLogger = $donationLogger;
 		$this->notifier = $notifier;
@@ -36,7 +36,7 @@ class ModerateDonationUseCase {
 			return $this->newModerationFailureResponse( $donationId );
 		}
 
-		$donation->markForModeration(new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN));
+		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 
 		$this->donationRepository->storeDonation( $donation );
 		$this->donationLogger->log( $donationId, sprintf( self::LOG_MESSAGE_DONATION_MARKED_FOR_MODERATION, $authorizedUser ) );

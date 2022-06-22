@@ -74,7 +74,7 @@ class LegacyToDomainConverter {
 		if ( $dd->getStatus() == DoctrineDonation::STATUS_CANCELLED ) {
 			$donation->cancelWithoutChecks();
 		}
-		if ( ! $dd->getModerationReasons()->isEmpty() ){
+		if ( !$dd->getModerationReasons()->isEmpty() ) {
 			$donation->markForModeration( ...$dd->getModerationReasons()->toArray() );
 		}
 	}

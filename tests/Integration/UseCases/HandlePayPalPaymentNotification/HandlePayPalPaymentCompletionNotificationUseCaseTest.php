@@ -19,7 +19,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
 
@@ -423,10 +423,10 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationNotifier&MockObject
+	 * @return DonationNotifier&MockObject
 	 */
-	private function getMailer(): DonationConfirmationNotifier {
-		return $this->getMockBuilder( DonationConfirmationNotifier::class )->disableOriginalConstructor()->getMock();
+	private function getMailer(): DonationNotifier {
+		return $this->getMockBuilder( DonationNotifier::class )->disableOriginalConstructor()->getMock();
 	}
 
 	/**

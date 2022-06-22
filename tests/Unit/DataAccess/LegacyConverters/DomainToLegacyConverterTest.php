@@ -109,13 +109,13 @@ class DomainToLegacyConverterTest extends TestCase {
 	}
 
 	private function makeGenericModerationReason(): ModerationReason {
-		return new ModerationReason(ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN);
+		return new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN );
 	}
 
 	public function testGivenDonationMarkedForModeration_convertsToModerationStatusDoctrineDonation(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->markForModeration($this->makeGenericModerationReason());
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
 
@@ -134,7 +134,7 @@ class DomainToLegacyConverterTest extends TestCase {
 	public function testGivenCancelledDonationThatIsMarkedForModeration_convertsToCancelledStatusDoctrineDonation(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newBankTransferDonation();
-		$donation->markForModeration($this->makeGenericModerationReason());
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$donation->cancelWithoutChecks();
 
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );

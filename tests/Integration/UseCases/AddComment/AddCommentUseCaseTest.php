@@ -176,8 +176,7 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 	public function testWhenDonationIsMarkedForModeration_responseMessageDoesNotContainOK(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->assignId( self::DONATION_ID );
-		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN));
-
+		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 
 		$this->donationRepository = new FakeDonationRepository( $donation );
 		$this->textPolicyValidator = $this->newFailingTextPolicyValidator();

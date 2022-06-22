@@ -20,7 +20,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
 use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Infrastructure\FakeCreditCardService;
 
 /**
@@ -36,7 +36,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 	/** @var DoctrineDonationRepository|FakeDonationRepository|DonationRepositorySpy */
 	private $repository;
 	private $authorizer;
-	/** @var DonationConfirmationNotifier&MockObject */
+	/** @var DonationNotifier&MockObject */
 	private $mailer;
 	private $eventLogger;
 	private $creditCardService;
@@ -150,10 +150,10 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationNotifier&MockObject
+	 * @return DonationNotifier&MockObject
 	 */
-	private function newMailer(): DonationConfirmationNotifier {
-		return $this->getMockBuilder( DonationConfirmationNotifier::class )->disableOriginalConstructor()->getMock();
+	private function newMailer(): DonationNotifier {
+		return $this->getMockBuilder( DonationNotifier::class )->disableOriginalConstructor()->getMock();
 	}
 
 	/**
