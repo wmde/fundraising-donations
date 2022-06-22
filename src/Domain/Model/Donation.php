@@ -31,7 +31,7 @@ class Donation {
 
 	/**
 	 * @var array ModerationReason[]
-	*/
+	 */
 	private array $moderationReasons;
 	private bool $cancelled;
 
@@ -230,25 +230,25 @@ class Donation {
 	}
 
 	/**
-	* @param ModerationReason ...$moderationReasons provide at least 1 ModerationReason to mark for moderation
-	*/
-	public function markForModeration( ModerationReason ...$moderationReasons): void {
-		if ( empty( $moderationReasons) ){
-			throw new \LogicException("you must provide at least one ModerationReason to mark a donation for moderation");
+	 * @param ModerationReason ...$moderationReasons provide at least 1 ModerationReason to mark for moderation
+	 */
+	public function markForModeration( ModerationReason ...$moderationReasons ): void {
+		if ( empty( $moderationReasons ) ) {
+			throw new \LogicException( "you must provide at least one ModerationReason to mark a donation for moderation" );
 		}
-		$this->moderationReasons = array_merge( $this->moderationReasons, $moderationReasons);
- 	}
+		$this->moderationReasons = array_merge( $this->moderationReasons, $moderationReasons );
+	}
 
 	public function approve(): void {
 		$this->moderationReasons = [];
 	}
 
 	/**
-	* @return ModerationReason[]
-	*/
+	 * @return ModerationReason[]
+	 */
 	public function getModerationReasons(): array {
 		return $this->moderationReasons;
- 	}
+	}
 
 	public function getTrackingInfo(): DonationTrackingInfo {
 		return $this->trackingInfo;
@@ -269,7 +269,7 @@ class Donation {
 	}
 
 	public function isMarkedForModeration(): bool {
-		return count( $this->moderationReasons) > 0;
+		return count( $this->moderationReasons ) > 0;
 	}
 
 	public function isBooked(): bool {

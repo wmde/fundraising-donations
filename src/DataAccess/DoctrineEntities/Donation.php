@@ -81,7 +81,7 @@ class Donation {
 	private ?DonationPayment $payment = null;
 
 	public function __construct() {
-		$this->moderationReasons = new ArrayCollection([]);
+		$this->moderationReasons = new ArrayCollection( [] );
 	}
 
 	public function setDonorFullName( string $donorFullName ): self {
@@ -464,7 +464,7 @@ class Donation {
 		$this->moderationReasons = new ArrayCollection( $moderationReasons );
 	}
 
-	public function getModerationReasons ():ArrayCollection {
+	public function getModerationReasons(): ArrayCollection {
 		return $this->moderationReasons;
 	}
 }

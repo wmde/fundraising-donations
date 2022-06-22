@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
 use WMDE\Fundraising\PaymentContext\Domain\DomainSpecificPaymentValidator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentType;

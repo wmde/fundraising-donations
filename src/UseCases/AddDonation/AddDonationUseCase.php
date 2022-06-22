@@ -19,7 +19,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
 
 /**
@@ -30,16 +30,16 @@ class AddDonationUseCase {
 	private DonationRepository $donationRepository;
 	private AddDonationValidator $donationValidator;
 	private ModerationService $policyValidator;
-	private DonationConfirmationNotifier $notifier;
+	private DonationNotifier $notifier;
 	private TransferCodeGenerator $transferCodeGenerator;
 	private DonationTokenFetcher $tokenFetcher;
 	private InitialDonationStatusPicker $initialDonationStatusPicker;
 	private EventEmitter $eventEmitter;
 
 	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
-			ModerationService $policyValidator, DonationConfirmationNotifier $notifier,
-			TransferCodeGenerator $transferCodeGenerator, DonationTokenFetcher $tokenFetcher,
-			InitialDonationStatusPicker $initialDonationStatusPicker, EventEmitter $eventEmitter ) {
+								ModerationService $policyValidator, DonationNotifier $notifier,
+								TransferCodeGenerator $transferCodeGenerator, DonationTokenFetcher $tokenFetcher,
+								InitialDonationStatusPicker $initialDonationStatusPicker, EventEmitter $eventEmitter ) {
 		$this->donationRepository = $donationRepository;
 		$this->donationValidator = $donationValidator;
 		$this->policyValidator = $policyValidator;
@@ -59,12 +59,9 @@ class AddDonationUseCase {
 
 		$donation = $this->newDonationFromRequest( $donationRequest );
 
-		$moderationResult = $this->policyValidator->moderateDonationRequest($donationRequest);
-
+		$moderationResult = $this->policyValidator->moderateDonationRequest( $donationRequest );
 		if ( $moderationResult->needsModeration() ) {
 			$donation->markForModeration( ...$moderationResult->getViolations() );
-			//TODO send mail depending on moderation topic here? or with the confirmationmailer?
-			//TODO if amount too high violation, an email should also be sent to spenden@wikimedia.de
 		}
 
 		if ( $this->policyValidator->isAutoDeleted( $donationRequest ) ) {
@@ -78,6 +75,8 @@ class AddDonationUseCase {
 		$this->eventEmitter->emit( new DonationCreatedEvent( $donation->getId(), $donation->getDonor() ) );
 
 		$this->sendDonationConfirmationEmail( $donation );
+		// The notifier checks if a notification is really needed (e.g. amount too high)
+		$this->notifier->sendModerationNotificationToAdmin( $donation );
 
 		return AddDonationResponse::newSuccessResponse(
 			$donation,

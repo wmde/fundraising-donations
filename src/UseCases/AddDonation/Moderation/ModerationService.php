@@ -8,7 +8,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
-use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
@@ -131,7 +130,7 @@ class ModerationService {
 		if ( $this->textPolicyValidator->textIsHarmless( $fieldContent ) ) {
 			return;
 		}
-		$this->result->addModerationReason( new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, $fieldName));
+		$this->result->addModerationReason( new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, $fieldName ) );
 	}
 
 	private function getAmountViolations( AddDonationRequest $request ): void {
@@ -139,9 +138,9 @@ class ModerationService {
 			$request->getAmount()->getEuros(),
 			$request->getInterval()
 		);
-		if($amountViolations->hasViolations()){
+		if ( $amountViolations->hasViolations() ) {
 			$this->result->addModerationReason(
-				new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH, Result::SOURCE_PAYMENT_AMOUNT)
+				new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH, Result::SOURCE_PAYMENT_AMOUNT )
 			);
 		}
 	}

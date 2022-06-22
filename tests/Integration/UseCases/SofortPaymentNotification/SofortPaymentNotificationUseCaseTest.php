@@ -14,7 +14,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase;
 
 /**
@@ -37,10 +37,10 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationNotifier&MockObject
+	 * @return DonationNotifier&MockObject
 	 */
-	private function getMailer(): DonationConfirmationNotifier {
-		return $this->createMock( DonationConfirmationNotifier::class );
+	private function getMailer(): DonationNotifier {
+		return $this->createMock( DonationNotifier::class );
 	}
 
 	public function testWhenNotificationIsForNonExistingDonation_unhandledResponseIsReturned(): void {

@@ -59,14 +59,14 @@ class DonationTest extends TestCase {
 	public function testModerationStatusCanBeQueried(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$donation->markForModeration($this->makeGenericModerationReason());
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$this->assertTrue( $donation->isMarkedForModeration() );
 	}
 
 	public function testGivenModerationStatus_cancellationSucceeds(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$donation->markForModeration($this->makeGenericModerationReason());
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$donation->cancel();
 		$this->assertTrue( $donation->isCancelled() );
 	}
@@ -145,7 +145,7 @@ class DonationTest extends TestCase {
 
 	private function newInModerationPayPalDonation(): Donation {
 		$donation = ValidDonation::newIncompletePayPalDonation();
-		$donation->markForModeration($this->makeGenericModerationReason());
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 		return $donation;
 	}
 
@@ -224,12 +224,12 @@ class DonationTest extends TestCase {
 	}
 
 	private function makeGenericModerationReason(): ModerationReason {
-		return new ModerationReason(ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN);
+		return new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN );
 	}
 
 	public function testMarkForModerationNeedsAtLeastOneModerationReason(): void {
 		$donation = ValidDonation::newIncompletePayPalDonation();
-		$this->expectException(\LogicException::class);
+		$this->expectException( \LogicException::class );
 		$donation->markForModeration();
 	}
 
