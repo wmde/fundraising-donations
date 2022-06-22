@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\ModerateDonation;
 
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
@@ -34,7 +36,8 @@ class ModerateDonationUseCase {
 			return $this->newModerationFailureResponse( $donationId );
 		}
 
-		$donation->markForModeration();
+		$donation->markForModeration(new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN));
+
 		$this->donationRepository->storeDonation( $donation );
 		$this->donationLogger->log( $donationId, sprintf( self::LOG_MESSAGE_DONATION_MARKED_FOR_MODERATION, $authorizedUser ) );
 

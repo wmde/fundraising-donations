@@ -18,6 +18,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
 
@@ -28,7 +29,7 @@ class AddDonationUseCase {
 
 	private DonationRepository $donationRepository;
 	private AddDonationValidator $donationValidator;
-	private AddDonationPolicyValidator $policyValidator;
+	private ModerationService $policyValidator;
 	private DonationConfirmationNotifier $notifier;
 	private TransferCodeGenerator $transferCodeGenerator;
 	private DonationTokenFetcher $tokenFetcher;
@@ -36,7 +37,7 @@ class AddDonationUseCase {
 	private EventEmitter $eventEmitter;
 
 	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
-			AddDonationPolicyValidator $policyValidator, DonationConfirmationNotifier $notifier,
+			ModerationService $policyValidator, DonationConfirmationNotifier $notifier,
 			TransferCodeGenerator $transferCodeGenerator, DonationTokenFetcher $tokenFetcher,
 			InitialDonationStatusPicker $initialDonationStatusPicker, EventEmitter $eventEmitter ) {
 		$this->donationRepository = $donationRepository;
@@ -58,8 +59,12 @@ class AddDonationUseCase {
 
 		$donation = $this->newDonationFromRequest( $donationRequest );
 
-		if ( $this->policyValidator->needsModeration( $donationRequest ) ) {
-			$donation->notifyOfPolicyValidationFailure();
+		$moderationResult = $this->policyValidator->moderateDonationRequest($donationRequest);
+
+		if ( $moderationResult->needsModeration() ) {
+			$donation->markForModeration( ...$moderationResult->getViolations() );
+			//TODO send mail depending on moderation topic here? or with the confirmationmailer?
+			//TODO if amount too high violation, an email should also be sent to spenden@wikimedia.de
 		}
 
 		if ( $this->policyValidator->isAutoDeleted( $donationRequest ) ) {

@@ -29,7 +29,10 @@ class Donation {
 	// external payment, notified by payment provider
 	public const STATUS_EXTERNAL_BOOKED = 'B';
 
-	private bool $moderationNeeded;
+	/**
+	 * @var array ModerationReason[]
+	*/
+	private array $moderationReasons;
 	private bool $cancelled;
 
 	public const OPTS_INTO_NEWSLETTER = true;
@@ -82,8 +85,8 @@ class Donation {
 		$this->comment = $comment;
 		$this->exported = false;
 		$this->optsIntoDonationReceipt = null;
-		$this->moderationNeeded = false;
 		$this->cancelled = false;
+		$this->moderationReasons = [];
 	}
 
 	/**
@@ -226,23 +229,26 @@ class Donation {
 		return $this->comment !== null;
 	}
 
-	public function markForModeration(): void {
-		$this->moderationNeeded = true;
-	}
+	/**
+	* @param ModerationReason ...$moderationReasons provide at least 1 ModerationReason to mark for moderation
+	*/
+	public function markForModeration( ModerationReason ...$moderationReasons): void {
+		if ( empty( $moderationReasons) ){
+			throw new \LogicException("you must provide at least one ModerationReason to mark a donation for moderation");
+		}
+		$this->moderationReasons = array_merge( $this->moderationReasons, $moderationReasons);
+ 	}
 
 	public function approve(): void {
-		$this->moderationNeeded = false;
+		$this->moderationReasons = [];
 	}
 
-	public function notifyOfPolicyValidationFailure(): void {
-		if ( !$this->hasExternalPayment() ) {
-			$this->markForModeration();
-		}
-	}
-
-	public function notifyOfCommentValidationFailure(): void {
-		$this->markForModeration();
-	}
+	/**
+	* @return ModerationReason[]
+	*/
+	public function getModerationReasons(): array {
+		return $this->moderationReasons;
+ 	}
 
 	public function getTrackingInfo(): DonationTrackingInfo {
 		return $this->trackingInfo;
@@ -263,7 +269,7 @@ class Donation {
 	}
 
 	public function isMarkedForModeration(): bool {
-		return $this->moderationNeeded;
+		return count( $this->moderationReasons) > 0;
 	}
 
 	public function isBooked(): bool {

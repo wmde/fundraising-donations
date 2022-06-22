@@ -4,7 +4,9 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 
 class Donation {
 
@@ -74,7 +76,13 @@ class Donation {
 
 	private ?\DateTime $dtBackup = null;
 
+	private ArrayCollection $moderationReasons;
+
 	private ?DonationPayment $payment = null;
+
+	public function __construct() {
+		$this->moderationReasons = new ArrayCollection([]);
+	}
 
 	public function setDonorFullName( string $donorFullName ): self {
 		$this->donorFullName = $donorFullName;
@@ -450,5 +458,13 @@ class Donation {
 		$dataObject = $this->getDataObject();
 		$modificationFunction( $dataObject );
 		$this->setDataObject( $dataObject );
+	}
+
+	public function setModerationReasons( ModerationReason ...$moderationReasons ): void {
+		$this->moderationReasons = new ArrayCollection( $moderationReasons );
+	}
+
+	public function getModerationReasons ():ArrayCollection {
+		return $this->moderationReasons;
 	}
 }
