@@ -6,6 +6,8 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -184,13 +186,16 @@ class LegacyToDomainConverterTest extends TestCase {
 		yield [ $doctrineDonation, Donation::STATUS_EXTERNAL_INCOMPLETE ];
 	}
 
-	public function testGivenDonationWithModerationNeededStatus_converterMarksDonationAsToBeModerated(): void {
+	public function testGivenDonationWithModerationReasons_converterMarksDonationAsToBeModerated(): void {
 		$doctrineDonation = ValidDoctrineDonation::newBankTransferDonation();
-		$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+		$moderationReason = new ModerationReason(ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN);
+		$doctrineDonation->setModerationReasons($moderationReason );
 		$converter = new LegacyToDomainConverter();
 
 		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+
 		$this->assertTrue( $donation->isMarkedForModeration() );
+		$this->assertSame($moderationReason, $donation->getModerationReasons()[0]);
 	}
 
 	/**

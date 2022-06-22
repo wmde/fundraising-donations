@@ -8,6 +8,8 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\NoName;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -66,7 +68,8 @@ class AddCommentUseCase {
 		$donation->addComment( $this->newComment( $donation, $addCommentRequest ) );
 
 		if ( !$this->commentTextPassesValidation( $addCommentRequest->getCommentText() ) ) {
-			$donation->notifyOfCommentValidationFailure();
+			$donation->markForModeration(new ModerationReason(ModerationIdentifier::COMMENT_CONTENT_VIOLATION));
+
 			$successMessage = 'comment_success_needs_moderation';
 		}
 

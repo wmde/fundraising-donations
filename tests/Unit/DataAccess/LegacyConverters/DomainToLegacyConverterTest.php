@@ -11,6 +11,8 @@ use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyC
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\InvalidPaymentMethod;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 
@@ -106,10 +108,14 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertSame( DoctrineDonation::STATUS_CANCELLED, $doctrineDonation->getStatus() );
 	}
 
+	private function makeGenericModerationReason(): ModerationReason {
+		return new ModerationReason(ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN);
+	}
+
 	public function testGivenDonationMarkedForModeration_convertsToModerationStatusDoctrineDonation(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->markForModeration();
+		$donation->markForModeration($this->makeGenericModerationReason());
 
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
 
@@ -128,7 +134,7 @@ class DomainToLegacyConverterTest extends TestCase {
 	public function testGivenCancelledDonationThatIsMarkedForModeration_convertsToCancelledStatusDoctrineDonation(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newBankTransferDonation();
-		$donation->markForModeration();
+		$donation->markForModeration($this->makeGenericModerationReason());
 		$donation->cancelWithoutChecks();
 
 		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );

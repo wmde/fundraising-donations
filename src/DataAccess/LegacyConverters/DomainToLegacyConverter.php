@@ -36,6 +36,8 @@ class DomainToLegacyConverter {
 		// currently, that method is not needed because the export state is set in a dedicated
 		// export script that does not use the domain model
 
+		$doctrineDonation->setModerationReasons(...$donation->getModerationReasons());
+
 		$doctrineDonation->encodeAndSetData(
 			array_merge(
 				$doctrineDonation->getDecodedData(),
