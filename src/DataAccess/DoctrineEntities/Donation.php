@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 
@@ -76,7 +77,7 @@ class Donation {
 
 	private ?\DateTime $dtBackup = null;
 
-	private ArrayCollection $moderationReasons;
+	private Collection $moderationReasons;
 
 	private ?DonationPayment $payment = null;
 
@@ -464,7 +465,7 @@ class Donation {
 		$this->moderationReasons = new ArrayCollection( $moderationReasons );
 	}
 
-	public function getModerationReasons(): ArrayCollection {
+	public function getModerationReasons(): Collection {
 		return $this->moderationReasons;
 	}
 }
