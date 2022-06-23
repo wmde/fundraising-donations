@@ -40,6 +40,7 @@ class TestDonationContextFactory {
 	public function getConnection(): Connection {
 		if ( $this->connection === null ) {
 			$this->connection = DriverManager::getConnection( $this->config['db'] );
+			$this->contextFactory->registerCustomTypes( $this->connection );
 		}
 		return $this->connection;
 	}

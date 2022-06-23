@@ -8,6 +8,8 @@ use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
@@ -63,14 +65,19 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertNotNull( $actual->getCreationTime() );
 		$expected->setCreationTime( $actual->getCreationTime() );
 
-		// pre-persist subscriber automatically access and update tokens. We'Re using fixed values in the test
+		// pre-persist subscriber automatically access and update tokens. We're using fixed values in the test
 		$expected->encodeAndSetData( array_merge( $expected->getDecodedData(), [
 			'token' => FixedTokenGenerator::TOKEN,
 			'utoken' => FixedTokenGenerator::TOKEN,
 			'uexpiry' => FixedTokenGenerator::EXPIRY_DATE
 		] ) );
 
+		$this->assertEquals( $expected->getModerationReasons()->toArray(), $actual->getModerationReasons()->toArray() );
 		$this->assertEquals( $expected->getDecodedData(), $actual->getDecodedData() );
+
+		// reset the moderation reasons because doctrine sets the moderation reasons to a PersistedCollection instead of ArrayCollection
+		// this way we can compare the objects
+		$actual->setModerationReasons( ...$expected->getModerationReasons()->toArray() );
 		$this->assertEquals( $expected, $actual );
 	}
 
@@ -96,10 +103,28 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$repository = $this->newRepository();
 
 		$repository->storeDonation( $donation );
+		// find() will retrieve a cached value, so we should clear the entity cache here
+		$this->entityManager->clear();
 
 		$this->assertEquals(
 			$donation,
 			$repository->getDonationById( $donation->getId() )
+		);
+	}
+
+	public function testNewModeratedDonationPersistenceRoundTrip(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->markForModeration( new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION ) );
+
+		$repository = $this->newRepository();
+
+		$repository->storeDonation( $donation );
+		// find() will retrieve a cached value, so we should clear the entity cache here
+		$this->entityManager->clear();
+
+		$this->assertEquals(
+			$donation->getModerationReasons(),
+			$repository->getDonationById( $donation->getId() )->getModerationReasons()
 		);
 	}
 

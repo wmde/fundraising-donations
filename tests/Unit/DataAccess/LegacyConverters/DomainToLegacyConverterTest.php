@@ -142,6 +142,17 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertSame( DoctrineDonation::STATUS_CANCELLED, $doctrineDonation->getStatus() );
 	}
 
+	public function testGivenModeratedDonation_convertsToDoctrineDonationHavingModerationReasons(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newBankTransferDonation();
+		$moderationReasons = [ $this->makeGenericModerationReason(), new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH ) ];
+		$donation->markForModeration( ...$moderationReasons );
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+
+		$this->assertEquals( $moderationReasons, $doctrineDonation->getModerationReasons()->toArray() );
+	}
+
 	public function testGivenDirectDebitDonation_statusIsSet(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newDirectDebitDonation();

@@ -7,6 +7,8 @@ namespace WMDE\Fundraising\DonationContext;
 use DateInterval;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\EventSubscriber;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
@@ -87,6 +89,20 @@ class DonationContextFactory {
 	 */
 	public function setTokenGenerator( ?TokenGenerator $tokenGenerator ): void {
 		$this->tokenGenerator = $tokenGenerator;
+	}
+
+	public function registerCustomTypes( Connection $connection ): void {
+		$this->registerDoctrineModerationIdentifierType( $connection );
+	}
+
+	public function registerDoctrineModerationIdentifierType( Connection $connection ): void {
+		static $isRegistered = false;
+		if ( $isRegistered ) {
+			return;
+		}
+		Type::addType( 'ModerationIdentifier', 'WMDE\Fundraising\DonationContext\DataAccess\ModerationIdentifier' );
+		$connection->getDatabasePlatform()->registerDoctrineTypeMapping( 'ModerationIdentifier', 'ModerationIdentifier' );
+		$isRegistered = true;
 	}
 
 }
