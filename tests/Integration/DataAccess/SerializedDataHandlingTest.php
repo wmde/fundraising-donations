@@ -5,15 +5,17 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
+use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
  */
-class SerializedDataHandlingTest extends \PHPUnit\Framework\TestCase {
+class SerializedDataHandlingTest extends TestCase {
 
 	/** @var EntityManager */
 	private $entityManager;
@@ -27,7 +29,7 @@ class SerializedDataHandlingTest extends \PHPUnit\Framework\TestCase {
 
 	/** @dataProvider donationDataProvider */
 	public function testDataFieldOfDonationIsInteractedWithCorrectly( string $paymentType, array $data ): void {
-		$this->repository = new DoctrineDonationRepository( $this->entityManager );
+		$this->repository = new DoctrineDonationRepository( $this->entityManager, new ModerationReasonRepository( $this->entityManager ) );
 		$this->storeDonation( $paymentType, $data );
 
 		$donation = $this->repository->getDonationById( 1 );

@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use Doctrine\ORM\EntityManager;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\UniqueTransferCodeGenerator;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
@@ -72,7 +73,7 @@ class UniqueTransferCodeGeneratorTest extends \PHPUnit\Framework\TestCase {
 			ValidDonation::newTrackingInfo()
 		);
 
-		( new DoctrineDonationRepository( $this->entityManager ) )->storeDonation( $donation );
+		( new DoctrineDonationRepository( $this->entityManager, new ModerationReasonRepository( $this->entityManager ) ) )->storeDonation( $donation );
 	}
 
 	public function testWhenFirstAndSecondResultsAreNotUnique_thirdResultGetsReturned(): void {
