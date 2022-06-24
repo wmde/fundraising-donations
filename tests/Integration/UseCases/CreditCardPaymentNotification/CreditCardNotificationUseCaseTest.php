@@ -8,6 +8,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidCreditCardNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -50,7 +51,8 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 	}
 
 	public function testWhenRepositoryThrowsException_handlerReturnsFailure(): void {
-		$this->repository = new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ) );
+		$throwingEM = ThrowingEntityManager::newInstance( $this );
+		$this->repository = new DoctrineDonationRepository( $throwingEM, new ModerationReasonRepository( $throwingEM ) );
 		$this->authorizer = new FailingDonationAuthorizer();
 		$useCase = $this->newCreditCardNotificationUseCase();
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );

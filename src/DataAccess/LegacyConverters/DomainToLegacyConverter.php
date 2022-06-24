@@ -10,6 +10,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\BookablePayment;
@@ -23,7 +24,14 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardExpiry;
 
 class DomainToLegacyConverter {
-	public function convert( Donation $donation, DoctrineDonation $doctrineDonation ): DoctrineDonation {
+
+	/**
+	 * @param Donation $donation
+	 * @param DoctrineDonation $doctrineDonation
+	 * @param ModerationReason[] $existingModerationReasons
+	 * @return DoctrineDonation
+	 */
+	public function convert( Donation $donation, DoctrineDonation $doctrineDonation, array $existingModerationReasons ): DoctrineDonation {
 		$doctrineDonation->setId( $donation->getId() );
 		$this->updatePaymentInformation( $doctrineDonation, $donation );
 		DonorFieldMapper::updateDonorInformation( $doctrineDonation, $donation->getDonor() );
@@ -36,7 +44,7 @@ class DomainToLegacyConverter {
 		// currently, that method is not needed because the export state is set in a dedicated
 		// export script that does not use the domain model
 
-		$doctrineDonation->setModerationReasons( ...$donation->getModerationReasons() );
+		$doctrineDonation->setModerationReasons( ...$this->mergeModerationReasons( $existingModerationReasons, $donation->getModerationReasons() ) );
 
 		$doctrineDonation->encodeAndSetData(
 			array_merge(
@@ -46,6 +54,25 @@ class DomainToLegacyConverter {
 		);
 
 		return $doctrineDonation;
+	}
+
+	/**
+	 * @param ModerationReason[] $existingModerationReasons
+	 * @param ModerationReason[] $moderationReasonsFromDonation
+	 * @return ModerationReason[]
+	 */
+	private function mergeModerationReasons( array $existingModerationReasons, array $moderationReasonsFromDonation ): array {
+		$resultArray = [];
+		foreach ( $moderationReasonsFromDonation as $moderationReason ) {
+			$resultArray[(string)$moderationReason] = $moderationReason;
+		}
+		foreach ( $existingModerationReasons as $moderationReason ) {
+			$id = (string)$moderationReason;
+			if ( isset( $resultArray[$id] ) ) {
+				$resultArray[$id] = $moderationReason;
+			}
+		}
+		return array_values( $resultArray );
 	}
 
 	private function updateStatusInformation( DoctrineDonation $doctrineDonation, Donation $donation ): void {

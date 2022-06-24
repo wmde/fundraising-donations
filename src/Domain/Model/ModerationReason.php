@@ -30,8 +30,9 @@ class ModerationReason {
 		return $this->source;
 	}
 
-	public function setSource( string $source ): void {
-		$this->source = $source;
+	public function __toString(): string {
+		$source = $this->getSource();
+		return $this->getModerationIdentifier()->name .	( $this->getSource() ? ":$source" : '' );
 	}
 
 }

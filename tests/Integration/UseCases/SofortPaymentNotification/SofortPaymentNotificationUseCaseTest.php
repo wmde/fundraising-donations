@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\SofortPaym
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidSofortNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
@@ -23,8 +24,9 @@ use WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPa
 class SofortPaymentNotificationUseCaseTest extends TestCase {
 
 	public function testWhenRepositoryThrowsException_errorResponseIsReturned(): void {
+		$throwingEM = ThrowingEntityManager::newInstance( $this );
 		$useCase = new SofortPaymentNotificationUseCase(
-			new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ) ),
+			new DoctrineDonationRepository( $throwingEM, new ModerationReasonRepository( $throwingEM ) ),
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer()
 		);

@@ -13,5 +13,8 @@
         <option name="default"/>
       </options>
     </field>
+    <indexes>
+      <index name="mr_identifier" columns="moderation_identifier,source"/>
+    </indexes>
   </entity>
 </doctrine-mapping>
