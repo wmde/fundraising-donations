@@ -39,13 +39,13 @@
 		"ext-pdo_sqlite": "*",
 		"symfony/cache": "^6.0",
 		"phpunit/phpunit": "~9.5.1",
-		"codeception/specify": "~2.0",
 		"phpstan/phpstan": "^1.0",
 		"phpmd/phpmd": "~2.6",
 
 		"mikey179/vfsstream": "~1.6",
 		"wmde/fundraising-phpcs": "~6.0.0",
-		"wmde/psr-log-test-doubles": "~3.0"
+		"wmde/psr-log-test-doubles": "~3.0",
+		"doctrine/migrations": "^3.5"
 	},
 	"autoload": {
 		"psr-4": {

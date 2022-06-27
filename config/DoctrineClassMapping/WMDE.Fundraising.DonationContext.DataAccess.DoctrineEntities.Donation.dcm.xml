@@ -12,7 +12,7 @@
       <index name="d_dt_backup" columns="dt_backup"/>
       <index name="d_status" columns="status,dt_new"/>
       <index name="d_comment_list" columns="is_public,dt_del"/>
-      <index name="d_payment" columns="payment_id"/>
+      <index name="d_payment_id" columns="payment_id"/>
     </indexes>
     <id name="id" type="integer" column="id">
       <generator strategy="IDENTITY"/>
@@ -79,19 +79,11 @@
     <field name="dtExp" type="datetime" column="dt_exp" nullable="true"/>
     <field name="dtGruen" type="datetime" column="dt_gruen" nullable="true"/>
     <field name="dtBackup" type="datetime" column="dt_backup" nullable="true"/>
-    <!-- TODO Make this non-nullable and unique after the payment migration is complete -->
-    <field name="paymentId" type="integer" column="payment_id" nullable="true">
+    <field name="paymentId" type="integer" column="payment_id" nullable="false">
       <options>
         <option name="unsigned">true</option>
+        <option name="default">0</option>
       </options>
     </field>
-    <one-to-one field="payment" target-entity="WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationPayment" fetch="EAGER">
-      <cascade>
-        <cascade-all/>
-      </cascade>
-      <join-columns>
-        <join-column name="legacy_payment_id" referenced-column-name="id"/>
-      </join-columns>
-    </one-to-one>
   </entity>
 </doctrine-mapping>

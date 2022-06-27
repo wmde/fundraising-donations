@@ -7,7 +7,6 @@ namespace WMDE\Fundraising\DonationContext;
 use DateInterval;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ORM\Configuration;
 use Doctrine\ORM\Mapping\Driver\XmlDriver;
 use Doctrine\Persistence\Mapping\Driver\MappingDriver;
 use Gedmo\Timestampable\TimestampableListener;
@@ -21,21 +20,20 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationPrePersistSubscr
 class DonationContextFactory {
 
 	/**
-	 * Use this constant for MappingDriverChain::addDriver
+	 * Used by FunFunFactory in MappingDriverChain::addDriver
+	 * @deprecated Use {@see ORMSetup::createXMLMetadataConfiguration()} with class mapping constant instead
 	 */
 	public const ENTITY_NAMESPACE = 'WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities';
 
-	private const DOCTRINE_CLASS_MAPPING_DIRECTORY = __DIR__ . '/../config/DoctrineClassMapping';
+	public const DOCTRINE_CLASS_MAPPING_DIRECTORY = __DIR__ . '/../config/DoctrineClassMapping';
 
 	protected array $config;
-	protected Configuration $doctrineConfiguration;
 	private AnnotationReader $annotationReader;
 
 	protected ?TokenGenerator $tokenGenerator;
 
-	public function __construct( array $config, Configuration $doctrineConfiguration ) {
+	public function __construct( array $config ) {
 		$this->config = $config;
-		$this->doctrineConfiguration = $doctrineConfiguration;
 		$this->tokenGenerator = null;
 		$this->annotationReader = new AnnotationReader();
 	}
