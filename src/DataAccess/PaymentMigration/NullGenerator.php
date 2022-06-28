@@ -3,7 +3,7 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration;
 
-use WMDE\Fundraising\PaymentContext\Domain\Repositories\PaymentIDRepository;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentIdRepository;
 
 class NullGenerator implements PaymentIDRepository {
 	public function getNewID(): int {

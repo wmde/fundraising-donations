@@ -16,7 +16,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentReferenceCode;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Repositories\PaymentIDRepository;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentIdRepository;
 
 class DonationToPaymentConverter {
 	private const PPL_LEGACY_KEY_MAP = [

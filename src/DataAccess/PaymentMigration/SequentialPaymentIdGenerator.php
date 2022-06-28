@@ -3,7 +3,7 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration;
 
-use WMDE\Fundraising\PaymentContext\Domain\Repositories\PaymentIDRepository;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentIdRepository;
 
 /**
  * A payment ID generator that doesn't query the DB for every new ID, but keeps it as internal state.
