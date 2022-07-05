@@ -38,14 +38,24 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 	public const AMOUNT_TOO_HIGH = 'donation_amount_too_high';
 
 	/**
+	 * Violation identifier for {@see ConstraintViolation}
+	 */
+	public const FORBIDDEN_PAYMENT_TYPE = 'forbidden_payment_type';
+
+	/**
 	 * Error source name for {@see ConstraintViolation}
 	 */
 	public const SOURCE_AMOUNT = 'amount';
 
+	/**
+	 * Error source name for {@see ConstraintViolation}
+	 */
+	public const SOURCE_PAYMENT_TYPE = 'amount';
+
 	private Euro $minimumAmount;
 	private Euro $maximumAmount;
 
-	public function __construct() {
+	public function __construct( private array $allowedPaymentTypes ) {
 		$this->minimumAmount = Euro::newFromInt( self::MINIMUM_AMOUNT_IN_EUROS );
 		$this->maximumAmount = Euro::newFromInt( self::MAXIMUM_AMOUNT_IN_EUROS );
 	}
@@ -62,6 +72,12 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 	 */
 	public function validatePaymentData( Euro $amount, PaymentInterval $interval, PaymentType $paymentType ): ValidationResponse {
 		$amountInCents = $amount->getEuroCents();
+
+		if ( !in_array( $paymentType, $this->allowedPaymentTypes ) ) {
+			return ValidationResponse::newFailureResponse( [
+				new ConstraintViolation( $paymentType->value, self::FORBIDDEN_PAYMENT_TYPE, self::SOURCE_PAYMENT_TYPE )
+			] );
+		}
 
 		if ( $amountInCents < $this->minimumAmount->getEuroCents() ) {
 			return ValidationResponse::newFailureResponse( [
