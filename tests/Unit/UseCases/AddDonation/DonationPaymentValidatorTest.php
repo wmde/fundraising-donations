@@ -14,11 +14,16 @@ use WMDE\FunValidators\ConstraintViolation;
  * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\DonationPaymentValidator
  */
 class DonationPaymentValidatorTest extends TestCase {
+
+	private const ALLOWED_PAYMENT_TYPES = [
+		PaymentType::DirectDebit
+	];
+
 	/**
 	 * @dataProvider getValidAmounts
 	 */
 	public function testGivenValidAmount_validatorReturnsNoViolations( float $amount ): void {
-		$validator = new DonationPaymentValidator();
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES );
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromFloat( $amount ), PaymentInterval::OneTime, PaymentType::DirectDebit );
 
@@ -32,7 +37,7 @@ class DonationPaymentValidatorTest extends TestCase {
 	}
 
 	public function testGivenSmallAmount_validatorReturnsViolation(): void {
-		$validator = new DonationPaymentValidator();
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES );
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromCents( 99 ), PaymentInterval::OneTime, PaymentType::DirectDebit );
 
@@ -44,7 +49,7 @@ class DonationPaymentValidatorTest extends TestCase {
 	}
 
 	public function testGivenLargeAmount_validatorReturnsViolation(): void {
-		$validator = new DonationPaymentValidator();
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES );
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 100_000 ), PaymentInterval::OneTime, PaymentType::DirectDebit );
 
@@ -54,4 +59,17 @@ class DonationPaymentValidatorTest extends TestCase {
 			$validationResult->getValidationErrors()[0]
 		);
 	}
+
+	public function testGivenDisallowedPaymentType_validatorReturnsViolation(): void {
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES );
+
+		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 99 ), PaymentInterval::OneTime, PaymentType::Paypal );
+
+		$this->assertFalse( $validationResult->isSuccessful() );
+		$this->assertEquals(
+			new ConstraintViolation( PaymentType::Paypal->value, DonationPaymentValidator::FORBIDDEN_PAYMENT_TYPE, DonationPaymentValidator::SOURCE_PAYMENT_TYPE ),
+			$validationResult->getValidationErrors()[0]
+		);
+	}
+
 }
