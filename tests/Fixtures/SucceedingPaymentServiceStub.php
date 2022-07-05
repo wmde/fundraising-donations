@@ -5,6 +5,8 @@ namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\CreatePaymentService;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\DonationPaymentValidator;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\NullGenerator;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as PaymentCreationSucceeded;
@@ -23,6 +25,10 @@ class SucceedingPaymentServiceStub implements CreatePaymentService {
 
 	public function createPayment( PaymentCreationRequest $request ): PaymentCreationSucceeded {
 		return $this->successResponse;
+	}
+
+	public function createPaymentValidator(): DonationPaymentValidator {
+		return new DonationPaymentValidator( PaymentType::cases() );
 	}
 
 }

@@ -9,4 +9,6 @@ use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as Pa
 
 interface CreatePaymentService {
 	public function createPayment( PaymentCreationRequest $request ): PaymentCreationFailed|PaymentCreationSucceeded;
+
+	public function createPaymentValidator(): DonationPaymentValidator;
 }
