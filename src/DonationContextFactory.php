@@ -21,23 +21,38 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationPrePersistSubscr
 class DonationContextFactory {
 
 	/**
-	 * Use this constant for MappingDriverChain::addDriver
+	 * Used MappingDriverChain::addDriver
+	 * @deprecated use {@see getDoctrineMappingPaths}
 	 */
 	public const ENTITY_NAMESPACE = 'WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities';
 
 	private const DOCTRINE_CLASS_MAPPING_DIRECTORY = __DIR__ . '/../config/DoctrineClassMapping';
 
 	protected array $config;
-	protected Configuration $doctrineConfiguration;
+
+	/**
+	 * @var Configuration|null
+	 * @deprecated Will be removed in next major release
+	 */
+	protected ?Configuration $doctrineConfiguration;
 	private AnnotationReader $annotationReader;
 
 	protected ?TokenGenerator $tokenGenerator;
 
-	public function __construct( array $config, Configuration $doctrineConfiguration ) {
+	public function __construct( array $config, ?Configuration $doctrineConfiguration = null ) {
 		$this->config = $config;
 		$this->doctrineConfiguration = $doctrineConfiguration;
 		$this->tokenGenerator = null;
 		$this->annotationReader = new AnnotationReader();
+	}
+
+	/**
+	 * @return string[]
+	 */
+	public static function getDoctrineMappingPaths(): array {
+		return [
+			self::DOCTRINE_CLASS_MAPPING_DIRECTORY
+		];
 	}
 
 	/**
@@ -52,6 +67,10 @@ class DonationContextFactory {
 		);
 	}
 
+	/**
+	 * @return MappingDriver
+	 * @deprecated Use ORMSetup::createXMLMetadataConfiguration with {@see getDoctrineMappingPaths instead}
+	 */
 	public function newMappingDriver(): MappingDriver {
 		return new XmlDriver( self::DOCTRINE_CLASS_MAPPING_DIRECTORY );
 	}
