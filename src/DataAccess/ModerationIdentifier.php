@@ -16,7 +16,7 @@ class ModerationIdentifier extends Type {
 	}
 
 	public function getName() {
-		return 'ModerationIdentifier';
+		return 'DonationModerationIdentifier';
 	}
 
 	public function convertToPHPValue( mixed $value, AbstractPlatform $platform ): DomainModerationIdentifier {
