@@ -100,8 +100,8 @@ class DonationContextFactory {
 		if ( $isRegistered ) {
 			return;
 		}
-		Type::addType( 'ModerationIdentifier', 'WMDE\Fundraising\DonationContext\DataAccess\ModerationIdentifier' );
-		$connection->getDatabasePlatform()->registerDoctrineTypeMapping( 'ModerationIdentifier', 'ModerationIdentifier' );
+		Type::addType( 'DonationModerationIdentifier', 'WMDE\Fundraising\DonationContext\DataAccess\ModerationIdentifier' );
+		$connection->getDatabasePlatform()->registerDoctrineTypeMapping( 'DonationModerationIdentifier', 'DonationModerationIdentifier' );
 		$isRegistered = true;
 	}
 
