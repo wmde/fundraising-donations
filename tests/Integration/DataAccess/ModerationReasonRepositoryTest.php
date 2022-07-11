@@ -13,6 +13,7 @@ use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineTypes\ModerationIdentifier
  */
 class ModerationReasonRepositoryTest extends TestCase {
 	private EntityManager $entityManager;
