@@ -22,7 +22,17 @@ class Donation {
 
 	// external payment, notified by payment provider
 	public const STATUS_EXTERNAL_BOOKED = 'B';
+
+	/**
+	 * Status for donation that are marked as moderated
+	 *
+	 * @deprecated Check count of moderationReasons. If > 0, donation is moderated
+	 */
 	public const STATUS_MODERATION = 'P';
+
+	/**
+	 * Status for soft-deletion (canceled by the user in the UI or "deleted" by an administrator)
+	 */
 	public const STATUS_CANCELLED = 'D';
 
 	/**
@@ -461,8 +471,9 @@ class Donation {
 		$this->setDataObject( $dataObject );
 	}
 
-	public function setModerationReasons( ModerationReason ...$moderationReasons ): void {
+	public function setModerationReasons( ModerationReason ...$moderationReasons ): self {
 		$this->moderationReasons = new ArrayCollection( $moderationReasons );
+		return $this;
 	}
 
 	public function getModerationReasons(): Collection {
