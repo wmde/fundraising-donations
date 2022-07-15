@@ -83,8 +83,20 @@ class DonationMailer implements DonationNotifier {
 		}
 		$this->adminMailer->sendMail(
 			new EmailAddress( $this->adminEmailAddress ),
-			$this->getTemplateArguments( $donation )
+			$this->getAdminTemplateArguments( $donation )
 		);
+	}
+
+	/**
+	 * @param Donation $donation
+	 * @return array{id:int,moderationFlags:array<string,boolean>,amount:float}
+	 */
+	private function getAdminTemplateArguments( Donation $donation ): array {
+		return [
+			'id' => $donation->getId(),
+			'moderationFlags' => $this->getModerationFlags( ...$donation->getModerationReasons() ),
+			'amount' => $donation->getAmount()->getEuroFloat()
+		];
 	}
 
 }
