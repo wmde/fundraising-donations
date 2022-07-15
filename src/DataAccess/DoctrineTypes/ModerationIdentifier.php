@@ -10,12 +10,12 @@ use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier as Domain
 
 class ModerationIdentifier extends Type {
 
-	public function getSQLDeclaration( array $column, AbstractPlatform $platform ) {
+	public function getSQLDeclaration( array $column, AbstractPlatform $platform ): string {
 		// we're using a backed enum to map the actual moderation identifier names with integers
 		return 'VARCHAR(50)';
 	}
 
-	public function getName() {
+	public function getName(): string {
 		return 'DonationModerationIdentifier';
 	}
 

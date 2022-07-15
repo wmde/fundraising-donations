@@ -157,24 +157,11 @@ class DonationConfirmationMailerTest extends TestCase {
 		$confirmationMailer->sendModerationNotificationToAdmin( $donation );
 
 		$mailerSpy->assertCalledOnceWith( new EmailAddress( self::ADMIN_EMAIL ), [
-			'recipient' => [
-				'firstName' => ValidDonation::DONOR_FIRST_NAME,
-				'lastName' => ValidDonation::DONOR_LAST_NAME,
-				'salutation' => ValidDonation::DONOR_SALUTATION,
-				'title' => ValidDonation::DONOR_TITLE
-			],
-			'donation' => [
 				'id' => $donation->getId(),
 				'amount' => ValidDonation::DONATION_AMOUNT,
-				'interval' => ValidDonation::PAYMENT_INTERVAL_IN_MONTHS,
-				'needsModeration' => true,
-				'paymentType' => 'UEB',
-				'bankTransferCode' => ValidDonation::PAYMENT_BANK_TRANSFER_CODE,
-				'receiptOptIn' => null,
 				'moderationFlags' => [
 					'AMOUNT_TOO_HIGH' => true,
 				],
-			]
 		] );
 	}
 }
