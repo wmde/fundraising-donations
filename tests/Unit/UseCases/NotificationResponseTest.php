@@ -15,7 +15,7 @@ class NotificationResponseTest extends TestCase {
 
 		$this->assertTrue( $response->notificationWasHandled() );
 		$this->assertFalse( $response->hasErrors() );
-		$this->assertSame( '', $response->getMesssage() );
+		$this->assertSame( '', $response->getMessage() );
 	}
 
 	public function testFailureResponseHasErrorMessage(): void {
@@ -25,7 +25,7 @@ class NotificationResponseTest extends TestCase {
 		$this->assertTrue( $response->hasErrors() );
 		$this->assertSame(
 			'These are not the payments you\'re looking for',
-			$response->getMesssage()
+			$response->getMessage()
 		);
 	}
 

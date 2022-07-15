@@ -44,7 +44,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$response = $useCase->handleNotification( $request );
 
 		$this->assertTrue( $response->hasErrors() );
-		$this->assertSame( 'Wrong access code for donation', $response->getMesssage() );
+		$this->assertSame( 'Wrong access code for donation', $response->getMessage() );
 	}
 
 	public function testWhenAuthorizationSucceeds_handlerReturnsSuccess(): void {
@@ -136,7 +136,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$response = $useCase->handleNotification( $request );
 
 		$this->assertTrue( $response->hasErrors() );
-		$this->assertSame( 'Amount does not match', $response->getMesssage() );
+		$this->assertSame( 'Amount does not match', $response->getMessage() );
 	}
 
 	private function newCreditCardNotificationUseCase(

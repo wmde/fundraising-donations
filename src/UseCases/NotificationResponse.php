@@ -27,7 +27,7 @@ class NotificationResponse {
 		return $this->message !== '';
 	}
 
-	public function getMesssage(): string {
+	public function getMessage(): string {
 		return $this->message;
 	}
 }
