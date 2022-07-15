@@ -212,7 +212,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$response = $useCase->handleNotification( $request );
 
 		$this->assertFalse( $response->notificationWasHandled() );
-		$this->assertSame( $errorMessage, $response->getMesssage(), 'Response should contain message from payment service' );
+		$this->assertSame( $errorMessage, $response->getMessage(), 'Response should contain message from payment service' );
 	}
 
 	/**

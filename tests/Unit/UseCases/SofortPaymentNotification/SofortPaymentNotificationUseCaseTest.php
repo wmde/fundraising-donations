@@ -148,7 +148,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$response = $useCase->handleNotification( $request );
 
 		$this->assertFalse( $response->notificationWasHandled() );
-		$this->assertSame( $errorMessage, $response->getMesssage() );
+		$this->assertSame( $errorMessage, $response->getMessage() );
 	}
 
 	public function testWhenAuthorizationSucceeds_confirmationMailIsSent(): void {
