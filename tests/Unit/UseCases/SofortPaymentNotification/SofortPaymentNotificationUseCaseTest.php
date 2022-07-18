@@ -34,7 +34,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		return $this->createMock( DonationNotifier::class );
 	}
 
-	public function testWhenNotificationIsForNonExistingDonation_failureResponseIsReturned(): void {
+	public function testWhenNotificationIsForNonExistingDonation_exceptionIsThrown(): void {
 		$useCase = new SofortPaymentNotificationUseCase(
 			new FakeDonationRepository(),
 			new SucceedingDonationAuthorizer(),
@@ -43,11 +43,10 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			$this->createEventLoggerStub()
 		);
 
-		$request = ValidSofortNotificationRequest::newInstantPayment( 4711 );
-		$response = $useCase->handleNotification( $request );
+		$this->expectException( \RuntimeException::class );
 
-		$this->assertFalse( $response->notificationWasHandled() );
-		$this->assertTrue( $response->hasErrors() );
+		$request = ValidSofortNotificationRequest::newInstantPayment( 4711 );
+		$useCase->handleNotification( $request );
 	}
 
 	public function testWhenAuthorizationFails_unhandledResponseIsReturned(): void {

@@ -26,6 +26,7 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase\BookDonationUseCase
  * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
  */
 class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
@@ -213,6 +214,18 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		$this->assertFalse( $response->notificationWasHandled() );
 		$this->assertSame( $errorMessage, $response->getMessage(), 'Response should contain message from payment service' );
+	}
+
+	public function testDonationDoesNotExist_throwsException(): void {
+		$donation = ValidDonation::newIncompletePayPalDonation();
+		$repository = new FakeDonationRepository( $donation );
+
+		$request = ValidPayPalNotificationRequest::newInstantPayment( 2 );
+		$useCase = $this->givenNewUseCase( repository: $repository );
+
+		$this->expectException( \RuntimeException::class );
+
+		$useCase->handleNotification( $request );
 	}
 
 	/**
