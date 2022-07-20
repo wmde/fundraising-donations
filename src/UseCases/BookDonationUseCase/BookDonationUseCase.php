@@ -37,7 +37,7 @@ class BookDonationUseCase {
 		$donation = $this->repository->getDonationById( $request->donationId );
 
 		if ( $donation === null ) {
-			return NotificationResponse::newFailureResponse( 'Donation not found' );
+			return NotificationResponse::newDonationNotFoundResponse();
 		}
 
 		return $this->handleRequestForDonation( $request, $donation );
