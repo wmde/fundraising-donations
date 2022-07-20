@@ -5,6 +5,8 @@ namespace WMDE\Fundraising\DonationContext\UseCases;
 
 class NotificationResponse {
 
+	private const DONATION_NOT_FOUND_MESSAGE = 'Donation not found';
+
 	private function __construct( private readonly string $message = '' ) {
 	}
 
@@ -19,6 +21,10 @@ class NotificationResponse {
 		return new self( $message );
 	}
 
+	public static function newDonationNotFoundResponse(): self {
+		return new self( self::DONATION_NOT_FOUND_MESSAGE );
+	}
+
 	public function notificationWasHandled(): bool {
 		return $this->message === '';
 	}
@@ -29,5 +35,9 @@ class NotificationResponse {
 
 	public function getMessage(): string {
 		return $this->message;
+	}
+
+	public function donationWasNotFound(): bool {
+		return $this->message === self::DONATION_NOT_FOUND_MESSAGE;
 	}
 }
