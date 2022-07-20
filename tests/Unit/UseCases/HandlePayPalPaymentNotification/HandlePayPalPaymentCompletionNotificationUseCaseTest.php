@@ -215,6 +215,20 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertSame( $errorMessage, $response->getMessage(), 'Response should contain message from payment service' );
 	}
 
+	public function testDonationDoesNotExist_returnsDonationWasNotFoundResponse(): void {
+		$repository = $this->createMock( DonationRepository::class );
+		$repository->method( 'getDonationById' )->willReturn( null );
+
+		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
+
+		$useCase = $this->givenNewUseCase( repository: $repository );
+
+		$response = $useCase->handleNotification( $request );
+
+		$this->assertFalse( $response->notificationWasHandled() );
+		$this->assertTrue( $response->donationWasNotFound() );
+	}
+
 	/**
 	 * Create a new use case with stubs that would make it pass
 	 *
