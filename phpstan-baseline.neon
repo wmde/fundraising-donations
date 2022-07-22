@@ -1,19 +1,8 @@
 parameters:
 	ignoreErrors:
-
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\DonationConfirmationNotifier\\:\\:expects\\(\\)\\.$#"
-			count: 3
-			path: tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
-
 		-
 			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\PaymentContext\\\\Domain\\\\Model\\\\PaymentMethod\\:\\:getBankTransferCode\\(\\)\\.$#"
 			count: 3
-			path: tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
-
-		-
-			message: "#^PHPDoc tag @return with type PHPUnit\\\\Framework\\\\MockObject\\\\MockObject\\|WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\DonationConfirmationNotifier is not subtype of native type WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\DonationConfirmationNotifier\\.$#"
-			count: 1
 			path: tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
 
 		-

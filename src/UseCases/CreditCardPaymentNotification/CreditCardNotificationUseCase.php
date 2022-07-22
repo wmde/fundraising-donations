@@ -11,7 +11,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\CreditCardTransactionData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Infrastructure\CreditCardService;
@@ -25,12 +25,12 @@ class CreditCardNotificationUseCase {
 	private DonationRepository $repository;
 	private DonationAuthorizer $authorizationService;
 	private CreditCardService $creditCardService;
-	private DonationConfirmationNotifier $notifier;
+	private DonationNotifier $notifier;
 	private DonationEventLogger $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-		CreditCardService $creditCardService, DonationConfirmationNotifier $notifier,
-		DonationEventLogger $donationEventLogger ) {
+								CreditCardService $creditCardService, DonationNotifier $notifier,
+								DonationEventLogger $donationEventLogger ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->creditCardService = $creditCardService;

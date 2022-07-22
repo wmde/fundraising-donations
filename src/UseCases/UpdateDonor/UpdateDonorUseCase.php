@@ -15,7 +15,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
 /**
  * This use case is for adding donor information to a donation after it was created.
@@ -29,14 +29,14 @@ class UpdateDonorUseCase {
 	private DonationAuthorizer $authorizationService;
 	private DonationRepository $donationRepository;
 	private UpdateDonorValidator $updateDonorValidator;
-	private DonationConfirmationNotifier $donationConfirmationMailer;
+	private DonationNotifier $donationConfirmationMailer;
 	private EventEmitter $eventEmitter;
 
 	public function __construct(
 		DonationAuthorizer $authorizationService,
 		UpdateDonorValidator $updateDonorValidator,
 		DonationRepository $donationRepository,
-		DonationConfirmationNotifier $donationConfirmationMailer,
+		DonationNotifier $donationConfirmationMailer,
 		EventEmitter $eventEmitter
 	) {
 		$this->authorizationService = $authorizationService;

@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
 /**
  * @license GPL-2.0-or-later
@@ -22,9 +22,9 @@ class DonationAcceptedEventHandler {
 
 	private DonationAuthorizer $authorizer;
 	private DonationRepository $repository;
-	private DonationConfirmationNotifier $notifier;
+	private DonationNotifier $notifier;
 
-	public function __construct( DonationAuthorizer $authorizer, DonationRepository $repository, DonationConfirmationNotifier $notifier ) {
+	public function __construct( DonationAuthorizer $authorizer, DonationRepository $repository, DonationNotifier $notifier ) {
 		$this->authorizer = $authorizer;
 		$this->repository = $repository;
 		$this->notifier = $notifier;

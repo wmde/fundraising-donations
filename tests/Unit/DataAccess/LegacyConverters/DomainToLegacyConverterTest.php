@@ -11,6 +11,8 @@ use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyC
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationPayment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\InvalidPaymentMethod;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 
@@ -25,7 +27,7 @@ class DomainToLegacyConverterTest extends TestCase {
 	public function testGivenPaymentMethodWithBankTransferCode_converterGetsCodeFromPayment( string $expectedOutput, Donation $donation ): void {
 		$converter = new DomainToLegacyConverter();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 
 		$this->assertEquals( $expectedOutput, $doctrineDonation->getBankTransferCode() );
 	}
@@ -52,7 +54,7 @@ class DomainToLegacyConverterTest extends TestCase {
 			]
 		) );
 
-		$conversionResult = $converter->convert( $donation, $doctrineDonation );
+		$conversionResult = $converter->convert( $donation, $doctrineDonation, [] );
 		$data = $conversionResult->getDecodedData();
 
 		$this->assertArrayHasKey( 'untouched', $data, 'Unrelated (legacy) data should be preserved' );
@@ -71,7 +73,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$donation->getPaymentMethod()->getPayPalData()->addChildPayment( $transactionId, $fakeChildId );
 		$doctrineDonation = new DoctrineDonation();
 
-		$conversionResult = $converter->convert( $donation, $doctrineDonation );
+		$conversionResult = $converter->convert( $donation, $doctrineDonation, [] );
 		$data = $conversionResult->getDecodedData();
 
 		$this->assertSame( [ '16R12136PU8783961' => 2 ], $data['transactionIds'] );
@@ -81,7 +83,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newBookedCreditCardDonation();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 		$data = $doctrineDonation->getDecodedData();
 
 		$this->assertSame( '9/2001', $data['mcp_cc_expiry_date'] );
@@ -91,7 +93,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newIncompleteAnonymousCreditCardDonation();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 		$data = $doctrineDonation->getDecodedData();
 
 		$this->assertSame( '', $data['mcp_cc_expiry_date'] );
@@ -101,17 +103,21 @@ class DomainToLegacyConverterTest extends TestCase {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newCancelledBankTransferDonation();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_CANCELLED, $doctrineDonation->getStatus() );
+	}
+
+	private function makeGenericModerationReason(): ModerationReason {
+		return new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN );
 	}
 
 	public function testGivenDonationMarkedForModeration_convertsToModerationStatusDoctrineDonation(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->markForModeration();
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_MODERATION, $doctrineDonation->getStatus() );
 	}
@@ -120,7 +126,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newBankTransferDonation();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_PROMISE, $doctrineDonation->getStatus() );
 	}
@@ -128,19 +134,30 @@ class DomainToLegacyConverterTest extends TestCase {
 	public function testGivenCancelledDonationThatIsMarkedForModeration_convertsToCancelledStatusDoctrineDonation(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newBankTransferDonation();
-		$donation->markForModeration();
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$donation->cancelWithoutChecks();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_CANCELLED, $doctrineDonation->getStatus() );
+	}
+
+	public function testGivenModeratedDonation_convertsToDoctrineDonationHavingModerationReasons(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newBankTransferDonation();
+		$moderationReasons = [ $this->makeGenericModerationReason(), new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH ) ];
+		$donation->markForModeration( ...$moderationReasons );
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
+
+		$this->assertEquals( $moderationReasons, $doctrineDonation->getModerationReasons()->toArray() );
 	}
 
 	public function testGivenDirectDebitDonation_statusIsSet(): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_NEW, $doctrineDonation->getStatus() );
 	}
@@ -149,7 +166,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newBankTransferDonation();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_PROMISE, $doctrineDonation->getStatus() );
 	}
@@ -161,7 +178,7 @@ class DomainToLegacyConverterTest extends TestCase {
 	public function testGivenIncompleteDonation_statusIsSet( Donation $donation ): void {
 		$converter = new DomainToLegacyConverter();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 
 		$this->assertSame( DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE, $doctrineDonation->getStatus() );
 	}
@@ -182,7 +199,7 @@ class DomainToLegacyConverterTest extends TestCase {
 	public function testGivenBookedDonation_statusIsSet( Donation $donation, string $expectedStatus ): void {
 		$converter = new DomainToLegacyConverter();
 
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [] );
 
 		$this->assertSame( $expectedStatus, $doctrineDonation->getStatus() );
 	}
@@ -205,6 +222,38 @@ class DomainToLegacyConverterTest extends TestCase {
 
 		$this->expectException( \DomainException::class );
 
-		$converter->convert( $donation, new DoctrineDonation() );
+		$converter->convert( $donation, new DoctrineDonation(), [] );
 	}
+
+	public function testGivenExistingModerationReasons_theyOverrideIdenticalDonationModerationReasons(): void {
+		$reason1 = new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH );
+		$reason2 = new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'email' );
+		$reason3 = new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'street' );
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->markForModeration( $reason1, $reason2, $reason3 );
+		$existingReason1 = new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH );
+		$existingReason2 = new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'email' );
+		$converter = new DomainToLegacyConverter();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [ $existingReason1, $existingReason2 ] );
+		$doctrineModerationReasons = $doctrineDonation->getModerationReasons();
+
+		$this->assertSame( [ $existingReason1, $existingReason2, $reason3 ], $doctrineModerationReasons->toArray() );
+	}
+
+	public function testGivenExistingModerationReasonsWhichDoNotExistInDonation_theyAreNotStored(): void {
+		$reason1 = new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH );
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->markForModeration( $reason1 );
+		$existingReason1 = new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH );
+		$existingReason2 = new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'email' );
+		$existingReason3 = new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'street' );
+		$converter = new DomainToLegacyConverter();
+
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), [ $existingReason1, $existingReason2, $existingReason3 ] );
+		$doctrineModerationReasons = $doctrineDonation->getModerationReasons();
+
+		$this->assertSame( [ $existingReason1 ], $doctrineModerationReasons->toArray() );
+	}
+
 }

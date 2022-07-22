@@ -8,12 +8,16 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetchingException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
 /**
- * @license GPL-2.0-or-later
+ * This class is used in the Fundraising Operation Center for sending
+ * confirmation mails when an admin approves a moderated donation.
+ *
+ * We use it because the FOC can't send e-mails with the right sender.
+ * As a workaround, we relay the sending to a special route of the Fundraising App.
  */
-class HttpDonationConfirmationNotifier implements DonationConfirmationNotifier {
+class HttpDonationNotifier implements DonationNotifier {
 
 	private DonationTokenFetcher $tokenFetcher;
 	private HttpClientInterface $httpClient;
@@ -39,6 +43,12 @@ class HttpDonationConfirmationNotifier implements DonationConfirmationNotifier {
 				'update_token' => $this->tokenFetcher->getTokens( $donation->getId() )->getUpdateToken()
 			] ]
 		);
+	}
+
+	public function sendModerationNotificationToAdmin( Donation $donation ) {
+		// This method should only be called from AddDonationUseCase,
+		// HttpDonationNotifier should not be used for that use case
+		throw new \LogicException( 'Method not allowed, check HttpDonationNotifier::sendModerationNotificationToAdmin comment for details.' );
 	}
 
 }

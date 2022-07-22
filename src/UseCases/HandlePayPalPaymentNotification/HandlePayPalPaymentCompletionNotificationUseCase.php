@@ -16,7 +16,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
 use WMDE\Fundraising\PaymentContext\RequestModel\PayPalPaymentNotificationRequest;
@@ -31,11 +31,11 @@ class HandlePayPalPaymentCompletionNotificationUseCase {
 
 	private DonationRepository $repository;
 	private DonationAuthorizer $authorizationService;
-	private DonationConfirmationNotifier $notifier;
+	private DonationNotifier $notifier;
 	private DonationEventLogger $donationEventLogger;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-		DonationConfirmationNotifier $notifier, DonationEventLogger $donationEventLogger ) {
+								DonationNotifier $notifier, DonationEventLogger $donationEventLogger ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->notifier = $notifier;

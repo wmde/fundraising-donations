@@ -13,7 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\SofortTransactionData;
 use WMDE\Fundraising\PaymentContext\RequestModel\SofortNotificationRequest;
@@ -23,10 +23,10 @@ class SofortPaymentNotificationUseCase {
 
 	private DonationRepository $repository;
 	private DonationAuthorizer $authorizationService;
-	private DonationConfirmationNotifier $notifier;
+	private DonationNotifier $notifier;
 
 	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-		DonationConfirmationNotifier $notifier ) {
+								DonationNotifier $notifier ) {
 		$this->repository = $repository;
 		$this->authorizationService = $authorizationService;
 		$this->notifier = $notifier;

@@ -14,7 +14,7 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DonationAcceptedEventHandler
@@ -38,14 +38,14 @@ class DonationAcceptedEventHandlerTest extends TestCase {
 	private $repository;
 
 	/**
-	 * @var DonationConfirmationNotifier&MockObject
+	 * @var DonationNotifier&MockObject
 	 */
 	private $mailer;
 
 	public function setUp(): void {
 		$this->authorizer = new SucceedingDonationAuthorizer();
 		$this->repository = new FakeDonationRepository( $this->newDonation() );
-		$this->mailer = $this->createMock( DonationConfirmationNotifier::class );
+		$this->mailer = $this->createMock( DonationNotifier::class );
 	}
 
 	private function newDonation(): Donation {

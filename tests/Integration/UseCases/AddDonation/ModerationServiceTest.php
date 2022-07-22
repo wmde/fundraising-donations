@@ -4,23 +4,22 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
+use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * @covers WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator
- *
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService
  */
-class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
+class ModerationServiceTest extends TestCase {
 
 	public function testTooHighAmountGiven_needsModerationReturnsTrue(): void {
-		$policyValidator = new AddDonationPolicyValidator(
+		$policyValidator = new ModerationService(
 			$this->newFailingAmountValidator(),
 			$this->newSucceedingTextPolicyValidator()
 		);
@@ -28,18 +27,37 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	public function testGivenBadWords_needsModerationReturnsTrue(): void {
-		$policyValidator = new AddDonationPolicyValidator(
+		$policyValidator = new ModerationService(
 			$this->newSucceedingAmountValidator(),
 			$this->newFailingTextPolicyValidator()
 		);
 		$this->assertTrue( $policyValidator->needsModeration( ValidAddDonationRequest::getRequest() ) );
 	}
 
-	private function newFailingAmountValidator(): AmountPolicyValidator {
-		$amountPolicyValidator = $this->getMockBuilder( AmountPolicyValidator::class )
-			->disableOriginalConstructor()
-			->getMock();
+	public function testGivenBadWordsWithAnonymousRequest_needsModerationReturnsFalse(): void {
+		$policyValidator = new ModerationService(
+			$this->newSucceedingAmountValidator(),
+			$this->newFailingTextPolicyValidator()
+		);
+		$request = ValidAddDonationRequest::getRequest();
+		$request->setDonorType( DonorType::ANONYMOUS() );
 
+		$this->assertFalse( $policyValidator->needsModeration( $request ) );
+	}
+
+	/**
+	 * @return iterable<array{string,boolean}>
+	 */
+	public function paymentTypeProvider(): iterable {
+		yield 'Paypal does not need moderation' => [ 'PPL', false ];
+		yield 'Credit Card does not need moderation' => [ 'MCP', false ];
+		yield 'Sofort does not need moderation' => [ 'SUB', false ];
+		yield 'Direct Debit needs moderation' => [ 'BEZ', true ];
+		yield 'Bank Transfer needs moderation' => [ 'UEB', true ];
+	}
+
+	private function newFailingAmountValidator(): AmountPolicyValidator {
+		$amountPolicyValidator = $this->createMock( AmountPolicyValidator::class );
 		$amountPolicyValidator->method( 'validate' )->willReturn(
 			new ValidationResult( new ConstraintViolation( 1000, 'too-high', 'amount' ) )
 		);
@@ -47,10 +65,7 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	private function newSucceedingAmountValidator(): AmountPolicyValidator {
-		$amountPolicyValidator = $this->getMockBuilder( AmountPolicyValidator::class )
-			->disableOriginalConstructor()
-			->getMock();
-
+		$amountPolicyValidator = $this->createMock( AmountPolicyValidator::class );
 		$amountPolicyValidator->method( 'validate' )->willReturn( new ValidationResult() );
 		return $amountPolicyValidator;
 	}
@@ -69,8 +84,8 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 	}
 
 	/** @dataProvider allowedEmailAddressProvider */
-	public function testWhenEmailAddressIsNotBlacklisted_isAutoDeletedReturnsFalse( string $emailAddress ): void {
-		$policyValidator = $this->newPolicyValidatorWithEmailBlacklist();
+	public function testWhenEmailAddressIsNotForbidden_isAutoDeletedReturnsFalse( string $emailAddress ): void {
+		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorEmailAddress( $emailAddress );
 
@@ -85,16 +100,16 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 		];
 	}
 
-	/** @dataProvider blacklistedEmailAddressProvider */
-	public function testWhenEmailAddressIsBlacklisted_isAutoDeletedReturnsTrue( string $emailAddress ): void {
-		$policyValidator = $this->newPolicyValidatorWithEmailBlacklist();
+	/** @dataProvider forbiddenEmailsProvider */
+	public function testWhenEmailAddressIsForbidden_isAutoDeletedReturnsTrue( string $emailAddress ): void {
+		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorEmailAddress( $emailAddress );
 
 		$this->assertTrue( $policyValidator->isAutoDeleted( $request ) );
 	}
 
-	public function blacklistedEmailAddressProvider(): array {
+	public function forbiddenEmailsProvider(): array {
 		return [
 			[ 'blocked.person@bar.baz' ],
 			[ 'test@example.com' ],
@@ -102,14 +117,20 @@ class AddDonationPolicyValidatorTest extends \PHPUnit\Framework\TestCase {
 		];
 	}
 
-	private function newPolicyValidatorWithEmailBlacklist(): AddDonationPolicyValidator {
-		$policyValidator = new AddDonationPolicyValidator(
+	private function newPolicyValidatorWithForbiddenEmails(): ModerationService {
+		return new ModerationService(
 			$this->newSucceedingAmountValidator(),
 			$this->newSucceedingTextPolicyValidator(),
 			[ '/^blocked.person@bar\.baz$/', '/@example.com$/i' ]
 		);
-
-		return $policyValidator;
 	}
 
+	public function testGivenAnonymousDonorWithEmailData_itIgnoresForbiddenEmails(): void {
+		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
+		$request = ValidAddDonationRequest::getRequest();
+		$request->setDonorType( DonorType::ANONYMOUS() );
+		$request->setDonorEmailAddress( 'blocked.person@bar.baz' );
+
+		$this->assertFalse( $policyValidator->isAutoDeleted( $request ) );
+	}
 }
