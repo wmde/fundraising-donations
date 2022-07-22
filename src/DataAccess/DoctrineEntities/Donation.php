@@ -4,7 +4,10 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 
 class Donation {
 
@@ -19,7 +22,17 @@ class Donation {
 
 	// external payment, notified by payment provider
 	public const STATUS_EXTERNAL_BOOKED = 'B';
+
+	/**
+	 * Status for donation that are marked as moderated
+	 *
+	 * @deprecated Check count of moderationReasons. If > 0, donation is moderated
+	 */
 	public const STATUS_MODERATION = 'P';
+
+	/**
+	 * Status for soft-deletion (canceled by the user in the UI or "deleted" by an administrator)
+	 */
 	public const STATUS_CANCELLED = 'D';
 
 	/**
@@ -74,7 +87,13 @@ class Donation {
 
 	private ?\DateTime $dtBackup = null;
 
+	private Collection $moderationReasons;
+
 	private ?DonationPayment $payment = null;
+
+	public function __construct() {
+		$this->moderationReasons = new ArrayCollection( [] );
+	}
 
 	public function setDonorFullName( string $donorFullName ): self {
 		$this->donorFullName = $donorFullName;
@@ -450,5 +469,14 @@ class Donation {
 		$dataObject = $this->getDataObject();
 		$modificationFunction( $dataObject );
 		$this->setDataObject( $dataObject );
+	}
+
+	public function setModerationReasons( ModerationReason ...$moderationReasons ): self {
+		$this->moderationReasons = new ArrayCollection( $moderationReasons );
+		return $this;
+	}
+
+	public function getModerationReasons(): Collection {
+		return $this->moderationReasons;
 	}
 }

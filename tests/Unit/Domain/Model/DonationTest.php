@@ -8,6 +8,8 @@ use DomainException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentTransactionData;
 
@@ -57,14 +59,14 @@ class DonationTest extends TestCase {
 	public function testModerationStatusCanBeQueried(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$donation->markForModeration();
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$this->assertTrue( $donation->isMarkedForModeration() );
 	}
 
 	public function testGivenModerationStatus_cancellationSucceeds(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$donation->markForModeration();
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$donation->cancel();
 		$this->assertTrue( $donation->isCancelled() );
 	}
@@ -143,7 +145,7 @@ class DonationTest extends TestCase {
 
 	private function newInModerationPayPalDonation(): Donation {
 		$donation = ValidDonation::newIncompletePayPalDonation();
-		$donation->markForModeration();
+		$donation->markForModeration( $this->makeGenericModerationReason() );
 		return $donation;
 	}
 
@@ -221,16 +223,14 @@ class DonationTest extends TestCase {
 		);
 	}
 
-	public function testWhenNonExternalPaymentIsNotifiedOfPolicyValidationFailure_itIsPutInModeration(): void {
-		$donation = ValidDonation::newBankTransferDonation();
-		$donation->notifyOfPolicyValidationFailure();
-		$this->assertTrue( $donation->isMarkedForModeration() );
+	private function makeGenericModerationReason(): ModerationReason {
+		return new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN );
 	}
 
-	public function testWhenExternalPaymentIsNotifiedOfPolicyValidationFailure_itIsNotPutInModeration(): void {
+	public function testMarkForModerationNeedsAtLeastOneModerationReason(): void {
 		$donation = ValidDonation::newIncompletePayPalDonation();
-		$donation->notifyOfPolicyValidationFailure();
-		$this->assertFalse( $donation->isMarkedForModeration() );
+		$this->expectException( \LogicException::class );
+		$donation->markForModeration();
 	}
 
 }

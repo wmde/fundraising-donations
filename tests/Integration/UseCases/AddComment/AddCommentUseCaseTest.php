@@ -5,6 +5,8 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddComment;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
@@ -174,7 +176,7 @@ class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
 	public function testWhenDonationIsMarkedForModeration_responseMessageDoesNotContainOK(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->assignId( self::DONATION_ID );
-		$donation->markForModeration();
+		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 
 		$this->donationRepository = new FakeDonationRepository( $donation );
 		$this->textPolicyValidator = $this->newFailingTextPolicyValidator();

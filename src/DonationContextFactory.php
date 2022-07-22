@@ -7,9 +7,8 @@ namespace WMDE\Fundraising\DonationContext;
 use DateInterval;
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\EventSubscriber;
-use Doctrine\ORM\Configuration;
-use Doctrine\ORM\Mapping\Driver\XmlDriver;
-use Doctrine\Persistence\Mapping\Driver\MappingDriver;
+use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Types\Type;
 use Gedmo\Timestampable\TimestampableListener;
 use WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator;
 use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
@@ -20,22 +19,15 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationPrePersistSubscr
  */
 class DonationContextFactory {
 
-	/**
-	 * Use this constant for MappingDriverChain::addDriver
-	 */
-	public const ENTITY_NAMESPACE = 'WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities';
-
 	private const DOCTRINE_CLASS_MAPPING_DIRECTORY = __DIR__ . '/../config/DoctrineClassMapping';
 
 	protected array $config;
-	protected Configuration $doctrineConfiguration;
 	private AnnotationReader $annotationReader;
 
 	protected ?TokenGenerator $tokenGenerator;
 
-	public function __construct( array $config, Configuration $doctrineConfiguration ) {
+	public function __construct( array $config ) {
 		$this->config = $config;
-		$this->doctrineConfiguration = $doctrineConfiguration;
 		$this->tokenGenerator = null;
 		$this->annotationReader = new AnnotationReader();
 	}
@@ -52,8 +44,8 @@ class DonationContextFactory {
 		);
 	}
 
-	public function newMappingDriver(): MappingDriver {
-		return new XmlDriver( self::DOCTRINE_CLASS_MAPPING_DIRECTORY );
+	public function getDoctrineMappingPaths(): array {
+		return [ self::DOCTRINE_CLASS_MAPPING_DIRECTORY ];
 	}
 
 	private function newTimestampableListener(): TimestampableListener {
@@ -87,6 +79,20 @@ class DonationContextFactory {
 	 */
 	public function setTokenGenerator( ?TokenGenerator $tokenGenerator ): void {
 		$this->tokenGenerator = $tokenGenerator;
+	}
+
+	public function registerCustomTypes( Connection $connection ): void {
+		$this->registerDoctrineModerationIdentifierType( $connection );
+	}
+
+	public function registerDoctrineModerationIdentifierType( Connection $connection ): void {
+		static $isRegistered = false;
+		if ( $isRegistered ) {
+			return;
+		}
+		Type::addType( 'DonationModerationIdentifier', 'WMDE\Fundraising\DonationContext\DataAccess\DoctrineTypes\ModerationIdentifier' );
+		$connection->getDatabasePlatform()->registerDoctrineTypeMapping( 'DonationModerationIdentifier', 'DonationModerationIdentifier' );
+		$isRegistered = true;
 	}
 
 }

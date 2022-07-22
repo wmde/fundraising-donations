@@ -10,7 +10,7 @@ use WMDE\Fundraising\DonationContext\Domain\Event\DonorUpdatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationConfirmationMailer;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationMailer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
@@ -241,8 +241,8 @@ class UpdateDonorUseCaseTest extends TestCase {
 			->withEmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS );
 	}
 
-	private function newConfirmationMailer(): DonationConfirmationMailer {
-		return new DonationConfirmationMailer( $this->templateMailer );
+	private function newConfirmationMailer(): DonationMailer {
+		return new DonationMailer( $this->templateMailer, $this->templateMailer, 'spenden@wikimedia.de' );
 	}
 
 }

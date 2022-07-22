@@ -19,23 +19,26 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
  */
 class DoctrineDonationRepository implements DonationRepository {
 
-	private EntityManager $entityManager;
-
-	public function __construct( EntityManager $entityManager ) {
-		$this->entityManager = $entityManager;
+	public function __construct(
+		private EntityManager $entityManager,
+		private ModerationReasonRepository $moderationReasonRepository
+	) {
 	}
 
 	public function storeDonation( Donation $donation ): void {
+		$existingModerationReasons = $this->moderationReasonRepository->getModerationReasonsThatAreAlreadyPersisted( ...$donation->getModerationReasons() );
+		// doctrine will persist the moderation reasons that are not yet found in the database
+		// and create relation entries to donation automatically
 		if ( $donation->getId() == null ) {
-			$this->insertDonation( $donation );
+			$this->insertDonation( $donation, $existingModerationReasons );
 		} else {
-			$this->updateDonation( $donation );
+			$this->updateDonation( $donation, $existingModerationReasons );
 		}
 	}
 
-	private function insertDonation( Donation $donation ): void {
+	private function insertDonation( Donation $donation, $existingModerationReasons ): void {
 		$converter = new DomainToLegacyConverter();
-		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation() );
+		$doctrineDonation = $converter->convert( $donation, new DoctrineDonation(), $existingModerationReasons );
 
 		try {
 			$this->entityManager->persist( $doctrineDonation );
@@ -48,7 +51,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		$donation->assignId( $doctrineDonation->getId() );
 	}
 
-	private function updateDonation( Donation $donation ): void {
+	private function updateDonation( Donation $donation, $existingModerationReasons ): void {
 		try {
 			$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
 		}
@@ -61,7 +64,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		}
 
 		$converter = new DomainToLegacyConverter();
-		$doctrineDonation = $converter->convert( $donation, $doctrineDonation );
+		$doctrineDonation = $converter->convert( $donation, $doctrineDonation, $existingModerationReasons );
 
 		try {
 			$this->entityManager->persist( $doctrineDonation );

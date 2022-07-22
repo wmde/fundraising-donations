@@ -13,19 +13,22 @@ use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeEventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationPolicyValidator;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\InitialDonationStatusPicker;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationResult;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\LessSimpleTransferCodeGenerator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 use WMDE\Fundraising\PaymentContext\Domain\TransferCodeGenerator;
@@ -104,12 +107,10 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationNotifier|MockObject
+	 * @return DonationNotifier&MockObject
 	 */
-	private function newMailer(): DonationConfirmationNotifier {
-		return $this->getMockBuilder( DonationConfirmationNotifier::class )
-			->disableOriginalConstructor()
-			->getMock();
+	private function newMailer(): DonationNotifier {
+		return $this->createMock( DonationNotifier::class );
 	}
 
 	private function newTokenFetcher(): DonationTokenFetcher {
@@ -178,30 +179,24 @@ class AddDonationUseCaseTest extends TestCase {
 		return $validator;
 	}
 
-	private function getSucceedingPolicyValidatorMock(): AddDonationPolicyValidator {
-		$validator = $this->getMockBuilder( AddDonationPolicyValidator::class )
-			->disableOriginalConstructor()
-			->getMock();
-
-		$validator->method( 'needsModeration' )->willReturn( false );
-
+	private function getSucceedingPolicyValidatorMock(): ModerationService {
+		$validator = $this->createStub( ModerationService::class );
+		$validator->method( 'moderateDonationRequest' )->willReturn( new ModerationResult() );
 		return $validator;
 	}
 
-	private function getFailingPolicyValidatorMock(): AddDonationPolicyValidator {
-		$validator = $this->getMockBuilder( AddDonationPolicyValidator::class )
-			->disableOriginalConstructor()
-			->getMock();
-
+	private function getFailingPolicyValidatorMock(): ModerationService {
+		$validator = $this->createStub( ModerationService::class );
 		$validator->method( 'needsModeration' )->willReturn( true );
-
+		$moderationResult = new ModerationResult();
+		$moderationResult->addModerationReason( new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH ) );
+		$validator->method( 'moderateDonationRequest' )->willReturn( $moderationResult );
 		return $validator;
 	}
 
-	private function getAutoDeletingPolicyValidatorMock(): AddDonationPolicyValidator {
-		$validator = $this->getMockBuilder( AddDonationPolicyValidator::class )
-			->disableOriginalConstructor()
-			->getMock();
+	private function getAutoDeletingPolicyValidatorMock(): ModerationService {
+		$validator = $this->createStub( ModerationService::class );
+		$validator->method( 'moderateDonationRequest' )->willReturn( new ModerationResult() );
 
 		$validator->method( 'isAutoDeleted' )->willReturn( true );
 
@@ -260,10 +255,23 @@ class AddDonationUseCaseTest extends TestCase {
 		$useCase->addDonation( $donation );
 	}
 
+	public function testGivenValidRequest_moderationEmailIsSent(): void {
+		$mailer = $this->newMailer();
+		$donation = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+
+		$mailer->expects( $this->once() )
+			->method( 'sendModerationNotificationToAdmin' )
+			->with( $this->isInstanceOf( Donation::class ) );
+
+		$useCase = $this->newUseCaseWithMailer( $mailer );
+
+		$useCase->addDonation( $donation );
+	}
+
 	public function testGivenValidRequestWithExternalPaymentType_confirmationEmailIsNotSent(): void {
 		$mailer = $this->newMailer();
 
-		$mailer->expects( $this->never() )->method( $this->anything() );
+		$mailer->expects( $this->never() )->method( 'sendConfirmationFor' );
 
 		$useCase = $this->newUseCaseWithMailer( $mailer );
 
@@ -288,25 +296,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertTrue( $response->getDonation()->isMarkedForModeration() );
 	}
 
-	public function testGivenPolicyViolationForExternalPaymentDonation_donationIsNotModerated(): void {
-		$useCase = new AddDonationUseCase(
-			$this->newRepository(),
-			$this->getSucceedingValidatorMock(),
-			$this->getFailingPolicyValidatorMock(),
-			$this->newMailer(),
-			$this->newTransferCodeGenerator(),
-			$this->newTokenFetcher(),
-			new InitialDonationStatusPicker(),
-			new FakeEventEmitter()
-		);
-
-		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
-		$request->setPaymentType( 'PPL' );
-		$response = $useCase->addDonation( $request );
-		$this->assertFalse( $response->getDonation()->isMarkedForModeration() );
-	}
-
-	private function newUseCaseWithMailer( DonationConfirmationNotifier $mailer ): AddDonationUseCase {
+	private function newUseCaseWithMailer( DonationNotifier $mailer ): AddDonationUseCase {
 		return new AddDonationUseCase(
 			$this->newRepository(),
 			$this->getSucceedingValidatorMock(),

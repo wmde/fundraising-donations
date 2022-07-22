@@ -86,5 +86,21 @@
         <join-column name="payment_id" referenced-column-name="id"/>
       </join-columns>
     </one-to-one>
+    <many-to-many
+            field="moderationReasons"
+            target-entity="WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason"
+            fetch="EAGER">
+      <cascade>
+        <cascade-all/>
+      </cascade>
+      <join-table name="donations_moderation_reasons">
+        <join-columns>
+          <join-column name="donation_id" referenced-column-name="id" />
+        </join-columns>
+        <inverse-join-columns>
+          <join-column name="moderation_reason_id" referenced-column-name="id" />
+        </inverse-join-columns>
+      </join-table>
+    </many-to-many>
   </entity>
 </doctrine-mapping>

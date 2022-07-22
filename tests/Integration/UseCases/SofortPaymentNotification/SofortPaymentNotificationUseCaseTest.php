@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\SofortPaym
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
+use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidSofortNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
@@ -14,7 +15,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
-use WMDE\Fundraising\DonationContext\UseCases\DonationConfirmationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase;
 
 /**
@@ -23,8 +24,9 @@ use WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPa
 class SofortPaymentNotificationUseCaseTest extends TestCase {
 
 	public function testWhenRepositoryThrowsException_errorResponseIsReturned(): void {
+		$throwingEM = ThrowingEntityManager::newInstance( $this );
 		$useCase = new SofortPaymentNotificationUseCase(
-			new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ) ),
+			new DoctrineDonationRepository( $throwingEM, new ModerationReasonRepository( $throwingEM ) ),
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer()
 		);
@@ -37,10 +39,10 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	}
 
 	/**
-	 * @return DonationConfirmationNotifier&MockObject
+	 * @return DonationNotifier&MockObject
 	 */
-	private function getMailer(): DonationConfirmationNotifier {
-		return $this->createMock( DonationConfirmationNotifier::class );
+	private function getMailer(): DonationNotifier {
+		return $this->createMock( DonationNotifier::class );
 	}
 
 	public function testWhenNotificationIsForNonExistingDonation_unhandledResponseIsReturned(): void {
