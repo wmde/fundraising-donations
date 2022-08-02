@@ -13,15 +13,18 @@ use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\DonationToPayme
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\InsertingPaymentHandler;
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\PaymentIdFinder;
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\RepositoryPaypalParentFinder;
-use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\SequentialPaymentIdGenerator;
 use WMDE\Fundraising\PaymentContext\PaymentContextFactory;
 
 require __DIR__ . '/vendor/autoload.php';
 
-// TODO find a different way to inject credentials
-$config = [
-	'url' => 'mysql://fundraising:INSECURE PASSWORD@database/fundraising'
-];
+$dsn = $_SERVER['MYSQL_DSN'] ?? '';
+if ( !$dsn || !preg_match("#^mysql://\w+:[\w ]+@\w+/\w+#", $dsn ) ) {
+	echo "You must set the environment variable MYSQL_DSN before running this script!\n";
+	echo "Example shell command:\nexport MYSQL_DSN='mysql://fundraising:INSECURE PASSWORD@database/fundraising'\n";
+	die( 1 );
+}
+
+$config = [ 'url' => $dsn ];
 
 function getStartingDonationId( Connection $db ): int {
 	// subtract 1 because starting ID is exclusive
@@ -29,7 +32,6 @@ function getStartingDonationId( Connection $db ): int {
 	// return 0 when minId is -1 (meaning there were no rows)
 	return max( 0, $minId );
 }
-
 
 $db = DriverManager::getConnection( $config );
 $paymentContextFactory = new PaymentContextFactory();
