@@ -10,7 +10,7 @@
 		"doctrine/orm": "~2.9",
 		"gedmo/doctrine-extensions": "^3.0",
 		"psr/log": "^1.0|^2.0|^3.0",
-		"symfony/http-client": "^5.2",
+		"symfony/http-client": "^6.1",
 
 		"wmde/email-address": "~1.0",
 		"wmde/euro": "~1.0",
