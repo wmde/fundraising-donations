@@ -38,7 +38,6 @@
 	],
 	"require-dev": {
 		"ext-pdo_sqlite": "*",
-		"doctrine/migrations": "^3.5",
 		"symfony/cache": "^6.1",
 		"phpunit/phpunit": "~9.5.1",
 		"phpstan/phpstan": "^1.7",
