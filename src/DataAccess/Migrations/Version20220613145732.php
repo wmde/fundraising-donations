@@ -7,6 +7,11 @@ namespace WMDE\Fundraising\DonationContext\DataAccess\Migrations;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
+/**
+ * This migration is just for adding an index to payment_id for faster JOINs with the payment table.
+ *
+ * We'll run it AFTER the data migration to avoid index rebuilding on every donation change
+ */
 final class Version20220613145732 extends AbstractMigration {
 	public function getDescription(): string {
 		return 'Add index for payment id';
