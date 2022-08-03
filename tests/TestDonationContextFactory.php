@@ -52,7 +52,7 @@ class TestDonationContextFactory {
 		$conn = $this->getConnection();
 		$paymentContext = new PaymentContextFactory();
 		$paymentContext->registerCustomTypes( $conn );
-		$paths = array_merge( $this->contextFactory->getDoctrineMappingPaths(), [ PaymentContextFactory::DOCTRINE_CLASS_MAPPING_DIRECTORY ] );
+		$paths = array_merge( $this->contextFactory->getDoctrineMappingPaths(), $paymentContext->getDoctrineMappingPaths() );
 		$entityManager = EntityManager::create(
 			$conn,
 			ORMSetup::createXMLMetadataConfiguration( $paths )
