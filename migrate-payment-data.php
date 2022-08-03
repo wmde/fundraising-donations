@@ -36,7 +36,7 @@ function getStartingDonationId( Connection $db ): int {
 $db = DriverManager::getConnection( $config );
 $paymentContextFactory = new PaymentContextFactory();
 $paymentContextFactory->registerCustomTypes( $db );
-$ormConfig = ORMSetup::createXMLMetadataConfiguration([ PaymentContextFactory::DOCTRINE_CLASS_MAPPING_DIRECTORY ]);
+$ormConfig = ORMSetup::createXMLMetadataConfiguration( $paymentContextFactory->getDoctrineMappingPaths() );
 $entityManager = EntityManager::create( $db, $ormConfig );
 
 $paymentIdCollection = new DonationPaymentIdCollection();
