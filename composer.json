@@ -52,6 +52,10 @@
 			"WMDE\\Fundraising\\DonationContext\\Tests\\": "tests/"
 		}
 	},
+	"bin": [
+		"bin/check-donation-payment-data",
+		"bin/migrate-donation-payment-data"
+	],
 	"config": {
 		"discard-changes": true,
 		"allow-plugins": {
