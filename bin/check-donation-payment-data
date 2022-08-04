@@ -4,18 +4,14 @@
 // A script to test data quality in donations for migration to the new payments
 
 use Doctrine\DBAL\DriverManager;
+use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\ConnectionFactory;
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\DonationToPaymentConverter;
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\ResultObject;
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\SequentialPaymentIdGenerator;
 
 include $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
-$config = [
-	'url' => 'mysql://fundraising:INSECURE PASSWORD@database/fundraising'
-];
-
-
-$db = DriverManager::getConnection( $config );
+$db = ConnectionFactory::getConnection();
 $converter = new DonationToPaymentConverter( $db );
 
 $result = $converter->convertDonations();
