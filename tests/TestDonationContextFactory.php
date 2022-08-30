@@ -13,6 +13,7 @@ use Doctrine\ORM\ORMSetup;
 use Gedmo\Timestampable\TimestampableListener;
 use WMDE\Fundraising\DonationContext\DonationContextFactory;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
+use WMDE\Fundraising\PaymentContext\PaymentContextFactory;
 
 class TestDonationContextFactory {
 
@@ -48,9 +49,13 @@ class TestDonationContextFactory {
 	}
 
 	private function newEntityManager( array $eventSubscribers = [] ): EntityManager {
+		$conn = $this->getConnection();
+		$paymentContext = new PaymentContextFactory();
+		$paymentContext->registerCustomTypes( $conn );
+		$paths = array_merge( $this->contextFactory->getDoctrineMappingPaths(), $paymentContext->getDoctrineMappingPaths() );
 		$entityManager = EntityManager::create(
-			$this->getConnection(),
-			ORMSetup::createXMLMetadataConfiguration( $this->contextFactory->getDoctrineMappingPaths() )
+			$conn,
+			ORMSetup::createXMLMetadataConfiguration( $paths )
 		);
 
 		$this->setupEventSubscribers( $entityManager->getEventManager(), $eventSubscribers );

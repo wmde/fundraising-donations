@@ -4,9 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
-use Codeception\Specify;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizer;
@@ -20,7 +19,6 @@ use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
  * @license GPL-2.0-or-later
  */
 class DoctrineDonationAuthorizerTest extends TestCase {
-	use Specify;
 
 	private const CORRECT_UPDATE_TOKEN = 'CorrectUpdateToken';
 	private const CORRECT_ACCESS_TOKEN = 'CorrectAccessToken';
@@ -29,7 +27,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 	private const MEANINGLESS_TOKEN = 'Some token';
 	private const EMPTY_TOKEN = '';
 	private const MEANINGLESS_DONATION_ID = 1337;
-	private const ID_OF_WRONG_DONATION = 42;
+	private const DUMMY_PAYMENT_ID = 23;
 
 	private EntityManager $entityManager;
 
@@ -41,91 +39,46 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		return new DoctrineDonationAuthorizer( $this->entityManager, $updateToken, $accessToken );
 	}
 
-	private function storeDonation( Donation $donation ) {
-		$this->entityManager->persist( $donation );
-		$this->entityManager->flush();
+	public function testGivenNoDonation_authorizationFails(): void {
+		$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
+		$this->assertFalse( $authorizer->userCanModifyDonation( self::MEANINGLESS_DONATION_ID ) );
+		$this->assertFalse( $authorizer->canAccessDonation( self::MEANINGLESS_DONATION_ID ) );
 	}
 
 	/**
-	 * @slowThreshold 400
+	 * @dataProvider updateTokenProvider
 	 */
-	public function testWhenNoDonations(): void {
-		$this->specify(
-			'update authorization fails',
-			function (): void {
-				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
-				$this->assertFalse( $authorizer->userCanModifyDonation( self::MEANINGLESS_DONATION_ID ) );
-			}
-		);
+	public function testAuthorizerChecksUpdateTokenOfDonation( string $updateToken, bool $expectedResult ): void {
+		$donation = $this->givenDonationWithTokens();
+		$authorizer = $this->newAuthorizationService( $updateToken );
 
-		$this->specify(
-			'access authorization fails',
-			function (): void {
-				$authorizer = $this->newAuthorizationService( self::CORRECT_ACCESS_TOKEN );
-				$this->assertFalse( $authorizer->canAccessDonation( self::MEANINGLESS_DONATION_ID ) );
-			}
-		);
+		$this->assertSame( $expectedResult, $authorizer->userCanModifyDonation( $donation->getId() ) );
 	}
 
 	/**
-	 * @slowThreshold 1200
+	 * @return iterable<string,array{string,bool}>
 	 */
-	public function testWhenDonationWithTokenExists(): void {
-		$donation = new Donation();
-		$donationData = $donation->getDataObject();
-		$donationData->setUpdateToken( self::CORRECT_UPDATE_TOKEN );
-		$donationData->setUpdateTokenExpiry( $this->getExpiryTimeInTheFuture() );
-		$donationData->setAccessToken( self::CORRECT_ACCESS_TOKEN );
-		$donation->setDataObject( $donationData );
-		$this->storeDonation( $donation );
+	public function updateTokenProvider(): iterable {
+		yield 'correct update token' => [ self::CORRECT_UPDATE_TOKEN, true ];
+		yield 'incorrect update token' => [ self::WRONG__UPDATE_TOKEN, false ];
+	}
 
-		$this->specify(
-			'given correct donation id and correct token, update authorization succeeds',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
-				$this->assertTrue( $authorizer->userCanModifyDonation( $donation->getId() ) );
-			}
-		);
+	/**
+	 * @dataProvider accessTokenProvider
+	 */
+	public function testAuthorizerChecksAccessTokenOfDonation( string $accessToken, bool $expectedResult ): void {
+		$donation = $this->givenDonationWithTokens();
+		$authorizer = $this->newAuthorizationService( '', $accessToken );
 
-		$this->specify(
-			'given wrong donation id and correct token, update authorization fails',
-			function (): void {
-				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
-				$this->assertFalse( $authorizer->userCanModifyDonation( self::ID_OF_WRONG_DONATION ) );
-			}
-		);
+		$this->assertSame( $expectedResult, $authorizer->canAccessDonation( $donation->getId() ) );
+	}
 
-		$this->specify(
-			'given correct donation id and wrong token, update authorization fails',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( self::WRONG__UPDATE_TOKEN );
-				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
-			}
-		);
-
-		$this->specify(
-			'given correct donation id and correct token, access authorization succeeds',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( '', self::CORRECT_ACCESS_TOKEN );
-				$this->assertTrue( $authorizer->canAccessDonation( $donation->getId() ) );
-			}
-		);
-
-		$this->specify(
-			'given wrong donation id and correct token, access authorization fails',
-			function (): void {
-				$authorizer = $this->newAuthorizationService( '', self::CORRECT_ACCESS_TOKEN );
-				$this->assertFalse( $authorizer->canAccessDonation( self::ID_OF_WRONG_DONATION ) );
-			}
-		);
-
-		$this->specify(
-			'given correct donation id and wrong token, access authorization fails',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( '', self::WRONG_ACCESS_TOKEN );
-				$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
-			}
-		);
+	/**
+	 * @return iterable<string,array{string,bool}>
+	 */
+	public function accessTokenProvider(): iterable {
+		yield 'correct access token' => [ self::CORRECT_ACCESS_TOKEN, true ];
+		yield 'incorrect update token' => [ self::WRONG_ACCESS_TOKEN, false ];
 	}
 
 	private function getExpiryTimeInTheFuture(): string {
@@ -133,67 +86,45 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 	}
 
 	public function testGivenTokenAndLegacyDonation_updateAuthorizationFails(): void {
-		$donation = new Donation();
-		$this->storeDonation( $donation );
+		$donation = $this->givenLegacyDonation();
 		$authorizer = $this->newAuthorizationService( self::MEANINGLESS_TOKEN );
 
 		$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 	}
 
 	public function testGivenTokenAndLegacyDonation_accessAuthorizationFails(): void {
-		$donation = new Donation();
-		$this->storeDonation( $donation );
+		$donation = $this->givenLegacyDonation();
 		$authorizer = $this->newAuthorizationService( self::EMPTY_TOKEN, self::MEANINGLESS_TOKEN );
 
 		$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
 	}
 
 	public function testGivenEmptyTokenAndLegacyDonation_updateAuthorizationFails(): void {
-		$donation = new Donation();
-		$this->storeDonation( $donation );
+		$donation = $this->givenLegacyDonation();
 		$authorizer = $this->newAuthorizationService( self::EMPTY_TOKEN, self::EMPTY_TOKEN );
 
 		$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 	}
 
 	public function testGivenEmptyTokenAndLegacyDonation_accessAuthorizationFails(): void {
-		$donation = new Donation();
-		$this->storeDonation( $donation );
+		$donation = $this->givenLegacyDonation();
 		$authorizer = $this->newAuthorizationService( self::EMPTY_TOKEN, self::EMPTY_TOKEN );
 
 		$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
 	}
 
-	/**
-	 * @slowThreshold 400
-	 */
-	public function testWhenUpdateTokenIsExpired(): void {
-		$donation = new Donation();
-		$donationData = $donation->getDataObject();
-		$donationData->setUpdateToken( self::CORRECT_UPDATE_TOKEN );
-		$donationData->setUpdateTokenExpiry( $this->getExpiryTimeInThePast() );
-		$donation->setDataObject( $donationData );
-		$this->storeDonation( $donation );
+	public function testWhenUpdateTokenIsExpiredUpdateCheckFailsForUser(): void {
+		$donation = $this->givenDonationWithExpiredUpdateToken();
 
-		$this->specify(
-			'given correct donation id and a token, update authorization fails for users',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
-				$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
-			}
-		);
-
-		$this->specify(
-			'given correct donation id and a token, update authorization succeeds for system',
-			function () use ( $donation ): void {
-				$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
-				$this->assertTrue( $authorizer->systemCanModifyDonation( $donation->getId() ) );
-			}
-		);
+		$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
+		$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
 	}
 
-	private function getExpiryTimeInThePast(): string {
-		return date( 'Y-m-d H:i:s', time() - 1 );
+	public function testWhenUpdateTokenIsExpiredUpdateCheckSucceedsForSystem(): void {
+		$donation = $this->givenDonationWithExpiredUpdateToken();
+		$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
+
+		$this->assertTrue( $authorizer->systemCanModifyDonation( $donation->getId() ) );
 	}
 
 	public function testGivenExceptionFromEntityManager_authorizerWrapsExceptionForUserModification(): void {
@@ -240,5 +171,44 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 			->willThrowException( new ORMException() );
 
 		return $entityManager;
+	}
+
+	private function givenDonationWithTokens(): Donation {
+		$donation = new Donation();
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
+		$donationData = $donation->getDataObject();
+		$donationData->setUpdateToken( self::CORRECT_UPDATE_TOKEN );
+		$donationData->setUpdateTokenExpiry( $this->getExpiryTimeInTheFuture() );
+		$donationData->setAccessToken( self::CORRECT_ACCESS_TOKEN );
+		$donation->setDataObject( $donationData );
+		$this->storeDonation( $donation );
+		return $donation;
+	}
+
+	private function givenDonationWithExpiredUpdateToken(): Donation {
+		$donation = new Donation();
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
+		$donationData = $donation->getDataObject();
+		$donationData->setUpdateToken( self::CORRECT_UPDATE_TOKEN );
+		$donationData->setUpdateTokenExpiry( $this->getExpiryTimeInThePast() );
+		$donation->setDataObject( $donationData );
+		$this->storeDonation( $donation );
+		return $donation;
+	}
+
+	private function givenLegacyDonation(): Donation {
+		$donation = new Donation();
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
+		$this->storeDonation( $donation );
+		return $donation;
+	}
+
+	private function storeDonation( Donation $donation ) {
+		$this->entityManager->persist( $donation );
+		$this->entityManager->flush();
+	}
+
+	private function getExpiryTimeInThePast(): string {
+		return date( 'Y-m-d H:i:s', time() - 1 );
 	}
 }

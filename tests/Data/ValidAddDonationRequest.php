@@ -4,27 +4,17 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
-use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BankData;
-use WMDE\Fundraising\PaymentContext\Domain\Model\Iban;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class ValidAddDonationRequest {
 
 	public static function getRequest(): AddDonationRequest {
 		$request = new AddDonationRequest();
-		$request->setAmount( Euro::newFromInt( 5 ) );
-		$request->setBankData( self::newValidBankData() );
-		$request->setInterval( ValidDonation::PAYMENT_INTERVAL_IN_MONTHS );
+		$request->setPaymentCreationRequest( self::newPaymentCreationRequest() );
 		$request->setOptIn( (string)ValidDonation::OPTS_INTO_NEWSLETTER );
-		$request->setPaymentType( PaymentMethod::DIRECT_DEBIT );
-
 		$request->setDonorType( DonorType::PERSON() );
 		$request->setDonorSalutation( ValidDonation::DONOR_SALUTATION );
 		$request->setDonorTitle( ValidDonation::DONOR_TITLE );
@@ -40,15 +30,13 @@ class ValidAddDonationRequest {
 		return $request;
 	}
 
-	private static function newValidBankData(): BankData {
-		$bankData = new BankData();
-
-		$bankData->setAccount( ValidDonation::PAYMENT_BANK_ACCOUNT );
-		$bankData->setBankCode( ValidDonation::PAYMENT_BANK_CODE );
-		$bankData->setBankName( ValidDonation::PAYMENT_BANK_NAME );
-		$bankData->setBic( ValidDonation::PAYMENT_BIC );
-		$bankData->setIban( new Iban( ValidDonation::PAYMENT_IBAN ) );
-
-		return $bankData->freeze()->assertNoNullFields();
+	public static function newPaymentCreationRequest(): PaymentCreationRequest {
+		return new PaymentCreationRequest(
+			500,
+			PaymentInterval::OneTime->value,
+			'BEZ',
+			ValidPayments::PAYMENT_IBAN,
+			ValidPayments::PAYMENT_BIC
+		);
 	}
 }

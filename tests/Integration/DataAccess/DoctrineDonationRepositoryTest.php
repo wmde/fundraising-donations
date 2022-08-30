@@ -15,11 +15,12 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\SofortTransactionData;
+use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
+use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
@@ -38,16 +39,19 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	private EntityManager $entityManager;
 	private ModerationReasonRepository $moderationRepository;
 
+	private LegacyPaymentData $legacyPaymentData;
+
 	public function setUp(): void {
 		$factory = TestEnvironment::newInstance()->getFactory();
 		$this->entityManager = $factory->getEntityManager();
 		$this->moderationRepository = new ModerationReasonRepository( $this->entityManager );
 		parent::setUp();
+		$this->legacyPaymentData = $this->createDefaultLegacyData();
 	}
 
 	public function testValidDonationGetPersisted(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
-
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
 		$this->newRepository()->storeDonation( $donation );
 
 		$expectedDoctrineEntity = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
@@ -57,7 +61,11 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	private function newRepository(): DoctrineDonationRepository {
-		return new DoctrineDonationRepository( $this->entityManager, $this->moderationRepository );
+		return new DoctrineDonationRepository(
+			$this->entityManager,
+			$this->makeGetPaymentUseCaseStub(),
+			$this->moderationRepository
+		);
 	}
 
 	private function assertDoctrineEntityIsInDatabase( DoctrineDonation $expected ): void {
@@ -94,7 +102,11 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	public function testWhenInsertFails_domainExceptionIsThrown(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 
-		$repository = new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ), $this->moderationRepository );
+		$repository = new DoctrineDonationRepository(
+			ThrowingEntityManager::newInstance( $this ),
+			$this->makeGetPaymentUseCaseStub(),
+			$this->moderationRepository
+		);
 
 		$this->expectException( StoreDonationException::class );
 		$repository->storeDonation( $donation );
@@ -131,24 +143,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		);
 	}
 
-	public function testSofortPaymentDateUpdate_paymentEntityIdStaysTheSame(): void {
-		$donation = ValidDonation::newSofortDonation();
-		$repository = $this->newRepository();
-		$repository->storeDonation( $donation );
-
-		$paymentId = $this->getDoctrineDonationById( $donation->getId() )->getPayment()->getId();
-
-		/**
-		 * @var SofortPayment $sofortPayment
-		 */
-		$sofortPayment = $donation->getPayment()->getPaymentMethod();
-		$sofortPayment->bookPayment( new SofortTransactionData( new \DateTimeImmutable( '2017-08-03T12:44:42' ) ) );
-
-		$repository->storeDonation( $donation );
-
-		$this->assertSame( $paymentId, $this->getDoctrineDonationById( $donation->getId() )->getPayment()->getId() );
-	}
-
 	public function testWhenDonationAlreadyExists_persistingCausesUpdate(): void {
 		$repository = $this->newRepository();
 
@@ -158,7 +152,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		// It is important a new instance is created here to test "detached entity" handling
 		$newDonation = ValidDonation::newDirectDebitDonation();
 		$newDonation->assignId( $donation->getId() );
-		$newDonation->cancel();
+		$newDonation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 		$repository->storeDonation( $newDonation );
 
 		$this->assertEquals( $newDonation, $repository->getDonationById( $newDonation->getId() ) );
@@ -171,7 +165,11 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testWhenDoctrineThrowsException_domainExceptionIsThrown(): void {
-		$repository = new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ), $this->moderationRepository );
+		$repository = new DoctrineDonationRepository(
+			ThrowingEntityManager::newInstance( $this ),
+			$this->makeGetPaymentUseCaseStub(),
+			$this->moderationRepository
+		);
 
 		$this->expectException( GetDonationException::class );
 		$repository->getDonationById( self::ID_OF_DONATION_NOT_IN_DB );
@@ -212,6 +210,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testPersistingDonationWithoutCommentCausesCommentToBeCleared(): void {
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
@@ -236,10 +235,34 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->assignId( 42 );
 
-		$repository = new DoctrineDonationRepository( ThrowingEntityManager::newInstance( $this ), $this->moderationRepository );
+		$repository = new DoctrineDonationRepository(
+			ThrowingEntityManager::newInstance( $this ),
+			$this->makeGetPaymentUseCaseStub(),
+			$this->moderationRepository
+		);
 
 		$this->expectException( StoreDonationException::class );
 		$repository->storeDonation( $donation );
+	}
+
+	public function makeGetPaymentUseCaseStub(): GetPaymentUseCase {
+		$stub = $this->createStub( GetPaymentUseCase::class );
+		$stub->method( 'getLegacyPaymentDataObject' )->willReturn( $this->legacyPaymentData );
+		return $stub;
+	}
+
+	private function createDefaultLegacyData(): LegacyPaymentData {
+		// Bogus data
+		return new LegacyPaymentData(
+			999999,
+			999,
+			'BLA',
+			[
+				'paymentValue' => 'almostInfinite',
+				'paid' => 'certainly'
+			],
+			'*'
+		);
 	}
 
 	public function testGivenTwoDonationsWithTheSameModerationReason_ReasonIsNotCreatedMultipleTimesButReused(): void {
