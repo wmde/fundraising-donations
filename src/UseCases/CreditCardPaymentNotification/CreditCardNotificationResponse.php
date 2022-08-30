@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotificatio
 use Exception;
 
 /**
- * @license GPL-2.0-or-later
+ * @deprecated
  */
 class CreditCardNotificationResponse {
 

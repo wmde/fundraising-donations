@@ -5,13 +5,11 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke <gabriel.birke@wikimedia.de>
- */
 class IncompleteDoctrineDonation {
+
+	private const PAYMENT_ID = 7;
 
 	public static function newPaypalDonationWithMissingTrackingData(): Donation {
 		return ( new self() )->createPaypalDonationWithMissingTrackingData();
@@ -33,7 +31,7 @@ class IncompleteDoctrineDonation {
 		$donation = new Donation();
 		$this->setPaymentData( $donation );
 		$this->setDonorData( $donation );
-		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setPaymentType( PaymentType::Paypal->value );
 		$donation->setStatus( Donation::STATUS_NEW );
 
 		$donation->encodeAndSetData(
@@ -51,7 +49,7 @@ class IncompleteDoctrineDonation {
 		$donation = new Donation();
 		$this->setPaymentData( $donation );
 		$this->setDonorData( $donation );
-		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setPaymentType( PaymentType::Paypal->value );
 		$donation->setStatus( Donation::STATUS_NEW );
 
 		$donation->encodeAndSetData(
@@ -68,7 +66,7 @@ class IncompleteDoctrineDonation {
 		$donation = new Donation();
 		$this->setPaymentData( $donation );
 		$this->setDonorData( $donation );
-		$donation->setPaymentType( PaymentMethod::DIRECT_DEBIT );
+		$donation->setPaymentType( PaymentType::DirectDebit->value );
 		$donation->setStatus( Donation::STATUS_NEW );
 
 		$donation->encodeAndSetData(
@@ -85,7 +83,7 @@ class IncompleteDoctrineDonation {
 		$donation = new Donation();
 		$this->setPaymentData( $donation );
 		$this->setDonorData( $donation );
-		$donation->setPaymentType( PaymentMethod::CREDIT_CARD );
+		$donation->setPaymentType( PaymentType::CreditCard->value );
 		$donation->setStatus( Donation::STATUS_NEW );
 
 		$donation->encodeAndSetData(
@@ -101,6 +99,7 @@ class IncompleteDoctrineDonation {
 	private function setPaymentData( Donation $donation ): void {
 		$donation->setAmount( (string)ValidDonation::DONATION_AMOUNT );
 		$donation->setPaymentIntervalInMonths( ValidDonation::PAYMENT_INTERVAL_IN_MONTHS );
+		$donation->setPaymentId( self::PAYMENT_ID );
 	}
 
 	private function setDonorData( Donation $donation ): void {

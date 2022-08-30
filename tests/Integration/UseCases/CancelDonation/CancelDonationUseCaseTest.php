@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CancelDonation;
 
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
@@ -19,6 +20,9 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase;
+use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\CancelPaymentUseCase;
+use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\FailureResponse;
+use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\SuccessResponse;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase
@@ -58,8 +62,31 @@ class CancelDonationUseCaseTest extends TestCase {
 			$this->repository,
 			$this->mailer,
 			$this->authorizer,
-			$this->logger
+			$this->logger,
+			$this->getSucceedingCancelPaymentUseCase()
 		);
+	}
+
+	private function newCancelDonationUseCasePaymentCancellationFails(): CancelDonationUseCase {
+		return new CancelDonationUseCase(
+			$this->repository,
+			$this->mailer,
+			$this->authorizer,
+			$this->logger,
+			$this->getFailingCancelPaymentUseCase()
+		);
+	}
+
+	private function getSucceedingCancelPaymentUseCase(): CancelPaymentUseCase|MockObject {
+		$cancelPaymentUseCase = $this->createMock( CancelPaymentUseCase::class );
+		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new SuccessResponse() );
+		return $cancelPaymentUseCase;
+	}
+
+	private function getFailingCancelPaymentUseCase(): CancelPaymentUseCase|MockObject {
+		$cancelPaymentUseCase = $this->createMock( CancelPaymentUseCase::class );
+		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new FailureResponse( "failed for whatever reason" ) );
+		return $cancelPaymentUseCase;
 	}
 
 	public function testGivenIdOfUnknownDonation_cancellationIsNotSuccessful(): void {
@@ -87,16 +114,17 @@ class CancelDonationUseCaseTest extends TestCase {
 	}
 
 	public function testGivenIdOfNonCancellableDonation_cancellationIsNotSuccessful(): void {
-		$donation = ValidDonation::newCancelledPayPalDonation();
+		$donation = ValidDonation::newBookedPayPalDonation();
 		$this->repository->storeDonation( $donation );
 
 		$request = new CancelDonationRequest( $donation->getId() );
-		$response = $this->newCancelDonationUseCase()->cancelDonation( $request );
+		$response = $this->newCancelDonationUseCasePaymentCancellationFails()->cancelDonation( $request );
 
 		$this->assertFalse( $response->cancellationSucceeded() );
 	}
 
 	private function newCancelableDonation(): Donation {
+		// direct debit and bank transfer are cancelable payment types
 		return ValidDonation::newDirectDebitDonation();
 	}
 

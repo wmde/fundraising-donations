@@ -18,11 +18,9 @@ class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
 
 	private const DEFAULT_MESSAGE = 'Log message';
 	private const LOG_TIMESTAMP = '2015-10-21 21:00:04';
+	private const DUMMY_PAYMENT_ID = 42;
 
-	/**
-	 * @var EntityManager
-	 */
-	private $entityManager;
+	private EntityManager $entityManager;
 
 	public function setUp(): void {
 		$this->entityManager = TestEnvironment::newInstance()->getFactory()->getEntityManager();
@@ -47,6 +45,7 @@ class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
 
 	public function testWhenNoLogExists_logGetsAdded(): void {
 		$donation = new Donation();
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$this->entityManager->persist( $donation );
 		$this->entityManager->flush();
 		$donationId = $donation->getId();
@@ -67,6 +66,7 @@ class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
 
 	public function testWhenLogExists_logGetsAppended(): void {
 		$donation = new Donation();
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$donation->encodeAndSetData( [ 'log' => [ '2014-01-01 0:00:00' => 'New year!' ] ] );
 		$this->entityManager->persist( $donation );
 		$this->entityManager->flush();

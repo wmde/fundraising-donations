@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
@@ -43,6 +44,24 @@ class ModerationServiceTest extends TestCase {
 		$request->setDonorType( DonorType::ANONYMOUS() );
 
 		$this->assertFalse( $policyValidator->needsModeration( $request ) );
+	}
+
+	/**
+	 * @dataProvider paymentTypeProvider
+	 */
+	public function testGivenExternalPayment_needsModerationReturnsFalse( string $paymentType, bool $expectedNeedsModeration ): void {
+		$policyValidator = new ModerationService(
+			$this->newFailingAmountValidator(),
+			$this->newFailingTextPolicyValidator()
+		);
+		$request = ValidAddDonationRequest::getRequest();
+		$request->setPaymentCreationRequest( new PaymentCreationRequest(
+			100,
+			0,
+			$paymentType
+		) );
+
+		$this->assertSame( $expectedNeedsModeration, $policyValidator->needsModeration( $request ) );
 	}
 
 	/**

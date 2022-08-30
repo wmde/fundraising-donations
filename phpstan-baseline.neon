@@ -1,9 +1,5 @@
 parameters:
 	ignoreErrors:
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\PaymentContext\\\\Domain\\\\Model\\\\PaymentMethod\\:\\:getBankTransferCode\\(\\)\\.$#"
-			count: 3
-			path: tests/Integration/UseCases/AddDonation/AddDonationUseCaseTest.php
 
 		-
 			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationAuthorizer\\:\\:hasAuthorizedAsAdmin\\(\\)\\.$#"
@@ -36,18 +32,8 @@ parameters:
 			path: tests/Integration/UseCases/CancelDonation/CancelDonationUseCaseTest.php
 
 		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\PaymentContext\\\\Domain\\\\Model\\\\PaymentMethod\\:\\:getPaypalData\\(\\)\\.$#"
-			count: 2
-			path: tests/Integration/UseCases/HandlePayPalPaymentNotification/HandlePayPalPaymentCompletionNotificationUseCaseTest.php
-
-		-
 			message: "#^Parameter \\#2 \\$address of class WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donor\\\\PersonDonor constructor expects WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donor\\\\Address\\\\PostalAddress, WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Address given\\.$#"
 			count: 1
 			path: tests/Unit/DataAccess/DonorFieldMapperTest.php
-
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\PaymentContext\\\\Domain\\\\Model\\\\PaymentMethod\\:\\:getPayPalData\\(\\)\\.$#"
-			count: 1
-			path: tests/Unit/DataAccess/LegacyConverters/DomainToLegacyConverterTest.php
 
 

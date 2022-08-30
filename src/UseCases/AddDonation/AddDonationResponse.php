@@ -7,37 +7,27 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\FunValidators\ConstraintViolation;
 
-/**
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- */
 class AddDonationResponse {
 
 	/**
 	 * @var ConstraintViolation[]
 	 */
-	private $validationErrors = [];
+	private array $validationErrors = [];
 
-	/**
-	 * @var Donation|null
-	 */
-	private $donation = null;
+	private ?Donation $donation = null;
 
-	/**
-	 * @var string|null
-	 */
-	private $updateToken = null;
+	private ?string $updateToken = null;
 
-	/**
-	 * @var string|null
-	 */
-	private $accessToken = null;
+	private ?string $accessToken = null;
 
-	public static function newSuccessResponse( Donation $donation, string $updateToken, string $accessToken ): self {
+	private ?string $paymentProviderRedirectUrl = null;
+
+	public static function newSuccessResponse( Donation $donation, string $updateToken, string $accessToken, ?string $paymentProviderRedirectUrl ): self {
 		$response = new self();
 		$response->donation = $donation;
 		$response->updateToken = $updateToken;
 		$response->accessToken = $accessToken;
+		$response->paymentProviderRedirectUrl = $paymentProviderRedirectUrl;
 		return $response;
 	}
 
@@ -77,6 +67,10 @@ class AddDonationResponse {
 
 	public function getAccessToken(): ?string {
 		return $this->accessToken;
+	}
+
+	public function getPaymentProviderRedirectUrl(): ?string {
+		return $this->paymentProviderRedirectUrl;
 	}
 
 }

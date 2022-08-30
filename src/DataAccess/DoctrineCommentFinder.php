@@ -12,12 +12,12 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
 
 /**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
+ * @todo Use database tables and arrays instead of ORM to avoid deprecated getAmount
+ *       See https://phabricator.wikimedia.org/T311061
  */
 class DoctrineCommentFinder implements CommentFinder {
 
-	private $entityManager;
+	private EntityManager $entityManager;
 
 	public function __construct( EntityManager $entityManager ) {
 		$this->entityManager = $entityManager;

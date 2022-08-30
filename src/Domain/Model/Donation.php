@@ -4,30 +4,14 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Domain\Model;
 
-use DomainException;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BookablePayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentTransactionData;
 
 /**
  * @license GPL-2.0-or-later
  */
 class Donation {
-
-	// direct debit
-	public const STATUS_NEW = 'N';
-
-	// bank transfer
-	public const STATUS_PROMISE = 'Z';
-
-	// external payment, not notified by payment provider
-	public const STATUS_EXTERNAL_INCOMPLETE = 'X';
-
-	// external payment, notified by payment provider
-	public const STATUS_EXTERNAL_BOOKED = 'B';
 
 	/**
 	 * @var array ModerationReason[]
@@ -39,9 +23,9 @@ class Donation {
 	public const DOES_NOT_OPT_INTO_NEWSLETTER = false;
 
 	private ?int $id;
-	private string $status;
 	private Donor $donor;
-	private DonationPayment $payment;
+
+	private int $paymentId;
 	private bool $optsIntoNewsletter;
 	private ?DonationComment $comment;
 	private bool $exported;
@@ -65,21 +49,19 @@ class Donation {
 
 	/**
 	 * @param int|null $id
-	 * @param string $status Must be one of the Donation::STATUS_ constants. Will be deprecated, see https://phabricator.wikimedia.org/T276817
 	 * @param Donor $donor
-	 * @param DonationPayment $payment
+	 * @param int $paymentId
 	 * @param bool $optsIntoNewsletter
 	 * @param DonationTrackingInfo $trackingInfo
 	 * @param DonationComment|null $comment
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( ?int $id, string $status, Donor $donor, DonationPayment $payment,
-		bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
+	public function __construct( ?int $id, Donor $donor, int $paymentId,
+								bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 		$this->id = $id;
-		$this->setStatus( $status );
 		$this->donor = $donor;
-		$this->payment = $payment;
+		$this->paymentId = $paymentId;
 		$this->optsIntoNewsletter = $optsIntoNewsletter;
 		$this->trackingInfo = $trackingInfo;
 		$this->comment = $comment;
@@ -87,30 +69,6 @@ class Donation {
 		$this->optsIntoDonationReceipt = null;
 		$this->cancelled = false;
 		$this->moderationReasons = [];
-	}
-
-	/**
-	 * @param string $status
-	 * @deprecated See https://phabricator.wikimedia.org/T276817
-	 */
-	private function setStatus( string $status ): void {
-		if ( !$this->isValidStatus( $status ) ) {
-			throw new \InvalidArgumentException( 'Invalid donation status' );
-		}
-
-		$this->status = $status;
-	}
-
-	private function isValidStatus( string $status ): bool {
-		return in_array(
-			$status,
-			[
-				self::STATUS_NEW,
-				self::STATUS_PROMISE,
-				self::STATUS_EXTERNAL_INCOMPLETE,
-				self::STATUS_EXTERNAL_BOOKED,
-			]
-		);
 	}
 
 	public function getId(): ?int {
@@ -131,25 +89,11 @@ class Donation {
 	}
 
 	/**
-	 * Usage of more specific methods such as isBooked or statusAllowsForCancellation is recommended.
-	 *
-	 * @return string One of the Donation::STATUS_ constants
-	 * @deprecated See https://phabricator.wikimedia.org/T276817
+	 * @deprecated Use a payment instead
+	 * @return Euro
 	 */
-	public function getStatus(): string {
-		return $this->status;
-	}
-
 	public function getAmount(): Euro {
-		return $this->payment->getAmount();
-	}
-
-	public function getPaymentIntervalInMonths(): int {
-		return $this->payment->getIntervalInMonths();
-	}
-
-	public function getPaymentMethodId(): string {
-		return $this->getPaymentMethod()->getId();
+		return Euro::newFromCents( 0 );
 	}
 
 	public function getDonor(): Donor {
@@ -172,12 +116,8 @@ class Donation {
 		$this->comment = $comment;
 	}
 
-	public function getPayment(): DonationPayment {
-		return $this->payment;
-	}
-
-	public function getPaymentMethod(): PaymentMethod {
-		return $this->payment->getPaymentMethod();
+	public function getPaymentId(): int {
+		return $this->paymentId;
 	}
 
 	public function getOptsIntoNewsletter(): bool {
@@ -185,9 +125,6 @@ class Donation {
 	}
 
 	public function cancel(): void {
-		if ( !$this->isCancellable() ) {
-			throw new RuntimeException( 'Can only cancel un-exported donations with nom-external payment providers' );
-		}
 		$this->cancelled = true;
 	}
 
@@ -195,26 +132,10 @@ class Donation {
 		$this->cancelled = false;
 	}
 
-	/**
-	 * @param PaymentTransactionData $paymentTransactionData
-	 *
-	 * @throws DomainException
-	 */
-	public function confirmBooked( PaymentTransactionData $paymentTransactionData ): void {
-		$paymentMethod = $this->getPaymentMethod();
-		if ( !( $paymentMethod instanceof BookablePayment ) ) {
-			throw new DomainException( 'Only bookable payments can be confirmed as booked' );
-		}
-
-		if ( $this->isBooked() ) {
-			throw new DomainException( 'Only un-booked donations can be confirmed as booked' );
-		}
-
+	public function confirmBooked(): void {
 		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
 			$this->makeCommentPrivate();
 		}
-
-		$paymentMethod->bookPayment( $paymentTransactionData );
 	}
 
 	private function makeCommentPrivate(): void {
@@ -254,26 +175,8 @@ class Donation {
 		return $this->trackingInfo;
 	}
 
-	private function isCancellable(): bool {
-		if ( $this->getPaymentMethod()->hasExternalProvider() ) {
-			return false;
-		}
-		if ( $this->isExported() ) {
-			return false;
-		}
-		return true;
-	}
-
-	public function hasExternalPayment(): bool {
-		return $this->getPaymentMethod()->hasExternalProvider();
-	}
-
 	public function isMarkedForModeration(): bool {
 		return count( $this->moderationReasons ) > 0;
-	}
-
-	public function isBooked(): bool {
-		return $this->getPaymentMethod()->paymentCompleted();
 	}
 
 	public function isExported(): bool {
@@ -296,8 +199,8 @@ class Donation {
 		$this->cancelled = true;
 	}
 
-	public function setOptsIntoDonationReceipt( ?bool $optOut ): void {
-		$this->optsIntoDonationReceipt = $optOut;
+	public function setOptsIntoDonationReceipt( ?bool $optsIn ): void {
+		$this->optsIntoDonationReceipt = $optsIn;
 	}
 
 	public function getOptsIntoDonationReceipt(): ?bool {
@@ -308,4 +211,17 @@ class Donation {
 		return $this->donor instanceof AnonymousDonor;
 	}
 
+	public function createFollowupDonationForPayment( int $paymentId ): self {
+		return new Donation(
+			null,
+			$this->getDonor(),
+			$paymentId,
+			$this->optsIntoNewsletter,
+			$this->getTrackingInfo(),
+			// We don't want to clone comments for followup donations because they would show up again in the feed.
+			// When we refactor the donation model,
+			// we can point the comment to the comment of the original donation (db relationship)
+			null
+		);
+	}
 }

@@ -4,14 +4,13 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
-use DomainException;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentTransactionData;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donation
@@ -23,37 +22,12 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentTransactionData;
  */
 class DonationTest extends TestCase {
 
-	/**
-	 * @dataProvider cancellableDonationProvider
-	 */
-	public function testGivenCancellableDonation_cancellationSucceeds( Donation $donation ): void {
+	public function testCancelingADonationSucceeds(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+
 		$donation->cancel();
 
 		$this->assertTrue( $donation->isCancelled() );
-	}
-
-	public function cancellableDonationProvider(): iterable {
-		yield [ ValidDonation::newDirectDebitDonation() ];
-		yield [ ValidDonation::newBankTransferDonation() ];
-	}
-
-	/**
-	 * @dataProvider nonCancellableDonationProvider
-	 */
-	public function testGivenNonCancellableDonation_cancellationFails( Donation $donation ): void {
-		$this->expectException( RuntimeException::class );
-		$donation->cancel();
-	}
-
-	public function nonCancellableDonationProvider(): array {
-		$exportedDonation = ValidDonation::newDirectDebitDonation();
-		$exportedDonation->markAsExported();
-		return [
-			[ ValidDonation::newSofortDonation() ],
-			[ ValidDonation::newBookedPayPalDonation() ],
-			[ $exportedDonation ],
-			[ ValidDonation::newCancelledPayPalDonation() ]
-		];
 	}
 
 	public function testModerationStatusCanBeQueried(): void {
@@ -90,57 +64,16 @@ class DonationTest extends TestCase {
 		$donation->assignId( 43 );
 	}
 
-	public function testGivenNonBookablePaymentType_confirmBookedThrowsException(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-
-		$this->expectException( DomainException::class );
-		$this->expectExceptionMessageMatches( '/Only bookable payments/' );
-		$donation->confirmBooked( ValidDonation::newCreditCardData() );
-	}
-
 	public function testNewDonationsAreNotExported() {
 		$donation = new Donation(
 			null,
-			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			ValidDonation::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null
 		);
 		$this->assertFalse( $donation->isExported() );
-	}
-
-	/**
-	 * @dataProvider statusesThatDoNotAllowForBookingProvider
-	 */
-	public function testGivenStatusThatDoesNotAllowForBooking_confirmBookedThrowsException( Donation $donation, PaymentTransactionData $transactionData ): void {
-		$this->expectException( DomainException::class );
-		$donation->confirmBooked( $transactionData );
-	}
-
-	public function statusesThatDoNotAllowForBookingProvider(): array {
-		return [
-			[ ValidDonation::newBookedPayPalDonation(), ValidDonation::newPayPalData() ],
-			[ ValidDonation::newBookedCreditCardDonation(), ValidDonation::newCreditCardData() ],
-		];
-	}
-
-	/**
-	 * @dataProvider statusesThatAllowsForBookingProvider
-	 */
-	public function testGivenStatusThatAllowsForBooking_confirmBookedSetsBookedStatus( Donation $donation, PaymentTransactionData $transactionData ): void {
-		$donation->confirmBooked( $transactionData );
-		$this->assertTrue( $donation->isBooked() );
-	}
-
-	public function statusesThatAllowsForBookingProvider(): array {
-		return [
-			[ ValidDonation::newIncompletePayPalDonation(), ValidDonation::newPayPalData() ],
-			[ ValidDonation::newIncompleteCreditCardDonation(), ValidDonation::newCreditCardData() ],
-			[ $this->newInModerationPayPalDonation(), ValidDonation::newPayPalData() ],
-			[ ValidDonation::newCancelledPayPalDonation(), ValidDonation::newPayPalData() ],
-		];
 	}
 
 	private function newInModerationPayPalDonation(): Donation {
@@ -152,9 +85,8 @@ class DonationTest extends TestCase {
 	public function testAddCommentThrowsExceptionWhenCommentAlreadySet(): void {
 		$donation = new Donation(
 			null,
-			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			ValidDonation::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			ValidDonation::newPublicComment()
@@ -167,9 +99,8 @@ class DonationTest extends TestCase {
 	public function testAddCommentSetsWhenCommentNotSetYet(): void {
 		$donation = new Donation(
 			null,
-			Donation::STATUS_NEW,
 			ValidDonation::newDonor(),
-			ValidDonation::newDirectDebitPayment(),
+			ValidPayments::newDirectDebitPayment()->getId(),
 			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null
@@ -187,7 +118,7 @@ class DonationTest extends TestCase {
 		$donation = $this->newInModerationPayPalDonation();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
-		$donation->confirmBooked( ValidDonation::newPayPalData() );
+		$donation->confirmBooked();
 
 		$this->assertFalse( $donation->getComment()->isPublic() );
 	}
@@ -196,7 +127,7 @@ class DonationTest extends TestCase {
 		$donation = ValidDonation::newCancelledPayPalDonation();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
-		$donation->confirmBooked( ValidDonation::newPayPalData() );
+		$donation->confirmBooked();
 
 		$this->assertFalse( $donation->getComment()->isPublic() );
 	}
@@ -204,27 +135,24 @@ class DonationTest extends TestCase {
 	public function testWhenCompletingBookingOfCancelledExternalPayment_lackOfCommentCausesNoError(): void {
 		$donation = ValidDonation::newCancelledPayPalDonation();
 
-		$donation->confirmBooked( ValidDonation::newPayPalData() );
+		$donation->confirmBooked();
 
 		$this->assertFalse( $donation->hasComment() );
 	}
 
-	public function testWhenConstructingWithInvalidStatus_exceptionIsThrown(): void {
-		$this->expectException( \InvalidArgumentException::class );
-
-		new Donation(
-			null,
-			'Such invalid status',
-			ValidDonation::newDonor(),
-			ValidDonation::newDirectDebitPayment(),
-			Donation::OPTS_INTO_NEWSLETTER,
-			ValidDonation::newTrackingInfo(),
-			null
-		);
-	}
-
 	private function makeGenericModerationReason(): ModerationReason {
 		return new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN );
+	}
+
+	public function testCreateFollowupDonationForPayment_duplicatesRelevantFields(): void {
+		$donation = ValidDonation::newBookedPayPalDonation();
+		$followupUpDonation = $donation->createFollowupDonationForPayment( paymentId: 99 );
+
+		$this->assertSame( 99, $followupUpDonation->getPaymentId() );
+		$this->assertEquals( $followupUpDonation->getDonor(), $donation->getDonor() );
+		$this->assertEquals( $followupUpDonation->getTrackingInfo(), $donation->getTrackingInfo() );
+		$this->assertEquals( $followupUpDonation->getOptsIntoNewsletter(), $donation->getOptsIntoNewsletter() );
+		$this->assertFalse( $followupUpDonation->isExported() );
 	}
 
 	public function testMarkForModerationNeedsAtLeastOneModerationReason(): void {

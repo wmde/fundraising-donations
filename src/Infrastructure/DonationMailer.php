@@ -5,12 +5,12 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Infrastructure;
 
 use WMDE\EmailAddress\EmailAddress;
+use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
-use WMDE\Fundraising\PaymentContext\Domain\Model\BankTransferPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
+use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
 /**
  * @license GPL-2.0-or-later
@@ -20,6 +20,7 @@ class DonationMailer implements DonationNotifier {
 	public function __construct(
 		private readonly TemplateMailerInterface $confirmationMailer,
 		private readonly TemplateMailerInterface $adminMailer,
+		private readonly GetPaymentUseCase $getPaymentService,
 		private readonly string $adminEmailAddress
 	) {
 	}
@@ -35,29 +36,21 @@ class DonationMailer implements DonationNotifier {
 	}
 
 	private function getTemplateArguments( Donation $donation ): array {
+		$paymentInfo = $this->getPaymentService->getPaymentDataArray( $donation->getPaymentId() );
 		return [
 			'recipient' => $donation->getDonor()->getName()->toArray(),
 			'donation' => [
 				'id' => $donation->getId(),
-				'amount' => $donation->getAmount()->getEuroFloat(),
-				'interval' => $donation->getPaymentIntervalInMonths(),
+				'amount' => Euro::newFromCents( (int)$paymentInfo['amount'] )->getEuroFloat(),
+				'amountInCents' => $paymentInfo['amount'],
+				'interval' => $paymentInfo['interval'],
+				'paymentType' => $paymentInfo['paymentType'],
 				'needsModeration' => $donation->isMarkedForModeration(),
 				'moderationFlags' => $this->getModerationFlags( ...$donation->getModerationReasons() ),
-				'paymentType' => $donation->getPaymentMethodId(),
-				'bankTransferCode' => $this->getBankTransferCode( $donation->getPaymentMethod() ),
+				'bankTransferCode' => $paymentInfo['paymentReferenceCode'] ?? '',
 				'receiptOptIn' => $donation->getOptsIntoDonationReceipt(),
 			]
 		];
-	}
-
-	private function getBankTransferCode( PaymentMethod $paymentMethod ): string {
-		// TODO convert this `if` statement into an interface where every payment method except BankTransfer returns empty string
-		// See https://phabricator.wikimedia.org/T192323
-		if ( $paymentMethod instanceof BankTransferPayment ) {
-			return $paymentMethod->getBankTransferCode();
-		}
-
-		return '';
 	}
 
 	/**
@@ -92,10 +85,11 @@ class DonationMailer implements DonationNotifier {
 	 * @return array{id:int,moderationFlags:array<string,boolean>,amount:float}
 	 */
 	private function getAdminTemplateArguments( Donation $donation ): array {
+		$paymentInfo = $this->getPaymentService->getPaymentDataArray( $donation->getPaymentId() );
 		return [
 			'id' => $donation->getId(),
 			'moderationFlags' => $this->getModerationFlags( ...$donation->getModerationReasons() ),
-			'amount' => $donation->getAmount()->getEuroFloat()
+			'amount' => Euro::newFromCents( (int)$paymentInfo['amount'] )->getEuroFloat()
 		];
 	}
 

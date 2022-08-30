@@ -5,14 +5,13 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationPayments\SofortPayment;
-use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentMethod;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class ValidDoctrineDonation {
+	private const PAYMENT_PAYPAL = 'PPL';
+	private const PAYMENT_BANK_TRANSFER = 'UEB';
+	private const PAYMENT_SOFORT = 'SUB';
+	private const PAYMENT_DIRECT_DEBIT = 'BEZ';
+	private const PAYMENT_CREDIT_CARD = 'MCP';
 
 	/**
 	 * Returns a Doctrine Donation entity equivalent to the domain entity returned
@@ -33,7 +32,8 @@ class ValidDoctrineDonation {
 	public static function newPaypalDoctrineDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setPaymentType( self::PAYMENT_PAYPAL );
+		$donation->setPaymentId( ValidPayments::ID_PAYPAL );
 		$donation->setStatus( Donation::STATUS_EXTERNAL_BOOKED );
 		$donation->encodeAndSetData(
 			array_merge(
@@ -66,8 +66,9 @@ class ValidDoctrineDonation {
 	public static function newAnonymousDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setPaymentType( self::PAYMENT_PAYPAL );
 		$donation->setStatus( Donation::STATUS_EXTERNAL_BOOKED );
+		$donation->setPaymentId( ValidPayments::ID_PAYPAL );
 		$donation->encodeAndSetData(
 			array_merge(
 				[ 'adresstyp' => 'anonym' ],
@@ -81,7 +82,8 @@ class ValidDoctrineDonation {
 	public static function newEmailDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setPaymentType( self::PAYMENT_PAYPAL );
+		$donation->setPaymentId( ValidPayments::ID_PAYPAL );
 		$donation->setStatus( Donation::STATUS_EXTERNAL_BOOKED );
 		$donation->encodeAndSetData(
 			array_merge(
@@ -100,27 +102,17 @@ class ValidDoctrineDonation {
 	public static function newBankTransferDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::BANK_TRANSFER );
-		$donation->setBankTransferCode( ValidDonation::PAYMENT_BANK_TRANSFER_CODE );
-		return $donation;
-	}
-
-	public static function newSofortDonation(): Donation {
-		$self = new self();
-		$payment = new SofortPayment();
-		$payment->setId( 1 );
-		$payment->setConfirmedAt( new \DateTime( ValidDonation::SOFORT_DONATION_CONFIRMED_AT ) );
-		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::SOFORT );
-		$donation->setPayment( $payment );
-		$donation->setBankTransferCode( ValidDonation::PAYMENT_BANK_TRANSFER_CODE );
+		$donation->setPaymentType( self::PAYMENT_BANK_TRANSFER );
+		$donation->setBankTransferCode( ValidPayments::PAYMENT_BANK_TRANSFER_CODE );
+		$donation->setPaymentId( ValidPayments::ID_BANK_TRANSFER );
 		return $donation;
 	}
 
 	public static function newAnyonymizedDonation() {
 		$self = new self();
 		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setPaymentType( self::PAYMENT_PAYPAL );
+		$donation->setPaymentId( ValidPayments::ID_PAYPAL );
 		$donation->setStatus( Donation::STATUS_EXTERNAL_BOOKED );
 		$donation->encodeAndSetData(
 			array_merge(
@@ -143,7 +135,8 @@ class ValidDoctrineDonation {
 
 		$donation->setAmount( (string)ValidDonation::DONATION_AMOUNT );
 		$donation->setPaymentIntervalInMonths( ValidDonation::PAYMENT_INTERVAL_IN_MONTHS );
-		$donation->setPaymentType( PaymentMethod::DIRECT_DEBIT );
+		$donation->setPaymentType( self::PAYMENT_DIRECT_DEBIT );
+		$donation->setPaymentId( ValidPayments::ID_DIRECT_DEBIT );
 
 		$donation->setDonorCity( ValidDonation::DONOR_CITY );
 		$donation->setDonorEmail( ValidDonation::DONOR_EMAIL_ADDRESS );
@@ -175,11 +168,11 @@ class ValidDoctrineDonation {
 
 	private function getBankDataArray(): array {
 		return [
-			'iban' => ValidDonation::PAYMENT_IBAN,
-			'bic' => ValidDonation::PAYMENT_BIC,
-			'konto' => ValidDonation::PAYMENT_BANK_ACCOUNT,
-			'blz' => ValidDonation::PAYMENT_BANK_CODE,
-			'bankname' => ValidDonation::PAYMENT_BANK_NAME,
+			'iban' => ValidPayments::PAYMENT_IBAN,
+			'bic' => ValidPayments::PAYMENT_BIC,
+			'konto' => ValidPayments::PAYMENT_BANK_ACCOUNT,
+			'blz' => ValidPayments::PAYMENT_BANK_CODE,
+			'bankname' => ValidPayments::PAYMENT_BANK_NAME,
 		];
 	}
 
@@ -230,22 +223,10 @@ class ValidDoctrineDonation {
 		];
 	}
 
-	public static function newDonationWithCash(): Donation {
-		$self = new self();
-		$donation = $self->createDonation();
-		$donation->setPaymentType( 'CSH' );
-		$donation->encodeAndSetData(
-			array_merge(
-				[ 'adresstyp' => 'anonym' ],
-			)
-		);
-		return $donation;
-	}
-
 	public static function newIncompletePaypalDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::PAYPAL );
+		$donation->setPaymentType( self::PAYMENT_PAYPAL );
 		$donation->setStatus( Donation::STATUS_EXTERNAL_INCOMPLETE );
 		return $donation;
 	}
@@ -253,7 +234,7 @@ class ValidDoctrineDonation {
 	public static function newIncompleteCreditCardDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::CREDIT_CARD );
+		$donation->setPaymentType( self::PAYMENT_CREDIT_CARD );
 		$donation->setStatus( Donation::STATUS_EXTERNAL_INCOMPLETE );
 		return $donation;
 	}
@@ -261,7 +242,7 @@ class ValidDoctrineDonation {
 	public static function newCreditCardDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::CREDIT_CARD );
+		$donation->setPaymentType( self::PAYMENT_CREDIT_CARD );
 		$donation->setStatus( Donation::STATUS_EXTERNAL_INCOMPLETE );
 		$donation->encodeAndSetData( array_merge( $donation->getDecodedData(), [
 			'ext_payment_id' => 'spenden.wikimedia.de-IDvooNg2sh#1',
@@ -282,7 +263,7 @@ class ValidDoctrineDonation {
 	public static function newIncompleteSofortDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
-		$donation->setPaymentType( PaymentMethod::SOFORT );
+		$donation->setPaymentType( self::PAYMENT_SOFORT );
 		$donation->setStatus( Donation::STATUS_EXTERNAL_INCOMPLETE );
 		return $donation;
 	}

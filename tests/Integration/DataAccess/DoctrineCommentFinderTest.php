@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
+use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
@@ -15,16 +16,11 @@ use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
  * @covers WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder
- *
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class DoctrineCommentFinderTest extends \PHPUnit\Framework\TestCase {
+class DoctrineCommentFinderTest extends TestCase {
 
-	/**
-	 * @var EntityManager
-	 */
-	private $entityManager;
+	private const DUMMY_PAYMENT_ID = 42;
+	private EntityManager $entityManager;
 
 	public function setUp(): void {
 		$this->entityManager = TestEnvironment::newInstance()->getFactory()->getEntityManager();
@@ -117,6 +113,7 @@ class DoctrineCommentFinderTest extends \PHPUnit\Framework\TestCase {
 
 	private function persistFirstDonationWithComment(): void {
 		$firstDonation = new Donation();
+		$firstDonation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$firstDonation->setPublicRecord( 'First name' );
 		$firstDonation->setComment( 'First comment' );
 		$firstDonation->setAmount( '100' );
@@ -127,6 +124,7 @@ class DoctrineCommentFinderTest extends \PHPUnit\Framework\TestCase {
 
 	private function persistSecondDonationWithComment(): void {
 		$secondDonation = new Donation();
+		$secondDonation->setPaymentId( self::DUMMY_PAYMENT_ID + 1 );
 		$secondDonation->setPublicRecord( 'Second name' );
 		$secondDonation->setComment( 'Second comment' );
 		$secondDonation->setAmount( '200' );
@@ -137,6 +135,7 @@ class DoctrineCommentFinderTest extends \PHPUnit\Framework\TestCase {
 
 	private function persistThirdDonationWithComment(): void {
 		$thirdDonation = new Donation();
+		$thirdDonation->setPaymentId( self::DUMMY_PAYMENT_ID + 2 );
 		$thirdDonation->setPublicRecord( 'Third name' );
 		$thirdDonation->setComment( 'Third comment' );
 		$thirdDonation->setAmount( '300' );
@@ -147,6 +146,7 @@ class DoctrineCommentFinderTest extends \PHPUnit\Framework\TestCase {
 
 	private function persistDonationWithPrivateComment(): void {
 		$privateDonation = new Donation();
+		$privateDonation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$privateDonation->setPublicRecord( 'Private name' );
 		$privateDonation->setComment( 'Private comment' );
 		$privateDonation->setAmount( '1337' );
@@ -157,6 +157,7 @@ class DoctrineCommentFinderTest extends \PHPUnit\Framework\TestCase {
 
 	private function persistDeletedDonationWithComment(): void {
 		$deletedDonation = new Donation();
+		$deletedDonation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$deletedDonation->setPublicRecord( 'Deleted name' );
 		$deletedDonation->setComment( 'Deleted comment' );
 		$deletedDonation->setAmount( '31337' );
@@ -168,6 +169,7 @@ class DoctrineCommentFinderTest extends \PHPUnit\Framework\TestCase {
 
 	private function persistDeletedDonationWithoutDeletedTimestamp(): void {
 		$deletedDonation = new Donation();
+		$deletedDonation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$deletedDonation->setPublicRecord( 'Deleted name' );
 		$deletedDonation->setComment( 'Deleted comment' );
 		$deletedDonation->setAmount( '31337' );

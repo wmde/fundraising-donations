@@ -7,8 +7,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotificatio
 use WMDE\Euro\Euro;
 
 /**
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
+ * @deprecated Use {@see NotificationRequest}
  */
 class CreditCardPaymentNotificationRequest {
 
