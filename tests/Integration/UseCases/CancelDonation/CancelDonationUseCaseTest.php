@@ -33,19 +33,10 @@ use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\SuccessResponse;
  */
 class CancelDonationUseCaseTest extends TestCase {
 
-	/**
-	 * @var DonationRepository|FakeDonationRepository|DonationRepositorySpy
-	 */
 	private DonationRepository $repository;
 
-	/**
-	 * @var TemplateMailerInterface|TemplateBasedMailerSpy
-	 */
-	private $mailer;
+	private TemplateMailerInterface $mailer;
 
-	/**
-	 * @var DonationAuthorizer|SucceedingDonationAuthorizerSpy
-	 */
 	private DonationAuthorizer $authorizer;
 
 	private DonationEventLoggerSpy $logger;
@@ -79,7 +70,7 @@ class CancelDonationUseCaseTest extends TestCase {
 
 	private function getSucceedingCancelPaymentUseCase(): CancelPaymentUseCase|MockObject {
 		$cancelPaymentUseCase = $this->createMock( CancelPaymentUseCase::class );
-		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new SuccessResponse() );
+		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new SuccessResponse( true ) );
 		return $cancelPaymentUseCase;
 	}
 
