@@ -103,7 +103,7 @@ class AddDonationUseCase {
 			null,
 			$this->getPersonalInfoFromRequest( $donationRequest ),
 			$paymentId,
-			$donationRequest->getOptIn() === '1',
+			$donationRequest->getOptsIntoNewsletter(),
 			$this->newTrackingInfoFromRequest( $donationRequest )
 		);
 		$donation->setOptsIntoDonationReceipt( $donationRequest->getOptsIntoDonationReceipt() );
