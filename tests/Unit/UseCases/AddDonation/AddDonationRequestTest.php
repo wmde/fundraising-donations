@@ -96,10 +96,10 @@ class AddDonationRequestTest extends TestCase {
 
 	public function testOptIn(): void {
 		$request = new AddDonationRequest();
-		$request->setOptIn( 'newsletter_optin' );
+		$request->setOptsIntoNewsletter( true );
 		$request->setOptsIntoDonationReceipt( true );
 
-		$this->assertSame( 'newsletter_optin', $request->getOptIn() );
+		$this->assertTrue( $request->getOptsIntoNewsletter() );
 		$this->assertTrue( $request->getOptsIntoDonationReceipt() );
 	}
 
@@ -130,7 +130,7 @@ class AddDonationRequestTest extends TestCase {
 		$this->assertSame( 'ZZ', $request->getDonorCountryCode() );
 		$this->assertSame( 'bw@waynecorp.biz', $request->getDonorEmailAddress() );
 		$this->assertSame( 'test_campaign/test_keyword', $request->getTracking() );
-		$this->assertSame( '1', $request->getOptIn() );
+		$this->assertTrue( $request->getOptsIntoNewsletter() );
 	}
 
 }

@@ -25,12 +25,7 @@ class AddDonationRequest {
 	private string $donorCountryCode = '';
 	private string $donorEmailAddress = '';
 
-	/**
-	 * Newsletter subscription
-	 *
-	 * @var string
-	 */
-	private string $optIn = '';
+	private bool $optsInToNewsletter = false;
 
 	private PaymentRequestBuilder $paymentCreationRequestBuilder;
 
@@ -69,12 +64,13 @@ class AddDonationRequest {
 		$this->paymentCreationRequestBuilder = new PaymentRequestBuilder();
 	}
 
-	public function getOptIn(): string {
-		return $this->optIn;
-	}
-
+	/**
+	 * @param string $optIn
+	 * @return void
+	 * @deprecated Use {@see setOptsIntoNewsletter}. Remove this when Controllers in Fundraising App no longer use it
+	 */
 	public function setOptIn( string $optIn ): void {
-		$this->optIn = trim( $optIn );
+		$this->setOptsIntoNewsletter( trim( $optIn ) === '1' );
 	}
 
 	/**
@@ -275,6 +271,14 @@ class AddDonationRequest {
 
 	public function getOptsIntoDonationReceipt(): bool {
 		return $this->optsIntoDonationReceipt;
+	}
+
+	public function getOptsIntoNewsletter(): bool {
+		return $this->optsInToNewsletter;
+	}
+
+	public function setOptsIntoNewsletter( bool $optIn ): void {
+		$this->optsInToNewsletter = $optIn;
 	}
 
 	public function getPaymentCreationRequest(): PaymentCreationRequest {
