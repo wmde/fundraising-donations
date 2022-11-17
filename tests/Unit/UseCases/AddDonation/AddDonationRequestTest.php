@@ -133,4 +133,30 @@ class AddDonationRequestTest extends TestCase {
 		$this->assertTrue( $request->getOptsIntoNewsletter() );
 	}
 
+	public function testDonorIsAnonymous(): void {
+		$anonRequest = new AddDonationRequest();
+		$anonRequest->setDonorType( DonorType::ANONYMOUS() );
+		$personRequest = new AddDonationRequest();
+		$personRequest->setDonorType( DonorType::PERSON() );
+		$emailOnlyRequest = new AddDonationRequest();
+		$emailOnlyRequest->setDonorType( DonorType::EMAIL() );
+
+		$this->assertTrue( $anonRequest->donorIsAnonymous() );
+		$this->assertFalse( $personRequest->donorIsAnonymous() );
+		$this->assertFalse( $emailOnlyRequest->donorIsAnonymous() );
+	}
+
+	public function testDonorIsEmailOnly(): void {
+		$anonRequest = new AddDonationRequest();
+		$anonRequest->setDonorType( DonorType::ANONYMOUS() );
+		$personRequest = new AddDonationRequest();
+		$personRequest->setDonorType( DonorType::PERSON() );
+		$emailOnlyRequest = new AddDonationRequest();
+		$emailOnlyRequest->setDonorType( DonorType::EMAIL() );
+
+		$this->assertFalse( $anonRequest->donorIsEmailOnly() );
+		$this->assertFalse( $personRequest->donorIsEmailOnly() );
+		$this->asserttrue( $emailOnlyRequest->donorIsEmailOnly() );
+	}
+
 }

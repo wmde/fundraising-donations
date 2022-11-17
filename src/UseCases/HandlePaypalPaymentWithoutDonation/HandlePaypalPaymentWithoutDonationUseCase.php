@@ -41,11 +41,8 @@ class HandlePaypalPaymentWithoutDonationUseCase {
 			null,
 			new AnonymousDonor(),
 			$result->paymentId,
-			Donation::DOES_NOT_OPT_INTO_NEWSLETTER,
 			DonationTrackingInfo::newBlankTrackingInfo(),
 		);
-
-		$donation->setOptsIntoDonationReceipt( false );
 
 		$this->donationRepository->storeDonation( $donation );
 

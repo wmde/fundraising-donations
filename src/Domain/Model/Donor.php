@@ -30,4 +30,16 @@ interface Donor {
 	 * @return string
 	 */
 	public function getDonorType(): string;
+
+	public function subscribeToNewsletter(): void;
+
+	public function unsubscribeFromNewsletter(): void;
+
+	public function wantsNewsletter(): bool;
+
+	public function requireReceipt(): void;
+
+	public function declineReceipt(): void;
+
+	public function wantsReceipt(): bool;
 }

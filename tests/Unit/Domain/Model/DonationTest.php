@@ -69,7 +69,6 @@ class DonationTest extends TestCase {
 			null,
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
-			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null
 		);
@@ -87,7 +86,6 @@ class DonationTest extends TestCase {
 			null,
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
-			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			ValidDonation::newPublicComment()
 		);
@@ -101,7 +99,6 @@ class DonationTest extends TestCase {
 			null,
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
-			Donation::OPTS_INTO_NEWSLETTER,
 			ValidDonation::newTrackingInfo(),
 			null
 		);
@@ -151,7 +148,6 @@ class DonationTest extends TestCase {
 		$this->assertSame( 99, $followupUpDonation->getPaymentId() );
 		$this->assertEquals( $followupUpDonation->getDonor(), $donation->getDonor() );
 		$this->assertEquals( $followupUpDonation->getTrackingInfo(), $donation->getTrackingInfo() );
-		$this->assertEquals( $followupUpDonation->getOptsIntoNewsletter(), $donation->getOptsIntoNewsletter() );
 		$this->assertFalse( $followupUpDonation->isExported() );
 	}
 

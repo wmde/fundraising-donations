@@ -265,6 +265,10 @@ class AddDonationRequest {
 		return $this->getDonorType()->is( DonorType::ANONYMOUS() );
 	}
 
+	public function donorIsEmailOnly(): bool {
+		return $this->getDonorType()->is( DonorType::EMAIL() );
+	}
+
 	public function setOptsIntoDonationReceipt( bool $optIn ): void {
 		$this->optsIntoDonationReceipt = $optIn;
 	}

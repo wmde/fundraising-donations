@@ -303,7 +303,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertTrue( $repository->getDonationById( 1 )->isCancelled() );
 	}
 
-	public function testOptingIntoDonationReceipt_persistedInDonation(): void {
+	public function testOptingIntoDonationReceipt_persistedInDonor(): void {
 		$repository = $this->makeDonationRepositoryStub();
 		$useCase = $this->makeUseCase( repository: $repository );
 
@@ -312,10 +312,10 @@ class AddDonationUseCaseTest extends TestCase {
 
 		$useCase->addDonation( $request );
 
-		$this->assertTrue( $repository->getDonationById( 1 )->getOptsIntoDonationReceipt() );
+		$this->assertTrue( $repository->getDonationById( 1 )->getDonor()->wantsReceipt() );
 	}
 
-	public function testOptingOutOfDonationReceipt_persistedInDonation(): void {
+	public function testOptingOutOfDonationReceipt_persistedInDonor(): void {
 		$repository = $this->makeDonationRepositoryStub();
 		$useCase = $this->makeUseCase( repository: $repository );
 
@@ -324,7 +324,31 @@ class AddDonationUseCaseTest extends TestCase {
 
 		$useCase->addDonation( $request );
 
-		$this->assertFalse( $repository->getDonationById( 1 )->getOptsIntoDonationReceipt() );
+		$this->assertFalse( $repository->getDonationById( 1 )->getDonor()->wantsReceipt() );
+	}
+
+	public function testOptingIntoNewsletter_persistedInDonor(): void {
+		$repository = $this->makeDonationRepositoryStub();
+		$useCase = $this->makeUseCase( repository: $repository );
+
+		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+		$request->setOptsIntoNewsletter( true );
+
+		$useCase->addDonation( $request );
+
+		$this->assertTrue( $repository->getDonationById( 1 )->getDonor()->wantsNewsletter() );
+	}
+
+	public function testOptingOutOfNewsletter_persistedInDonor(): void {
+		$repository = $this->makeDonationRepositoryStub();
+		$useCase = $this->makeUseCase( repository: $repository );
+
+		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+		$request->setOptsIntoNewsletter( false );
+
+		$useCase->addDonation( $request );
+
+		$this->assertFalse( $repository->getDonationById( 1 )->getDonor()->wantsNewsletter() );
 	}
 
 	private function makeUseCase(

@@ -44,7 +44,6 @@ class HandlePaypalPaymentWithoutDonationUseCaseTest extends TestCase {
 
 		$this->assertSame( 1, $donation->getPaymentId() );
 		$this->assertTrue( $donation->donorIsAnonymous() );
-		$this->assertFalse( $donation->getOptsIntoDonationReceipt() );
 		$this->assertFalse( $result->hasErrors() );
 		$this->assertCount( 1, $logs );
 		$this->assertStringContainsString( 'booked', $logs[0][1] );

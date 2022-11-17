@@ -99,16 +99,14 @@ class AddDonationUseCase {
 	}
 
 	private function newDonationFromRequest( AddDonationRequest $donationRequest, int $paymentId ): Donation {
-		$donation = new Donation(
+		$donor = $this->getPersonalInfoFromRequest( $donationRequest );
+		$this->processNewsletterAndReceiptOptions( $donationRequest, $donor );
+		return new Donation(
 			null,
-			$this->getPersonalInfoFromRequest( $donationRequest ),
+			$donor,
 			$paymentId,
-			$donationRequest->getOptsIntoNewsletter(),
 			$this->newTrackingInfoFromRequest( $donationRequest )
 		);
-		$donation->setOptsIntoDonationReceipt( $donationRequest->getOptsIntoDonationReceipt() );
-
-		return $donation;
 	}
 
 	private function getPersonalInfoFromRequest( AddDonationRequest $request ): Donor {
@@ -212,6 +210,20 @@ class AddDonationUseCase {
 	 */
 	private function generatePayPalInvoiceId( Donation $donation ): string {
 		return 'D' . $donation->getId();
+	}
+
+	private function processNewsletterAndReceiptOptions( AddDonationRequest $donationRequest, Donor $donor ): void {
+		if ( $donationRequest->getOptsIntoDonationReceipt() ) {
+			$donor->requireReceipt();
+		} else {
+			$donor->declineReceipt();
+		}
+
+		if ( $donationRequest->getOptsIntoNewsletter() ) {
+			$donor->subscribeToNewsletter();
+		} else {
+			$donor->unsubscribeFromNewsletter();
+		}
 	}
 
 }

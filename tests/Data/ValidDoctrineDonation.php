@@ -142,6 +142,7 @@ class ValidDoctrineDonation {
 		$donation->setDonorEmail( ValidDonation::DONOR_EMAIL_ADDRESS );
 		$donation->setDonorFullName( ValidDonation::DONOR_FULL_NAME );
 		$donation->setDonorOptsIntoNewsletter( ValidDonation::OPTS_INTO_NEWSLETTER );
+		$donation->setDonationReceipt( true );
 
 		$donation->encodeAndSetData(
 			array_merge(
