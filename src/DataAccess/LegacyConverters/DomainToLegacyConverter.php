@@ -26,10 +26,11 @@ class DomainToLegacyConverter {
 		$doctrineDonation->setId( $donation->getId() );
 		$this->updatePaymentInformation( $doctrineDonation, $legacyPaymentData );
 		$doctrineDonation->setPaymentId( $donation->getPaymentId() );
-		DonorFieldMapper::updateDonorInformation( $doctrineDonation, $donation->getDonor() );
+		$donor = $donation->getDonor();
+		DonorFieldMapper::updateDonorInformation( $doctrineDonation, $donor );
 		$this->updateComment( $doctrineDonation, $donation->getComment() );
-		$doctrineDonation->setDonorOptsIntoNewsletter( $donation->getOptsIntoNewsletter() );
-		$doctrineDonation->setDonationReceipt( $donation->getOptsIntoDonationReceipt() );
+		$doctrineDonation->setDonorOptsIntoNewsletter( $donor->wantsNewsletter() );
+		$doctrineDonation->setDonationReceipt( $donor->wantsReceipt() );
 		$this->updateStatusInformation( $doctrineDonation, $donation, $legacyPaymentData );
 
 		// TODO create $this->updateExportState($doctrineDonation, $donation);

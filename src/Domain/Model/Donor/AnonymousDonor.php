@@ -28,4 +28,28 @@ class AnonymousDonor extends AbstractDonor {
 		return (string)DonorType::ANONYMOUS();
 	}
 
+	public function subscribeToNewsletter(): void {
+		// Do nothing, this donor doesn't support newsletters
+	}
+
+	public function unsubscribeFromNewsletter(): void {
+		// Do nothing, this donor doesn't support newsletters
+	}
+
+	public function wantsNewsletter(): bool {
+		return false;
+	}
+
+	public function requireReceipt(): void {
+		// Do nothing, this donor doesn't support receipts
+	}
+
+	public function declineReceipt(): void {
+		// Do nothing, this donor doesn't support receipts
+	}
+
+	public function wantsReceipt(): bool {
+		return false;
+	}
+
 }

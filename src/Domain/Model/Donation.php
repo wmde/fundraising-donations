@@ -19,25 +19,12 @@ class Donation {
 	private array $moderationReasons;
 	private bool $cancelled;
 
-	public const OPTS_INTO_NEWSLETTER = true;
-	public const DOES_NOT_OPT_INTO_NEWSLETTER = false;
-
 	private ?int $id;
 	private Donor $donor;
 
 	private int $paymentId;
-	private bool $optsIntoNewsletter;
 	private ?DonationComment $comment;
 	private bool $exported;
-
-	/**
-	 * If the user wants to receive a donation receipt
-	 *
-	 * Can be null as there are historic, and machine-made records without this information
-	 *
-	 * @var bool|null
-	 */
-	private ?bool $optsIntoDonationReceipt;
 
 	/**
 	 * TODO: move out of Donation when database model is refactored
@@ -51,22 +38,18 @@ class Donation {
 	 * @param int|null $id
 	 * @param Donor $donor
 	 * @param int $paymentId
-	 * @param bool $optsIntoNewsletter
 	 * @param DonationTrackingInfo $trackingInfo
 	 * @param DonationComment|null $comment
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( ?int $id, Donor $donor, int $paymentId,
-								bool $optsIntoNewsletter, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
+	public function __construct( ?int $id, Donor $donor, int $paymentId, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 		$this->id = $id;
 		$this->donor = $donor;
 		$this->paymentId = $paymentId;
-		$this->optsIntoNewsletter = $optsIntoNewsletter;
 		$this->trackingInfo = $trackingInfo;
 		$this->comment = $comment;
 		$this->exported = false;
-		$this->optsIntoDonationReceipt = null;
 		$this->cancelled = false;
 		$this->moderationReasons = [];
 	}
@@ -120,8 +103,16 @@ class Donation {
 		return $this->paymentId;
 	}
 
+	/**
+	 * This might be used by the fundraising application for display purposes,
+	 * but should be removed when not used any more.
+	 *
+	 * See also https://phabricator.wikimedia.org/T323710
+	 *
+	 * @deprecated use $this->getDonor()->wantsNewsletter()
+	 */
 	public function getOptsIntoNewsletter(): bool {
-		return $this->optsIntoNewsletter;
+		return $this->donor->wantsNewsletter();
 	}
 
 	public function cancel(): void {
@@ -199,12 +190,16 @@ class Donation {
 		$this->cancelled = true;
 	}
 
-	public function setOptsIntoDonationReceipt( ?bool $optsIn ): void {
-		$this->optsIntoDonationReceipt = $optsIn;
-	}
-
-	public function getOptsIntoDonationReceipt(): ?bool {
-		return $this->optsIntoDonationReceipt;
+	/**
+	 * This might be used by the fundraising application for display purposes,
+	 * but should be removed when not used any more.
+	 *
+	 * See also https://phabricator.wikimedia.org/T323710
+	 *
+	 * @deprecated
+	 */
+	public function getOptsIntoDonationReceipt(): bool {
+		return $this->donor->wantsReceipt();
 	}
 
 	public function donorIsAnonymous(): bool {
@@ -216,7 +211,6 @@ class Donation {
 			null,
 			$this->getDonor(),
 			$paymentId,
-			$this->optsIntoNewsletter,
 			$this->getTrackingInfo(),
 			// We don't want to clone comments for followup donations because they would show up again in the feed.
 			// When we refactor the donation model,
