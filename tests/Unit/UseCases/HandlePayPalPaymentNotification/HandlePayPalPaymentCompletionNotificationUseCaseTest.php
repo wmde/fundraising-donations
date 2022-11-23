@@ -26,6 +26,7 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\HandlePayPalPaymentNotification\HandlePayPalPaymentCompletionNotificationUseCase
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase\BookDonationUseCase
  * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
  */
 class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
@@ -215,7 +216,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertSame( $errorMessage, $response->getMessage(), 'Response should contain message from payment service' );
 	}
 
-	public function testDonationDoesNotExist_returnsDonationWasNotFoundResponse(): void {
+	public function testWhenDonationDoesNotExist_returnsDonationWasNotFoundResponse(): void {
 		$repository = $this->createMock( DonationRepository::class );
 		$repository->method( 'getDonationById' )->willReturn( null );
 
@@ -227,6 +228,19 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 		$this->assertFalse( $response->notificationWasHandled() );
 		$this->assertTrue( $response->donationWasNotFound() );
+	}
+
+	public function testWhenPaymentIsAlreadyBooked_returnsPaymentAlreadyBookedResponse(): void {
+		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
+		$bookPaymentResponse = FailureResponse::newAlreadyCompletedResponse();
+		$useCase = $this->givenNewUseCase(
+			paymentBookingService: $this->createFailingPaymentBookingServiceStub( $bookPaymentResponse )
+		);
+
+		$response = $useCase->handleNotification( $request );
+
+		$this->assertFalse( $response->notificationWasHandled() );
+		$this->assertTrue( $response->paymentWasAlreadyCompleted() );
 	}
 
 	/**
@@ -266,6 +280,12 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	private function createSucceedingPaymentBookingServiceStub(): PaymentBookingService|Stub {
 		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
 		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new SuccessResponse() );
+		return $paymentBookingServiceStub;
+	}
+
+	private function createFailingPaymentBookingServiceStub( FailureResponse $response ): PaymentBookingService|Stub {
+		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
+		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( $response );
 		return $paymentBookingServiceStub;
 	}
 
