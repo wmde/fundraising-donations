@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases;
 class NotificationResponse {
 
 	private const DONATION_NOT_FOUND_MESSAGE = 'Donation not found';
+	private const ALREADY_COMPLETED_MESSAGE = 'Payment was booked before';
 
 	private function __construct( private readonly string $message = '' ) {
 	}
@@ -25,6 +26,10 @@ class NotificationResponse {
 		return new self( self::DONATION_NOT_FOUND_MESSAGE );
 	}
 
+	public static function newAlreadyCompletedResponse(): self {
+		return new self( self::ALREADY_COMPLETED_MESSAGE );
+	}
+
 	public function notificationWasHandled(): bool {
 		return $this->message === '';
 	}
@@ -39,5 +44,9 @@ class NotificationResponse {
 
 	public function donationWasNotFound(): bool {
 		return $this->message === self::DONATION_NOT_FOUND_MESSAGE;
+	}
+
+	public function paymentWasAlreadyCompleted(): bool {
+		return $this->message === self::ALREADY_COMPLETED_MESSAGE;
 	}
 }
