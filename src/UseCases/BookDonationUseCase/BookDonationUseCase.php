@@ -53,7 +53,7 @@ class BookDonationUseCase {
 
 		$result = $this->paymentBookingService->bookPayment( $donation->getPaymentId(), $request->bookingData );
 		if ( $result instanceof FailureResponse ) {
-			return NotificationResponse::newFailureResponse( $result->message );
+			return $this->createFailureResponseFromPaymentServiceResponse( $result );
 		}
 		if ( $result instanceof FollowUpSuccessResponse ) {
 			$donation = $donation->createFollowupDonationForPayment( $result->childPaymentId );
@@ -85,6 +85,13 @@ class BookDonationUseCase {
 			$followUpId,
 			"book_donation_use_case: new transaction id to corresponding parent donation: $parentId"
 		);
+	}
+
+	private function createFailureResponseFromPaymentServiceResponse( FailureResponse $result ): NotificationResponse {
+		if ( $result->paymentWasAlreadyCompleted() ) {
+			return NotificationResponse::newAlreadyCompletedResponse();
+		}
+		return NotificationResponse::newFailureResponse( $result->message );
 	}
 
 }
