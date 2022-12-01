@@ -14,7 +14,7 @@ class ValidAddDonationRequest {
 	public static function getRequest(): AddDonationRequest {
 		$request = new AddDonationRequest();
 		$request->setPaymentCreationRequest( self::newPaymentCreationRequest() );
-		$request->setOptIn( (string)ValidDonation::OPTS_INTO_NEWSLETTER );
+		$request->setOptsIntoNewsletter( ValidDonation::OPTS_INTO_NEWSLETTER );
 		$request->setDonorType( DonorType::PERSON() );
 		$request->setDonorSalutation( ValidDonation::DONOR_SALUTATION );
 		$request->setDonorTitle( ValidDonation::DONOR_TITLE );

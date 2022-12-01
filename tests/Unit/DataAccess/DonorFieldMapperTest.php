@@ -7,6 +7,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonor;
 
 /**
  * This test is only testing the safeguards against developer error,
@@ -20,20 +21,7 @@ class DonorFieldMapperTest extends TestCase {
 		$this->expectException( \UnexpectedValueException::class );
 		$this->expectExceptionMessageMatches( '/Could not determine address type/' );
 
-		$testDonor = new class extends Donor\AbstractDonor {
-
-			public function isPrivatePerson(): bool {
-				return false;
-			}
-
-			public function isCompany(): bool {
-				return false;
-			}
-
-			public function getDonorType(): string {
-				return 'Just testing';
-			}
-		};
+		$testDonor = new FakeDonor();
 
 		DonorFieldMapper::getPersonalDataFields( $testDonor );
 	}

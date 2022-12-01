@@ -9,18 +9,18 @@ use WMDE\Fundraising\DonationContext\DataAccess\DonorFactory;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 
 class LegacyToDomainConverter {
 	public function createFromLegacyObject( DoctrineDonation $doctrineDonation ): Donation {
+		$donor = $this->getDonor( $doctrineDonation );
 		$donation = new Donation(
 			$doctrineDonation->getId(),
-			DonorFactory::createDonorFromEntity( $doctrineDonation ),
+			$donor,
 			$doctrineDonation->getPaymentId(),
-			(bool)$doctrineDonation->getDonorOptsIntoNewsletter(),
 			$this->createTrackingInfo( $doctrineDonation ),
 			$this->createComment( $doctrineDonation )
 		);
-		$donation->setOptsIntoDonationReceipt( $doctrineDonation->getDonationReceipt() );
 		if ( $this->entityIsExported( $doctrineDonation ) ) {
 			$donation->markAsExported();
 		}
@@ -63,5 +63,22 @@ class LegacyToDomainConverter {
 
 	private function entityIsExported( DoctrineDonation $dd ): bool {
 		return $dd->getDtGruen() && $dd->getDtGruen()->getTimestamp() > 0;
+	}
+
+	private function getDonor( DoctrineDonation $doctrineDonation ): Donor {
+		$donor = DonorFactory::createDonorFromEntity( $doctrineDonation );
+		if ( $doctrineDonation->getDonationReceipt() ) {
+			$donor->requireReceipt();
+		} else {
+			$donor->declineReceipt();
+		}
+
+		if ( $doctrineDonation->getDonorOptsIntoNewsletter() ) {
+			$donor->subscribeToNewsletter();
+		} else {
+			$donor->unsubscribeFromNewsletter();
+		}
+
+		return $donor;
 	}
 }

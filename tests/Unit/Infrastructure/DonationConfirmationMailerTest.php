@@ -46,7 +46,7 @@ class DonationConfirmationMailerTest extends TestCase {
 				'needsModeration' => false,
 				'paymentType' => 'UEB',
 				'bankTransferCode' => ValidPayments::PAYMENT_BANK_TRANSFER_CODE,
-				'receiptOptIn' => null,
+				'receiptOptIn' => true,
 				'moderationFlags' => [],
 			]
 		] );
