@@ -48,7 +48,7 @@ class DonationMailer implements DonationNotifier {
 				'needsModeration' => $donation->isMarkedForModeration(),
 				'moderationFlags' => $this->getModerationFlags( ...$donation->getModerationReasons() ),
 				'bankTransferCode' => $paymentInfo['paymentReferenceCode'] ?? '',
-				'receiptOptIn' => $donation->getOptsIntoDonationReceipt(),
+				'receiptOptIn' => $donation->getDonor()->wantsReceipt(),
 			]
 		];
 	}

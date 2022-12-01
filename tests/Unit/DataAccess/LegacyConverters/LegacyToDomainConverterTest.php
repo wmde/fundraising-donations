@@ -60,4 +60,106 @@ class LegacyToDomainConverterTest extends TestCase {
 		$this->assertTrue( $donation->isMarkedForModeration() );
 		$this->assertSame( $moderationReasons, $donation->getModerationReasons() );
 	}
+
+	/**
+	 * @dataProvider donationProviderForNewsletterSubscription
+	 */
+	public function testConverterPassesNewsletterSubscriptionToDonor( DoctrineDonation $doctrineDonation, bool $expectedDonorValue ): void {
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+
+		$this->assertSame( $expectedDonorValue, $donation->getDonor()->wantsNewsletter() );
+	}
+
+	/**
+	 * @return iterable<array{DoctrineDonation, bool}>
+	 */
+	public function donationProviderForNewsletterSubscription(): iterable {
+		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
+		$doctrineDonation->setDonorOptsIntoNewsletter( true );
+		yield 'private donor wants newsletter' => [ $doctrineDonation, true ];
+
+		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
+		$doctrineDonation->setDonorOptsIntoNewsletter( false );
+		yield 'private donor does not want newsletter' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newCompanyDonation();
+		$doctrineDonation->setDonorOptsIntoNewsletter( true );
+		yield 'company donor wants newsletter' => [ $doctrineDonation, true ];
+
+		$doctrineDonation = ValidDoctrineDonation::newCompanyDonation();
+		$doctrineDonation->setDonorOptsIntoNewsletter( false );
+		yield 'company donor does not want newsletter' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newEmailDonation();
+		$doctrineDonation->setDonorOptsIntoNewsletter( true );
+		yield 'email-only donor wants newsletter' => [ $doctrineDonation, true ];
+
+		$doctrineDonation = ValidDoctrineDonation::newEmailDonation();
+		$doctrineDonation->setDonorOptsIntoNewsletter( false );
+		yield 'email-only donor does not want newsletter' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newAnonymousDonation();
+		yield 'anonymous donor cannot receive newsletter' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newAnonymousDonation();
+		$doctrineDonation->setDonorOptsIntoNewsletter( true );
+		yield 'converter ignores invalid newsletter subscription data from DB for anonymous' => [ $doctrineDonation, false ];
+	}
+
+	/**
+	 * @dataProvider donationProviderForReceipt
+	 */
+	public function testConverterPassesReceiptRequirementsToDonor( DoctrineDonation $doctrineDonation, bool $expectedDonorValue ): void {
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+
+		$this->assertSame( $expectedDonorValue, $donation->getDonor()->wantsReceipt() );
+	}
+
+	/**
+	 * @return iterable<array{DoctrineDonation, bool}>
+	 */
+	public function donationProviderForReceipt(): iterable {
+		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
+		$doctrineDonation->setDonationReceipt( true );
+		yield 'private donor wants receipt' => [ $doctrineDonation, true ];
+
+		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
+		$doctrineDonation->setDonationReceipt( false );
+		yield 'private donor does not want receipt' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
+		$doctrineDonation->setDonationReceipt( null );
+		yield 'legacy private donor does not want receipt' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newCompanyDonation();
+		$doctrineDonation->setDonationReceipt( true );
+		yield 'company donor wants receipt' => [ $doctrineDonation, true ];
+
+		$doctrineDonation = ValidDoctrineDonation::newCompanyDonation();
+		$doctrineDonation->setDonationReceipt( false );
+		yield 'company donor does not want receipt' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newCompanyDonation();
+		$doctrineDonation->setDonationReceipt( null );
+		yield 'legacy company donor does not want receipt' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newEmailDonation();
+		$doctrineDonation->setDonationReceipt( true );
+		yield 'converter ignores invalid receipt data from DB for email-only' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newEmailDonation();
+		$doctrineDonation->setDonationReceipt( false );
+		yield 'email-only donor does not want receipt' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newAnonymousDonation();
+		yield 'anonymous donor cannot receive receipt' => [ $doctrineDonation, false ];
+
+		$doctrineDonation = ValidDoctrineDonation::newAnonymousDonation();
+		$doctrineDonation->setDonationReceipt( true );
+		yield 'converter ignores invalid receipt data from DB for anonymous' => [ $doctrineDonation, false ];
+	}
 }

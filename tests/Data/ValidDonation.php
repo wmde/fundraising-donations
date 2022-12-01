@@ -36,7 +36,7 @@ class ValidDonation {
 	public const DONATION_AMOUNT = 13.37;
 	public const PAYMENT_INTERVAL_IN_MONTHS = 3;
 
-	public const OPTS_INTO_NEWSLETTER = Donation::OPTS_INTO_NEWSLETTER;
+	public const OPTS_INTO_NEWSLETTER = true;
 	public const TRACKING_BANNER_IMPRESSION_COUNT = 1;
 	public const TRACKING_TOTAL_IMPRESSION_COUNT = 3;
 	// "tracking" is the name of the property on the object, "TRACKING" is our prefix, hence TRACKING_TRACKING
@@ -148,21 +148,23 @@ class ValidDonation {
 	}
 
 	private static function createDonation( Payment $payment ): Donation {
+		$donor = self::newDonor();
+		$donor->subscribeToNewsletter();
 		return new Donation(
 			null,
-			self::newDonor(),
+			$donor,
 			$payment->getId(),
-			self::OPTS_INTO_NEWSLETTER,
 			self::newTrackingInfo()
 		);
 	}
 
 	private static function createCancelledDonation( Payment $payment ): Donation {
+		$donor = self::newDonor();
+		$donor->subscribeToNewsletter();
 		$donation = new Donation(
 			null,
-			self::newDonor(),
+			$donor,
 			$payment->getId(),
-			self::OPTS_INTO_NEWSLETTER,
 			self::newTrackingInfo()
 		);
 		$donation->cancelWithoutChecks();
@@ -174,7 +176,6 @@ class ValidDonation {
 			null,
 			new AnonymousDonor(),
 			$payment->getId(),
-			false,
 			self::newTrackingInfo()
 		);
 	}
@@ -184,7 +185,6 @@ class ValidDonation {
 			$donationId,
 			new AnonymousDonor(),
 			$payment->getId(),
-			false,
 			self::newTrackingInfo()
 		);
 	}

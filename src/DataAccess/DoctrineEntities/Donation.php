@@ -186,7 +186,9 @@ class Donation {
 	/**
 	 * Get donation receipt state
 	 *
-	 * @return bool
+	 * This field was introduced without proper migration, so it can be null
+	 *
+	 * @return bool|null
 	 */
 	public function getDonationReceipt(): ?bool {
 		return $this->donationReceipt;
