@@ -84,4 +84,12 @@ class DonationPaymentValidatorTest extends TestCase {
 			$validationResult->getValidationErrors()[0]
 		);
 	}
+
+	public function testGivenEmailOnlyDonorAndDirectDebitPayment_validatorReturnsValid(): void {
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES, DonorType::EMAIL() );
+
+		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 99 ), PaymentInterval::OneTime, PaymentType::DirectDebit );
+
+		$this->assertTrue( $validationResult->isSuccessful() );
+	}
 }
