@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\CreatePaymentUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse as PaymentCreationFailed;
@@ -25,8 +26,8 @@ class CreatePaymentWithUseCase implements CreatePaymentService {
 		return $this->createPaymentUseCase->createPayment( $request );
 	}
 
-	public function createPaymentValidator(): DonationPaymentValidator {
-		return new DonationPaymentValidator( $this->allowedPaymentTypes );
+	public function createPaymentValidator( DonorType $donorType ): DonationPaymentValidator {
+		return new DonationPaymentValidator( $this->allowedPaymentTypes, $donorType );
 	}
 
 }
