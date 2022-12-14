@@ -170,6 +170,15 @@ class AddDonationUseCase {
 		}
 	}
 
+	/**
+	 * Modify PaymentCreationRequest from the AddDonationRequest
+	 *
+	 * We need to add donor-type specific properties (bank transfer code and validation)
+	 * to the original request. PaymentCreationRequest is immutable so we create a new one.
+	 *
+	 * @param AddDonationRequest $request
+	 * @return PaymentCreationRequest
+	 */
 	private function getPaymentRequestForDonor( AddDonationRequest $request ): PaymentCreationRequest {
 		$paymentRequest = $request->getPaymentCreationRequest();
 		$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
@@ -177,7 +186,7 @@ class AddDonationUseCase {
 			$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR;
 		}
 
-		$request = new PaymentCreationRequest(
+		$newPaymentCreationRequest = new PaymentCreationRequest(
 			$paymentRequest->amountInEuroCents,
 			$paymentRequest->interval,
 			$paymentRequest->paymentType,
@@ -185,8 +194,10 @@ class AddDonationUseCase {
 			$paymentRequest->bic,
 			$paymentReferenceCodePrefix
 		);
-		$request->setDomainSpecificPaymentValidator( $this->paymentService->createPaymentValidator() );
-		return $request;
+		$newPaymentCreationRequest->setDomainSpecificPaymentValidator(
+			$this->paymentService->createPaymentValidator( $request->getDonorType() )
+		);
+		return $newPaymentCreationRequest;
 	}
 
 	private function generatePaymentProviderUrl( PaymentProviderURLGenerator $paymentProviderURLGenerator, Donation $donation, DonationTokens $tokens ): string {

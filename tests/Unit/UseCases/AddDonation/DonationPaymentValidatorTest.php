@@ -5,6 +5,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddDonation;
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\DonationPaymentValidator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
@@ -23,7 +24,7 @@ class DonationPaymentValidatorTest extends TestCase {
 	 * @dataProvider getValidAmounts
 	 */
 	public function testGivenValidAmount_validatorReturnsNoViolations( float $amount ): void {
-		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES );
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES, DonorType::PERSON() );
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromFloat( $amount ), PaymentInterval::OneTime, PaymentType::DirectDebit );
 
@@ -37,7 +38,7 @@ class DonationPaymentValidatorTest extends TestCase {
 	}
 
 	public function testGivenSmallAmount_validatorReturnsViolation(): void {
-		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES );
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES, DonorType::PERSON() );
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromCents( 99 ), PaymentInterval::OneTime, PaymentType::DirectDebit );
 
@@ -49,7 +50,7 @@ class DonationPaymentValidatorTest extends TestCase {
 	}
 
 	public function testGivenLargeAmount_validatorReturnsViolation(): void {
-		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES );
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES, DonorType::PERSON() );
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 100_000 ), PaymentInterval::OneTime, PaymentType::DirectDebit );
 
@@ -61,7 +62,7 @@ class DonationPaymentValidatorTest extends TestCase {
 	}
 
 	public function testGivenDisallowedPaymentType_validatorReturnsViolation(): void {
-		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES );
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES, DonorType::COMPANY() );
 
 		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 99 ), PaymentInterval::OneTime, PaymentType::Paypal );
 
@@ -72,4 +73,23 @@ class DonationPaymentValidatorTest extends TestCase {
 		);
 	}
 
+	public function testGivenAnonymousDonorAndDirectDebitPayment_validatorReturnsViolation(): void {
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES, DonorType::ANONYMOUS() );
+
+		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 99 ), PaymentInterval::OneTime, PaymentType::DirectDebit );
+
+		$this->assertFalse( $validationResult->isSuccessful() );
+		$this->assertEquals(
+			new ConstraintViolation( PaymentType::DirectDebit->value, DonationPaymentValidator::FORBIDDEN_PAYMENT_TYPE_FOR_DONOR_TYPE, DonationPaymentValidator::SOURCE_PAYMENT_TYPE ),
+			$validationResult->getValidationErrors()[0]
+		);
+	}
+
+	public function testGivenEmailOnlyDonorAndDirectDebitPayment_validatorReturnsValid(): void {
+		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES, DonorType::EMAIL() );
+
+		$validationResult = $validator->validatePaymentData( Euro::newFromInt( 99 ), PaymentInterval::OneTime, PaymentType::DirectDebit );
+
+		$this->assertTrue( $validationResult->isSuccessful() );
+	}
 }
