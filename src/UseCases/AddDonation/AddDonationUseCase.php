@@ -194,9 +194,7 @@ class AddDonationUseCase {
 			$paymentRequest->bic,
 			$paymentReferenceCodePrefix
 		);
-		$newPaymentCreationRequest->setDomainSpecificPaymentValidator(
-			$this->paymentService->createPaymentValidator( $request->getDonorType() )
-		);
+		$newPaymentCreationRequest->setDomainSpecificPaymentValidator( $this->paymentService->createPaymentValidator() );
 		return $newPaymentCreationRequest;
 	}
 

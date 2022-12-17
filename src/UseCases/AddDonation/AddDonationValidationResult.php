@@ -15,7 +15,6 @@ class AddDonationValidationResult extends ValidationResult {
 
 	public const SOURCE_PAYMENT_TYPE = 'zahlweise';
 	public const SOURCE_PAYMENT_AMOUNT = 'amount';
-
 	public const SOURCE_DONOR_ADDRESS_TYPE = 'addressType';
 	public const SOURCE_DONOR_EMAIL = 'email';
 	public const SOURCE_DONOR_COMPANY = AddressValidator::SOURCE_COMPANY;
@@ -29,17 +28,8 @@ class AddDonationValidationResult extends ValidationResult {
 	public const SOURCE_DONOR_COUNTRY = AddressValidator::SOURCE_COUNTRY;
 	public const SOURCE_TRACKING_SOURCE = 'source';
 
-	public const VIOLATION_TOO_LOW = 'too-low';
-	public const VIOLATION_TOO_HIGH = 'too-high';
+	public const VIOLATION_FORBIDDEN_PAYMENT_TYPE_FOR_DONOR_TYPE = 'forbidden_payment_type_for_donor_type';
+
 	public const VIOLATION_WRONG_LENGTH = 'wrong-length';
-	public const VIOLATION_NOT_MONEY = 'not-money';
-	public const VIOLATION_MISSING = 'missing';
-	public const VIOLATION_IBAN_BLOCKED = 'iban-blocked';
-	public const VIOLATION_NOT_DATE = 'not-date';
-	public const VIOLATION_NOT_PHONE_NUMBER = 'not-phone';
-	public const VIOLATION_NOT_EMAIL = 'not-email';
-	public const VIOLATION_NOT_POSTCODE = 'not-postcode';
-	public const VIOLATION_WRONG_PAYMENT_TYPE = 'invalid_payment_type';
-	public const VIOLATION_TEXT_POLICY = 'text_policy';
 
 }

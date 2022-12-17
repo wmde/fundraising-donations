@@ -9,6 +9,10 @@ use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 
+/**
+ * A Valid AddDonationRequest with a private person donor, donating
+ * 5 Euros, one time via direct debit.
+ */
 class ValidAddDonationRequest {
 
 	public static function getRequest(): AddDonationRequest {
