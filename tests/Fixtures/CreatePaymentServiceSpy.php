@@ -3,7 +3,6 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\DonationPaymentValidator;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
@@ -20,8 +19,8 @@ class CreatePaymentServiceSpy extends SucceedingPaymentServiceStub {
 		return parent::createPayment( $request );
 	}
 
-	public function createPaymentValidator( DonorType $donorType ): DonationPaymentValidator {
-		return new DonationPaymentValidator( PaymentType::cases(), $donorType );
+	public function createPaymentValidator(): DonationPaymentValidator {
+		return new DonationPaymentValidator( PaymentType::cases() );
 	}
 
 	public function getLastRequest(): PaymentCreationRequest {

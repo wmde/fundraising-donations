@@ -18,6 +18,12 @@ class PaymentRequestBuilder {
 		);
 	}
 
+	public static function fromExistingRequest( PaymentCreationRequest $request ): self {
+		$builder = new self();
+		$builder->paymentCreationRequest = $request;
+		return $builder;
+	}
+
 	public function getPaymentCreationRequest(): PaymentCreationRequest {
 		return $this->paymentCreationRequest;
 	}

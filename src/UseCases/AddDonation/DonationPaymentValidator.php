@@ -4,7 +4,6 @@ declare( strict_types=1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\PaymentContext\Domain\DomainSpecificPaymentValidator;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
@@ -56,11 +55,6 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 	public const FORBIDDEN_PAYMENT_TYPE = 'forbidden_payment_type';
 
 	/**
-	 * Violation identifier for {@see ConstraintViolation}
-	 */
-	public const FORBIDDEN_PAYMENT_TYPE_FOR_DONOR_TYPE = 'forbidden_payment_type_for_donor_type';
-
-	/**
 	 * Error source name for {@see ConstraintViolation}
 	 */
 	public const SOURCE_AMOUNT = 'amount';
@@ -74,8 +68,7 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 	private Euro $maximumAmount;
 
 	public function __construct(
-		private readonly array $allowedPaymentTypes,
-		private readonly DonorType $donorType
+		private readonly array $allowedPaymentTypes
 	) {
 		$this->minimumAmount = Euro::newFromInt( self::MINIMUM_AMOUNT_IN_EUROS );
 		$this->maximumAmount = Euro::newFromInt( self::MAXIMUM_AMOUNT_IN_EUROS );
@@ -109,12 +102,6 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 		if ( $amountInCents >= $this->maximumAmount->getEuroCents() ) {
 			return ValidationResponse::newFailureResponse( [
 				new ConstraintViolation( $amountInCents, self::AMOUNT_TOO_HIGH, self::SOURCE_AMOUNT )
-			] );
-		}
-
-		if ( $this->donorType->is( DonorType::ANONYMOUS() ) && $paymentType === PaymentType::DirectDebit ) {
-			return ValidationResponse::newFailureResponse( [
-				new ConstraintViolation( $paymentType->value, self::FORBIDDEN_PAYMENT_TYPE_FOR_DONOR_TYPE, self::SOURCE_PAYMENT_TYPE )
 			] );
 		}
 
