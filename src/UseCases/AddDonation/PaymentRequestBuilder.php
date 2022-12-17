@@ -80,14 +80,14 @@ class PaymentRequestBuilder {
 		return $this;
 	}
 
-	public function withPaymentReferenceCode( string $paymentReferenceCode ): self {
+	public function withPaymentReferenceCodePrefix( string $transferCodePrefix ): self {
 		$this->paymentCreationRequest = new PaymentCreationRequest(
 			$this->paymentCreationRequest->amountInEuroCents,
 			$this->paymentCreationRequest->interval,
 			$this->paymentCreationRequest->paymentType,
 			$this->paymentCreationRequest->iban,
 			$this->paymentCreationRequest->bic,
-			$paymentReferenceCode
+			$transferCodePrefix
 		);
 		return $this;
 	}
