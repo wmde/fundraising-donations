@@ -4,15 +4,17 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation;
 
+use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
- * This class is for checking if needs moderation / immediate deletion.
+ * This class is for checking if a donation needs moderation / immediate deletion.
  * It will be applied **after** the use case has created the donation.
  *
  * Moderation reasons can be either amounts that are too high (but still plausible) or text policy violations in
@@ -61,11 +63,12 @@ class ModerationService {
 	 */
 	public function moderateDonationRequest( AddDonationRequest $request ): ModerationResult {
 		$this->result = new ModerationResult();
-		if ( $this->paymentTypeBypassesModeration( $request->getPaymentCreationRequest()->paymentType ) ) {
+		$paymentCreationRequest = $request->getPaymentCreationRequest();
+		if ( $this->paymentTypeBypassesModeration( $paymentCreationRequest->paymentType ) ) {
 			return $this->result;
 		}
 
-		$this->getAmountViolations( $request );
+		$this->getAmountViolations( $paymentCreationRequest );
 		$this->getBadWordViolations( $request );
 
 		return $this->result;
@@ -133,10 +136,10 @@ class ModerationService {
 		$this->result->addModerationReason( new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, $fieldName ) );
 	}
 
-	private function getAmountViolations( AddDonationRequest $request ): void {
+	private function getAmountViolations( PaymentCreationRequest $request ): void {
 		$amountViolations = $this->amountPolicyValidator->validate(
-			$request->getAmount()->getEuros(),
-			$request->getInterval()
+			Euro::newFromCents( $request->amountInEuroCents )->getEuroFloat(),
+			$request->interval
 		);
 		if ( $amountViolations->hasViolations() ) {
 			$this->result->addModerationReason(
