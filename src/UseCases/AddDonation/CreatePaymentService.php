@@ -3,7 +3,6 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse as PaymentCreationFailed;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as PaymentCreationSucceeded;
@@ -11,5 +10,5 @@ use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as Pa
 interface CreatePaymentService {
 	public function createPayment( PaymentCreationRequest $request ): PaymentCreationFailed|PaymentCreationSucceeded;
 
-	public function createPaymentValidator( DonorType $donorType ): DonationPaymentValidator;
+	public function createPaymentValidator(): DonationPaymentValidator;
 }

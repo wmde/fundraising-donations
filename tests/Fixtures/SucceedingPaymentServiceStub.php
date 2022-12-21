@@ -3,7 +3,6 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\CreatePaymentService;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\DonationPaymentValidator;
@@ -28,8 +27,8 @@ class SucceedingPaymentServiceStub implements CreatePaymentService {
 		return $this->successResponse;
 	}
 
-	public function createPaymentValidator( DonorType $donorType ): DonationPaymentValidator {
-		return new DonationPaymentValidator( PaymentType::cases(), $donorType );
+	public function createPaymentValidator(): DonationPaymentValidator {
+		return new DonationPaymentValidator( PaymentType::cases() );
 	}
 
 }

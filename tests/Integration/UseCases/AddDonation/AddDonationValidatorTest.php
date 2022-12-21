@@ -10,6 +10,8 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\PaymentRequestBuilder;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\SucceedingDomainNameValidator;
 use WMDE\FunValidators\ValidationResult;
@@ -46,6 +48,11 @@ class AddDonationValidatorTest extends TestCase {
 		$request->setDonorCity( '' );
 		$request->setDonorCountryCode( '' );
 		$request->setDonorEmailAddress( '' );
+		$paymentRequest = $request->getPaymentCreationRequest();
+		$request->setPaymentCreationRequest( PaymentRequestBuilder::fromExistingRequest( $paymentRequest )
+			->withPaymentType( PaymentType::BankTransfer->value )
+			->build()
+		);
 
 		$this->assertCount( 0, $this->donationValidator->validate( $request )->getViolations() );
 	}
@@ -116,6 +123,26 @@ class AddDonationValidatorTest extends TestCase {
 		$request->setDonorCountryCode( '' );
 
 		$this->assertTrue( $this->donationValidator->validate( $request )->isSuccessful() );
+	}
+
+	public function testGivenAnonymousDonorWithDirectDebit_validationFails(): void {
+		$request = ValidAddDonationRequest::getRequest();
+		$request->setDonorType( DonorType::ANONYMOUS() );
+
+		$result = $this->donationValidator->validate( $request );
+		$this->assertFalse( $result->isSuccessful() );
+
+		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_DONOR_ADDRESS_TYPE );
+		$this->assertConstraintWasViolated( $result, AddDonationValidationResult::SOURCE_PAYMENT_TYPE );
+	}
+
+	public function testGivenEmailOnlyDonorWithDirectDebit_validationSucceeds(): void {
+		$request = ValidAddDonationRequest::getRequest();
+		$request->setDonorType( DonorType::EMAIL() );
+
+		$result = $this->donationValidator->validate( $request );
+
+		$this->assertTrue( $result->isSuccessful() );
 	}
 
 	private function newDonationValidator(): AddDonationValidator {
