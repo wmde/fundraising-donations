@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AddressValidator;
@@ -41,6 +42,7 @@ class AddDonationValidator {
 		$this->violations = [];
 
 		$this->validateDonor();
+		$this->validateDonorAndPaymentTypeCombination();
 
 		return new Result( ...$this->violations );
 	}
@@ -81,6 +83,9 @@ class AddDonationValidator {
 		}
 	}
 
+	/**
+	 * @return ConstraintViolation[]
+	 */
 	private function getPersonNameViolations(): array {
 		return $this->addressValidator->validatePersonName(
 			$this->request->getDonorSalutation(),
@@ -90,12 +95,18 @@ class AddDonationValidator {
 		)->getViolations();
 	}
 
+	/**
+	 * @return ConstraintViolation[]
+	 */
 	private function getCompanyNameViolations(): array {
 		return $this->addressValidator->validateCompanyName(
 			$this->request->getDonorCompany()
 		)->getViolations();
 	}
 
+	/**
+	 * @return ConstraintViolation[]
+	 */
 	private function getAddressViolations(): array {
 		return $this->addressValidator->validatePostalAddress(
 			$this->request->getDonorStreetAddress(),
@@ -110,6 +121,23 @@ class AddDonationValidator {
 			return new ValidationResult();
 		}
 		return $this->emailValidator->validate( $this->request->getDonorEmailAddress() );
+	}
+
+	private function validateDonorAndPaymentTypeCombination(): void {
+		$donorType = $this->request->getDonorType();
+		$paymentType = $this->request->getPaymentCreationRequest()->paymentType;
+		if ( $donorType->is( DonorType::ANONYMOUS() ) && $paymentType === PaymentType::DirectDebit->value ) {
+			$this->violations[] = new ConstraintViolation(
+				$paymentType,
+				Result::VIOLATION_FORBIDDEN_PAYMENT_TYPE_FOR_DONOR_TYPE,
+				Result::SOURCE_DONOR_ADDRESS_TYPE
+			);
+			$this->violations[] = new ConstraintViolation(
+				$paymentType,
+				Result::VIOLATION_FORBIDDEN_PAYMENT_TYPE_FOR_DONOR_TYPE,
+				Result::SOURCE_PAYMENT_TYPE
+			);
+		}
 	}
 
 }
