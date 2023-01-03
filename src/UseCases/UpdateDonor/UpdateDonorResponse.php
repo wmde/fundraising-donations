@@ -14,7 +14,6 @@ class UpdateDonorResponse {
 	public const SUCCESS_TEXT = 'donor_change_success_text';
 	public const ERROR_ACCESS_DENIED = 'donor_change_failure_access_denied';
 	public const ERROR_DONATION_IS_EXPORTED = 'donor_change_failure_exported';
-	public const ERROR_DONATION_HAS_ADDRESS = 'donor_change_failure_has_address';
 	public const ERROR_VALIDATION_FAILED = 'donor_change_failure_validation_error';
 
 	private $donation;
