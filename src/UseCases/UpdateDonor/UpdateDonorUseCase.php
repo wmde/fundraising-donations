@@ -62,10 +62,6 @@ class UpdateDonorUseCase {
 			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_DONATION_IS_EXPORTED );
 		}
 
-		if ( $donation->getDonor()->getPhysicalAddress() instanceof PostalAddress ) {
-			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_DONATION_HAS_ADDRESS );
-		}
-
 		$validationResult = $this->updateDonorValidator->validateDonorData( $updateDonorRequest );
 		if ( $validationResult->getViolations() ) {
 			// We don't need to return the full validation result since we rely on the client-side validation to catch
