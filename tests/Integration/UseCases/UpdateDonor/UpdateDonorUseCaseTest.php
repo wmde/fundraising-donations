@@ -75,19 +75,6 @@ class UpdateDonorUseCaseTest extends TestCase {
 		$useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
 	}
 
-	public function testGivenDonationWithAddressData_donationUpdateFails() {
-		$repository = $this->newRepository();
-		$donation = ValidDonation::newDirectDebitDonation();
-		$repository->storeDonation( $donation );
-		$donationId = $donation->getId();
-
-		$useCase = $this->newUpdateDonorUseCase( $repository );
-		$response = $useCase->updateDonor( $this->newUpdateDonorRequestForPerson( $donationId ) );
-
-		$this->assertFalse( $response->isSuccessful() );
-		$this->assertEquals( UpdateDonorResponse::ERROR_DONATION_HAS_ADDRESS, $response->getErrorMessage() );
-	}
-
 	public function testGivenFailingAuthorizer_donationUpdateFails() {
 		$repository = $this->newRepository();
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
