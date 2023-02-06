@@ -51,7 +51,7 @@ class DonorTypeTest extends TestCase {
 		$this->assertTrue( $donorType->is( $expectedDonorType ) );
 	}
 
-	public function validDonorTypeValues(): array {
+	public static function validDonorTypeValues(): array {
 		return [
 			[ 'person', DonorType::PERSON() ],
 			[ 'company', DonorType::COMPANY() ],
@@ -71,7 +71,7 @@ class DonorTypeTest extends TestCase {
 		DonorType::make( $donorTypeValue );
 	}
 
-	public function invalidDonorTypeValues(): iterable {
+	public static function invalidDonorTypeValues(): iterable {
 		yield [ '' ];
 		yield [ '!!!' ];
 		yield [ 'firma' ];

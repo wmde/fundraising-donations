@@ -28,7 +28,7 @@ class ModerationReasonTest extends TestCase {
 	/**
 	 * @return iterable<string,array{ModerationReason,string}>
 	 */
-	public function stringifyProvider(): iterable {
+	public static function stringifyProvider(): iterable {
 		yield 'ModerationIdentifier and source' => [
 			new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'email' ),
 			'ADDRESS_CONTENT_VIOLATION:email'

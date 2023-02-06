@@ -30,7 +30,7 @@ class AddCommentValidatorTest extends TestCase {
 		$this->assertTrue( $validator->validate( $this->newAddCommentRequest( $text ) )->isSuccessful() );
 	}
 
-	public function getCreativeButValidCommentTexts(): iterable {
+	public static function getCreativeButValidCommentTexts(): iterable {
 		yield [ 'In the common tongue it reads "One Wiki to Rule Them All. One Wiki to Find Them. ' .
 			'One Wiki to Bring Them All and In The Darkness Bind Them." ' ];
 		yield [ 'Greetings from China ア' ];
