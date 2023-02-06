@@ -67,7 +67,7 @@ class ModerationServiceTest extends TestCase {
 	/**
 	 * @return iterable<array{string,boolean}>
 	 */
-	public function paymentTypeProvider(): iterable {
+	public static function paymentTypeProvider(): iterable {
 		yield 'Paypal does not need moderation' => [ 'PPL', false ];
 		yield 'Credit Card does not need moderation' => [ 'MCP', false ];
 		yield 'Sofort does not need moderation' => [ 'SUB', false ];
@@ -111,7 +111,7 @@ class ModerationServiceTest extends TestCase {
 		$this->assertFalse( $policyValidator->isAutoDeleted( ValidAddDonationRequest::getRequest() ) );
 	}
 
-	public function allowedEmailAddressProvider(): array {
+	public static function allowedEmailAddressProvider(): array {
 		return [
 			[ 'other.person@bar.baz' ],
 			[ 'test@example.computer.says.no' ],
@@ -128,7 +128,7 @@ class ModerationServiceTest extends TestCase {
 		$this->assertTrue( $policyValidator->isAutoDeleted( $request ) );
 	}
 
-	public function forbiddenEmailsProvider(): array {
+	public static function forbiddenEmailsProvider(): array {
 		return [
 			[ 'blocked.person@bar.baz' ],
 			[ 'test@example.com' ],

@@ -44,7 +44,7 @@ class ChunkedQueryResultIteratorTest extends TestCase {
 		$this->assertSame( [ 'id' => $numRows ], $lastResult );
 	}
 
-	public function provideNumRowsAndChunkSizes(): iterable {
+	public static function provideNumRowsAndChunkSizes(): iterable {
 		yield 'chunk size 1 - query for each row' => [ 20, 1 ];
 		yield 'chunk size 2' => [ 40, 2 ];
 		yield 'chunk size 5, only 2 queries needed' => [ 10, 5 ];
@@ -73,7 +73,7 @@ class ChunkedQueryResultIteratorTest extends TestCase {
 		$this->assertSame( [ 'id' => $maxOffset ], $lastResult );
 	}
 
-	public function provideChunkSizes(): iterable {
+	public static function provideChunkSizes(): iterable {
 		yield [ 1 ];
 		yield [ 10 ];
 		yield [ 19 ];

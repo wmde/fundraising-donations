@@ -67,9 +67,9 @@ class ModerateCommentUseCaseTest extends TestCase {
 		$this->assertTrue( $comment->isPublic(), $assertMessage );
 	}
 
-	public function commentProviderForPublication(): iterable {
-		yield [ $this->newPrivateComment(), 'private comments should be published' ];
-		yield [ $this->newPublicComment(), 'public comments should stay published' ];
+	public static function commentProviderForPublication(): iterable {
+		yield [ self::newPrivateComment(), 'private comments should be published' ];
+		yield [ self::newPublicComment(), 'public comments should stay published' ];
 	}
 
 	public function testWhenPublicationSucceeds_donationGetsPersisted(): void {
@@ -101,13 +101,13 @@ class ModerateCommentUseCaseTest extends TestCase {
 		$this->assertFalse( $comment->isPublic(), $assertMessage );
 	}
 
-	public function commentProviderForRetraction(): iterable {
-		yield [ $this->newPrivateComment(), 'private comments should stay private' ];
-		yield [ $this->newPublicComment(), 'public comments should be retracted' ];
+	public static function commentProviderForRetraction(): iterable {
+		yield [ self::newPrivateComment(), 'private comments should stay private' ];
+		yield [ self::newPublicComment(), 'public comments should be retracted' ];
 	}
 
 	public function testWhenRetractionSucceeds_donationGetsPersisted(): void {
-		$comment = $this->newPublicComment();
+		$comment = self::newPublicComment();
 		$repository = $this->createMock( CommentRepository::class );
 		$repository->method( 'getCommentByDonationId' )->willReturn( $comment );
 		$repository->expects( $this->once() )->method( 'updateComment' )->with( $comment );
@@ -120,7 +120,7 @@ class ModerateCommentUseCaseTest extends TestCase {
 
 	public function testPublicationAndRetractionLogAdminUserName(): void {
 		$repository = $this->createMock( CommentRepository::class );
-		$repository->method( 'getCommentByDonationId' )->willReturn( $this->newPublicComment() );
+		$repository->method( 'getCommentByDonationId' )->willReturn( self::newPublicComment() );
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
 		$retractionRequest = ModerateCommentRequest::retractComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
@@ -138,11 +138,11 @@ class ModerateCommentUseCaseTest extends TestCase {
 		$this->assertEquals( $expectedLogCalls, $logCalls );
 	}
 
-	private function newPublicComment(): DonationComment {
+	private static function newPublicComment(): DonationComment {
 		return new DonationComment( 'I love Wikipedia', true, 'Donnie Donor' );
 	}
 
-	private function newPrivateComment(): DonationComment {
+	private static function newPrivateComment(): DonationComment {
 		return new DonationComment( 'I donated for Wikipedia and all I got is this confirmation T-Shirt', false, 'anonymous' );
 	}
 }
