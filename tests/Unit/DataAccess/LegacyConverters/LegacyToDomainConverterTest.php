@@ -75,7 +75,7 @@ class LegacyToDomainConverterTest extends TestCase {
 	/**
 	 * @return iterable<array{DoctrineDonation, bool}>
 	 */
-	public function donationProviderForNewsletterSubscription(): iterable {
+	public static function donationProviderForNewsletterSubscription(): iterable {
 		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
 		$doctrineDonation->setDonorOptsIntoNewsletter( true );
 		yield 'private donor wants newsletter' => [ $doctrineDonation, true ];
@@ -122,7 +122,7 @@ class LegacyToDomainConverterTest extends TestCase {
 	/**
 	 * @return iterable<array{DoctrineDonation, bool}>
 	 */
-	public function donationProviderForReceipt(): iterable {
+	public static function donationProviderForReceipt(): iterable {
 		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
 		$doctrineDonation->setDonationReceipt( true );
 		yield 'private donor wants receipt' => [ $doctrineDonation, true ];

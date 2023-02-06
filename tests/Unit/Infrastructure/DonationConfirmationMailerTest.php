@@ -121,7 +121,7 @@ class DonationConfirmationMailerTest extends TestCase {
 		$this->assertCount( $expectedMailCount, $mailerSpy->getSendMailCalls() );
 	}
 
-	public function moderationReasonProvider(): iterable {
+	public static function moderationReasonProvider(): iterable {
 		yield 'address content violation' => [ [ new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION ) ], 0 ];
 		yield 'multiple violations, but not amount one' => [ [
 			new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION ),
