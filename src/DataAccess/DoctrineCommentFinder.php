@@ -61,8 +61,7 @@ class DoctrineCommentFinder implements CommentFinder {
 				$limit,
 				$offset
 			);
-		}
-		catch ( ORMException $ex ) {
+		} catch ( ORMException $ex ) {
 			throw new CommentListingException( $ex );
 		}
 	}

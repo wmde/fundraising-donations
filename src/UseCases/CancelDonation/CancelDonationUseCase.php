@@ -35,8 +35,7 @@ class CancelDonationUseCase {
 
 		try {
 			$donation = $this->donationRepository->getDonationById( $cancellationRequest->getDonationId() );
-		}
-		catch ( GetDonationException $ex ) {
+		} catch ( GetDonationException $ex ) {
 			return $this->newFailureResponse( $cancellationRequest );
 		}
 
@@ -53,8 +52,7 @@ class CancelDonationUseCase {
 
 		try {
 			$this->donationRepository->storeDonation( $donation );
-		}
-		catch ( StoreDonationException $ex ) {
+		} catch ( StoreDonationException $ex ) {
 			return $this->newFailureResponse( $cancellationRequest );
 		}
 
@@ -62,8 +60,7 @@ class CancelDonationUseCase {
 
 		try {
 			$this->sendConfirmationEmail( $cancellationRequest, $donation );
-		}
-		catch ( \RuntimeException $ex ) {
+		} catch ( \RuntimeException $ex ) {
 			return new CancelDonationResponse(
 				$cancellationRequest->getDonationId(),
 				CancelDonationResponse::MAIL_DELIVERY_FAILED

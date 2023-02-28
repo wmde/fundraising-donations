@@ -6,11 +6,10 @@ namespace WMDE\Fundraising\DonationContext\UseCases\GetDonation;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class GetDonationResponse {
+
+	private ?Donation $donation;
+	private ?string $updateToken;
 
 	public static function newNotAllowedResponse(): self {
 		return new self( null );
@@ -19,9 +18,6 @@ class GetDonationResponse {
 	public static function newValidResponse( Donation $donation, string $updateToken ): self {
 		return new self( $donation, $updateToken );
 	}
-
-	private $donation;
-	private $updateToken;
 
 	private function __construct( Donation $donation = null, string $updateToken = null ) {
 		$this->donation = $donation;

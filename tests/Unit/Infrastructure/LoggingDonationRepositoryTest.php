@@ -55,8 +55,7 @@ class LoggingDonationRepositoryTest extends \PHPUnit\Framework\TestCase {
 
 		try {
 			$loggingRepo->getDonationById( 1337 );
-		}
-		catch ( GetDonationException $ex ) {
+		} catch ( GetDonationException $ex ) {
 		}
 
 		$this->assertExceptionLoggedAsCritical( GetDonationException::class, $logger );
@@ -110,8 +109,7 @@ class LoggingDonationRepositoryTest extends \PHPUnit\Framework\TestCase {
 
 		try {
 			$loggingRepo->storeDonation( ValidDonation::newDirectDebitDonation() );
-		}
-		catch ( StoreDonationException $ex ) {
+		} catch ( StoreDonationException $ex ) {
 		}
 
 		$this->assertExceptionLoggedAsCritical( StoreDonationException::class, $logger );

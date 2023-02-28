@@ -45,7 +45,7 @@ class HttpDonationNotifier implements DonationNotifier {
 		);
 	}
 
-	public function sendModerationNotificationToAdmin( Donation $donation ) {
+	public function sendModerationNotificationToAdmin( Donation $donation ): void {
 		// This method should only be called from AddDonationUseCase,
 		// HttpDonationNotifier should not be used for that use case
 		throw new \LogicException( 'Method not allowed, check HttpDonationNotifier::sendModerationNotificationToAdmin comment for details.' );
