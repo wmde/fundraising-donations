@@ -17,7 +17,7 @@ class AddCommentValidationResult {
 	public const SOURCE_COMMENT = 'kommentar';
 	public const SOURCE_NAME = 'eintrag';
 
-	private $violations;
+	private array $violations;
 
 	/**
 	 * @param string[] $violations AddCommentValidationResult::SOURCE_ => AddCommentValidationResult::VIOLATION_

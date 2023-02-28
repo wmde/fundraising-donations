@@ -13,7 +13,10 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
  */
 class InMemoryCommentFinder implements CommentFinder {
 
-	private $comments;
+	/**
+	 * @var CommentWithAmount[]
+	 */
+	private array $comments;
 
 	public function __construct( CommentWithAmount ...$comments ) {
 		$this->comments = $comments;

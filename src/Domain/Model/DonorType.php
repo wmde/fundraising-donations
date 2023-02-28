@@ -21,7 +21,7 @@ class DonorType {
 		'ANONYMOUS' => 'anonymous'
 	];
 
-	protected function __construct( $type ) {
+	protected function __construct( string $type ) {
 		if ( !isset( self::TYPES[$type] ) ) {
 			throw new \UnexpectedValueException( 'Invalid type: ' . $type );
 		}
@@ -36,7 +36,7 @@ class DonorType {
 		return self::TYPES[$this->value];
 	}
 
-	public static function make( $value ): DonorType {
+	public static function make( string $value ): DonorType {
 		$valueMap = array_flip( self::TYPES );
 		if ( !isset( $valueMap[$value] ) ) {
 			throw new \UnexpectedValueException( 'Invalid value: ' . $value );

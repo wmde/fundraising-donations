@@ -9,10 +9,6 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class DonationAcceptedEventHandler {
 
 	public const AUTHORIZATION_FAILED = 'Authorization failed';
@@ -42,8 +38,7 @@ class DonationAcceptedEventHandler {
 
 		try {
 			$donation = $this->repository->getDonationById( $donationId );
-		}
-		catch ( GetDonationException $ex ) {
+		} catch ( GetDonationException $ex ) {
 			return self::DATABASE_ERROR_OCCURRED;
 		}
 

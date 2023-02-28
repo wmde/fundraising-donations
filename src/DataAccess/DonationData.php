@@ -4,23 +4,17 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
-/**
- * @since 2.0
- *
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class DonationData {
 
-	private $accessToken;
-	private $updateToken;
-	private $updateTokenExpiry;
+	private ?string $accessToken = null;
+	private ?string $updateToken = null;
+	private ?string $updateTokenExpiry = null;
 
 	public function getAccessToken(): ?string {
 		return $this->accessToken;
 	}
 
-	public function setAccessToken( ?string $token ) {
+	public function setAccessToken( ?string $token ): void {
 		$this->accessToken = $token;
 	}
 
@@ -28,7 +22,7 @@ class DonationData {
 		return $this->updateToken;
 	}
 
-	public function setUpdateToken( ?string $updateToken ) {
+	public function setUpdateToken( ?string $updateToken ): void {
 		$this->updateToken = $updateToken;
 	}
 

@@ -4,9 +4,12 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddComment;
 
+use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
@@ -20,20 +23,17 @@ use WMDE\FunValidators\Validators\TextPolicyValidator;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentUseCase
- *
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
-class AddCommentUseCaseTest extends \PHPUnit\Framework\TestCase {
+class AddCommentUseCaseTest extends TestCase {
 
 	private const DONATION_ID = 9001;
 	private const COMMENT_TEXT = 'Your programmers deserve a raise';
 	private const COMMENT_IS_PUBLIC = true;
 
-	private $donationRepository;
-	private $authorizer;
-	private $textPolicyValidator;
-	private $commentValidator;
+	private DonationRepository $donationRepository;
+	private DonationAuthorizer $authorizer;
+	private TextPolicyValidator $textPolicyValidator;
+	private AddCommentValidator $commentValidator;
 
 	public function setUp(): void {
 		$this->donationRepository = new FakeDonationRepository();

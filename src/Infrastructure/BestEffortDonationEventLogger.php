@@ -8,12 +8,11 @@ use Psr\Log\LoggerInterface;
 
 /**
  * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
  */
 class BestEffortDonationEventLogger implements DonationEventLogger {
 
-	private $donationEventLogger;
-	private $logger;
+	private DonationEventLogger $donationEventLogger;
+	private LoggerInterface $logger;
 
 	public function __construct( DonationEventLogger $donationEventLogger, LoggerInterface $logger ) {
 		$this->donationEventLogger = $donationEventLogger;
@@ -23,8 +22,7 @@ class BestEffortDonationEventLogger implements DonationEventLogger {
 	public function log( int $donationId, string $message ): void {
 		try {
 			$this->donationEventLogger->log( $donationId, $message );
-		}
-		catch ( DonationEventLogException $e ) {
+		} catch ( DonationEventLogException $e ) {
 			$logContext = [
 				'donationId' => $donationId,
 				'exception' => $e,

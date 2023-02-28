@@ -4,20 +4,11 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\ListComments;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class CommentListingRequest {
 
 	public const FIRST_PAGE = 1;
 
-	private $limit;
-	private $page;
-
-	public function __construct( int $limit, int $page ) {
-		$this->limit = $limit;
-		$this->page = $page;
+	public function __construct( private readonly int $limit, private readonly int $page ) {
 	}
 
 	public function getLimit(): int {

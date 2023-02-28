@@ -22,17 +22,11 @@ use WMDE\FunValidators\Validators\TextPolicyValidator;
  */
 class AddCommentUseCase {
 
-	private $donationRepository;
-	private $authorizationService;
-	private $textPolicyValidator;
-	private $commentValidator;
-
-	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-		TextPolicyValidator $textPolicyValidator, AddCommentValidator $commentValidator ) {
-		$this->donationRepository = $repository;
-		$this->authorizationService = $authorizationService;
-		$this->textPolicyValidator = $textPolicyValidator;
-		$this->commentValidator = $commentValidator;
+	public function __construct(
+		private readonly DonationRepository $donationRepository,
+		private readonly DonationAuthorizer $authorizationService,
+		private readonly TextPolicyValidator $textPolicyValidator,
+		private readonly AddCommentValidator $commentValidator ) {
 	}
 
 	public function addComment( AddCommentRequest $addCommentRequest ): AddCommentResponse {
@@ -47,8 +41,7 @@ class AddCommentUseCase {
 
 		try {
 			$donation = $this->donationRepository->getDonationById( $addCommentRequest->getDonationId() );
-		}
-		catch ( GetDonationException $ex ) {
+		} catch ( GetDonationException $ex ) {
 			return AddCommentResponse::newFailureResponse( 'comment_failure_donation_error' );
 		}
 
@@ -75,8 +68,7 @@ class AddCommentUseCase {
 
 		try {
 			$this->donationRepository->storeDonation( $donation );
-		}
-		catch ( StoreDonationException $ex ) {
+		} catch ( StoreDonationException $ex ) {
 			return AddCommentResponse::newFailureResponse( 'comment_failure_save_error' );
 		}
 
