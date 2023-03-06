@@ -18,13 +18,12 @@ class LoggingCommentFinder implements CommentFinder {
 
 	private const CONTEXT_EXCEPTION_KEY = 'exception';
 
-	private $commentFinder;
-	private $logger;
-	private $logLevel;
+	private string $logLevel;
 
-	public function __construct( CommentFinder $commentFinder, LoggerInterface $logger ) {
-		$this->commentFinder = $commentFinder;
-		$this->logger = $logger;
+	public function __construct(
+		private readonly CommentFinder $commentFinder,
+		private readonly LoggerInterface $logger
+	) {
 		$this->logLevel = LogLevel::CRITICAL;
 	}
 
@@ -40,8 +39,7 @@ class LoggingCommentFinder implements CommentFinder {
 	public function getPublicComments( int $limit, int $offset = 0 ): array {
 		try {
 			return $this->commentFinder->getPublicComments( $limit, $offset );
-		}
-		catch ( CommentListingException $ex ) {
+		} catch ( CommentListingException $ex ) {
 			$this->logger->log( $this->logLevel, $ex->getMessage(), [ self::CONTEXT_EXCEPTION_KEY => $ex ] );
 			throw $ex;
 		}

@@ -10,22 +10,13 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class DoctrineDonationPrePersistSubscriber implements EventSubscriber {
 
 	private const DATE_TIME_FORMAT = 'Y-m-d H:i:s';
 
-	private $updateTokenGenerator;
-	private $accessTokenGenerator;
-
-	public function __construct( TokenGenerator $updateTokenGenerator, TokenGenerator $accessTokenGenerator ) {
-		$this->updateTokenGenerator = $updateTokenGenerator;
-		$this->accessTokenGenerator = $accessTokenGenerator;
+	public function __construct(
+		private readonly TokenGenerator $updateTokenGenerator,
+		private readonly TokenGenerator $accessTokenGenerator ) {
 	}
 
 	public function getSubscribedEvents(): array {

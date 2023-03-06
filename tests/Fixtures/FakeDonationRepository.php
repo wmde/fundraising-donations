@@ -16,7 +16,15 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 class FakeDonationRepository implements DonationRepository {
 
 	private int $calls = 0;
+
+	/**
+	 * @var Donation[]
+	 */
 	private array $donations = [];
+
+	/**
+	 * @var Donation[]
+	 */
 	private array $donationClones = [];
 	private bool $throwOnRead = false;
 	private bool $throwOnWrite = false;
@@ -49,7 +57,10 @@ class FakeDonationRepository implements DonationRepository {
 		$this->donationClones[$donation->getId()] = clone $donation;
 	}
 
-	public function getDonations() {
+	/**
+	 * @return Donation[]
+	 */
+	public function getDonations(): array {
 		return $this->donations;
 	}
 

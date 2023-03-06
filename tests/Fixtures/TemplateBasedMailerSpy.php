@@ -8,14 +8,10 @@ use PHPUnit\Framework\TestCase;
 use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class TemplateBasedMailerSpy implements TemplateMailerInterface {
 
-	private $testCase;
-	private $sendMailCalls = [];
+	private TestCase $testCase;
+	private array $sendMailCalls = [];
 
 	public function __construct( TestCase $testCase ) {
 		$this->testCase = $testCase;

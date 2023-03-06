@@ -66,7 +66,7 @@ class DonationMailer implements DonationNotifier {
 		return $result;
 	}
 
-	public function sendModerationNotificationToAdmin( Donation $donation ) {
+	public function sendModerationNotificationToAdmin( Donation $donation ): void {
 		$importantReasons = array_filter(
 			$donation->getModerationReasons(),
 			fn( $moderationReason ) => $moderationReason->getModerationIdentifier() === ModerationIdentifier::AMOUNT_TOO_HIGH

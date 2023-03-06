@@ -16,7 +16,9 @@ class UpdateDonorResponse {
 	public const ERROR_DONATION_IS_EXPORTED = 'donor_change_failure_exported';
 	public const ERROR_VALIDATION_FAILED = 'donor_change_failure_validation_error';
 
-	private $donation;
+	private ?Donation $donation;
+	private string $errorMessage;
+	private string $successMessage;
 
 	public static function newSuccessResponse( string $successMessage, Donation $donation = null ): self {
 		return new self( '', $successMessage, $donation );
@@ -25,9 +27,6 @@ class UpdateDonorResponse {
 	public static function newFailureResponse( string $errorMessage, Donation $donation = null ): self {
 		return new self( $errorMessage, '', $donation );
 	}
-
-	private $errorMessage;
-	private $successMessage;
 
 	private function __construct( string $errorMessage = null, string $successMessage = null, Donation $donation = null ) {
 		$this->errorMessage = $errorMessage;

@@ -9,14 +9,10 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class ThrowingDonationRepository implements DonationRepository {
 
-	private $throwOnStoreDonation;
-	private $onGetDonationById;
+	private bool $throwOnStoreDonation = false;
+	private bool $onGetDonationById = false;
 
 	public function throwOnStoreDonation(): void {
 		$this->throwOnStoreDonation = true;

@@ -11,17 +11,13 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class LoggingDonationRepository implements DonationRepository {
 
 	private const CONTEXT_EXCEPTION_KEY = 'exception';
 
-	private $repository;
-	private $logger;
-	private $logLevel;
+	private DonationRepository $repository;
+	private LoggerInterface $logger;
+	private string $logLevel;
 
 	public function __construct( DonationRepository $repository, LoggerInterface $logger ) {
 		$this->repository = $repository;
@@ -39,8 +35,7 @@ class LoggingDonationRepository implements DonationRepository {
 	public function storeDonation( Donation $donation ): void {
 		try {
 			$this->repository->storeDonation( $donation );
-		}
-		catch ( StoreDonationException $ex ) {
+		} catch ( StoreDonationException $ex ) {
 			$this->logger->log( $this->logLevel, $ex->getMessage(), [ self::CONTEXT_EXCEPTION_KEY => $ex ] );
 			throw $ex;
 		}
@@ -57,8 +52,7 @@ class LoggingDonationRepository implements DonationRepository {
 	public function getDonationById( int $id ): ?Donation {
 		try {
 			return $this->repository->getDonationById( $id );
-		}
-		catch ( GetDonationException $ex ) {
+		} catch ( GetDonationException $ex ) {
 			$this->logger->log( $this->logLevel, $ex->getMessage(), [ self::CONTEXT_EXCEPTION_KEY => $ex ] );
 			throw $ex;
 		}

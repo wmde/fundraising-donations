@@ -435,7 +435,7 @@ class Donation {
 		$this->paymentId = $paymentId;
 	}
 
-	public function setId( ?int $id ) {
+	public function setId( ?int $id ): void {
 		$this->id = $id;
 	}
 
@@ -507,7 +507,7 @@ class Donation {
 		return $data;
 	}
 
-	public function setDataObject( DonationData $data ) {
+	public function setDataObject( DonationData $data ): void {
 		$dataArray = array_merge(
 			$this->getDecodedData(),
 			[
@@ -529,7 +529,7 @@ class Donation {
 	/**
 	 * @param callable $modificationFunction Takes a modifiable DonationData parameter
 	 */
-	public function modifyDataObject( callable $modificationFunction ) {
+	public function modifyDataObject( callable $modificationFunction ): void {
 		$dataObject = $this->getDataObject();
 		$modificationFunction( $dataObject );
 		$this->setDataObject( $dataObject );

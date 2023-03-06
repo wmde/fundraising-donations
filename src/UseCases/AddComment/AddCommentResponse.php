@@ -19,8 +19,8 @@ class AddCommentResponse {
 		return new self( $errorMessage, '' );
 	}
 
-	private $errorMessage;
-	private $successMessage;
+	private string $errorMessage;
+	private string $successMessage;
 
 	private function __construct( string $errorMessage, string $successMessage ) {
 		$this->errorMessage = $errorMessage;
