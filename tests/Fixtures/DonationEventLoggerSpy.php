@@ -12,12 +12,18 @@ use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
  */
 class DonationEventLoggerSpy implements DonationEventLogger {
 
-	private $logCalls = [];
+	/**
+	 * @var array<array{int, string}>
+	 */
+	private array $logCalls = [];
 
 	public function log( int $donationId, string $message ): void {
 		$this->logCalls[] = [ $donationId, $message ];
 	}
 
+	/**
+	 * @return array<array{int, string}>
+	 */
 	public function getLogCalls(): array {
 		return $this->logCalls;
 	}

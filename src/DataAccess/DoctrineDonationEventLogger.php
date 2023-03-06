@@ -10,17 +10,14 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as Doc
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogException;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class DoctrineDonationEventLogger implements DonationEventLogger {
 
-	private $entityManager;
+	/**
+	 * @var callable|\Closure
+	 */
 	private $timestampFunction;
 
-	public function __construct( EntityManager $entityManager, callable $timestampFunction = null ) {
-		$this->entityManager = $entityManager;
+	public function __construct( private readonly EntityManager $entityManager, ?callable $timestampFunction = null ) {
 		if ( $timestampFunction === null ) {
 			$this->timestampFunction = static function () {
 				return date( 'Y-m-d H:i:s' );
@@ -34,8 +31,7 @@ class DoctrineDonationEventLogger implements DonationEventLogger {
 		try {
 			/** @var ?DoctrineDonation $donation */
 			$donation = $this->entityManager->find( DoctrineDonation::class, $donationId );
-		}
-		catch ( ORMException $e ) {
+		} catch ( ORMException $e ) {
 			throw new DonationEventLogException( 'Could not get donation', $e );
 		}
 
@@ -53,8 +49,7 @@ class DoctrineDonationEventLogger implements DonationEventLogger {
 		try {
 			$this->entityManager->persist( $donation );
 			$this->entityManager->flush();
-		}
-		catch ( ORMException $e ) {
+		} catch ( ORMException $e ) {
 			throw new DonationEventLogException( 'Could not store donation', $e );
 		}
 	}

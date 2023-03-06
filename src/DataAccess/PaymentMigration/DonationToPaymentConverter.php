@@ -411,7 +411,7 @@ class DonationToPaymentConverter {
 		return 0;
 	}
 
-	private function addDoubleBookedIds( int $donationId, array $log ) {
+	private function addDoubleBookedIds( int $donationId, array $log ): void {
 		foreach ( $log as $msg ) {
 			if ( preg_match( '/new transaction id (?:to )?corresponding child donation: ?(\d+)/', $msg, $matches ) ) {
 				$childId = intval( $matches[1] );

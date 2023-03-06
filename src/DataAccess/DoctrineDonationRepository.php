@@ -10,6 +10,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as Doc
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -38,7 +39,11 @@ class DoctrineDonationRepository implements DonationRepository {
 		}
 	}
 
-	private function insertDonation( Donation $donation, $existingModerationReasons ): void {
+	/**
+	 * @param Donation $donation
+	 * @param ModerationReason[] $existingModerationReasons
+	 */
+	private function insertDonation( Donation $donation, array $existingModerationReasons ): void {
 		$converter = new DomainToLegacyConverter();
 		$doctrineDonation = $converter->convert(
 			$donation,
@@ -50,19 +55,21 @@ class DoctrineDonationRepository implements DonationRepository {
 		try {
 			$this->entityManager->persist( $doctrineDonation );
 			$this->entityManager->flush();
-		}
-		catch ( ORMException $ex ) {
+		} catch ( ORMException $ex ) {
 			throw new StoreDonationException( $ex );
 		}
 
 		$donation->assignId( $doctrineDonation->getId() );
 	}
 
-	private function updateDonation( Donation $donation, $existingModerationReasons ): void {
+	/**
+	 * @param Donation $donation
+	 * @param ModerationReason[] $existingModerationReasons
+	 */
+	private function updateDonation( Donation $donation, array $existingModerationReasons ): void {
 		try {
 			$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
-		}
-		catch ( GetDonationException $ex ) {
+		} catch ( GetDonationException $ex ) {
 			throw new StoreDonationException( $ex );
 		}
 
@@ -81,8 +88,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		try {
 			$this->entityManager->persist( $doctrineDonation );
 			$this->entityManager->flush();
-		}
-		catch ( ORMException $ex ) {
+		} catch ( ORMException $ex ) {
 			throw new StoreDonationException( $ex );
 		}
 	}
@@ -90,8 +96,7 @@ class DoctrineDonationRepository implements DonationRepository {
 	private function getDoctrineDonationById( int $id ): ?DoctrineDonation {
 		try {
 			return $this->entityManager->find( DoctrineDonation::class, $id );
-		}
-		catch ( ORMException $ex ) {
+		} catch ( ORMException $ex ) {
 			throw new GetDonationException( $ex );
 		}
 	}

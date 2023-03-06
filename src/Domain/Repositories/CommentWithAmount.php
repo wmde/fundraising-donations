@@ -7,18 +7,14 @@ namespace WMDE\Fundraising\DonationContext\Domain\Repositories;
 use DateTime;
 use WMDE\FreezableValueObject\FreezableValueObject;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class CommentWithAmount {
 	use FreezableValueObject;
 
-	private $authorName;
-	private $donationAmount;
-	private $commentText;
-	private $donationTime;
-	private $donationId;
+	private string $authorName;
+	private float $donationAmount;
+	private string $commentText;
+	private DateTime $donationTime;
+	private int $donationId;
 
 	public static function newInstance(): self {
 		return new self();

@@ -6,19 +6,12 @@ namespace WMDE\Fundraising\DonationContext\UseCases\ListComments;
 
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentFinder;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class ListCommentsUseCase {
 
 	private const MAX_PAGE = 100;
 	private const MAX_LIMIT = 100;
 
-	private $commentRepository;
-
-	public function __construct( CommentFinder $commentRepository ) {
-		$this->commentRepository = $commentRepository;
+	public function __construct( private readonly CommentFinder $commentRepository ) {
 	}
 
 	public function listComments( CommentListingRequest $listingRequest ): CommentList {

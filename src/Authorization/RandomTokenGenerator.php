@@ -10,12 +10,10 @@ namespace WMDE\Fundraising\DonationContext\Authorization;
  */
 class RandomTokenGenerator implements TokenGenerator {
 
-	private $tokenLength;
-	private $validityTimeSpan;
-
-	public function __construct( int $tokenLength, \DateInterval $validityTimeSpan ) {
-		$this->tokenLength = $tokenLength;
-		$this->validityTimeSpan = $validityTimeSpan;
+	public function __construct(
+		private readonly int $tokenLength,
+		private readonly \DateInterval $validityTimeSpan
+	) {
 	}
 
 	public function generateToken(): string {

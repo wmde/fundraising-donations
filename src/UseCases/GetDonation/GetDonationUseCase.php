@@ -10,21 +10,12 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class GetDonationUseCase {
 
-	private $authorizer;
-	private $tokenFetcher;
-	private $donationRepository;
-
-	public function __construct( DonationAuthorizer $authorizer, DonationTokenFetcher $tokenFetcher,
-		DonationRepository $donationRepository ) {
-		$this->authorizer = $authorizer;
-		$this->tokenFetcher = $tokenFetcher;
-		$this->donationRepository = $donationRepository;
+	public function __construct(
+		private readonly DonationAuthorizer $authorizer,
+		private readonly DonationTokenFetcher $tokenFetcher,
+		private readonly DonationRepository $donationRepository ) {
 	}
 
 	public function showConfirmation( GetDonationRequest $request ): GetDonationResponse {
@@ -48,8 +39,7 @@ class GetDonationUseCase {
 	private function getDonationById( int $donationId ): ?Donation {
 		try {
 			return $this->donationRepository->getDonationById( $donationId );
-		}
-		catch ( GetDonationException $ex ) {
+		} catch ( GetDonationException $ex ) {
 			return null;
 		}
 	}

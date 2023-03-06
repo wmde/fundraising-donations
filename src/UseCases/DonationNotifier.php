@@ -10,5 +10,5 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 interface DonationNotifier {
 	public function sendConfirmationFor( Donation $donation ): void;
 
-	public function sendModerationNotificationToAdmin( Donation $donation );
+	public function sendModerationNotificationToAdmin( Donation $donation ): void;
 }
