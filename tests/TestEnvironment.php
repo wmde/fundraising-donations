@@ -6,6 +6,9 @@ namespace WMDE\Fundraising\DonationContext\Tests;
 
 class TestEnvironment {
 
+	/**
+	 * @var array<mixed>
+	 */
 	private array $config;
 	private TestDonationContextFactory $factory;
 

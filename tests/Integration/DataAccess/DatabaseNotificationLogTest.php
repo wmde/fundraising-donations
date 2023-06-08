@@ -47,6 +47,9 @@ class DatabaseNotificationLogTest extends TestCase {
 		$log = new DatabaseNotificationLog( $this->entityManager );
 		$log->logConfirmationSent( self::MISSING_DONATION_ID );
 
+		/**
+		 * @var string $count
+		 */
 		$count = $this->connection->fetchOne(
 			"SELECT count(*) as row_count FROM {$this->tableName} WHERE donation_id = ?",
 			[ self::MISSING_DONATION_ID ]
@@ -61,6 +64,9 @@ class DatabaseNotificationLogTest extends TestCase {
 
 		$log->logConfirmationSent( self::EXISTING_DONATION_ID );
 
+		/**
+		 * @var string $count
+		 */
 		$count = $this->connection->fetchOne(
 			"SELECT count(*) as row_count FROM {$this->tableName} WHERE donation_id = ?",
 			[ self::EXISTING_DONATION_ID ]

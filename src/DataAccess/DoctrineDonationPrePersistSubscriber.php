@@ -23,6 +23,11 @@ class DoctrineDonationPrePersistSubscriber implements EventSubscriber {
 		return [ Events::prePersist ];
 	}
 
+	/**
+	 * @param LifecycleEventArgs $args
+	 *
+	 * @return void
+	 */
 	public function prePersist( LifecycleEventArgs $args ): void {
 		$entity = $args->getObject();
 

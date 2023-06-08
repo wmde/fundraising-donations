@@ -4,6 +4,10 @@ declare( strict_types=1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration;
 
 class ResultObject {
+
+	/**
+	 * @var array<int,array<string,mixed>>
+	 */
 	private array $itemBuffer = [];
 	private int $bufferIndex;
 	private int $itemCount;
@@ -12,7 +16,7 @@ class ResultObject {
 
 	/**
 	 * @param int $bufferSize
-	 * @param array $row
+	 * @param array<string,mixed> $row
 	 */
 	public function __construct( private int $bufferSize, array $row ) {
 		$this->itemBuffer = [ $row ];
@@ -22,6 +26,11 @@ class ResultObject {
 		$this->donationDateRange = new BoundedValue( $row['donationDate'] );
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 *
+	 * @return void
+	 */
 	public function add( array $row ): void {
 		$this->itemBuffer[$this->bufferIndex] = $row;
 		$this->itemCount++;
@@ -34,6 +43,9 @@ class ResultObject {
 		return $this->itemCount;
 	}
 
+	/**
+	 * @return array<int,array<string,mixed>>
+	 */
 	public function getItemSample(): array {
 		return $this->itemBuffer;
 	}

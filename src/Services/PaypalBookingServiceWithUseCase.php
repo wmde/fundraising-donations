@@ -16,6 +16,12 @@ class PaypalBookingServiceWithUseCase implements PaypalBookingService {
 		$this->useCase = $bookedPayPalPaymentUseCase;
 	}
 
+	/**
+	 * @param int $amountInCents
+	 * @param array<string,mixed> $transactionData
+	 *
+	 * @return SuccessResponse|FailureResponse
+	 */
 	public function bookNewPayment( int $amountInCents, array $transactionData ): SuccessResponse|FailureResponse {
 		return $this->useCase->bookNewPayment( $amountInCents, $transactionData );
 	}

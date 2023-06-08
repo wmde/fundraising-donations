@@ -47,6 +47,12 @@ class DoctrineCommentFinder implements CommentFinder {
 		);
 	}
 
+	/**
+	 * @param int $limit
+	 * @param int $offset
+	 *
+	 * @return Donation[]
+	 */
 	private function getDonations( int $limit, int $offset ): array {
 		try {
 			return $this->entityManager->getRepository( Donation::class )->findBy(

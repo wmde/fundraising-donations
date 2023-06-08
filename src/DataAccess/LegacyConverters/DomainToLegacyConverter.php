@@ -98,6 +98,12 @@ class DomainToLegacyConverter {
 		}
 	}
 
+	/**
+	 * @param Donation $donation
+	 * @param LegacyPaymentData $legacyPaymentData
+	 *
+	 * @return array<string,mixed>
+	 */
 	private function getDataMap( Donation $donation, LegacyPaymentData $legacyPaymentData ): array {
 		$filteredPaymentSpecificValues = $legacyPaymentData->paymentSpecificValues;
 		unset( $filteredPaymentSpecificValues['ueb_code'] );
@@ -108,6 +114,11 @@ class DomainToLegacyConverter {
 		);
 	}
 
+	/**
+	 * @param DonationTrackingInfo $trackingInfo
+	 *
+	 * @return array<string,int|string>
+	 */
 	private function getDataFieldsFromTrackingInfo( DonationTrackingInfo $trackingInfo ): array {
 		return [
 			'layout' => $trackingInfo->getLayout(),

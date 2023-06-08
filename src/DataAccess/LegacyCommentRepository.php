@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
+use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -18,6 +19,9 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
  */
 class LegacyCommentRepository implements CommentRepository {
 
+	/**
+	 * @var array<int,Donation>
+	 */
 	private array $fetchedDonationsByComment = [];
 	private DonationRepository $donationRepository;
 

@@ -1,5 +1,6 @@
 <?php
-declare( strict_types=1 );
+
+declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration;
 
@@ -19,6 +20,7 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\SofortPayment;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentIdRepository;
 
 class DonationToPaymentConverter {
+
 	private const PPL_LEGACY_KEY_MAP = [
 		'paypal_payer_id' => 'payer_id',
 		'paypal_subscr_id' => 'subscr_id',
@@ -63,6 +65,9 @@ class DonationToPaymentConverter {
 	private PaymentIdRepository $dummyIdGeneratorForFollowups;
 	private PaymentReferenceCode $anonymisedPaymentReferenceCode;
 	private ConversionResult $result;
+	/**
+	 * @var array<int[]>
+	 */
 	private array $doubleBookedPayPalChildIds = [];
 	private int $syntheticTransactionIdCounter = 1;
 
@@ -74,26 +79,24 @@ class DonationToPaymentConverter {
 	 */
 	private \DateTimeImmutable $lostBookingDataPeriodStart;
 	private \DateTimeImmutable $lostBookingDataPeriodEnd;
+	private NewPaymentHandler $paymentHandler;
+	private PaypalParentFinder $paypalParentFinder;
+	private ProgressPrinter $progressPrinter;
 
 	public function __construct(
 		private Connection $db,
-		private ?NewPaymentHandler $paymentHandler = null,
-		private ?PaypalParentFinder $paypalParentFinder = null,
-		private ?ProgressPrinter $progressPrinter = null
+		?NewPaymentHandler $paymentHandler = null,
+		?PaypalParentFinder $paypalParentFinder = null,
+		?ProgressPrinter $progressPrinter = null
 	) {
 		$this->dummyIdGeneratorForFollowups = new NullGenerator();
 		$this->anonymisedPaymentReferenceCode = PaymentReferenceCode::newFromString( self::ANONYMOUS_REFERENCE_CODE );
 		$this->lostBookingDataPeriodStart = new \DateTimeImmutable( '2015-09-28 0:00:00' );
 		$this->lostBookingDataPeriodEnd = new \DateTimeImmutable( '2015-10-08 0:00:00' );
-		if ( $paymentHandler === null ) {
-			$this->paymentHandler = new NullPaymentHandler();
-		}
-		if ( $this->paypalParentFinder === null ) {
-			$this->paypalParentFinder = new NullPaypalParentFinder();
-		}
-		if ( $this->progressPrinter === null ) {
-			$this->progressPrinter = new ProgressPrinter();
-		}
+
+		$this->paymentHandler = $paymentHandler ?? new NullPaymentHandler();
+		$this->paypalParentFinder = $paypalParentFinder ?? new NullPaypalParentFinder();
+		$this->progressPrinter = $progressPrinter ?? new ProgressPrinter();
 	}
 
 	/**
@@ -103,6 +106,7 @@ class DonationToPaymentConverter {
 	 *
 	 * @param int $idOffset Starting donation ID (exclusive)
 	 * @param int $maxDonationId End donation ID
+	 *
 	 * @return ConversionResult
 	 */
 	public function convertDonations( int $idOffset = 0, int $maxDonationId = self::CONVERT_ALL ): ConversionResult {
@@ -130,17 +134,31 @@ class DonationToPaymentConverter {
 		return $this->result;
 	}
 
-	 private function getRows( int $minDonationId, int $maxDonationId ): iterable {
+	/**
+	 * @param int $minDonationId
+	 * @param int $maxDonationId
+	 *
+	 * @return iterable<array<string,mixed>>
+	 */
+	private function getRows( int $minDonationId, int $maxDonationId ): iterable {
 		$qb = $this->db->createQueryBuilder();
-		$qb->select( 'd.id', 'betrag AS amount', 'periode AS intervalInMonths', 'zahlweise AS paymentType',
-			 'ueb_code AS transferCode', 'data', 'status', 'dt_new AS donationDate', 'ps.confirmed_at AS valuationDate',
+		$qb->select(
+			'd.id',
+			'betrag AS amount',
+			'periode AS intervalInMonths',
+			'zahlweise AS paymentType',
+			'ueb_code AS transferCode',
+			'data',
+			'status',
+			'dt_new AS donationDate',
+			'ps.confirmed_at AS valuationDate',
 		)
-			 ->from( 'spenden', 'd' )
-			 ->leftJoin( 'd', 'donation_payment', 'p', 'd.legacy_payment_id = p.id' )
-			 ->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' );
+			->from( 'spenden', 'd' )
+			->leftJoin( 'd', 'donation_payment', 'p', 'd.legacy_payment_id = p.id' )
+			->leftJoin( 'p', 'donation_payment_sofort', 'ps', 'ps.id = p.id' );
 
 		return new ChunkedQueryResultIterator( $qb, 'd.id', self::CHUNK_SIZE, $maxDonationId, $minDonationId );
-	 }
+	}
 
 	private function getMaxId(): int {
 		$maxId = $this->db->executeQuery( "SELECT MAX(id) FROM spenden" )->fetchOne();
@@ -153,6 +171,12 @@ class DonationToPaymentConverter {
 		return $maxId;
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 *
+	 * @return Payment
+	 * @throws \Exception
+	 */
 	private function newPayment( array $row ): Payment {
 		switch ( $row['paymentType'] ) {
 			case 'PPL':
@@ -171,6 +195,12 @@ class DonationToPaymentConverter {
 		}
 	}
 
+	/**
+	 * @param array<string,string> $keymap
+	 * @param array<string,mixed> $data
+	 *
+	 * @return array<string,mixed>
+	 */
 	private function getBookingData( array $keymap, array $data ): array {
 		$bookingData = [];
 		foreach ( $keymap as $legacyKey => $name ) {
@@ -181,6 +211,12 @@ class DonationToPaymentConverter {
 		return $bookingData;
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 *
+	 * @return CreditCardPayment
+	 * @throws \Exception
+	 */
 	private function newCreditCardPayment( array $row ): CreditCardPayment {
 		$payment = new CreditCardPayment(
 			intval( $row['id'] ),
@@ -224,6 +260,12 @@ class DonationToPaymentConverter {
 		return $payment;
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 *
+	 * @return PayPalPayment
+	 * @throws \Exception
+	 */
 	private function newPayPalPayment( array $row ): PayPalPayment {
 		$interval = $this->getPaymentIntervalForPaypal( $row );
 		$payment = new PayPalPayment(
@@ -257,11 +299,16 @@ class DonationToPaymentConverter {
 				$this->result->addWarning( 'Booked Paypal payment without timestamp, assumed donation date', $row );
 				$row['data']['ext_payment_timestamp'] = $this->newPaypalPaymentDate( $row['donationDate'] );
 			}
-		} elseif ( !\DateTimeImmutable::createFromFormat( PayPalBookingTransformer::PAYPAL_DATE_FORMAT, $row['data']['ext_payment_timestamp'] ) ) {
+		} elseif ( !\DateTimeImmutable::createFromFormat(
+			PayPalBookingTransformer::PAYPAL_DATE_FORMAT,
+			$row['data']['ext_payment_timestamp']
+		) ) {
 			$solution = 'created from donation date';
 			$oldRow = $row;
 			try {
-				$row['data']['ext_payment_timestamp'] = $this->newPaypalPaymentDate( $row['data']['ext_payment_timestamp'] );
+				$row['data']['ext_payment_timestamp'] = $this->newPaypalPaymentDate(
+					$row['data']['ext_payment_timestamp']
+				);
 				$solution = 'reformatted existing date';
 			} catch ( \Exception ) {
 				$row['data']['ext_payment_timestamp'] = $this->newPaypalPaymentDate( $row['donationDate'] );
@@ -276,7 +323,10 @@ class DonationToPaymentConverter {
 
 		// Replace payment with parent PayPal payment, to create followup donations
 		$payment = $this->paypalParentFinder->getParentPaypalPayment( $row, $this->result ) ?? $payment;
-		return $payment->bookPayment( $this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ), new OneTimeIdGenerator( intval( $row['id'] ) ) );
+		return $payment->bookPayment(
+			$this->getBookingData( self::PPL_LEGACY_KEY_MAP, $row['data'] ),
+			new OneTimeIdGenerator( intval( $row['id'] ) )
+		);
 	}
 
 	private function newPaypalPaymentDate( string $dateSource ): string {
@@ -284,10 +334,19 @@ class DonationToPaymentConverter {
 			->format( PayPalBookingTransformer::PAYPAL_DATE_FORMAT );
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 *
+	 * @return SofortPayment
+	 * @throws \Exception
+	 */
 	private function newSofortPayment( array $row ): SofortPayment {
 		$interval = PaymentInterval::from( intval( $row['intervalInMonths'] ) );
 		if ( $interval !== PaymentInterval::OneTime ) {
-			$this->result->addWarning( 'Recurring interval for sofort payment, set to one-time', [ ...$row, 'interval' => $interval->value ] );
+			$this->result->addWarning(
+				'Recurring interval for sofort payment, set to one-time',
+				[ ...$row, 'interval' => $interval->value ]
+			);
 			$interval = PaymentInterval::OneTime;
 		}
 		$payment = SofortPayment::create(
@@ -320,6 +379,11 @@ class DonationToPaymentConverter {
 		}
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 *
+	 * @return DirectDebitPayment
+	 */
 	private function newDirectDebitPayment( array $row ): DirectDebitPayment {
 		if ( empty( $row['data']['iban'] ) ) {
 			// DummyData
@@ -347,6 +411,11 @@ class DonationToPaymentConverter {
 		return $payment;
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 *
+	 * @return BankTransferPayment
+	 */
 	private function newBankTransferPayment( array $row ): BankTransferPayment {
 		$paymentReferenceCode = $this->getPaymentReferenceCode( $row );
 		$payment = BankTransferPayment::create(
@@ -362,6 +431,11 @@ class DonationToPaymentConverter {
 		return $payment;
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 *
+	 * @return PaymentReferenceCode
+	 */
 	private function getPaymentReferenceCode( array $row ): PaymentReferenceCode {
 		if ( empty( $row['transferCode'] ) ) {
 			return $this->anonymisedPaymentReferenceCode;
@@ -373,6 +447,11 @@ class DonationToPaymentConverter {
 		return PaymentReferenceCode::newFromString( $row['transferCode'] );
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 *
+	 * @return Euro
+	 */
 	private function getAmount( array $row ): Euro {
 		$amount = $row['amount'];
 		if ( $amount === '' || $amount === null ) {
@@ -388,7 +467,8 @@ class DonationToPaymentConverter {
 	 * For parent payments with interval 0, check if the booking data is really a subscription
 	 * or just an accidental double-booking. O
 	 *
-	 * @param array $row
+	 * @param array<string,mixed> $row
+	 *
 	 * @return int
 	 */
 	private function getPaymentIntervalForPaypal( array $row ): int {
@@ -397,13 +477,19 @@ class DonationToPaymentConverter {
 			return $interval;
 		}
 		$log = $row['data']['log'] ?? [];
-		$log = array_filter( $log, fn( $msg ) => preg_match( '/new transaction id (?:to )?corresponding child donation/', $msg ) );
+		$log = array_filter(
+			$log,
+			fn( $msg ) => preg_match( '/new transaction id (?:to )?corresponding child donation/', $msg )
+		);
 		// If Payment is not a parent payment, we don't care
 		if ( empty( $log ) ) {
 			return $interval;
 		}
 		if ( empty( $row['data']['ext_subscr_id'] ) ) {
-			$this->result->addWarning( 'Recurring paypal payment with interval 0, corrected to one-time-payment', $row );
+			$this->result->addWarning(
+				'Recurring paypal payment with interval 0, corrected to one-time-payment',
+				$row
+			);
 			$this->addDoubleBookedIds( intval( $row['id'] ), $log );
 		} else {
 			$this->result->addError( 'Recurring paypal payment with interval 0 and subscription ID', $row );
@@ -411,6 +497,12 @@ class DonationToPaymentConverter {
 		return 0;
 	}
 
+	/**
+	 * @param int $donationId
+	 * @param array<int,string> $log
+	 *
+	 * @return void
+	 */
 	private function addDoubleBookedIds( int $donationId, array $log ): void {
 		foreach ( $log as $msg ) {
 			if ( preg_match( '/new transaction id (?:to )?corresponding child donation: ?(\d+)/', $msg, $matches ) ) {
@@ -424,6 +516,9 @@ class DonationToPaymentConverter {
 		}
 	}
 
+	/**
+	 * @return array<int[]>
+	 */
 	public function getDoubleBookedPayPalChildIds(): array {
 		return $this->doubleBookedPayPalChildIds;
 	}

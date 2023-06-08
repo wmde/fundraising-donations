@@ -48,18 +48,15 @@ class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
 		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$this->entityManager->persist( $donation );
 		$this->entityManager->flush();
-		$donationId = $donation->getId();
 
 		$logger = new DoctrineDonationEventLogger( $this->entityManager, $this->getDefaultTimeFunction() );
+		$logger->log( 1, self::DEFAULT_MESSAGE );
+		$expectedLog = [ self::LOG_TIMESTAMP => self::DEFAULT_MESSAGE ];
 
-		$logger->log( $donationId, self::DEFAULT_MESSAGE );
+		$donation = $this->getDonationById( $donation->getId() );
 
-		$donation = $this->getDonationById( $donationId );
+		$this->assertNotNull( $donation );
 		$data = $donation->getDecodedData();
-
-		$expectedLog = [
-			self::LOG_TIMESTAMP => self::DEFAULT_MESSAGE
-		];
 		$this->assertArrayHasKey( 'log', $data );
 		$this->assertEquals( $expectedLog, $data['log'] );
 	}
@@ -70,24 +67,23 @@ class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
 		$donation->encodeAndSetData( [ 'log' => [ '2014-01-01 0:00:00' => 'New year!' ] ] );
 		$this->entityManager->persist( $donation );
 		$this->entityManager->flush();
-		$donationId = $donation->getId();
 
 		$logger = new DoctrineDonationEventLogger( $this->entityManager, $this->getDefaultTimeFunction() );
-
-		$logger->log( $donationId, self::DEFAULT_MESSAGE );
-
-		$donation = $this->getDonationById( $donationId );
-		$data = $donation->getDecodedData();
-
+		$logger->log( $donation->getId(), self::DEFAULT_MESSAGE );
 		$expectedLog = [
 			'2014-01-01 0:00:00' => 'New year!',
 			self::LOG_TIMESTAMP => self::DEFAULT_MESSAGE
 		];
+
+		$donation = $this->getDonationById( $donation->getId() );
+
+		$this->assertNotNull( $donation );
+		$data = $donation->getDecodedData();
 		$this->assertArrayHasKey( 'log', $data );
 		$this->assertEquals( $expectedLog, $data['log'] );
 	}
 
-	private function getDonationById( int $donationId ): Donation {
+	private function getDonationById( int $donationId ): ?Donation {
 		return $this->entityManager->find( Donation::class, $donationId );
 	}
 

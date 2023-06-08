@@ -111,6 +111,9 @@ class ModerationServiceTest extends TestCase {
 		$this->assertFalse( $policyValidator->isAutoDeleted( ValidAddDonationRequest::getRequest() ) );
 	}
 
+	/**
+	 * @return array<string[]>
+	 */
 	public static function allowedEmailAddressProvider(): array {
 		return [
 			[ 'other.person@bar.baz' ],
@@ -128,6 +131,9 @@ class ModerationServiceTest extends TestCase {
 		$this->assertTrue( $policyValidator->isAutoDeleted( $request ) );
 	}
 
+	/**
+	 * @return array<string[]>
+	 */
 	public static function forbiddenEmailsProvider(): array {
 		return [
 			[ 'blocked.person@bar.baz' ],

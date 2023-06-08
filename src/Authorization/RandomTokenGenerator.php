@@ -17,7 +17,7 @@ class RandomTokenGenerator implements TokenGenerator {
 	}
 
 	public function generateToken(): string {
-		return bin2hex( random_bytes( $this->tokenLength ) );
+		return bin2hex( random_bytes( max( 1, $this->tokenLength ) ) );
 	}
 
 	public function generateTokenExpiry(): \DateTime {

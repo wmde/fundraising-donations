@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\EventManager;
+use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
@@ -15,14 +16,23 @@ use WMDE\Fundraising\DonationContext\DonationContextFactory;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
 use WMDE\Fundraising\PaymentContext\PaymentContextFactory;
 
+/**
+ * @phpstan-import-type Params from DriverManager
+ */
 class TestDonationContextFactory {
 
 	private DonationContextFactory $contextFactory;
+	/**
+	 * @var array{token-length:int,token-validity-timestamp:string,db:Params}
+	 */
 	private array $config;
 
 	private ?EntityManager $entityManager;
 	private ?Connection $connection;
 
+	/**
+	 * @param array{token-length:int,token-validity-timestamp:string,db:Params} $config
+	 */
 	public function __construct( array $config ) {
 		$this->config = $config;
 		$this->contextFactory = new DonationContextFactory(
@@ -48,6 +58,12 @@ class TestDonationContextFactory {
 		return $this->entityManager;
 	}
 
+	/**
+	 * @param array<EventSubscriber> $eventSubscribers
+	 *
+	 * @return EntityManager
+	 * @throws \Doctrine\ORM\Exception\ORMException
+	 */
 	private function newEntityManager( array $eventSubscribers = [] ): EntityManager {
 		$conn = $this->getConnection();
 		$paymentContext = new PaymentContextFactory();
@@ -63,6 +79,12 @@ class TestDonationContextFactory {
 		return $entityManager;
 	}
 
+	/**
+	 * @param EventManager $eventManager
+	 * @param array<EventSubscriber> $eventSubscribers
+	 *
+	 * @return void
+	 */
 	private function setupEventSubscribers( EventManager $eventManager, array $eventSubscribers ): void {
 		foreach ( $eventSubscribers as $eventSubscriber ) {
 			$eventManager->addEventSubscriber( $eventSubscriber );

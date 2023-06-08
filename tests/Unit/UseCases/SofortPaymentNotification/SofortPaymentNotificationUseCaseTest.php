@@ -27,10 +27,7 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
  */
 class SofortPaymentNotificationUseCaseTest extends TestCase {
 
-	/**
-	 * @return DonationNotifier&MockObject
-	 */
-	private function getMailer(): DonationNotifier {
+	private function getMailer(): DonationNotifier&MockObject {
 		return $this->createMock( DonationNotifier::class );
 	}
 
@@ -175,7 +172,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 	}
 
-	private function getSucceedingPaymentBookingServiceStub(): PaymentBookingService|Stub {
+	private function getSucceedingPaymentBookingServiceStub(): PaymentBookingService&Stub {
 		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
 		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new SuccessResponse() );
 		return $paymentBookingServiceStub;

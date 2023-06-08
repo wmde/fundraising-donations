@@ -5,7 +5,13 @@ namespace WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration;
 
 use Traversable;
 
+/**
+ * @implements \IteratorAggregate<int>
+ */
 class DonationPaymentIdCollection implements \IteratorAggregate {
+	/**
+	 * @var array<int,int>
+	 */
 	private array $donationToPaymentIds = [];
 
 	public function addPaymentForDonation( int $paymentId, int $donationId ): void {

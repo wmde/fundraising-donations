@@ -32,6 +32,9 @@ class ValidCreditCardNotificationRequest {
 		);
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private static function newBaseBookingData(): array {
 		return [
 			'transactionId' => self::PAYMENT_ID,
