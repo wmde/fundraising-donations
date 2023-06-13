@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationExistsChecker;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
@@ -16,7 +17,9 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationExistsChecker;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationExistsChecker;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
@@ -63,6 +66,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	private function newRepository(): DoctrineDonationRepository {
 		return new DoctrineDonationRepository(
 			$this->entityManager,
+			new DoctrineDonationExistsChecker( $this->entityManager ),
 			$this->makeGetPaymentUseCaseStub(),
 			$this->moderationRepository
 		);
@@ -109,6 +113,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 		$repository = new DoctrineDonationRepository(
 			ThrowingEntityManager::newInstance( $this ),
+			new SucceedingDonationExistsChecker(),
 			$this->makeGetPaymentUseCaseStub(),
 			$this->moderationRepository
 		);
@@ -158,8 +163,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$repository->storeDonation( $donation );
 
 		// It is important a new instance is created here to test "detached entity" handling
-		$newDonation = ValidDonation::newDirectDebitDonation();
-		$newDonation->assignId( $donation->getId() );
+		$newDonation = ValidDonation::newDirectDebitDonation( $donation->getId() );
 		$newDonation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 		$repository->storeDonation( $newDonation );
 
@@ -175,22 +179,13 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	public function testWhenDoctrineThrowsException_domainExceptionIsThrown(): void {
 		$repository = new DoctrineDonationRepository(
 			ThrowingEntityManager::newInstance( $this ),
+			new SucceedingDonationExistsChecker(),
 			$this->makeGetPaymentUseCaseStub(),
 			$this->moderationRepository
 		);
 
 		$this->expectException( GetDonationException::class );
 		$repository->getDonationById( self::ID_OF_DONATION_NOT_IN_DB );
-	}
-
-	public function testWhenDonationDoesNotExist_persistingCausesException(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->assignId( self::ID_OF_DONATION_NOT_IN_DB );
-
-		$repository = $this->newRepository();
-
-		$this->expectException( StoreDonationException::class );
-		$repository->storeDonation( $donation );
 	}
 
 	public function testGivenDonationUpdateWithoutDonorInformation_DonorNameStaysTheSame(): void {
@@ -225,8 +220,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$repository = $this->newRepository();
 		$repository->storeDonation( $donation );
 
-		$newDonation = ValidDonation::newDirectDebitDonation();
-		$newDonation->assignId( $donation->getId() );
+		$newDonation = ValidDonation::newDirectDebitDonation( $donation->getId() );
 
 		$repository->storeDonation( $newDonation );
 
@@ -240,11 +234,11 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function testWhenUpdateFails_domainExceptionIsThrown(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->assignId( 42 );
+		$donation = ValidDonation::newDirectDebitDonation( 42 );
 
 		$repository = new DoctrineDonationRepository(
 			ThrowingEntityManager::newInstance( $this ),
+			new FailingDonationExistsChecker(),
 			$this->makeGetPaymentUseCaseStub(),
 			$this->moderationRepository
 		);

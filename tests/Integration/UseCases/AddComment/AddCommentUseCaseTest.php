@@ -74,15 +74,13 @@ class AddCommentUseCaseTest extends TestCase {
 	}
 
 	private function newFakeRepositoryWithDonation(): FakeDonationRepository {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->assignId( self::DONATION_ID );
+		$donation = ValidDonation::newDirectDebitDonation( self::DONATION_ID );
 
 		return new FakeDonationRepository( $donation );
 	}
 
 	private function newFakeRepositoryWithAnonDonation(): FakeDonationRepository {
-		$donation = ValidDonation::newBookedAnonymousPayPalDonation();
-		$donation->assignId( self::DONATION_ID );
+		$donation = ValidDonation::newBookedAnonymousPayPalDonation( self::DONATION_ID );
 
 		return new FakeDonationRepository( $donation );
 	}
@@ -176,8 +174,7 @@ class AddCommentUseCaseTest extends TestCase {
 	}
 
 	public function testWhenDonationIsMarkedForModeration_responseMessageDoesNotContainOK(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->assignId( self::DONATION_ID );
+		$donation = ValidDonation::newDirectDebitDonation( self::DONATION_ID );
 		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 
 		$this->donationRepository = new FakeDonationRepository( $donation );

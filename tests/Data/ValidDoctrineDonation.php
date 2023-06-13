@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Data;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 
 class ValidDoctrineDonation {
+	private const DONATION_ID = 1;
 	private const PAYMENT_PAYPAL = 'PPL';
 	private const PAYMENT_BANK_TRANSFER = 'UEB';
 	private const PAYMENT_SOFORT = 'SUB';
@@ -130,7 +131,7 @@ class ValidDoctrineDonation {
 
 	private function createDonation(): Donation {
 		$donation = new Donation();
-
+		$donation->setId( self::DONATION_ID );
 		$donation->setStatus( Donation::STATUS_NEW );
 
 		$donation->setAmount( (string)ValidDonation::DONATION_AMOUNT );

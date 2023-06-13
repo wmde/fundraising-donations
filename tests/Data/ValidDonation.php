@@ -17,7 +17,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
 
 class ValidDonation {
-
 	public const DONOR_FIRST_NAME = 'Jeroen';
 	public const DONOR_LAST_NAME = 'De Dauw';
 	public const DONOR_SALUTATION = 'nyan';
@@ -48,121 +47,135 @@ class ValidDonation {
 
 	public const COMMENT_AUTHOR_DISPLAY_NAME = 'Such a tomato';
 
-	public static function newBankTransferDonation(): Donation {
+	public static function newBankTransferDonation( int $donationId = 1 ): Donation {
 		return self::createDonation(
+			$donationId,
 			ValidPayments::newBankTransferPayment(),
 		);
 	}
 
-	public static function newSofortDonation(): Donation {
+	public static function newSofortDonation( int $donationId = 1 ): Donation {
 		return self::createDonation(
+			$donationId,
 			ValidPayments::newSofortPayment(),
 		);
 	}
 
-	public static function newDirectDebitDonation(): Donation {
+	public static function newDirectDebitDonation( int $donationId = 1 ): Donation {
 		return self::createDonation(
+			$donationId,
 			ValidPayments::newDirectDebitPayment(),
 		);
 	}
 
-	public static function newBookedPayPalDonation( string $transactionId = ValidPayments::PAYPAL_TRANSACTION_ID ): Donation {
+	public static function newBookedPayPalDonation( int $donationId = 1, string $transactionId = ValidPayments::PAYPAL_TRANSACTION_ID ): Donation {
 		return self::createDonation(
+			$donationId,
 			ValidPayments::newBookedPayPalPayment( $transactionId ),
 		);
 	}
 
-	public static function newIncompletePayPalDonation(): Donation {
+	public static function newIncompletePayPalDonation( int $donationId = 1 ): Donation {
 		return self::createDonation(
+			$donationId,
 			ValidPayments::newPayPalPayment(),
 		);
 	}
 
-	public static function newIncompleteSofortDonation(): Donation {
-		return self::newSofortDonation();
+	public static function newIncompleteSofortDonation( int $donationId = 1 ): Donation {
+		return self::newSofortDonation( $donationId );
 	}
 
-	public static function newCompletedSofortDonation(): Donation {
+	public static function newCompletedSofortDonation( int $donationId = 1 ): Donation {
 		$payment = ValidPayments::newCompletedSofortPayment();
 		return self::createDonation(
+			$donationId,
 			$payment,
 		);
 	}
 
-	public static function newIncompleteAnonymousPayPalDonation(): Donation {
+	public static function newIncompleteAnonymousPayPalDonation( int $donationId = 1 ): Donation {
 		return self::createAnonymousDonation(
+			$donationId,
 			ValidPayments::newPayPalPayment(),
 		);
 	}
 
-	public static function newBookedAnonymousPayPalDonation(): Donation {
+	public static function newBookedAnonymousPayPalDonation( int $donationId = 1 ): Donation {
 		return self::createAnonymousDonation(
-			ValidPayments::newBookedPayPalPayment(),
-		);
-	}
-
-	public static function newBookedAnonymousPayPalDonationUpdate( int $donationId ): Donation {
-		return self::createAnonymousDonationWithId(
 			$donationId,
 			ValidPayments::newBookedPayPalPayment(),
 		);
 	}
 
-	public static function newBookedCreditCardDonation(): Donation {
+	public static function newBookedAnonymousPayPalDonationUpdate( int $donationId ): Donation {
+		return self::createAnonymousDonation(
+			$donationId,
+			ValidPayments::newBookedPayPalPayment(),
+		);
+	}
+
+	public static function newBookedCreditCardDonation( int $donationId = 1 ): Donation {
 		$payment = ValidPayments::newBookedCreditCardPayment();
 		return self::createDonation(
+			$donationId,
 			$payment,
 		);
 	}
 
-	public static function newIncompleteCreditCardDonation(): Donation {
+	public static function newIncompleteCreditCardDonation( int $donationId = 1 ): Donation {
 		return self::createDonation(
+			$donationId,
 			ValidPayments::newCreditCardPayment(),
 		);
 	}
 
-	public static function newIncompleteAnonymousCreditCardDonation(): Donation {
+	public static function newIncompleteAnonymousCreditCardDonation( int $donationId = 1 ): Donation {
 		return self::createAnonymousDonation(
+			$donationId,
 			ValidPayments::newCreditCardPayment(),
 		);
 	}
 
-	public static function newCancelledPayPalDonation(): Donation {
+	public static function newCancelledPayPalDonation( int $donationId = 1 ): Donation {
 		return self::createCancelledDonation(
+			$donationId,
 			ValidPayments::newPayPalPayment()
 		);
 	}
 
-	public static function newCancelledBankTransferDonation(): Donation {
+	public static function newCancelledBankTransferDonation( int $donationId = 1 ): Donation {
 		return self::createCancelledDonation(
+			$donationId,
 			ValidPayments::newBankTransferPayment()
 		);
 	}
 
-	public static function newCompanyBankTransferDonation(): Donation {
+	public static function newCompanyBankTransferDonation( int $donationId = 1 ): Donation {
 		$donation = self::createDonation(
+			$donationId,
 			ValidPayments::newBankTransferPayment(),
 		);
 		$donation->setDonor( self::newCompanyDonor() );
 		return $donation;
 	}
 
-	private static function createDonation( Payment $payment ): Donation {
+	private static function createDonation( int $donationId, Payment $payment ): Donation {
 		$donor = self::newDonor();
 		$donor->subscribeToNewsletter();
 		return new Donation(
-			null,
+			$donationId,
 			$donor,
 			$payment->getId(),
 			self::newTrackingInfo()
 		);
 	}
 
-	private static function createCancelledDonation( Payment $payment ): Donation {
+	private static function createCancelledDonation( int $donationId, Payment $payment ): Donation {
 		$donor = self::newDonor();
 		$donor->subscribeToNewsletter();
 		$donation = new Donation(
-			null,
+			$donationId,
 			$donor,
 			$payment->getId(),
 			self::newTrackingInfo()
@@ -171,16 +184,7 @@ class ValidDonation {
 		return $donation;
 	}
 
-	private static function createAnonymousDonation( Payment $payment ): Donation {
-		return new Donation(
-			null,
-			new AnonymousDonor(),
-			$payment->getId(),
-			self::newTrackingInfo()
-		);
-	}
-
-	private static function createAnonymousDonationWithId( int $donationId, Payment $payment ): Donation {
+	private static function createAnonymousDonation( int $donationId, Payment $payment ): Donation {
 		return new Donation(
 			$donationId,
 			new AnonymousDonor(),

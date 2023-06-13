@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\HandlePayPalPayme
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Services\PaymentBookingService;
@@ -16,6 +17,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\StaticDonationIdRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
@@ -243,17 +245,8 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$this->assertTrue( $response->paymentWasAlreadyCompleted() );
 	}
 
-	/**
-	 * Create a new use case with stubs that would make it pass
-	 *
-	 * @param DonationRepository|null $repository
-	 * @param DonationAuthorizer|null $authorizer
-	 * @param DonationNotifier|null $notifier
-	 * @param PaymentBookingService|null $paymentBookingService
-	 * @param DonationEventLogger|null $eventLogger
-	 * @return HandlePayPalPaymentCompletionNotificationUseCase
-	 */
 	private function givenNewUseCase(
+		?DonationIdRepository $idGenerator = null,
 		?DonationRepository $repository = null,
 		?DonationAuthorizer $authorizer = null,
 		?DonationNotifier $notifier = null,
@@ -261,6 +254,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		?DonationEventLogger $eventLogger = null,
 	): HandlePayPalPaymentCompletionNotificationUseCase {
 		return new HandlePayPalPaymentCompletionNotificationUseCase(
+			$idGenerator ?? new StaticDonationIdRepository(),
 			$repository ?? $this->createFakeRepository(),
 			authorizationService: $authorizer ?? new SucceedingDonationAuthorizer(),
 			notifier: $notifier ?? $this->createNotifierStub(),
