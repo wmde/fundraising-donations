@@ -9,6 +9,7 @@ use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 
 class IncompleteDoctrineDonation {
 
+	private const DONATION_ID = 1;
 	private const PAYMENT_ID = 7;
 
 	public static function newPaypalDonationWithMissingTrackingData(): Donation {
@@ -47,6 +48,7 @@ class IncompleteDoctrineDonation {
 
 	private function createPaypalDonationWithMissingTrackingData(): Donation {
 		$donation = new Donation();
+		$donation->setId( self::DONATION_ID );
 		$this->setPaymentData( $donation );
 		$this->setDonorData( $donation );
 		$donation->setPaymentType( PaymentType::Paypal->value );

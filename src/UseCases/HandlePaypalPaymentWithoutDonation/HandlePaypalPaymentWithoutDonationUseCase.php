@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\HandlePaypalPaymentWithoutDo
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Services\PaypalBookingService;
@@ -19,8 +20,9 @@ class HandlePaypalPaymentWithoutDonationUseCase {
 	public function __construct(
 		private readonly PaypalBookingService $paypalBookingService,
 		private readonly DonationRepository $donationRepository,
-		private DonationNotifier $notifier,
-		private DonationEventLogger $eventLogger,
+		private readonly DonationIdRepository $idGenerator,
+		private readonly DonationNotifier $notifier,
+		private readonly DonationEventLogger $eventLogger,
 	) {
 	}
 
@@ -38,7 +40,7 @@ class HandlePaypalPaymentWithoutDonationUseCase {
 		}
 
 		$donation = new Donation(
-			null,
+			$this->idGenerator->getNewId(),
 			new AnonymousDonor(),
 			$result->paymentId,
 			DonationTrackingInfo::newBlankTrackingInfo(),

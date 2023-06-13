@@ -11,14 +11,9 @@ parameters:
 			path: src/DataAccess/DoctrineDonationPrePersistSubscriber.php
 
 		-
-			message: "#^Parameter \\#1 \\$id of method WMDE\\\\Fundraising\\\\DonationContext\\\\DataAccess\\\\DoctrineDonationRepository\\:\\:getDoctrineDonationById\\(\\) expects int, int\\|null given\\.$#"
+			message: "#^Parameter \\#1 \\$id of class WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donation constructor expects int, int\\|null given\\.$#"
 			count: 1
-			path: src/DataAccess/DoctrineDonationRepository.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donation\\:\\:assignId\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/DataAccess/DoctrineDonationRepository.php
+			path: src/DataAccess/LegacyConverters/LegacyToDomainConverter.php
 
 		-
 			message: "#^Cannot call method getAuthorDisplayName\\(\\) on WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\DonationComment\\|null\\.$#"
@@ -41,59 +36,14 @@ parameters:
 			path: src/Domain/Model/DonorType.php
 
 		-
-			message: "#^Method WMDE\\\\Fundraising\\\\DonationContext\\\\Infrastructure\\\\DonationMailer\\:\\:getAdminTemplateArguments\\(\\) should return array\\{id\\: int, moderationFlags\\: array\\<string, bool\\>, amount\\: float\\} but returns array\\{id\\: int\\|null, moderationFlags\\: array\\<string, bool\\>, amount\\: float\\}\\.$#"
+			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donation\\:\\:assignId\\(\\)\\.$#"
 			count: 1
-			path: src/Infrastructure/DonationMailer.php
+			path: tests/Fixtures/FakeDonationRepository.php
 
 		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationTokenFetcher\\:\\:getTokens\\(\\) expects int, int\\|null given\\.$#"
+			message: "#^Strict comparison using \\=\\=\\= between int and null will always evaluate to false\\.$#"
 			count: 1
-			path: src/Infrastructure/HttpDonationNotifier.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of class WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Event\\\\DonationCreatedEvent constructor expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/UseCases/AddDonation/AddDonationUseCase.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationTokenFetcher\\:\\:getTokens\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/UseCases/AddDonation/AddDonationUseCase.php
-
-		-
-			message: "#^Parameter \\#1 \\$itemId of class WMDE\\\\Fundraising\\\\PaymentContext\\\\Domain\\\\PaymentUrlGenerator\\\\RequestContext constructor expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/UseCases/AddDonation/AddDonationUseCase.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationAuthorizer\\:\\:systemCanModifyDonation\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/UseCases/BookDonationUseCase/BookDonationUseCase.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Infrastructure\\\\DonationEventLogger\\:\\:log\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/UseCases/BookDonationUseCase/BookDonationUseCase.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Infrastructure\\\\DonationEventLogger\\:\\:log\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/UseCases/CancelDonation/CancelDonationUseCase.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Infrastructure\\\\DonationEventLogger\\:\\:log\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/UseCases/HandlePaypalPaymentWithoutDonation/HandlePaypalPaymentWithoutDonationUseCase.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\ModerateDonation\\\\NotificationLog\\:\\:hasSentConfirmationFor\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/UseCases/ModerateDonation/ModerateDonationUseCase.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\ModerateDonation\\\\NotificationLog\\:\\:logConfirmationSent\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/UseCases/ModerateDonation/ModerateDonationUseCase.php
+			path: tests/Fixtures/FakeDonationRepository.php
 
 		-
 			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationAuthorizer\\:\\:canAccessDonation\\(\\) expects int, int\\|null given\\.$#"
@@ -119,26 +69,6 @@ parameters:
 			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Tests\\\\Integration\\\\DataAccess\\\\DoctrineDonationEventLoggerTest\\:\\:getDonationById\\(\\) expects int, int\\|null given\\.$#"
 			count: 2
 			path: tests/Integration/DataAccess/DoctrineDonationEventLoggerTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of static method WMDE\\\\Fundraising\\\\DonationContext\\\\Tests\\\\Data\\\\ValidDonation\\:\\:newBookedAnonymousPayPalDonationUpdate\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: tests/Integration/DataAccess/DoctrineDonationRepositoryTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of method WMDE\\\\Fundraising\\\\DonationContext\\\\DataAccess\\\\DoctrineDonationRepository\\:\\:getDonationById\\(\\) expects int, int\\|null given\\.$#"
-			count: 4
-			path: tests/Integration/DataAccess/DoctrineDonationRepositoryTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donation\\:\\:assignId\\(\\) expects int, int\\|null given\\.$#"
-			count: 2
-			path: tests/Integration/DataAccess/DoctrineDonationRepositoryTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of method WMDE\\\\Fundraising\\\\DonationContext\\\\Tests\\\\Integration\\\\DataAccess\\\\DoctrineDonationRepositoryTest\\:\\:getDoctrineDonationById\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: tests/Integration/DataAccess/DoctrineDonationRepositoryTest.php
 
 		-
 			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationAuthorizer\\:\\:hasAuthorizedAsAdmin\\(\\)\\.$#"
@@ -171,63 +101,8 @@ parameters:
 			path: tests/Integration/UseCases/CancelDonation/CancelDonationUseCaseTest.php
 
 		-
-			message: "#^Parameter \\#1 \\$donationId of class WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\CancelDonation\\\\CancelDonationRequest constructor expects int, int\\|null given\\.$#"
-			count: 11
-			path: tests/Integration/UseCases/CancelDonation/CancelDonationUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Repositories\\\\DonationRepository\\:\\:getDonationById\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: tests/Integration/UseCases/CancelDonation/CancelDonationUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Tests\\\\Integration\\\\UseCases\\\\UpdateDonor\\\\UpdateDonorUseCaseTest\\:\\:newUpdateDonorRequestForCompany\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Tests\\\\Integration\\\\UseCases\\\\UpdateDonor\\\\UpdateDonorUseCaseTest\\:\\:newUpdateDonorRequestForPerson\\(\\) expects int, int\\|null given\\.$#"
-			count: 7
-			path: tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Repositories\\\\DonationRepository\\:\\:getDonationById\\(\\) expects int, int\\|null given\\.$#"
-			count: 2
-			path: tests/Integration/UseCases/UpdateDonor/UpdateDonorUseCaseTest.php
-
-		-
 			message: "#^Parameter \\#2 \\$address of class WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donor\\\\PersonDonor constructor expects WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donor\\\\Address\\\\PostalAddress, WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Address given\\.$#"
 			count: 1
 			path: tests/Unit/DataAccess/DonorFieldMapperTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of static method WMDE\\\\Fundraising\\\\DonationContext\\\\Tests\\\\Data\\\\ValidPayPalNotificationRequest\\:\\:newDuplicatePayment\\(\\) expects int, int\\|null given\\.$#"
-			count: 2
-			path: tests/Unit/UseCases/HandlePayPalPaymentNotification/HandlePayPalPaymentCompletionNotificationUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of static method WMDE\\\\Fundraising\\\\DonationContext\\\\Tests\\\\Data\\\\ValidPayPalNotificationRequest\\:\\:newInstantPayment\\(\\) expects int, int\\|null given\\.$#"
-			count: 4
-			path: tests/Unit/UseCases/HandlePayPalPaymentNotification/HandlePayPalPaymentCompletionNotificationUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#2 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Tests\\\\Unit\\\\UseCases\\\\HandlePayPalPaymentNotification\\\\HandlePayPalPaymentCompletionNotificationUseCaseTest\\:\\:assertEventLogContainsExpression\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: tests/Unit/UseCases/HandlePayPalPaymentNotification/HandlePayPalPaymentCompletionNotificationUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\ModerateDonation\\\\ModerateDonationUseCase\\:\\:approveDonation\\(\\) expects int, int\\|null given\\.$#"
-			count: 7
-			path: tests/Unit/UseCases/ModerateDonation/ModerateDonationUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\ModerateDonation\\\\ModerateDonationUseCase\\:\\:markDonationAsModerated\\(\\) expects int, int\\|null given\\.$#"
-			count: 5
-			path: tests/Unit/UseCases/ModerateDonation/ModerateDonationUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\UseCases\\\\RestoreDonation\\\\RestoreDonationUseCase\\:\\:restoreCancelledDonation\\(\\) expects int, int\\|null given\\.$#"
-			count: 3
-			path: tests/Unit/UseCases/RestoreDonation/RestoreDonationUseCaseTest.php
 
 
