@@ -10,6 +10,7 @@ use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
@@ -18,7 +19,6 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest;
-use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\CancelPaymentUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\FailureResponse;
@@ -33,38 +33,19 @@ use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\SuccessResponse;
  */
 class CancelDonationUseCaseTest extends TestCase {
 
-	private DonationRepository $repository;
-
-	private TemplateMailerInterface $mailer;
-
-	private DonationAuthorizer $authorizer;
-
-	private DonationEventLoggerSpy $logger;
-
-	public function setUp(): void {
-		$this->repository = new FakeDonationRepository();
-		$this->mailer = new TemplateBasedMailerSpy( $this );
-		$this->authorizer = new SucceedingDonationAuthorizerSpy();
-		$this->logger = new DonationEventLoggerSpy();
-	}
-
-	private function newCancelDonationUseCase(): CancelDonationUseCase {
+	private function newCancelDonationUseCase(
+		DonationRepository $repository = null,
+		TemplateMailerInterface $mailer = null,
+		DonationAuthorizer $authorizer = null,
+		DonationEventLogger $logger = null,
+		CancelPaymentUseCase $cancelPaymentUseCase = null
+	): CancelDonationUseCase {
 		return new CancelDonationUseCase(
-			$this->repository,
-			$this->mailer,
-			$this->authorizer,
-			$this->logger,
-			$this->getSucceedingCancelPaymentUseCase()
-		);
-	}
-
-	private function newCancelDonationUseCasePaymentCancellationFails(): CancelDonationUseCase {
-		return new CancelDonationUseCase(
-			$this->repository,
-			$this->mailer,
-			$this->authorizer,
-			$this->logger,
-			$this->getFailingCancelPaymentUseCase()
+			$repository ?? new FakeDonationRepository(),
+			$mailer ?? new TemplateBasedMailerSpy( $this ),
+			$authorizer ?? new SucceedingDonationAuthorizerSpy(),
+			$logger ?? new DonationEventLoggerSpy(),
+				$cancelPaymentUseCase ?? $this->getSucceedingCancelPaymentUseCase()
 		);
 	}
 
@@ -94,11 +75,12 @@ class CancelDonationUseCaseTest extends TestCase {
 
 	public function testGivenIdOfCancellableDonation_cancellationIsSuccessful(): void {
 		$donation = $this->newCancelableDonation();
-		$this->repository->storeDonation( $donation );
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
 
 		$request = new CancelDonationRequest( $donation->getId() );
-		$response = $this->newCancelDonationUseCase()->cancelDonation( $request );
-		$donation = $this->repository->getDonationById( $donation->getId() );
+		$response = $this->newCancelDonationUseCase( repository: $repository )->cancelDonation( $request );
+		$donation = $repository->getDonationById( $donation->getId() );
 
 		$this->assertNotNull( $donation );
 		$this->assertTrue( $response->cancellationSucceeded() );
@@ -108,10 +90,14 @@ class CancelDonationUseCaseTest extends TestCase {
 
 	public function testGivenIdOfNonCancellableDonation_cancellationIsNotSuccessful(): void {
 		$donation = ValidDonation::newBookedPayPalDonation();
-		$this->repository->storeDonation( $donation );
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
 
 		$request = new CancelDonationRequest( $donation->getId() );
-		$response = $this->newCancelDonationUseCasePaymentCancellationFails()->cancelDonation( $request );
+		$response = $this->newCancelDonationUseCase(
+			repository: $repository,
+			cancelPaymentUseCase: $this->getFailingCancelPaymentUseCase()
+		)->cancelDonation( $request );
 
 		$this->assertFalse( $response->cancellationSucceeded() );
 	}
@@ -123,13 +109,18 @@ class CancelDonationUseCaseTest extends TestCase {
 
 	public function testWhenDonationGetsCancelled_cancellationConfirmationEmailIsSent(): void {
 		$donation = $this->newCancelableDonation();
-		$this->repository->storeDonation( $donation );
+		$mailer = new TemplateBasedMailerSpy( $this );
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
 
 		$request = new CancelDonationRequest( $donation->getId() );
-		$response = $this->newCancelDonationUseCase()->cancelDonation( $request );
+		$response = $this->newCancelDonationUseCase(
+			repository: $repository,
+			mailer: $mailer
+		)->cancelDonation( $request );
 
 		$this->assertTrue( $response->cancellationSucceeded() );
-		$this->mailer->assertCalledOnceWith(
+		$mailer->assertCalledOnceWith(
 			new EmailAddress( $donation->getDonor()->getEmailAddress() ),
 			[
 				'recipient' => [
@@ -145,38 +136,56 @@ class CancelDonationUseCaseTest extends TestCase {
 
 	public function testWhenDonationGetsCancelled_logEntryNeededByBackendIsWritten(): void {
 		$donation = $this->newCancelableDonation();
-		$this->repository->storeDonation( $donation );
+		$logger = new DonationEventLoggerSpy();
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
 
-		$this->newCancelDonationUseCase()->cancelDonation( new CancelDonationRequest( $donation->getId() ) );
+		$this->newCancelDonationUseCase(
+			repository: $repository,
+			logger: $logger
+		)->cancelDonation( new CancelDonationRequest( $donation->getId() ) );
 
 		$this->assertSame(
 			[ [ $donation->getId(), 'frontend: storno' ] ],
-			$this->logger->getLogCalls()
+			$logger->getLogCalls()
 		);
 	}
 
 	public function testWhenDonationGetsCancelledByAdmin_adminUserNameIsWrittenAsLogEntry(): void {
 		$donation = $this->newCancelableDonation();
-		$this->repository->storeDonation( $donation );
+		$logger = new DonationEventLoggerSpy();
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
 
-		$this->newCancelDonationUseCase()->cancelDonation( new CancelDonationRequest( $donation->getId(), "coolAdmin" ) );
+		$this->newCancelDonationUseCase(
+			repository: $repository,
+			logger: $logger
+		)->cancelDonation( new CancelDonationRequest( $donation->getId(), "coolAdmin" ) );
 
 		$this->assertSame(
 			[ [ $donation->getId(), 'cancelled by user: coolAdmin' ] ],
-			$this->logger->getLogCalls()
+			$logger->getLogCalls()
 		);
 	}
 
 	public function testGivenIdOfNonCancellableDonation_nothingIsWrittenToTheLog(): void {
-		$this->newCancelDonationUseCase()->cancelDonation( new CancelDonationRequest( 1 ) );
+		$logger = new DonationEventLoggerSpy();
+		$this->newCancelDonationUseCase( logger: $logger )->cancelDonation( new CancelDonationRequest( 1 ) );
 
-		$this->assertSame( [], $this->logger->getLogCalls() );
+		$this->assertSame( [], $logger->getLogCalls() );
 	}
 
 	public function testWhenConfirmationMailFails_mailDeliveryFailureResponseIsReturned(): void {
-		$this->mailer = $this->newThrowingMailer();
+		$donation = $this->newCancelableDonation();
+		$mailer = $this->newThrowingMailer();
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
 
-		$response = $this->getResponseForCancellableDonation();
+		$request = new CancelDonationRequest( $donation->getId() );
+		$response = $this->newCancelDonationUseCase(
+			repository: $repository,
+			mailer: $mailer
+		)->cancelDonation( $request );
 
 		$this->assertTrue( $response->cancellationSucceeded() );
 		$this->assertTrue( $response->mailDeliveryFailed() );
@@ -191,74 +200,84 @@ class CancelDonationUseCaseTest extends TestCase {
 	}
 
 	public function testWhenGetDonationFails_cancellationIsNotSuccessful(): void {
-		$this->repository->throwOnRead();
+		$donation = $this->newCancelableDonation();
+		$repository = new FakeDonationRepository();
+		$repository->throwOnRead();
 
-		$response = $this->getResponseForCancellableDonation();
+		$request = new CancelDonationRequest( $donation->getId() );
+		$response = $this->newCancelDonationUseCase( repository: $repository )->cancelDonation( $request );
 
 		$this->assertFalse( $response->cancellationSucceeded() );
 	}
 
-	private function getResponseForCancellableDonation(): CancelDonationResponse {
-		$donation = $this->newCancelableDonation();
-		$this->repository->storeDonation( $donation );
-
-		$request = new CancelDonationRequest( $donation->getId() );
-		return $this->newCancelDonationUseCase()->cancelDonation( $request );
-	}
-
 	public function testWhenDonationSavingFails_cancellationIsNotSuccessful(): void {
 		$donation = $this->newCancelableDonation();
-		$this->repository->storeDonation( $donation );
-		$this->repository->throwOnWrite();
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
+		$repository->throwOnWrite();
 
 		$request = new CancelDonationRequest( $donation->getId() );
-		$response = $this->newCancelDonationUseCase()->cancelDonation( $request );
+		$response = $this->newCancelDonationUseCase( repository: $repository )->cancelDonation( $request );
 
 		$this->assertFalse( $response->cancellationSucceeded() );
 	}
 
 	public function testWhenAdminUserCancelsDonation_authorizerChecksIfSystemCanModifyDonation(): void {
 		$donation = $this->newCancelableDonation();
-		$this->repository->storeDonation( $donation );
+		$authorizer = new SucceedingDonationAuthorizerSpy();
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
 
 		$request = new CancelDonationRequest( $donation->getId(), "coolAdmin" );
-		$this->newCancelDonationUseCase()->cancelDonation( $request );
+		$this->newCancelDonationUseCase(
+			repository: $repository,
+			authorizer: $authorizer
+		)->cancelDonation( $request );
 
-		$this->assertTrue( $this->authorizer->hasAuthorizedAsAdmin() );
-		$this->assertFalse( $this->authorizer->hasAuthorizedAsUser() );
+		$this->assertTrue( $authorizer->hasAuthorizedAsAdmin() );
+		$this->assertFalse( $authorizer->hasAuthorizedAsUser() );
 	}
 
 	public function testWhenDonorCancelsDonation_authorizerUsesFullAuthorizationCheck(): void {
 		$donation = $this->newCancelableDonation();
-		$this->repository->storeDonation( $donation );
+		$authorizer = new SucceedingDonationAuthorizerSpy();
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
 
 		$request = new CancelDonationRequest( $donation->getId() );
-		$this->newCancelDonationUseCase()->cancelDonation( $request );
+		$this->newCancelDonationUseCase(
+			repository: $repository,
+			authorizer: $authorizer
+		)->cancelDonation( $request );
 
-		$this->assertFalse( $this->authorizer->hasAuthorizedAsAdmin() );
-		$this->assertTrue( $this->authorizer->hasAuthorizedAsUser() );
+		$this->assertFalse( $authorizer->hasAuthorizedAsAdmin() );
+		$this->assertTrue( $authorizer->hasAuthorizedAsUser() );
 	}
 
 	public function testWhenAdminUserCancelsDonation_emailIsNotSent(): void {
-		$this->mailer = $this->createMock( TemplateMailerInterface::class );
-		$this->mailer->expects( $this->never() )->method( 'sendMail' );
+		$mailer = $this->createMock( TemplateMailerInterface::class );
+
+		$mailer->expects( $this->never() )->method( 'sendMail' );
 
 		$donation = $this->newCancelableDonation();
-		$this->repository->storeDonation( $donation );
-
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
 		$request = new CancelDonationRequest( $donation->getId(), "coolAdmin" );
-		$this->newCancelDonationUseCase()->cancelDonation( $request );
+		$this->newCancelDonationUseCase(
+			repository: $repository,
+			mailer: $mailer
+		)->cancelDonation( $request );
 	}
 
 	public function testCanceledDonationIsPersisted(): void {
 		$donation = $this->newCancelableDonation();
-		$this->repository = new DonationRepositorySpy( $donation );
+		$repository = new DonationRepositorySpy( $donation );
 
 		$request = new CancelDonationRequest( $donation->getId(), "coolAdmin" );
-		$response = $this->newCancelDonationUseCase()->cancelDonation( $request );
+		$response = $this->newCancelDonationUseCase( repository: $repository )->cancelDonation( $request );
 
 		$this->assertTrue( $response->cancellationSucceeded() );
-		$storeCalls = $this->repository->getStoreDonationCalls();
+		$storeCalls = $repository->getStoreDonationCalls();
 		$this->assertCount( 1, $storeCalls );
 		$this->assertSame( 1, $storeCalls[0]->getId() );
 	}
