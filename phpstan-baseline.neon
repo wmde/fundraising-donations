@@ -6,16 +6,6 @@ parameters:
 			path: src/DataAccess/DoctrineDonationPrePersistSubscriber.php
 
 		-
-			message: "#^Cannot call method getAuthorDisplayName\\(\\) on WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\DonationComment\\|null\\.$#"
-			count: 1
-			path: src/Domain/Model/Donation.php
-
-		-
-			message: "#^Cannot call method getCommentText\\(\\) on WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\DonationComment\\|null\\.$#"
-			count: 1
-			path: src/Domain/Model/Donation.php
-
-		-
 			message: "#^Method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\DonorType\\:\\:__callStatic\\(\\) has parameter \\$arguments with no type specified\\.$#"
 			count: 1
 			path: src/Domain/Model/DonorType.php

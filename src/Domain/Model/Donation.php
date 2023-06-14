@@ -111,12 +111,15 @@ class Donation {
 	}
 
 	public function confirmBooked(): void {
-		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
+		if ( $this->isMarkedForModeration() || $this->isCancelled() ) {
 			$this->makeCommentPrivate();
 		}
 	}
 
 	private function makeCommentPrivate(): void {
+		if ( $this->comment === null ) {
+			return;
+		}
 		$this->comment = new DonationComment(
 			$this->comment->getCommentText(),
 			false,
