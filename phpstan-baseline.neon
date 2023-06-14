@@ -1,19 +1,9 @@
 parameters:
 	ignoreErrors:
 		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Repositories\\\\CommentWithAmount\\:\\:setDonationId\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/DataAccess/DoctrineCommentFinder.php
-
-		-
 			message: "#^Method WMDE\\\\Fundraising\\\\DonationContext\\\\DataAccess\\\\DoctrineDonationPrePersistSubscriber\\:\\:prePersist\\(\\) has parameter \\$args with generic class Doctrine\\\\Persistence\\\\Event\\\\LifecycleEventArgs but does not specify its types\\: TObjectManager$#"
 			count: 1
 			path: src/DataAccess/DoctrineDonationPrePersistSubscriber.php
-
-		-
-			message: "#^Parameter \\#1 \\$id of class WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donation constructor expects int, int\\|null given\\.$#"
-			count: 1
-			path: src/DataAccess/LegacyConverters/LegacyToDomainConverter.php
 
 		-
 			message: "#^Cannot call method getAuthorDisplayName\\(\\) on WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\DonationComment\\|null\\.$#"
@@ -34,41 +24,6 @@ parameters:
 			message: "#^Method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\DonorType\\:\\:__callStatic\\(\\) has parameter \\$name with no type specified\\.$#"
 			count: 1
 			path: src/Domain/Model/DonorType.php
-
-		-
-			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donation\\:\\:assignId\\(\\)\\.$#"
-			count: 1
-			path: tests/Fixtures/FakeDonationRepository.php
-
-		-
-			message: "#^Strict comparison using \\=\\=\\= between int and null will always evaluate to false\\.$#"
-			count: 1
-			path: tests/Fixtures/FakeDonationRepository.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationAuthorizer\\:\\:canAccessDonation\\(\\) expects int, int\\|null given\\.$#"
-			count: 3
-			path: tests/Integration/DataAccess/DoctrineDonationAuthorizerTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationAuthorizer\\:\\:systemCanModifyDonation\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: tests/Integration/DataAccess/DoctrineDonationAuthorizerTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationAuthorizer\\:\\:userCanModifyDonation\\(\\) expects int, int\\|null given\\.$#"
-			count: 4
-			path: tests/Integration/DataAccess/DoctrineDonationAuthorizerTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\DataAccess\\\\DoctrineDonationEventLogger\\:\\:log\\(\\) expects int, int\\|null given\\.$#"
-			count: 1
-			path: tests/Integration/DataAccess/DoctrineDonationEventLoggerTest.php
-
-		-
-			message: "#^Parameter \\#1 \\$donationId of method WMDE\\\\Fundraising\\\\DonationContext\\\\Tests\\\\Integration\\\\DataAccess\\\\DoctrineDonationEventLoggerTest\\:\\:getDonationById\\(\\) expects int, int\\|null given\\.$#"
-			count: 2
-			path: tests/Integration/DataAccess/DoctrineDonationEventLoggerTest.php
 
 		-
 			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Authorization\\\\DonationAuthorizer\\:\\:hasAuthorizedAsAdmin\\(\\)\\.$#"
@@ -99,10 +54,3 @@ parameters:
 			message: "#^Call to an undefined method WMDE\\\\Fundraising\\\\DonationContext\\\\Infrastructure\\\\TemplateMailerInterface\\:\\:assertCalledOnceWith\\(\\)\\.$#"
 			count: 1
 			path: tests/Integration/UseCases/CancelDonation/CancelDonationUseCaseTest.php
-
-		-
-			message: "#^Parameter \\#2 \\$address of class WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donor\\\\PersonDonor constructor expects WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Donor\\\\Address\\\\PostalAddress, WMDE\\\\Fundraising\\\\DonationContext\\\\Domain\\\\Model\\\\Address given\\.$#"
-			count: 1
-			path: tests/Unit/DataAccess/DonorFieldMapperTest.php
-
-

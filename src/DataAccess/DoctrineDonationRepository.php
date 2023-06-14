@@ -109,6 +109,10 @@ class DoctrineDonationRepository implements DonationRepository {
 		}
 
 		$converter = new LegacyToDomainConverter();
-		return $converter->createFromLegacyObject( $doctrineDonation );
+		try {
+			return $converter->createFromLegacyObject( $doctrineDonation );
+		} catch ( \InvalidArgumentException $ex ) {
+			throw new GetDonationException( $ex );
+		}
 	}
 }

@@ -16,15 +16,24 @@ use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
  * @covers WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder
+ *
+ * TODO: Refactor this test, it is confusing as it relies on magic database ID incrementation
  */
 class DoctrineCommentFinderTest extends TestCase {
 
 	private const DUMMY_PAYMENT_ID = 42;
 	private EntityManager $entityManager;
+	private int $currentId = 0;
 
 	public function setUp(): void {
 		$this->entityManager = TestEnvironment::newInstance()->getFactory()->getEntityManager();
 		parent::setUp();
+		$this->currentId = 0;
+	}
+
+	private function getIncrementedCurrentId(): int {
+		$this->currentId++;
+		return $this->currentId;
 	}
 
 	private function newDbalCommentRepository(): DoctrineCommentFinder {
@@ -112,71 +121,77 @@ class DoctrineCommentFinderTest extends TestCase {
 	}
 
 	private function persistFirstDonationWithComment(): void {
-		$firstDonation = new Donation();
-		$firstDonation->setPaymentId( self::DUMMY_PAYMENT_ID );
-		$firstDonation->setPublicRecord( 'First name' );
-		$firstDonation->setComment( 'First comment' );
-		$firstDonation->setAmount( '100' );
-		$firstDonation->setCreationTime( new DateTime( '1984-01-01' ) );
-		$firstDonation->setIsPublic( true );
-		$this->entityManager->persist( $firstDonation );
+		$donation = new Donation();
+		$donation->setId( $this->getIncrementedCurrentId() );
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
+		$donation->setPublicRecord( 'First name' );
+		$donation->setComment( 'First comment' );
+		$donation->setAmount( '100' );
+		$donation->setCreationTime( new DateTime( '1984-01-01' ) );
+		$donation->setIsPublic( true );
+		$this->entityManager->persist( $donation );
 	}
 
 	private function persistSecondDonationWithComment(): void {
-		$secondDonation = new Donation();
-		$secondDonation->setPaymentId( self::DUMMY_PAYMENT_ID + 1 );
-		$secondDonation->setPublicRecord( 'Second name' );
-		$secondDonation->setComment( 'Second comment' );
-		$secondDonation->setAmount( '200' );
-		$secondDonation->setCreationTime( new DateTime( '1984-02-02' ) );
-		$secondDonation->setIsPublic( true );
-		$this->entityManager->persist( $secondDonation );
+		$donation = new Donation();
+		$donation->setId( $this->getIncrementedCurrentId() );
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID + 1 );
+		$donation->setPublicRecord( 'Second name' );
+		$donation->setComment( 'Second comment' );
+		$donation->setAmount( '200' );
+		$donation->setCreationTime( new DateTime( '1984-02-02' ) );
+		$donation->setIsPublic( true );
+		$this->entityManager->persist( $donation );
 	}
 
 	private function persistThirdDonationWithComment(): void {
-		$thirdDonation = new Donation();
-		$thirdDonation->setPaymentId( self::DUMMY_PAYMENT_ID + 2 );
-		$thirdDonation->setPublicRecord( 'Third name' );
-		$thirdDonation->setComment( 'Third comment' );
-		$thirdDonation->setAmount( '300' );
-		$thirdDonation->setCreationTime( new DateTime( '1984-03-03' ) );
-		$thirdDonation->setIsPublic( true );
-		$this->entityManager->persist( $thirdDonation );
+		$donation = new Donation();
+		$donation->setId( $this->getIncrementedCurrentId() );
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID + 2 );
+		$donation->setPublicRecord( 'Third name' );
+		$donation->setComment( 'Third comment' );
+		$donation->setAmount( '300' );
+		$donation->setCreationTime( new DateTime( '1984-03-03' ) );
+		$donation->setIsPublic( true );
+		$this->entityManager->persist( $donation );
 	}
 
 	private function persistDonationWithPrivateComment(): void {
-		$privateDonation = new Donation();
-		$privateDonation->setPaymentId( self::DUMMY_PAYMENT_ID );
-		$privateDonation->setPublicRecord( 'Private name' );
-		$privateDonation->setComment( 'Private comment' );
-		$privateDonation->setAmount( '1337' );
-		$privateDonation->setCreationTime( new DateTime( '1984-12-12' ) );
-		$privateDonation->setIsPublic( false );
-		$this->entityManager->persist( $privateDonation );
+		$donation = new Donation();
+		$donation->setId( $this->getIncrementedCurrentId() );
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
+		$donation->setPublicRecord( 'Private name' );
+		$donation->setComment( 'Private comment' );
+		$donation->setAmount( '1337' );
+		$donation->setCreationTime( new DateTime( '1984-12-12' ) );
+		$donation->setIsPublic( false );
+		$this->entityManager->persist( $donation );
 	}
 
 	private function persistDeletedDonationWithComment(): void {
-		$deletedDonation = new Donation();
-		$deletedDonation->setPaymentId( self::DUMMY_PAYMENT_ID );
-		$deletedDonation->setPublicRecord( 'Deleted name' );
-		$deletedDonation->setComment( 'Deleted comment' );
-		$deletedDonation->setAmount( '31337' );
-		$deletedDonation->setCreationTime( new DateTime( '1984-11-11' ) );
-		$deletedDonation->setIsPublic( true );
-		$deletedDonation->setDeletionTime( new DateTime( '2000-01-01' ) );
-		$this->entityManager->persist( $deletedDonation );
+		$donation = new Donation();
+		$donation->setId( $this->getIncrementedCurrentId() );
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
+		$donation->setPublicRecord( 'Deleted name' );
+		$donation->setComment( 'Deleted comment' );
+		$donation->setAmount( '31337' );
+		$donation->setCreationTime( new DateTime( '1984-11-11' ) );
+		$donation->setIsPublic( true );
+		$donation->setDeletionTime( new DateTime( '2000-01-01' ) );
+		$this->entityManager->persist( $donation );
 	}
 
 	private function persistDeletedDonationWithoutDeletedTimestamp(): void {
-		$deletedDonation = new Donation();
-		$deletedDonation->setPaymentId( self::DUMMY_PAYMENT_ID );
-		$deletedDonation->setPublicRecord( 'Deleted name' );
-		$deletedDonation->setComment( 'Deleted comment' );
-		$deletedDonation->setAmount( '31337' );
-		$deletedDonation->setCreationTime( new DateTime( '1984-11-11' ) );
-		$deletedDonation->setIsPublic( true );
-		$deletedDonation->setStatus( Donation::STATUS_CANCELLED );
-		$this->entityManager->persist( $deletedDonation );
+		$donation = new Donation();
+		$donation->setId( $this->getIncrementedCurrentId() );
+		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
+		$donation->setPublicRecord( 'Deleted name' );
+		$donation->setComment( 'Deleted comment' );
+		$donation->setAmount( '31337' );
+		$donation->setCreationTime( new DateTime( '1984-11-11' ) );
+		$donation->setIsPublic( true );
+		$donation->setStatus( Donation::STATUS_CANCELLED );
+		$this->entityManager->persist( $donation );
 	}
 
 	private function getFirstComment(): CommentWithAmount {
