@@ -162,4 +162,13 @@ class LegacyToDomainConverterTest extends TestCase {
 		$doctrineDonation->setDonationReceipt( true );
 		yield 'converter ignores invalid receipt data from DB for anonymous' => [ $doctrineDonation, false ];
 	}
+
+	public function testThrowsExceptionWhenGivenDonationWithNullId(): void {
+		$doctrineDonation = new DoctrineDonation();
+
+		$this->expectException( \InvalidArgumentException::class );
+		$this->expectExceptionMessage( "Doctrine donation ID must not be null" );
+
+		( new LegacyToDomainConverter() )->createFromLegacyObject( $doctrineDonation );
+	}
 }

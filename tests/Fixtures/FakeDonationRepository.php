@@ -14,9 +14,6 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class FakeDonationRepository implements DonationRepository {
-
-	private int $calls = 0;
-
 	/**
 	 * @var Donation[]
 	 */
@@ -48,13 +45,9 @@ class FakeDonationRepository implements DonationRepository {
 			throw new StoreDonationException();
 		}
 
-		if ( $donation->getId() === null ) {
-			$donation->assignId( ++$this->calls );
-		}
-
-		$this->donations[$donation->getId()] = $donation;
+		$this->donations[ $donation->getId() ] = $donation;
 		// guard against memory-modification after store
-		$this->donationClones[$donation->getId()] = clone $donation;
+		$this->donationClones[ $donation->getId() ] = clone $donation;
 	}
 
 	/**

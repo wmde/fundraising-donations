@@ -49,7 +49,11 @@ class DonorFieldMapperTest extends TestCase {
 
 		};
 		$validDonor = ValidDonation::newDonor();
-		$extendedDonor = new Donor\PersonDonor( $specialName, $validDonor->getPhysicalAddress(), $validDonor->getEmailAddress() );
+		/**
+		 * @var Donor\Address\PostalAddress $address
+		 */
+		$address = $validDonor->getPhysicalAddress();
+		$extendedDonor = new Donor\PersonDonor( $specialName, $address, $validDonor->getEmailAddress() );
 
 		DonorFieldMapper::getPersonalDataFields( $extendedDonor );
 	}
