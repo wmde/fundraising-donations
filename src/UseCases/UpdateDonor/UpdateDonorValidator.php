@@ -49,6 +49,11 @@ class UpdateDonorValidator {
 		return new UpdateDonorValidationResult();
 	}
 
+	/**
+	 * @param UpdateDonorRequest $donorRequest
+	 *
+	 * @return ConstraintViolation[]
+	 */
 	private function getPersonViolations( UpdateDonorRequest $donorRequest ): array {
 		return $this->addressValidator->validatePersonName(
 			$donorRequest->getSalutation(),
@@ -58,6 +63,11 @@ class UpdateDonorValidator {
 		)->getViolations();
 	}
 
+	/**
+	 * @param UpdateDonorRequest $donorRequest
+	 *
+	 * @return ConstraintViolation[]
+	 */
 	private function getCompanyViolations( UpdateDonorRequest $donorRequest ): array {
 		return $this->addressValidator->validateCompanyName(
 			$donorRequest->getCompanyName()
@@ -72,6 +82,11 @@ class UpdateDonorValidator {
 		);
 	}
 
+	/**
+	 * @param UpdateDonorRequest $donorRequest
+	 *
+	 * @return ConstraintViolation[]
+	 */
 	private function getAddressViolations( UpdateDonorRequest $donorRequest ): array {
 		return $this->addressValidator->validatePostalAddress(
 			$donorRequest->getStreetAddress(),
@@ -81,6 +96,11 @@ class UpdateDonorValidator {
 		)->getViolations();
 	}
 
+	/**
+	 * @param UpdateDonorRequest $donorRequest
+	 *
+	 * @return ConstraintViolation[]
+	 */
 	private function getEmailViolations( UpdateDonorRequest $donorRequest ): array {
 		return $this->emailValidator->validate( $donorRequest->getEmailAddress() )->getViolations();
 	}

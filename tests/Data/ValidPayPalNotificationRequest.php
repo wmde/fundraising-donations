@@ -82,6 +82,9 @@ class ValidPayPalNotificationRequest {
 		);
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private static function getBaseTransactionData(): array {
 		return [
 			'paypal_payer_id' => self::PAYER_ID ,

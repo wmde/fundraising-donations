@@ -14,7 +14,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 class Donation {
 
 	/**
-	 * @var array ModerationReason[]
+	 * @var ModerationReason[]
 	 */
 	private array $moderationReasons;
 	private bool $cancelled;

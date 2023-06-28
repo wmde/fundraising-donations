@@ -36,7 +36,7 @@ class DonationData {
 	/**
 	 * @param string|null $updateTokenExpiry Time in 'Y-m-d H:i:s' format
 	 */
-	public function setUpdateTokenExpiry( ?string $updateTokenExpiry ) {
+	public function setUpdateTokenExpiry( ?string $updateTokenExpiry ): void {
 		$this->updateTokenExpiry = $updateTokenExpiry;
 	}
 

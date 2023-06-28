@@ -12,7 +12,7 @@ use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentRequest;
 class AddCommentRequestTest extends TestCase {
 	private const DONATION_ID = 1234567;
 
-	public function testFieldMutation() {
+	public function testFieldMutation(): void {
 		$text = 'Wikipedia helped me to find proof, but i couldn\'t write it in the margin';
 		$request = new AddCommentRequest();
 		$request->setCommentText( $text );

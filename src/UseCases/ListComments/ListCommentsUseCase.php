@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\ListComments;
 
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentFinder;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
 
 class ListCommentsUseCase {
 
@@ -29,6 +30,12 @@ class ListCommentsUseCase {
 		return $limit <= self::MAX_LIMIT && $limit >= 1;
 	}
 
+	/**
+	 * @param int $limit
+	 * @param int $page
+	 *
+	 * @return CommentWithAmount[]
+	 */
 	private function getListItems( int $limit, int $page ): array {
 		return $this->commentRepository->getPublicComments(
 			$limit,

@@ -121,7 +121,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 		$request = ValidCreditCardNotificationRequest::newBillingNotification( 1 );
 		$useCase->handleNotification( $request );
 
-		$this->assertEventLogContainsExpression( $eventLogger, $donation->getId(), '/booked/' );
+		$this->assertEventLogContainsExpression( $eventLogger, intval( $donation->getId() ), '/booked/' );
 	}
 
 	public function testWhenPaymentBookingServiceFails_handlerReturnsFailure(): void {

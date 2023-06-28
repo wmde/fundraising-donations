@@ -183,8 +183,10 @@ class AddDonationUseCaseTest extends TestCase {
 		$useCase = $this->makeUseCase( policyValidator: $this->makeFakeFailingModerationService() );
 
 		$response = $useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
+		$donation = $response->getDonation();
 
-		$this->assertTrue( $response->getDonation()->isMarkedForModeration() );
+		$this->assertNotNull( $donation );
+		$this->assertTrue( $donation->isMarkedForModeration() );
 	}
 
 	private function newValidAddDonationRequestWithEmail( string $email ): AddDonationRequest {
@@ -254,11 +256,10 @@ class AddDonationUseCaseTest extends TestCase {
 		);
 
 		$response = $useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'irrelevant@example.com' ) );
-		$donation = $response->getDonation();
 
 		$context = $urlGenerator->getLastContext();
-		$this->assertSame( $donation->getId(), $context->itemId );
-		$this->assertSame( 'D' . $donation->getId(), $context->invoiceId );
+		$this->assertSame( 1, $context->itemId );
+		$this->assertSame( 'D' . 1, $context->invoiceId );
 		$this->assertSame( $response->getAccessToken(), $context->accessToken );
 		$this->assertSame( $response->getUpdateToken(), $context->updateToken );
 		$this->assertSame( ValidDonation::DONOR_FIRST_NAME, $context->firstName );
@@ -299,8 +300,10 @@ class AddDonationUseCaseTest extends TestCase {
 		$useCase = $this->makeUseCase( repository: $repository, policyValidator: $this->makeFakeAutodeletingPolicyValidator() );
 
 		$useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
+		$donation = $repository->getDonationById( 1 );
 
-		$this->assertTrue( $repository->getDonationById( 1 )->isCancelled() );
+		$this->assertNotNull( $donation );
+		$this->assertTrue( $donation->isCancelled() );
 	}
 
 	public function testOptingIntoDonationReceipt_persistedInDonor(): void {
@@ -311,8 +314,10 @@ class AddDonationUseCaseTest extends TestCase {
 		$request->setOptsIntoDonationReceipt( true );
 
 		$useCase->addDonation( $request );
+		$donation = $repository->getDonationById( 1 );
 
-		$this->assertTrue( $repository->getDonationById( 1 )->getDonor()->wantsReceipt() );
+		$this->assertNotNull( $donation );
+		$this->assertTrue( $donation->getDonor()->wantsReceipt() );
 	}
 
 	public function testOptingOutOfDonationReceipt_persistedInDonor(): void {
@@ -323,8 +328,10 @@ class AddDonationUseCaseTest extends TestCase {
 		$request->setOptsIntoDonationReceipt( false );
 
 		$useCase->addDonation( $request );
+		$donation = $repository->getDonationById( 1 );
 
-		$this->assertFalse( $repository->getDonationById( 1 )->getDonor()->wantsReceipt() );
+		$this->assertNotNull( $donation );
+		$this->assertFalse( $donation->getDonor()->wantsReceipt() );
 	}
 
 	public function testOptingIntoNewsletter_persistedInDonor(): void {
@@ -335,8 +342,10 @@ class AddDonationUseCaseTest extends TestCase {
 		$request->setOptsIntoNewsletter( true );
 
 		$useCase->addDonation( $request );
+		$donation = $repository->getDonationById( 1 );
 
-		$this->assertTrue( $repository->getDonationById( 1 )->getDonor()->wantsNewsletter() );
+		$this->assertNotNull( $donation );
+		$this->assertTrue( $donation->getDonor()->wantsNewsletter() );
 	}
 
 	public function testOptingOutOfNewsletter_persistedInDonor(): void {
@@ -347,8 +356,10 @@ class AddDonationUseCaseTest extends TestCase {
 		$request->setOptsIntoNewsletter( false );
 
 		$useCase->addDonation( $request );
+		$donation = $repository->getDonationById( 1 );
 
-		$this->assertFalse( $repository->getDonationById( 1 )->getDonor()->wantsNewsletter() );
+		$this->assertNotNull( $donation );
+		$this->assertFalse( $donation->getDonor()->wantsNewsletter() );
 	}
 
 	private function makeUseCase(
@@ -359,7 +370,7 @@ class AddDonationUseCaseTest extends TestCase {
 		?DonationTokenFetcher $tokenFetcher = null,
 		?EventEmitter $eventEmitter = null,
 		?CreatePaymentService $paymentService = null,
-	) {
+	): AddDonationUseCase {
 		return new AddDonationUseCase(
 			$repository ?? $this->makeDonationRepositoryStub(),
 			$donationValidator ?? $this->makeFakeSucceedingDonationValidator(),

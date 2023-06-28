@@ -21,7 +21,7 @@ use WMDE\FunValidators\Validators\SucceedingEmailValidator;
  */
 class UpdateDonorValidatorTest extends TestCase {
 
-	public function testGivenAnonymousDonor_validationFails() {
+	public function testGivenAnonymousDonor_validationFails(): void {
 		$validator = new UpdateDonorValidator(
 			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS ),
 			new SucceedingEmailValidator()
@@ -41,7 +41,7 @@ class UpdateDonorValidatorTest extends TestCase {
 		);
 	}
 
-	public function testGivenFailingDonorValidator_validationFails() {
+	public function testGivenFailingDonorValidator_validationFails(): void {
 		$addressViolation = new ValidationResult( new ConstraintViolation( '', 'donor_name_missing', 'first_name' ) );
 		$donorValidator = $this->createPartialMock(
 			AddressValidator::class,
@@ -59,7 +59,7 @@ class UpdateDonorValidatorTest extends TestCase {
 		);
 	}
 
-	public function testGivenEmptyDonorRequestValues_validationFails() {
+	public function testGivenEmptyDonorRequestValues_validationFails(): void {
 		$validator = new UpdateDonorValidator(
 			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS ),
 			new EmailValidator( new SucceedingDomainNameValidator() )
@@ -77,7 +77,7 @@ class UpdateDonorValidatorTest extends TestCase {
 		$this->assertEquals( 'email_address_wrong_format', $violations[7]->getMessageIdentifier() );
 	}
 
-	public function testGivenInvalidCompanyDonor_validationFails() {
+	public function testGivenInvalidCompanyDonor_validationFails(): void {
 		$validator = new UpdateDonorValidator(
 			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS ),
 			new EmailValidator( new SucceedingDomainNameValidator() )

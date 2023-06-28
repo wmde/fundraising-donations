@@ -72,6 +72,12 @@ class HandlePaypalPaymentWithoutDonationUseCaseTest extends TestCase {
 		$this->assertCount( 0, $loggerSpy->getLogCalls() );
 	}
 
+	/**
+	 * @param array<mixed> $bookingData
+	 *
+	 * @return PaypalBookingService
+	 * @throws \PHPUnit\Framework\MockObject\Exception
+	 */
 	private function createPaymentService( array $bookingData ): PaypalBookingService {
 		$paymentService = $this->createMock( PaypalBookingService::class );
 		$paymentService->expects( $this->once() )

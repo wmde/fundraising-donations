@@ -61,11 +61,18 @@ class LoggingDonationRepositoryTest extends \PHPUnit\Framework\TestCase {
 		$this->assertExceptionLoggedAsCritical( GetDonationException::class, $logger );
 	}
 
+	/**
+	 * @param class-string<object> $expectedExceptionType
+	 * @param LoggerSpy $logger
+	 *
+	 * @return void
+	 */
 	private function assertExceptionLoggedAsCritical( string $expectedExceptionType, LoggerSpy $logger ): void {
 		$this->assertCount( 1, $logger->getLogCalls(), 'There should be exactly one log call' );
 
 		$logCall = $logger->getLogCalls()->getFirstCall();
 
+		$this->assertNotNull( $logCall );
 		$this->assertSame( LogLevel::CRITICAL, $logCall->getLevel() );
 		$this->assertArrayHasKey(
 			'exception',

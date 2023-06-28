@@ -11,6 +11,8 @@ use Doctrine\DBAL\Query\QueryBuilder;
  *
  * Internally, this class will modify the query to limit the number of rows.
  * This means it will execute the same query, but with different, increasing offsets on the data.
+ *
+ * @implements \IteratorAggregate<array<string,mixed>>
  */
 class ChunkedQueryResultIterator implements \IteratorAggregate {
 

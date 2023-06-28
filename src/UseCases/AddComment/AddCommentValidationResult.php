@@ -17,6 +17,9 @@ class AddCommentValidationResult {
 	public const SOURCE_COMMENT = 'kommentar';
 	public const SOURCE_NAME = 'eintrag';
 
+	/**
+	 * @var string[]
+	 */
 	private array $violations;
 
 	/**
@@ -26,6 +29,9 @@ class AddCommentValidationResult {
 		$this->violations = $violations;
 	}
 
+	/**
+	 * @return string[]
+	 */
 	public function getViolations(): array {
 		return $this->violations;
 	}

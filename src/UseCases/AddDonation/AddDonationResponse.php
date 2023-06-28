@@ -31,6 +31,11 @@ class AddDonationResponse {
 		return $response;
 	}
 
+	/**
+	 * @param ConstraintViolation[] $errors
+	 *
+	 * @return self
+	 */
 	public static function newFailureResponse( array $errors ): self {
 		$response = new self();
 		$response->validationErrors = $errors;

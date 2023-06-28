@@ -12,7 +12,7 @@ use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationReque
  */
 class CancelDonationRequestTest extends TestCase {
 
-	public function testUnauthorizedRequest() {
+	public function testUnauthorizedRequest(): void {
 		$donationID = 1;
 		$cancelDonationRequest = new CancelDonationRequest( $donationID );
 
@@ -20,7 +20,7 @@ class CancelDonationRequestTest extends TestCase {
 		$this->assertFalse( $cancelDonationRequest->isAuthorizedRequest() );
 	}
 
-	public function testAuthorizedRequest() {
+	public function testAuthorizedRequest(): void {
 		$donationID = 2;
 		$authUser = "adminUserX";
 		$cancelDonationRequest = new CancelDonationRequest( $donationID, $authUser );

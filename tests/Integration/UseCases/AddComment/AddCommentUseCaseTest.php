@@ -58,14 +58,16 @@ class AddCommentUseCaseTest extends TestCase {
 		$this->donationRepository = $this->newFakeRepositoryWithDonation();
 
 		$response = $this->newUseCase()->addComment( $this->newValidRequest() );
+		$donation = $this->donationRepository->getDonationById( self::DONATION_ID );
 
+		$this->assertNotNull( $donation );
 		$this->assertEquals(
 			new DonationComment(
 				self::COMMENT_TEXT,
 				self::COMMENT_IS_PUBLIC,
 				'nyan Jeroen De Dauw'
 			),
-			$this->donationRepository->getDonationById( self::DONATION_ID )->getComment()
+			$donation->getComment()
 		);
 
 		$this->assertTrue( $response->isSuccessful() );
@@ -140,11 +142,11 @@ class AddCommentUseCaseTest extends TestCase {
 		$this->textPolicyValidator = $this->newFailingTextPolicyValidator();
 
 		$response = $this->newUseCase()->addComment( $this->newValidRequest() );
-		$this->assertTrue( $response->isSuccessful() );
+		$donation = $this->donationRepository->getDonationById( self::DONATION_ID );
 
-		$this->assertFalse(
-			$this->donationRepository->getDonationById( self::DONATION_ID )->getComment()->isPublic()
-		);
+		$this->assertNotNull( $donation );
+		$this->assertTrue( $response->isSuccessful() );
+		$this->assertFalse( $donation->getComment()?->isPublic() );
 	}
 
 	private function newFailingTextPolicyValidator(): TextPolicyValidator {
@@ -156,11 +158,11 @@ class AddCommentUseCaseTest extends TestCase {
 		$this->textPolicyValidator = $this->newFailingTextPolicyValidator();
 
 		$response = $this->newUseCase()->addComment( $this->newValidRequest() );
-		$this->assertTrue( $response->isSuccessful() );
+		$donation = $this->donationRepository->getDonationById( self::DONATION_ID );
 
-		$this->assertTrue(
-			$this->donationRepository->getDonationById( self::DONATION_ID )->isMarkedForModeration()
-		);
+		$this->assertNotNull( $donation );
+		$this->assertTrue( $response->isSuccessful() );
+		$this->assertTrue( $donation->isMarkedForModeration() );
 	}
 
 	public function testWhenTextValidationFails_responseMessageDoesNotContainOK(): void {
@@ -219,12 +221,10 @@ class AddCommentUseCaseTest extends TestCase {
 		$addCommentRequest->setDonationId( self::DONATION_ID );
 
 		$response = $this->newUseCase()->addComment( $addCommentRequest );
+		$donation = $this->donationRepository->getDonationById( self::DONATION_ID );
 
-		$this->assertSame(
-			'Anonym',
-			$this->donationRepository->getDonationById( self::DONATION_ID )->getComment()->getAuthorDisplayName()
-		);
-
+		$this->assertNotNull( $donation );
+		$this->assertSame( 'Anonym', $donation->getComment()?->getAuthorDisplayName() );
 		$this->assertTrue( $response->isSuccessful() );
 	}
 
@@ -240,12 +240,10 @@ class AddCommentUseCaseTest extends TestCase {
 		$addCommentRequest->setDonationId( self::DONATION_ID );
 
 		$response = $this->newUseCase()->addComment( $addCommentRequest );
+		$donation = $this->donationRepository->getDonationById( self::DONATION_ID );
 
-		$this->assertSame(
-			'Anonym',
-			$this->donationRepository->getDonationById( self::DONATION_ID )->getComment()->getAuthorDisplayName()
-		);
-
+		$this->assertNotNull( $donation );
+		$this->assertSame( 'Anonym', $donation->getComment()?->getAuthorDisplayName() );
 		$this->assertTrue( $response->isSuccessful() );
 	}
 

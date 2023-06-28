@@ -49,7 +49,7 @@ class RestoreDonationUseCaseTest extends TestCase {
 		$donationLogger = new DonationEventLoggerSpy();
 
 		$useCase = new RestoreDonationUseCase( $fakeDonationRepository, $donationLogger );
-		$response = $useCase->restoreCancelledDonation( 1, self::AUTH_USER_NAME );
+		$response = $useCase->restoreCancelledDonation( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->restoreSucceeded() );
 		$this->assertFalse( $donation->isCancelled() );

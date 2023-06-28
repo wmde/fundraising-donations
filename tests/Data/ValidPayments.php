@@ -54,7 +54,7 @@ class ValidPayments {
 		);
 	}
 
-	private static function newPaymentIdGeneratorStub() {
+	private static function newPaymentIdGeneratorStub(): PaymentIdRepository {
 		return new class implements PaymentIdRepository {
 			public function getNewID(): int {
 				throw new \LogicException( 'Id generator should never be called - this is only for followup payments' );
@@ -142,6 +142,9 @@ class ValidPayments {
 		return $payment;
 	}
 
+	/**
+	 * @return array<string,string|float>
+	 */
 	public static function newCreditCardBookingData(): array {
 		return [ 'transactionId' => self::CREDIT_CARD_TRANSACTION_ID, 'amount' => self::DONATION_AMOUNT * 100 ];
 	}

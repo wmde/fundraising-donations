@@ -16,6 +16,12 @@ class RepositoryPaypalParentFinder implements PaypalParentFinder {
 		$this->repo = new DoctrinePaymentRepository( $entityManager );
 	}
 
+	/**
+	 * @param array<string,mixed> $row
+	 * @param ConversionResult $result
+	 *
+	 * @return PayPalPayment|null
+	 */
 	public function getParentPaypalPayment( array $row, ConversionResult $result ): ?PayPalPayment {
 		$log = $row['data']['log'] ?? [];
 		foreach ( $log as $message ) {

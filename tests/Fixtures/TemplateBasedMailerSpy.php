@@ -11,6 +11,9 @@ use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 class TemplateBasedMailerSpy implements TemplateMailerInterface {
 
 	private TestCase $testCase;
+	/**
+	 * @var array<array{EmailAddress,array<string,mixed>}>
+	 */
 	private array $sendMailCalls = [];
 
 	public function __construct( TestCase $testCase ) {
@@ -21,10 +24,19 @@ class TemplateBasedMailerSpy implements TemplateMailerInterface {
 		$this->sendMailCalls[] = [ $recipient, $templateArguments ];
 	}
 
+	/**
+	 * @return array<array{EmailAddress,array<string,mixed>}>
+	 */
 	public function getSendMailCalls(): array {
 		return $this->sendMailCalls;
 	}
 
+	/**
+	 * @param EmailAddress $expectedEmail
+	 * @param array<string,mixed> $expectedArguments
+	 *
+	 * @return void
+	 */
 	public function assertCalledOnceWith( EmailAddress $expectedEmail, array $expectedArguments ): void {
 		$this->assertCalledOnce();
 

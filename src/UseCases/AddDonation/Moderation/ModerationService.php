@@ -48,6 +48,11 @@ class ModerationService {
 
 	private ModerationResult $result;
 
+	/**
+	 * @param AmountPolicyValidator $amountPolicyValidator
+	 * @param TextPolicyValidator $textPolicyValidator
+	 * @param string[] $forbiddenEmailAddresses
+	 */
 	public function __construct( AmountPolicyValidator $amountPolicyValidator, TextPolicyValidator $textPolicyValidator,
 		array $forbiddenEmailAddresses = [] ) {
 		$this->amountPolicyValidator = $amountPolicyValidator;

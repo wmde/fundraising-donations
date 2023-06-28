@@ -30,6 +30,9 @@ class DonationPaymentValidatorTest extends TestCase {
 		$this->assertTrue( $validationResult->isSuccessful() );
 	}
 
+	/**
+	 * @return iterable<array{float}>
+	 */
 	public static function getValidAmounts(): iterable {
 		yield 'average amount' => [ 25.00 ];
 		yield 'lower bound edge case' => [ 1.00 ];

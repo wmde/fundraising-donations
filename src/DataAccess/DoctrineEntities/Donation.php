@@ -123,6 +123,9 @@ class Donation {
 
 	private ?\DateTime $dtBackup = null;
 
+	/**
+	 * @var Collection<int|string,ModerationReason>
+	 */
 	private Collection $moderationReasons;
 
 	private int $paymentId;
@@ -467,7 +470,7 @@ class Donation {
 	/**
 	 * NOTE: if possible, use @see getDataObject instead, as it provides a nicer API.
 	 *
-	 * @return array
+	 * @return array<string,mixed>
 	 */
 	public function getDecodedData(): array {
 		if ( $this->data === null ) {
@@ -482,9 +485,9 @@ class Donation {
 	/**
 	 * NOTE: if possible, use @see modifyDataObject instead, as it provides a nicer API.
 	 *
-	 * @param array $data
+	 * @param array<string,mixed> $data
 	 */
-	public function encodeAndSetData( array $data ) {
+	public function encodeAndSetData( array $data ): void {
 		$this->data = base64_encode( serialize( $data ) );
 	}
 
@@ -540,6 +543,9 @@ class Donation {
 		return $this;
 	}
 
+	/**
+	 * @return Collection<int|string,ModerationReason>
+	 */
 	public function getModerationReasons(): Collection {
 		return $this->moderationReasons;
 	}

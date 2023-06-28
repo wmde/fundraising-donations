@@ -27,6 +27,9 @@ class AddDonationValidator {
 	 */
 	private array $violations;
 
+	/**
+	 * @var array<string,int>
+	 */
 	private array $maximumFieldLengths = [
 		Result::SOURCE_TRACKING_SOURCE => 250,
 		Result::SOURCE_DONOR_EMAIL => 250

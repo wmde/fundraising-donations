@@ -14,6 +14,11 @@ class ModerationReasonRepository {
 	) {
 	}
 
+	/**
+	 * @param ModerationReason ...$moderationReasons
+	 *
+	 * @return array<int,ModerationReason>
+	 */
 	public function getModerationReasonsThatAreAlreadyPersisted( ModerationReason ...$moderationReasons ): array {
 		if ( count( $moderationReasons ) === 0 ) {
 			return [];

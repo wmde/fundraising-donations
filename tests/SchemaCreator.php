@@ -29,6 +29,7 @@ class SchemaCreator {
 
 	/**
 	 * @return ClassMetadata[]
+	 * @phpstan-ignore-next-line
 	 */
 	private function getClassMetaData(): array {
 		return $this->entityManager->getMetadataFactory()->getAllMetadata();

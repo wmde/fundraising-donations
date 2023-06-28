@@ -30,10 +30,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 
 	private DonationEventLoggerSpy $donationLogger;
 
-	/**
-	 * @var MockObject&DonationNotifier
-	 */
-	private $notifier;
+	private MockObject&DonationNotifier $notifier;
 
 	private NotificationLog $notificationLog;
 
@@ -70,7 +67,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$useCase = $this->newModerateDonationUseCase( $donation );
 
-		$response = $useCase->approveDonation( 1, self::AUTH_USER_NAME );
+		$response = $useCase->approveDonation( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
 		$this->assertFalse( $donation->isMarkedForModeration() );
@@ -152,7 +149,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$useCase = $this->newModerateDonationUseCase( $donation );
 
-		$response = $useCase->markDonationAsModerated( 1, self::AUTH_USER_NAME );
+		$response = $useCase->markDonationAsModerated( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertFalse( $response->moderationChangeSucceeded() );
 		$this->assertCount( 0, $this->donationLogger->getLogCalls() );
@@ -161,7 +158,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 	public function testGivenDonationThatIsNotModerated_markingForModerationSucceeds(): void {
 		$donation = ValidDonation::newBankTransferDonation();
 		$useCase = $this->newModerateDonationUseCase( $donation );
-		$response = $useCase->markDonationAsModerated( 1, self::AUTH_USER_NAME );
+		$response = $useCase->markDonationAsModerated( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
 		$this->assertTrue( $donation->isMarkedForModeration() );
@@ -197,12 +194,12 @@ class ModerateDonationUseCaseTest extends TestCase {
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$useCase = $this->newModerateDonationUseCase( $donation );
-		$response = $useCase->approveDonation( 1, self::AUTH_USER_NAME );
+		$response = $useCase->approveDonation( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
 		$this->assertFalse( $donation->isMarkedForModeration() );
 
-		$response = $useCase->markDonationAsModerated( 1, self::AUTH_USER_NAME );
+		$response = $useCase->markDonationAsModerated( $donation->getId(), self::AUTH_USER_NAME );
 
 		$this->assertTrue( $response->moderationChangeSucceeded() );
 		$this->assertTrue( $donation->isMarkedForModeration() );

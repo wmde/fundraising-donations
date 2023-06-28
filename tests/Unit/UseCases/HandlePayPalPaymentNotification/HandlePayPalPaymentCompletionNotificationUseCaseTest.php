@@ -63,7 +63,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 			notifier: $notifier
 		);
 
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
+		$request = ValidPayPalNotificationRequest::newInstantPayment( $donation->getId() );
 		$this->assertTrue( $useCase->handleNotification( $request )->notificationWasHandled() );
 	}
 
@@ -71,7 +71,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$donation = ValidDonation::newIncompletePayPalDonation();
 		$repositorySpy = new DonationRepositorySpy( $donation );
 
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
+		$request = ValidPayPalNotificationRequest::newInstantPayment( $donation->getId() );
 		$useCase = $this->givenNewUseCase(
 			repository: $repositorySpy,
 		);
@@ -83,7 +83,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	public function testWhenAuthorizationSucceeds_paymentIsBooked(): void {
 		$donation = ValidDonation::newIncompletePayPalDonation();
 		$repository = new FakeDonationRepository( $donation );
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
+		$request = ValidPayPalNotificationRequest::newInstantPayment( $donation->getId() );
 
 		$paymentBookingServiceMock = $this->createMock( PaymentBookingService::class );
 		$paymentBookingServiceMock
@@ -105,7 +105,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		$repository = new FakeDonationRepository( $donation );
 		$eventLogger = new DonationEventLoggerSpy();
 
-		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
+		$request = ValidPayPalNotificationRequest::newInstantPayment( $donation->getId() );
 		$useCase = $this->givenNewUseCase(
 			repository: $repository,
 			eventLogger: $eventLogger
@@ -175,12 +175,12 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		);
 		$this->assertEventLogContainsExpression(
 			$eventLogger,
-			$donation->getId(),
+			1,
 			'/child donation.*' . $followupUpDonation->getId() . '/'
 		);
 		$this->assertEventLogContainsExpression(
 			$eventLogger,
-			$followupUpDonation->getId(),
+			intval( $followupUpDonation->getId() ),
 			'/parent donation.*' . $donation->getId() . '/'
 		);
 	}
@@ -277,19 +277,19 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 		return $this->createStub( DonationEventLogger::class );
 	}
 
-	private function createSucceedingPaymentBookingServiceStub(): PaymentBookingService|Stub {
+	private function createSucceedingPaymentBookingServiceStub(): PaymentBookingService&Stub {
 		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
 		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new SuccessResponse() );
 		return $paymentBookingServiceStub;
 	}
 
-	private function createFailingPaymentBookingServiceStub( FailureResponse $response ): PaymentBookingService|Stub {
+	private function createFailingPaymentBookingServiceStub( FailureResponse $response ): PaymentBookingService&Stub {
 		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
 		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( $response );
 		return $paymentBookingServiceStub;
 	}
 
-	private function createFollowUpSucceedingPaymentBookingServiceStub(): PaymentBookingService|Stub {
+	private function createFollowUpSucceedingPaymentBookingServiceStub(): PaymentBookingService&Stub {
 		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
 		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new FollowUpSuccessResponse( 1, 2 ) );
 		return $paymentBookingServiceStub;

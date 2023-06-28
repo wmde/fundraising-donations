@@ -10,7 +10,7 @@ use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest;
  * @covers \WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest
  */
 class UpdateDonorRequestTest extends TestCase {
-	public function testConstruction() {
+	public function testConstruction(): void {
 		$request = UpdateDonorRequest::newInstance()
 			->withSalutation( 'Miss' )
 			->withTitle( 'Dr.' )
@@ -34,7 +34,7 @@ class UpdateDonorRequestTest extends TestCase {
 		$this->assertSame( 'ivy@example.com', $request->getEmailAddress() );
 	}
 
-	public function testStringValuesAreTrimmed() {
+	public function testStringValuesAreTrimmed(): void {
 		$request = UpdateDonorRequest::newInstance()
 			->withSalutation( ' Miss ' )
 			->withTitle( ' Dr. ' )

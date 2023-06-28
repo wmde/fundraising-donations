@@ -36,7 +36,7 @@ class LegacyCommentRepositoryTest extends TestCase {
 		$donation = ValidDonation::newBankTransferDonation();
 		$repository = new LegacyCommentRepository( new FakeDonationRepository( $donation ) );
 
-		$comment = $repository->getCommentByDonationId( $donation->getId() );
+		$comment = $repository->getCommentByDonationId( 1 );
 
 		$this->assertNull( $comment );
 	}
@@ -46,7 +46,7 @@ class LegacyCommentRepositoryTest extends TestCase {
 		$donation->addComment( ValidDonation::newPublicComment() );
 		$repository = new LegacyCommentRepository( new FakeDonationRepository( $donation ) );
 
-		$comment = $repository->getCommentByDonationId( $donation->getId() );
+		$comment = $repository->getCommentByDonationId( 1 );
 
 		$this->assertEquals( $comment, ValidDonation::newPublicComment() );
 	}
@@ -66,12 +66,12 @@ class LegacyCommentRepositoryTest extends TestCase {
 		$donationRepository = new DonationRepositorySpy( $donation );
 		$repository = new LegacyCommentRepository( $donationRepository );
 
-		$repository->insertCommentForDonation( $donation->getId(), $comment );
+		$repository->insertCommentForDonation( 1, $comment );
 
 		$this->assertEquals( $donation->getComment(), ValidDonation::newPublicComment() );
 		$storeDonationCalls = $donationRepository->getGetDonationCalls();
 		$this->assertCount( 1, $storeDonationCalls );
-		$this->assertSame( $donation->getId(), $storeDonationCalls[0] );
+		$this->assertSame( 1, $storeDonationCalls[0] );
 	}
 
 	public function testInsertCommentForDonationFakesCommentIdByReturningDonationId(): void {
@@ -80,9 +80,9 @@ class LegacyCommentRepositoryTest extends TestCase {
 		$donationRepository = new DonationRepositorySpy( $donation );
 		$repository = new LegacyCommentRepository( $donationRepository );
 
-		$fakeCommentId = $repository->insertCommentForDonation( $donation->getId(), $comment );
+		$fakeCommentId = $repository->insertCommentForDonation( 1, $comment );
 
-		$this->assertSame( $donation->getId(), $fakeCommentId );
+		$this->assertSame( 1, $fakeCommentId );
 	}
 
 	public function testUpdateCommentFailsIfDonationWasNotLoadedBefore(): void {
@@ -100,7 +100,7 @@ class LegacyCommentRepositoryTest extends TestCase {
 		$repository = new LegacyCommentRepository( $donationRepository );
 
 		// The call to getCommentByDonationId will make the repository remember which donation the comment belonged to
-		$repository->getCommentByDonationId( $donation->getId() );
+		$repository->getCommentByDonationId( 1 );
 		$repository->updateComment( $comment );
 
 		$storeDonationCalls = $donationRepository->getStoreDonationCalls();
@@ -122,7 +122,7 @@ class LegacyCommentRepositoryTest extends TestCase {
 		$donationRepository = new DonationRepositorySpy( $donation );
 		$repository = new LegacyCommentRepository( $donationRepository );
 		// The call to getCommentByDonationId will make the repository remember which donation the comment belonged to
-		$repository->getCommentByDonationId( $donation->getId() );
+		$repository->getCommentByDonationId( 1 );
 		$newComment = clone $comment;
 		$newComment->retract();
 
@@ -134,7 +134,7 @@ class LegacyCommentRepositoryTest extends TestCase {
 	public function testUpdateCommentFailsIfLoadedDonationHadNoComment(): void {
 		$donation = ValidDonation::newBookedCreditCardDonation();
 		$repository = new LegacyCommentRepository( new FakeDonationRepository( $donation ) );
-		$repository->getCommentByDonationId( $donation->getId() );
+		$repository->getCommentByDonationId( 1 );
 
 		$this->expectException( LegacyException::class );
 		$repository->updateComment( ValidDonation::newPublicComment() );

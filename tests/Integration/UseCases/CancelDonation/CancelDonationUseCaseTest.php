@@ -68,13 +68,13 @@ class CancelDonationUseCaseTest extends TestCase {
 		);
 	}
 
-	private function getSucceedingCancelPaymentUseCase(): CancelPaymentUseCase|MockObject {
+	private function getSucceedingCancelPaymentUseCase(): CancelPaymentUseCase&MockObject {
 		$cancelPaymentUseCase = $this->createMock( CancelPaymentUseCase::class );
 		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new SuccessResponse( true ) );
 		return $cancelPaymentUseCase;
 	}
 
-	private function getFailingCancelPaymentUseCase(): CancelPaymentUseCase|MockObject {
+	private function getFailingCancelPaymentUseCase(): CancelPaymentUseCase&MockObject {
 		$cancelPaymentUseCase = $this->createMock( CancelPaymentUseCase::class );
 		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new FailureResponse( "failed for whatever reason" ) );
 		return $cancelPaymentUseCase;
@@ -98,10 +98,12 @@ class CancelDonationUseCaseTest extends TestCase {
 
 		$request = new CancelDonationRequest( $donation->getId() );
 		$response = $this->newCancelDonationUseCase()->cancelDonation( $request );
+		$donation = $this->repository->getDonationById( $donation->getId() );
 
+		$this->assertNotNull( $donation );
 		$this->assertTrue( $response->cancellationSucceeded() );
 		$this->assertFalse( $response->mailDeliveryFailed() );
-		$this->assertTrue( $this->repository->getDonationById( $donation->getId() )->isCancelled() );
+		$this->assertTrue( $donation->isCancelled() );
 	}
 
 	public function testGivenIdOfNonCancellableDonation_cancellationIsNotSuccessful(): void {
@@ -258,7 +260,7 @@ class CancelDonationUseCaseTest extends TestCase {
 		$this->assertTrue( $response->cancellationSucceeded() );
 		$storeCalls = $this->repository->getStoreDonationCalls();
 		$this->assertCount( 1, $storeCalls );
-		$this->assertSame( $donation->getId(), $storeCalls[0]->getId() );
+		$this->assertSame( 1, $storeCalls[0]->getId() );
 	}
 
 }

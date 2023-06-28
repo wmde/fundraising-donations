@@ -67,6 +67,9 @@ class ModerateCommentUseCaseTest extends TestCase {
 		$this->assertTrue( $comment->isPublic(), $assertMessage );
 	}
 
+	/**
+	 * @return iterable<array{DonationComment, string}>
+	 */
 	public static function commentProviderForPublication(): iterable {
 		yield [ self::newPrivateComment(), 'private comments should be published' ];
 		yield [ self::newPublicComment(), 'public comments should stay published' ];
@@ -101,6 +104,9 @@ class ModerateCommentUseCaseTest extends TestCase {
 		$this->assertFalse( $comment->isPublic(), $assertMessage );
 	}
 
+	/**
+	 * @return iterable<array{DonationComment, string}>
+	 */
 	public static function commentProviderForRetraction(): iterable {
 		yield [ self::newPrivateComment(), 'private comments should stay private' ];
 		yield [ self::newPublicComment(), 'public comments should be retracted' ];

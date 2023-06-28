@@ -8,6 +8,10 @@ use WMDE\Fundraising\DonationContext\Domain\Event;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 
 class EventEmitterSpy implements EventEmitter {
+
+	/**
+	 * @var Event[]
+	 */
 	private array $events;
 
 	public function emit( Event $event ): void {

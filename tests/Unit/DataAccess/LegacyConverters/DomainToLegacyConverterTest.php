@@ -41,6 +41,9 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertEquals( $expectedOutput, $doctrineDonation->getBankTransferCode() );
 	}
 
+	/**
+	 * @return array<array{string|Donation}>
+	 */
 	public static function getPaymentMethodsAndTransferCodes(): array {
 		return [
 			[ ValidPayments::PAYMENT_BANK_TRANSFER_CODE, ValidDonation::newBankTransferDonation(), ],
@@ -179,6 +182,9 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertSame( $status, $doctrineDonation->getStatus() );
 	}
 
+	/**
+	 * @return iterable<array{string}>
+	 */
 	public static function getStatusValues(): iterable {
 		yield [ LegacyPaymentStatus::DIRECT_DEBIT->value ];
 		yield [ LegacyPaymentStatus::BANK_TRANSFER->value ];

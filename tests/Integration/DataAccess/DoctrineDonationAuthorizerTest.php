@@ -203,7 +203,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		return $donation;
 	}
 
-	private function storeDonation( Donation $donation ) {
+	private function storeDonation( Donation $donation ): void {
 		$this->entityManager->persist( $donation );
 		$this->entityManager->flush();
 	}

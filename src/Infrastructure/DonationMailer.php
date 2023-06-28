@@ -35,6 +35,11 @@ class DonationMailer implements DonationNotifier {
 		);
 	}
 
+	/**
+	 * @param Donation $donation
+	 *
+	 * @return array{recipient:array<string,string>,donation:array<string,mixed>}
+	 */
 	private function getTemplateArguments( Donation $donation ): array {
 		$paymentInfo = $this->getPaymentService->getPaymentDataArray( $donation->getPaymentId() );
 		return [

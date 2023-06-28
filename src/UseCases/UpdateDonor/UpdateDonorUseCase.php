@@ -51,8 +51,11 @@ class UpdateDonorUseCase {
 			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_ACCESS_DENIED );
 		}
 
-		// No null check needed here, because authorizationService will deny access to non-existing donations
 		$donation = $this->donationRepository->getDonationById( $updateDonorRequest->getDonationId() );
+
+		if ( $donation === null ) {
+			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_DONATION_NOT_FOUND );
+		}
 
 		if ( $donation->isCancelled() ) {
 			return UpdateDonorResponse::newFailureResponse( UpdateDonorResponse::ERROR_ACCESS_DENIED );
@@ -75,7 +78,7 @@ class UpdateDonorUseCase {
 		$donation->setDonor( $newDonor );
 		$this->donationRepository->storeDonation( $donation );
 
-		$this->eventEmitter->emit( new DonorUpdatedEvent( $donation->getId(), $previousDonor, $newDonor ) );
+		$this->eventEmitter->emit( new DonorUpdatedEvent( intval( $donation->getId() ), $previousDonor, $newDonor ) );
 		$this->donationConfirmationMailer->sendConfirmationFor( $donation );
 
 		return UpdateDonorResponse::newSuccessResponse( UpdateDonorResponse::SUCCESS_TEXT, $donation );

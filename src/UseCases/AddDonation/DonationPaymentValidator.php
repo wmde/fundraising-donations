@@ -67,6 +67,9 @@ class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 	private Euro $minimumAmount;
 	private Euro $maximumAmount;
 
+	/**
+	 * @param PaymentType[] $allowedPaymentTypes
+	 */
 	public function __construct(
 		private readonly array $allowedPaymentTypes
 	) {

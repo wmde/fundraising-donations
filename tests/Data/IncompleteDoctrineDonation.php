@@ -109,6 +109,9 @@ class IncompleteDoctrineDonation {
 		$donation->setDonorOptsIntoNewsletter( ValidDonation::OPTS_INTO_NEWSLETTER );
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getTrackingInfoArray(): array {
 		return [
 			'layout' => '',
@@ -121,6 +124,9 @@ class IncompleteDoctrineDonation {
 		];
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getDonorArray(): array {
 		return array_merge(
 			$this->getPersonNameArray(),
@@ -129,6 +135,9 @@ class IncompleteDoctrineDonation {
 		);
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getPersonNameArray(): array {
 		return [
 			'adresstyp' => 'person',
@@ -140,6 +149,9 @@ class IncompleteDoctrineDonation {
 		];
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getAddressArray(): array {
 		return [
 			'strasse' => ValidDonation::DONOR_STREET_ADDRESS,
@@ -149,6 +161,9 @@ class IncompleteDoctrineDonation {
 		];
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getPaypalArray(): array {
 		return [
 			'paypal_payer_id' => ValidPayPalNotificationRequest::PAYER_ID,

@@ -101,6 +101,11 @@ class DonationConfirmationMailerTest extends TestCase {
 	}
 
 	/**
+	 * @param ModerationReason[] $moderationReasons
+	 * @param int $expectedMailCount
+	 *
+	 * @return void
+	 * @throws \PHPUnit\Framework\MockObject\Exception
 	 * @dataProvider moderationReasonProvider
 	 */
 	public function testGivenModeratedDonation_adminIsNotNotifiedOfAnyModerationExceptAmountTooHigh( array $moderationReasons, int $expectedMailCount ): void {
@@ -121,6 +126,9 @@ class DonationConfirmationMailerTest extends TestCase {
 		$this->assertCount( $expectedMailCount, $mailerSpy->getSendMailCalls() );
 	}
 
+	/**
+	 * @return iterable<array{ModerationReason[], int}>
+	 */
 	public static function moderationReasonProvider(): iterable {
 		yield 'address content violation' => [ [ new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION ) ], 0 ];
 		yield 'multiple violations, but not amount one' => [ [

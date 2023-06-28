@@ -64,7 +64,7 @@ class DonationTest extends TestCase {
 		$donation->assignId( 43 );
 	}
 
-	public function testNewDonationsAreNotExported() {
+	public function testNewDonationsAreNotExported(): void {
 		$donation = new Donation(
 			null,
 			ValidDonation::newDonor(),
@@ -117,6 +117,7 @@ class DonationTest extends TestCase {
 
 		$donation->confirmBooked();
 
+		$this->assertNotNull( $donation->getComment() );
 		$this->assertFalse( $donation->getComment()->isPublic() );
 	}
 
@@ -126,6 +127,7 @@ class DonationTest extends TestCase {
 
 		$donation->confirmBooked();
 
+		$this->assertNotNull( $donation->getComment() );
 		$this->assertFalse( $donation->getComment()->isPublic() );
 	}
 
