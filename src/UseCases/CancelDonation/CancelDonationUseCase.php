@@ -112,10 +112,14 @@ class CancelDonationUseCase {
 		);
 	}
 
+	/**
+	 * @param Donation $donation
+	 *
+	 * @return array<string,mixed>
+	 */
 	private function getConfirmationMailTemplateArguments( Donation $donation ): array {
 		return [
 			'donationId' => $donation->getId(),
-
 			'recipient' => $donation->getDonor()->getName()->toArray(),
 		];
 	}

@@ -13,6 +13,7 @@ class UpdateDonorResponse {
 
 	public const SUCCESS_TEXT = 'donor_change_success_text';
 	public const ERROR_ACCESS_DENIED = 'donor_change_failure_access_denied';
+	public const ERROR_DONATION_NOT_FOUND = 'donor_change_failure_not_found';
 	public const ERROR_DONATION_IS_EXPORTED = 'donor_change_failure_exported';
 	public const ERROR_VALIDATION_FAILED = 'donor_change_failure_validation_error';
 
@@ -28,7 +29,7 @@ class UpdateDonorResponse {
 		return new self( $errorMessage, '', $donation );
 	}
 
-	private function __construct( string $errorMessage = null, string $successMessage = null, Donation $donation = null ) {
+	private function __construct( string $errorMessage = '', string $successMessage = '', Donation $donation = null ) {
 		$this->errorMessage = $errorMessage;
 		$this->successMessage = $successMessage;
 		$this->donation = $donation;

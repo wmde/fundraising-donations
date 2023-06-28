@@ -21,11 +21,17 @@ class DonationContextFactory {
 
 	private const DOCTRINE_CLASS_MAPPING_DIRECTORY = __DIR__ . '/../config/DoctrineClassMapping';
 
+	/**
+	 * @var array{token-length:int,token-validity-timestamp:string}
+	 */
 	protected array $config;
 	private AnnotationReader $annotationReader;
 
 	protected ?TokenGenerator $tokenGenerator;
 
+	/**
+	 * @param array{token-length:int,token-validity-timestamp:string} $config
+	 */
 	public function __construct( array $config ) {
 		$this->config = $config;
 		$this->tokenGenerator = null;
@@ -44,6 +50,9 @@ class DonationContextFactory {
 		);
 	}
 
+	/**
+	 * @return string[]
+	 */
 	public function getDoctrineMappingPaths(): array {
 		return [ self::DOCTRINE_CLASS_MAPPING_DIRECTORY ];
 	}

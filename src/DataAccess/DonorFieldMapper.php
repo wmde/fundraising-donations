@@ -16,6 +16,11 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
  * stores all personal information in a serialized blob.
  */
 class DonorFieldMapper {
+	/**
+	 * @param Donor $donor
+	 *
+	 * @return array<string,mixed>
+	 */
 	public static function getPersonalDataFields( Donor $donor ): array {
 		return array_merge(
 			// Order of the fields is the same as the resulting array of ValidDoctrineDonation,
@@ -29,6 +34,11 @@ class DonorFieldMapper {
 		);
 	}
 
+	/**
+	 * @param DonorName $name
+	 *
+	 * @return array<string,string>
+	 */
 	private static function getDataFieldsFromPersonName( DonorName $name ): array {
 		$keyToDbFieldMap = [
 			'salutation' => 'anrede',
@@ -47,6 +57,11 @@ class DonorFieldMapper {
 		return $result;
 	}
 
+	/**
+	 * @param Address $address
+	 *
+	 * @return array<string,string>
+	 */
 	private static function getDataFieldsFromAddress( Address $address ): array {
 		if ( $address instanceof NoAddress ) {
 			return [];

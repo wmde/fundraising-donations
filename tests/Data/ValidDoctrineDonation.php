@@ -108,7 +108,7 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
-	public static function newAnyonymizedDonation() {
+	public static function newAnyonymizedDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
 		$donation->setPaymentType( self::PAYMENT_PAYPAL );
@@ -155,6 +155,9 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getTrackingInfoArray(): array {
 		return [
 			'layout' => '',
@@ -167,6 +170,9 @@ class ValidDoctrineDonation {
 		];
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getBankDataArray(): array {
 		return [
 			'iban' => ValidPayments::PAYMENT_IBAN,
@@ -177,6 +183,9 @@ class ValidDoctrineDonation {
 		];
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getPrivateDonorArray(): array {
 		return array_merge(
 			[ 'adresstyp' => 'person' ],
@@ -186,6 +195,9 @@ class ValidDoctrineDonation {
 		);
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getPersonNameArray(): array {
 		return [
 			'anrede' => ValidDonation::DONOR_SALUTATION,
@@ -195,6 +207,9 @@ class ValidDoctrineDonation {
 		];
 	}
 
+	/**
+	 * @return array<string,string|int>
+	 */
 	private function getAddressArray(): array {
 		return [
 			'strasse' => ValidDonation::DONOR_STREET_ADDRESS,
@@ -204,6 +219,9 @@ class ValidDoctrineDonation {
 		];
 	}
 
+	/**
+	 * @return array<string,string>
+	 */
 	private function getPaypalDataArray(): array {
 		return [
 			'ext_payment_id' => '72171T32A6H345906',

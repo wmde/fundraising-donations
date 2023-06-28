@@ -8,6 +8,11 @@ use WMDE\Fundraising\PaymentContext\UseCases\CreateBookedPayPalPayment\FailureRe
 use WMDE\Fundraising\PaymentContext\UseCases\CreateBookedPayPalPayment\SuccessResponse;
 
 interface PaypalBookingService {
-
+	/**
+	 * @param int $amountInCents
+	 * @param array<string,mixed> $transactionData
+	 *
+	 * @return SuccessResponse|FailureResponse
+	 */
 	public function bookNewPayment( int $amountInCents, array $transactionData ): SuccessResponse|FailureResponse;
 }

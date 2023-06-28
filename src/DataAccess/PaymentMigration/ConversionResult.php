@@ -17,6 +17,12 @@ class ConversionResult {
 	private array $warnings = [];
 	private int $donationCount = 0;
 
+	/**
+	 * @param string $itemType
+	 * @param array<string,mixed> $row
+	 *
+	 * @return void
+	 */
 	public function addError( string $itemType, array $row ): void {
 		if ( !isset( $this->errors[$itemType] ) ) {
 			$this->errors[$itemType] = new ResultObject( self::BUFFER_SIZE, $row );
@@ -25,6 +31,12 @@ class ConversionResult {
 		}
 	}
 
+	/**
+	 * @param string $itemType
+	 * @param array<string,mixed> $row
+	 *
+	 * @return void
+	 */
 	public function addWarning( string $itemType, array $row ): void {
 		if ( !isset( $this->warnings[$itemType] ) ) {
 			$this->warnings[$itemType] = new ResultObject( self::BUFFER_SIZE, $row );
@@ -38,10 +50,16 @@ class ConversionResult {
 		return $this;
 	}
 
+	/**
+	 * @return ResultObject[]
+	 */
 	public function getErrors(): array {
 		return $this->errors;
 	}
 
+	/**
+	 * @return ResultObject[]
+	 */
 	public function getWarnings(): array {
 		return $this->warnings;
 	}

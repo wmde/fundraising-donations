@@ -17,7 +17,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
  */
 class DonationTest extends TestCase {
 
-	public function testDataEncodingAndDecodingRoundtrips() {
+	public function testDataEncodingAndDecodingRoundtrips(): void {
 		$donation = new Donation();
 
 		$someData = [
@@ -32,20 +32,20 @@ class DonationTest extends TestCase {
 		$this->assertSame( $someData, $donation->getDecodedData() );
 	}
 
-	public function testGivenNoData_getDecodedDataReturnsEmptyArray() {
+	public function testGivenNoData_getDecodedDataReturnsEmptyArray(): void {
 		$donation = new Donation();
 
 		$this->assertSame( [], $donation->getDecodedData() );
 	}
 
-	public function testWhenSettingIdToAnInteger_getIdReturnsIt() {
+	public function testWhenSettingIdToAnInteger_getIdReturnsIt(): void {
 		$donation = new Donation();
 		$donation->setId( 1337 );
 
 		$this->assertSame( 1337, $donation->getId() );
 	}
 
-	public function testWhenSettingIdToNull_getIdReturnsNull() {
+	public function testWhenSettingIdToNull_getIdReturnsNull(): void {
 		$donation = new Donation();
 		$donation->setId( 1337 );
 		$donation->setId( null );
@@ -53,13 +53,13 @@ class DonationTest extends TestCase {
 		$this->assertNull( $donation->getId() );
 	}
 
-	public function testWhenIdIsNotSet_getIdReturnsNull() {
+	public function testWhenIdIsNotSet_getIdReturnsNull(): void {
 		$donation = new Donation();
 
 		$this->assertNull( $donation->getId() );
 	}
 
-	public function testGivenNoData_getDataObjectReturnsObjectWithNullValues() {
+	public function testGivenNoData_getDataObjectReturnsObjectWithNullValues(): void {
 		$donation = new Donation();
 
 		$this->assertNull( $donation->getDataObject()->getAccessToken() );
@@ -67,7 +67,7 @@ class DonationTest extends TestCase {
 		$this->assertNull( $donation->getDataObject()->getUpdateTokenExpiry() );
 	}
 
-	public function testGivenData_getDataObjectReturnsTheValues() {
+	public function testGivenData_getDataObjectReturnsTheValues(): void {
 		$donation = new Donation();
 		$donation->encodeAndSetData( [
 			'token' => 'foo',
@@ -80,7 +80,7 @@ class DonationTest extends TestCase {
 		$this->assertSame( 'baz', $donation->getDataObject()->getUpdateTokenExpiry() );
 	}
 
-	public function testWhenProvidingData_setDataObjectSetsData() {
+	public function testWhenProvidingData_setDataObjectSetsData(): void {
 		$data = new DonationData();
 		$data->setAccessToken( 'foo' );
 		$data->setUpdateToken( 'bar' );
@@ -99,7 +99,7 @@ class DonationTest extends TestCase {
 		);
 	}
 
-	public function testWhenProvidingNullData_setObjectDoesNotSetFields() {
+	public function testWhenProvidingNullData_setObjectDoesNotSetFields(): void {
 		$donation = new Donation();
 		$donation->setDataObject( new DonationData() );
 
@@ -109,7 +109,7 @@ class DonationTest extends TestCase {
 		);
 	}
 
-	public function testWhenDataAlreadyExists_setDataObjectRetainsAndUpdatesData() {
+	public function testWhenDataAlreadyExists_setDataObjectRetainsAndUpdatesData(): void {
 		$donation = new Donation();
 		$donation->encodeAndSetData( [
 			'nyan' => 'cat',
@@ -134,7 +134,7 @@ class DonationTest extends TestCase {
 		);
 	}
 
-	public function testWhenModifyingTheDataObject_modificationsAreReflected() {
+	public function testWhenModifyingTheDataObject_modificationsAreReflected(): void {
 		$donation = new Donation();
 		$donation->encodeAndSetData( [
 			'nyan' => 'cat',
@@ -158,7 +158,7 @@ class DonationTest extends TestCase {
 		);
 	}
 
-	public function testStatusConstantsExist() {
+	public function testStatusConstantsExist(): void {
 		$this->assertNotNull( Donation::STATUS_NEW );
 		$this->assertNotNull( Donation::STATUS_CANCELLED );
 		$this->assertNotNull( Donation::STATUS_EXTERNAL_BOOKED );

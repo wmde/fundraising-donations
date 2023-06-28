@@ -59,7 +59,7 @@ class InsertingPaymentHandler implements NewPaymentHandler {
 		$this->transactionStarted = true;
 	}
 
-	private function commit() {
+	private function commit(): void {
 		if ( !$this->transactionStarted ) {
 			return;
 		}

@@ -166,10 +166,7 @@ class AddDonationValidatorTest extends TestCase {
 			}
 		}
 
-		$this->assertTrue(
-			false,
-			'Failed asserting that constraint for field "' . $fieldName . '"" was violated.'
-		);
+		$this->fail( 'Failed asserting that constraint for field "' . $fieldName . '"" was violated.' );
 	}
 
 	private function newAddressValidator(): AddressValidator {

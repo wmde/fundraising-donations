@@ -27,13 +27,13 @@ class DonorFactory {
 						$data->getValue( 'titel' )
 					),
 					self::createPhysicalAddress( $data ),
-					$donation->getDonorEmail()
+					$donation->getDonorEmail() ?? ''
 				);
 			case 'firma':
 				return new CompanyDonor(
 					new CompanyName( $data->getValue( 'firma' ) ),
 					self::createPhysicalAddress( $data ),
-					$donation->getDonorEmail()
+					$donation->getDonorEmail() ?? ''
 				);
 			case 'email':
 				return new Donor\EmailDonor(
@@ -43,7 +43,7 @@ class DonorFactory {
 						$data->getValue( 'anrede' ),
 						$data->getValue( 'titel' )
 					),
-					$donation->getDonorEmail()
+					$donation->getDonorEmail() ?? ''
 				);
 			case 'anonym':
 				return new AnonymousDonor();
