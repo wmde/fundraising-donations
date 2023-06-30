@@ -16,24 +16,18 @@ use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
  * @covers WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder
- *
- * TODO: Refactor this test, it is confusing as it relies on magic database ID incrementation
  */
 class DoctrineCommentFinderTest extends TestCase {
 
-	private const DUMMY_PAYMENT_ID = 42;
+	private const COMMENT_NAME = 'Donor name';
+	private const COMMENT = 'Comment';
+	private const DONATION_AMOUNT = '100';
+	private const DONATION_AMOUNT_FLOAT = 100;
 	private EntityManager $entityManager;
-	private int $currentId = 0;
 
 	public function setUp(): void {
 		$this->entityManager = TestEnvironment::newInstance()->getFactory()->getEntityManager();
 		parent::setUp();
-		$this->currentId = 0;
-	}
-
-	private function getIncrementedCurrentId(): int {
-		$this->currentId++;
-		return $this->currentId;
 	}
 
 	private function newDbalCommentRepository(): DoctrineCommentFinder {
@@ -47,181 +41,77 @@ class DoctrineCommentFinderTest extends TestCase {
 	}
 
 	public function testWhenThereAreLessCommentsThanTheLimit_theyAreAllReturned(): void {
-		$this->persistFirstDonationWithComment();
-		$this->persistSecondDonationWithComment();
-		$this->persistThirdDonationWithComment();
+		$this->givenStoredDonationWithComment( donationId: 1, date: '1984-01-01' );
+		$this->givenStoredDonationWithComment( donationId: 2, date: '1984-01-02' );
+		$this->givenStoredDonationWithComment( donationId: 3, date: '1984-01-03' );
 		$this->entityManager->flush();
 
 		$repository = $this->newDbalCommentRepository();
 
 		$this->assertEquals(
 			[
-				$this->getThirdComment( 3 ),
-				$this->getSecondComment(),
-				$this->getFirstComment(),
+				$this->getComment( donationId: 3, date: '1984-01-03' ),
+				$this->getComment( donationId: 2, date: '1984-01-02' ),
+				$this->getComment( donationId: 1, date: '1984-01-01' ),
 			],
 			$repository->getPublicComments( 10 )
 		);
 	}
 
 	public function testWhenThereAreMoreCommentsThanTheLimit_aLimitedNumberAreReturned(): void {
-		$this->persistFirstDonationWithComment();
-		$this->persistSecondDonationWithComment();
-		$this->persistThirdDonationWithComment();
+		$this->givenStoredDonationWithComment( donationId: 1, date: '1984-01-01' );
+		$this->givenStoredDonationWithComment( donationId: 2, date: '1984-01-02' );
+		$this->givenStoredDonationWithComment( donationId: 3, date: '1984-01-03' );
 		$this->entityManager->flush();
 
 		$repository = $this->newDbalCommentRepository();
 
 		$this->assertEquals(
 			[
-				$this->getThirdComment( 3 ),
-				$this->getSecondComment(),
+				$this->getComment( donationId: 3, date: '1984-01-03' ),
+				$this->getComment( donationId: 2, date: '1984-01-02' ),
 			],
 			$repository->getPublicComments( 2 )
 		);
 	}
 
 	public function testOnlyPublicCommentsGetReturned(): void {
-		$this->persistFirstDonationWithComment();
-		$this->persistSecondDonationWithComment();
-		$this->persistDonationWithPrivateComment();
-		$this->persistThirdDonationWithComment();
+		$this->givenStoredDonationWithComment( donationId: 1, date: '1984-01-01' );
+		$this->givenStoredDonationWithComment( donationId: 2, date: '1984-01-02' );
+		$this->givenStoredDonationWithPrivateComment( donationId: 3, date: '1984-01-03' );
+		$this->givenStoredDonationWithComment( donationId: 4, date: '1984-01-04' );
 		$this->entityManager->flush();
 
 		$repository = $this->newDbalCommentRepository();
 
 		$this->assertEquals(
 			[
-				$this->getThirdComment( 4 ),
-				$this->getSecondComment(),
-				$this->getFirstComment(),
+				$this->getComment( donationId: 4, date: '1984-01-04' ),
+				$this->getComment( donationId: 2, date: '1984-01-02' ),
+				$this->getComment( donationId: 1, date: '1984-01-01' ),
 			],
 			$repository->getPublicComments( 10 )
 		);
 	}
 
 	public function testOnlyNonDeletedCommentsGetReturned(): void {
-		$this->persistFirstDonationWithComment();
-		$this->persistSecondDonationWithComment();
-		$this->persistDeletedDonationWithComment();
-		$this->persistThirdDonationWithComment();
-		$this->persistDeletedDonationWithoutDeletedTimestamp();
+		$this->givenStoredDonationWithComment( donationId: 1, date: '1984-01-01' );
+		$this->givenStoredDonationWithComment( donationId: 2, date: '1984-01-02' );
+		$this->givenDeletedTimeStoredDonationWithComment( donationId: 3, createdDate: '1984-01-03', deletedDate: '2000-01-01' );
+		$this->givenStoredDonationWithComment( donationId: 4, date: '1984-01-04' );
+		$this->givenDeletedStatusStoredDonationWithComment( donationId: 5, createdDate: '1984-01-05' );
 		$this->entityManager->flush();
 
 		$repository = $this->newDbalCommentRepository();
 
 		$this->assertEquals(
 			[
-				$this->getThirdComment( 4 ),
-				$this->getSecondComment(),
-				$this->getFirstComment(),
+				$this->getComment( donationId: 4, date: '1984-01-04' ),
+				$this->getComment( donationId: 2, date: '1984-01-02' ),
+				$this->getComment( donationId: 1, date: '1984-01-01' ),
 			],
 			$repository->getPublicComments( 10 )
 		);
-	}
-
-	private function persistFirstDonationWithComment(): void {
-		$donation = new Donation();
-		$donation->setId( $this->getIncrementedCurrentId() );
-		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
-		$donation->setPublicRecord( 'First name' );
-		$donation->setComment( 'First comment' );
-		$donation->setAmount( '100' );
-		$donation->setCreationTime( new DateTime( '1984-01-01' ) );
-		$donation->setIsPublic( true );
-		$this->entityManager->persist( $donation );
-	}
-
-	private function persistSecondDonationWithComment(): void {
-		$donation = new Donation();
-		$donation->setId( $this->getIncrementedCurrentId() );
-		$donation->setPaymentId( self::DUMMY_PAYMENT_ID + 1 );
-		$donation->setPublicRecord( 'Second name' );
-		$donation->setComment( 'Second comment' );
-		$donation->setAmount( '200' );
-		$donation->setCreationTime( new DateTime( '1984-02-02' ) );
-		$donation->setIsPublic( true );
-		$this->entityManager->persist( $donation );
-	}
-
-	private function persistThirdDonationWithComment(): void {
-		$donation = new Donation();
-		$donation->setId( $this->getIncrementedCurrentId() );
-		$donation->setPaymentId( self::DUMMY_PAYMENT_ID + 2 );
-		$donation->setPublicRecord( 'Third name' );
-		$donation->setComment( 'Third comment' );
-		$donation->setAmount( '300' );
-		$donation->setCreationTime( new DateTime( '1984-03-03' ) );
-		$donation->setIsPublic( true );
-		$this->entityManager->persist( $donation );
-	}
-
-	private function persistDonationWithPrivateComment(): void {
-		$donation = new Donation();
-		$donation->setId( $this->getIncrementedCurrentId() );
-		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
-		$donation->setPublicRecord( 'Private name' );
-		$donation->setComment( 'Private comment' );
-		$donation->setAmount( '1337' );
-		$donation->setCreationTime( new DateTime( '1984-12-12' ) );
-		$donation->setIsPublic( false );
-		$this->entityManager->persist( $donation );
-	}
-
-	private function persistDeletedDonationWithComment(): void {
-		$donation = new Donation();
-		$donation->setId( $this->getIncrementedCurrentId() );
-		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
-		$donation->setPublicRecord( 'Deleted name' );
-		$donation->setComment( 'Deleted comment' );
-		$donation->setAmount( '31337' );
-		$donation->setCreationTime( new DateTime( '1984-11-11' ) );
-		$donation->setIsPublic( true );
-		$donation->setDeletionTime( new DateTime( '2000-01-01' ) );
-		$this->entityManager->persist( $donation );
-	}
-
-	private function persistDeletedDonationWithoutDeletedTimestamp(): void {
-		$donation = new Donation();
-		$donation->setId( $this->getIncrementedCurrentId() );
-		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
-		$donation->setPublicRecord( 'Deleted name' );
-		$donation->setComment( 'Deleted comment' );
-		$donation->setAmount( '31337' );
-		$donation->setCreationTime( new DateTime( '1984-11-11' ) );
-		$donation->setIsPublic( true );
-		$donation->setStatus( Donation::STATUS_CANCELLED );
-		$this->entityManager->persist( $donation );
-	}
-
-	private function getFirstComment(): CommentWithAmount {
-		return CommentWithAmount::newInstance()
-			->setAuthorName( 'First name' )
-			->setCommentText( 'First comment' )
-			->setDonationAmount( 100 )
-			->setDonationTime( new \DateTime( '1984-01-01' ) )
-			->setDonationId( 1 )
-			->freeze()->assertNoNullFields();
-	}
-
-	private function getSecondComment(): CommentWithAmount {
-		return CommentWithAmount::newInstance()
-			->setAuthorName( 'Second name' )
-			->setCommentText( 'Second comment' )
-			->setDonationAmount( 200 )
-			->setDonationTime( new \DateTime( '1984-02-02' ) )
-			->setDonationId( 2 )
-			->freeze()->assertNoNullFields();
-	}
-
-	private function getThirdComment( int $donationId ): CommentWithAmount {
-		return CommentWithAmount::newInstance()
-			->setAuthorName( 'Third name' )
-			->setCommentText( 'Third comment' )
-			->setDonationAmount( 300 )
-			->setDonationTime( new \DateTime( '1984-03-03' ) )
-			->setDonationId( $donationId )
-			->freeze()->assertNoNullFields();
 	}
 
 	public function testDoctrineThrowsException_getPublicCommentsRethrowsAsDomainException(): void {
@@ -229,6 +119,77 @@ class DoctrineCommentFinderTest extends TestCase {
 
 		$this->expectException( CommentListingException::class );
 		$repository->getPublicComments( 10 );
+	}
+
+	public function testGivenOffsetOfOneCausesOneCommentToBeSkipped(): void {
+		$this->givenStoredDonationWithComment( donationId: 1, date: '1984-01-01' );
+		$this->givenStoredDonationWithComment( donationId: 2, date: '1984-01-02' );
+		$this->givenStoredDonationWithComment( donationId: 3, date: '1984-01-03' );
+		$this->entityManager->flush();
+
+		$this->assertEquals(
+			[
+				$this->getComment( donationId: 2, date: '1984-01-02' ),
+				$this->getComment( donationId: 1, date: '1984-01-01' ),
+			],
+			$this->newDbalCommentRepository()->getPublicComments( 10, 1 )
+		);
+	}
+
+	public function testGivenOffsetBeyondResultSetCausesEmptyResult(): void {
+		$this->givenStoredDonationWithComment( donationId: 1, date: '1984-01-01' );
+		$this->givenStoredDonationWithComment( donationId: 2, date: '1984-01-02' );
+		$this->givenStoredDonationWithComment( donationId: 3, date: '1984-01-03' );
+		$this->entityManager->flush();
+
+		$this->assertEquals(
+			[],
+			$this->newDbalCommentRepository()->getPublicComments( 10, 10 )
+		);
+	}
+
+	private function givenDonation( int $donationId, string $date ): Donation {
+		$donation = new Donation();
+		$donation->setId( $donationId );
+		$donation->setPaymentId( $donationId );
+		$donation->setPublicRecord( self::COMMENT_NAME );
+		$donation->setComment( self::COMMENT );
+		$donation->setAmount( self::DONATION_AMOUNT );
+		$donation->setCreationTime( new DateTime( $date ) );
+		$donation->setIsPublic( true );
+		return $donation;
+	}
+
+	private function givenStoredDonationWithComment( int $donationId, string $date ): void {
+		$this->entityManager->persist( $this->givenDonation( $donationId, $date ) );
+	}
+
+	private function givenStoredDonationWithPrivateComment( int $donationId, string $date ): void {
+		$donation = $this->givenDonation( $donationId, $date );
+		$donation->setIsPublic( false );
+		$this->entityManager->persist( $donation );
+	}
+
+	private function givenDeletedTimeStoredDonationWithComment( int $donationId, string $createdDate, string $deletedDate ): void {
+		$donation = $this->givenDonation( $donationId, $createdDate );
+		$donation->setDeletionTime( new DateTime( $deletedDate ) );
+		$this->entityManager->persist( $donation );
+	}
+
+	private function givenDeletedStatusStoredDonationWithComment( int $donationId, string $createdDate ): void {
+		$donation = $this->givenDonation( $donationId, $createdDate );
+		$donation->setStatus( Donation::STATUS_CANCELLED );
+		$this->entityManager->persist( $donation );
+	}
+
+	private function getComment( int $donationId, string $date ): CommentWithAmount {
+		return CommentWithAmount::newInstance()
+			->setAuthorName( self::COMMENT_NAME )
+			->setCommentText( self::COMMENT )
+			->setDonationAmount( self::DONATION_AMOUNT_FLOAT )
+			->setDonationTime( new \DateTime( $date ) )
+			->setDonationId( $donationId )
+			->freeze()->assertNoNullFields();
 	}
 
 	private function newThrowingEntityManager(): EntityManager {
@@ -240,32 +201,4 @@ class DoctrineCommentFinderTest extends TestCase {
 
 		return $entityManager;
 	}
-
-	public function testGivenOffsetOfOneCausesOneCommentToBeSkipped(): void {
-		$this->persistFirstDonationWithComment();
-		$this->persistSecondDonationWithComment();
-		$this->persistThirdDonationWithComment();
-		$this->entityManager->flush();
-
-		$this->assertEquals(
-			[
-				$this->getSecondComment(),
-				$this->getFirstComment(),
-			],
-			$this->newDbalCommentRepository()->getPublicComments( 10, 1 )
-		);
-	}
-
-	public function testGivenOffsetBeyondResultSetCausesEmptyResult(): void {
-		$this->persistFirstDonationWithComment();
-		$this->persistSecondDonationWithComment();
-		$this->persistThirdDonationWithComment();
-		$this->entityManager->flush();
-
-		$this->assertEquals(
-			[],
-			$this->newDbalCommentRepository()->getPublicComments( 10, 10 )
-		);
-	}
-
 }
