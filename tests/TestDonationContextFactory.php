@@ -4,14 +4,12 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests;
 
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\EventManager;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMSetup;
-use Gedmo\Timestampable\TimestampableListener;
 use WMDE\Fundraising\DonationContext\DonationContextFactory;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
 use WMDE\Fundraising\PaymentContext\PaymentContextFactory;
@@ -92,15 +90,7 @@ class TestDonationContextFactory {
 	}
 
 	public function newSchemaCreator(): SchemaCreator {
-		return new SchemaCreator( $this->newEntityManager( [
-			TimestampableListener::class => $this->newTimestampableListener()
-		] ) );
-	}
-
-	private function newTimestampableListener(): TimestampableListener {
-		$timestampableListener = new TimestampableListener;
-		$timestampableListener->setAnnotationReader( new AnnotationReader() );
-		return $timestampableListener;
+		return new SchemaCreator( $this->newEntityManager() );
 	}
 
 }

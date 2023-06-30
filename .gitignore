@@ -14,5 +14,6 @@ res/blz.lut2f
 ubuntu-xenial-16.04-cloudimg-console.log
 
 .phpunit.result.cache
+.phpunit.cache
 
 coverage
