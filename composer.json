@@ -9,7 +9,6 @@
 
 		"doctrine/orm": "~2.9",
 		"doctrine/migrations": "^3.5",
-		"gedmo/doctrine-extensions": "^3.0",
 		"psr/log": "^3.0",
 		"symfony/http-client": "^6.1",
 
