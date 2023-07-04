@@ -5,11 +5,9 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext;
 
 use DateInterval;
-use Doctrine\Common\Annotations\AnnotationReader;
 use Doctrine\Common\EventSubscriber;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
-use Gedmo\Timestampable\TimestampableListener;
 use WMDE\Fundraising\DonationContext\Authorization\RandomTokenGenerator;
 use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationPrePersistSubscriber;
@@ -25,7 +23,6 @@ class DonationContextFactory {
 	 * @var array{token-length:int,token-validity-timestamp:string}
 	 */
 	protected array $config;
-	private AnnotationReader $annotationReader;
 
 	protected ?TokenGenerator $tokenGenerator;
 
@@ -35,19 +32,15 @@ class DonationContextFactory {
 	public function __construct( array $config ) {
 		$this->config = $config;
 		$this->tokenGenerator = null;
-		$this->annotationReader = new AnnotationReader();
 	}
 
 	/**
 	 * @return EventSubscriber[]
 	 */
 	public function newEventSubscribers(): array {
-		return array_merge(
-			[
-				TimestampableListener::class => $this->newTimestampableListener(),
-				DoctrineDonationPrePersistSubscriber::class => $this->newDoctrineDonationPrePersistSubscriber()
-			]
-		);
+		return [
+			DoctrineDonationPrePersistSubscriber::class => $this->newDoctrineDonationPrePersistSubscriber()
+		];
 	}
 
 	/**
@@ -55,12 +48,6 @@ class DonationContextFactory {
 	 */
 	public function getDoctrineMappingPaths(): array {
 		return [ self::DOCTRINE_CLASS_MAPPING_DIRECTORY ];
-	}
-
-	private function newTimestampableListener(): TimestampableListener {
-		$timestampableListener = new TimestampableListener;
-		$timestampableListener->setAnnotationReader( $this->annotationReader );
-		return $timestampableListener;
 	}
 
 	private function newDoctrineDonationPrePersistSubscriber(): DoctrineDonationPrePersistSubscriber {

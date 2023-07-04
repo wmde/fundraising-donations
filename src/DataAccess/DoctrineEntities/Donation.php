@@ -132,6 +132,7 @@ class Donation {
 
 	public function __construct() {
 		$this->moderationReasons = new ArrayCollection( [] );
+		$this->creationTime = new \DateTime();
 	}
 
 	public function setDonorFullName( string $donorFullName ): self {
