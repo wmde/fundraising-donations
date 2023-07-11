@@ -8,7 +8,7 @@ use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 
 /**
- * Auto-generated Migration: Please modify to your needs!
+ * Create table for storing the latest Donation ID
  */
 final class Version20230613080717 extends AbstractMigration {
 
@@ -20,9 +20,11 @@ final class Version20230613080717 extends AbstractMigration {
 		$table = $schema->createTable( 'last_generated_donation_id' );
 		$table->addColumn( 'donation_id', 'integer' );
 		$table->setPrimaryKey( [ 'donation_id' ] );
+	}
 
+	public function postUp( Schema $schema ): void {
 		$this->addSql(
-			'INSERT INTO last_generated_payment_id (donation_id) VALUES ((SELECT MAX(id) + 1 FROM spenden))'
+			'INSERT INTO last_generated_donation_id (donation_id) VALUES ((SELECT MAX(id) FROM spenden))'
 		);
 	}
 
