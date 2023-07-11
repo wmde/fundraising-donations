@@ -14,6 +14,7 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidSofortNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\StaticDonationIdRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase;
@@ -21,6 +22,7 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
 /**
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase\BookDonationUseCase
  * @covers \WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase
  * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationRequest
  * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
@@ -33,6 +35,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 
 	public function testWhenNotificationIsForNonExistingDonation_failureResponseIsReturned(): void {
 		$useCase = new SofortPaymentNotificationUseCase(
+			new StaticDonationIdRepository(),
 			new FakeDonationRepository(),
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -52,6 +55,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$fakeRepository->storeDonation( ValidDonation::newIncompleteSofortDonation() );
 
 		$useCase = new SofortPaymentNotificationUseCase(
+			new StaticDonationIdRepository(),
 			$fakeRepository,
 			new FailingDonationAuthorizer(),
 			$this->getMailer(),
@@ -71,6 +75,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$paymentBookingServiceStub = $this->getSucceedingPaymentBookingServiceStub();
 
 		$useCase = new SofortPaymentNotificationUseCase(
+			new StaticDonationIdRepository(),
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -90,6 +95,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$paymentBookingServiceStub = $this->getSucceedingPaymentBookingServiceStub();
 
 		$useCase = new SofortPaymentNotificationUseCase(
+			new StaticDonationIdRepository(),
 			$repositorySpy,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -116,6 +122,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			->willReturn( new SuccessResponse() );
 
 		$useCase = new SofortPaymentNotificationUseCase(
+			new StaticDonationIdRepository(),
 			$repository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -134,6 +141,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new FailureResponse( $errorMessage ) );
 
 		$useCase = new SofortPaymentNotificationUseCase(
+			new StaticDonationIdRepository(),
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$this->getMailer(),
@@ -161,6 +169,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 			->with( $donation );
 
 		$useCase = new SofortPaymentNotificationUseCase(
+			new StaticDonationIdRepository(),
 			$fakeRepository,
 			new SucceedingDonationAuthorizer(),
 			$mailer,

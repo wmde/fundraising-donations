@@ -11,6 +11,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyC
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationExistsChecker;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
@@ -22,9 +23,10 @@ use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 class DoctrineDonationRepository implements DonationRepository {
 
 	public function __construct(
-		private EntityManager $entityManager,
-		private GetPaymentUseCase $getPaymentUseCase,
-		private ModerationReasonRepository $moderationReasonRepository
+		private readonly EntityManager $entityManager,
+		private readonly DonationExistsChecker $donationExistsChecker,
+		private readonly GetPaymentUseCase $getPaymentUseCase,
+		private readonly ModerationReasonRepository $moderationReasonRepository
 	) {
 	}
 
@@ -32,7 +34,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		$existingModerationReasons = $this->moderationReasonRepository->getModerationReasonsThatAreAlreadyPersisted( ...$donation->getModerationReasons() );
 		// doctrine will persist the moderation reasons that are not yet found in the database
 		// and create relation entries to donation automatically
-		if ( $donation->getId() == null ) {
+		if ( !$this->donationExistsChecker->donationExists( $donation->getId() ) ) {
 			$this->insertDonation( $donation, $existingModerationReasons );
 		} else {
 			$this->updateDonation( $donation, $existingModerationReasons );
@@ -58,8 +60,6 @@ class DoctrineDonationRepository implements DonationRepository {
 		} catch ( ORMException $ex ) {
 			throw new StoreDonationException( $ex );
 		}
-
-		$donation->assignId( $doctrineDonation->getId() );
 	}
 
 	/**
@@ -109,6 +109,10 @@ class DoctrineDonationRepository implements DonationRepository {
 		}
 
 		$converter = new LegacyToDomainConverter();
-		return $converter->createFromLegacyObject( $doctrineDonation );
+		try {
+			return $converter->createFromLegacyObject( $doctrineDonation );
+		} catch ( \InvalidArgumentException $ex ) {
+			throw new GetDonationException( $ex );
+		}
 	}
 }

@@ -84,8 +84,7 @@ class LoggingDonationRepositoryTest extends \PHPUnit\Framework\TestCase {
 
 	public function testWhenGetDonationByIdDoesNotThrow_returnValueIsReturnedWithoutLogging(): void {
 		$logger = new LoggerSpy();
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->assignId( 1337 );
+		$donation = ValidDonation::newDirectDebitDonation( 1337 );
 
 		$loggingRepo = new LoggingDonationRepository(
 			new FakeDonationRepository( $donation ),

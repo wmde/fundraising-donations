@@ -15,7 +15,7 @@
       <index name="d_payment_id" columns="payment_id"/>
     </indexes>
     <id name="id" type="integer" column="id">
-      <generator strategy="IDENTITY"/>
+      <generator strategy="NONE"/>
     </id>
     <field name="status" type="string" column="status" length="1" nullable="false">
       <options>

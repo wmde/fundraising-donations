@@ -39,7 +39,7 @@ class DoctrineCommentFinder implements CommentFinder {
 					->setCommentText( $donation->getComment() )
 					->setDonationAmount( (float)$donation->getAmount() )
 					->setDonationTime( $donation->getCreationTime() )
-					->setDonationId( $donation->getId() )
+					->setDonationId( $donation->getId() ?? 0 )
 					->freeze()
 					->assertNoNullFields();
 			},

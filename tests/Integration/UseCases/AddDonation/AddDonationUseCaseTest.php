@@ -13,6 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -20,6 +21,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\CreatePaymentServiceSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\StaticDonationIdRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingPaymentServiceStub;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\UrlGeneratorSpy;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
@@ -252,14 +254,15 @@ class AddDonationUseCaseTest extends TestCase {
 	public function testUrlGeneratorGetsDonationData(): void {
 		$urlGenerator = new UrlGeneratorSpy();
 		$useCase = $this->makeUseCase(
+			idGenerator: new StaticDonationIdRepository(),
 			paymentService: $this->makeSuccessfulPaymentServiceWithUrlGenerator( $urlGenerator )
 		);
 
 		$response = $useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'irrelevant@example.com' ) );
 
 		$context = $urlGenerator->getLastContext();
-		$this->assertSame( 1, $context->itemId );
-		$this->assertSame( 'D' . 1, $context->invoiceId );
+		$this->assertSame( StaticDonationIdRepository::DONATION_ID, $context->itemId );
+		$this->assertSame( 'D' . StaticDonationIdRepository::DONATION_ID, $context->invoiceId );
 		$this->assertSame( $response->getAccessToken(), $context->accessToken );
 		$this->assertSame( $response->getUpdateToken(), $context->updateToken );
 		$this->assertSame( ValidDonation::DONOR_FIRST_NAME, $context->firstName );
@@ -297,10 +300,14 @@ class AddDonationUseCaseTest extends TestCase {
 
 	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsCancelled(): void {
 		$repository = $this->makeDonationRepositoryStub();
-		$useCase = $this->makeUseCase( repository: $repository, policyValidator: $this->makeFakeAutodeletingPolicyValidator() );
+		$useCase = $this->makeUseCase(
+			idGenerator: new StaticDonationIdRepository(),
+			repository: $repository,
+			policyValidator: $this->makeFakeAutodeletingPolicyValidator()
+		);
 
 		$useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
-		$donation = $repository->getDonationById( 1 );
+		$donation = $repository->getDonationById( StaticDonationIdRepository::DONATION_ID );
 
 		$this->assertNotNull( $donation );
 		$this->assertTrue( $donation->isCancelled() );
@@ -308,13 +315,16 @@ class AddDonationUseCaseTest extends TestCase {
 
 	public function testOptingIntoDonationReceipt_persistedInDonor(): void {
 		$repository = $this->makeDonationRepositoryStub();
-		$useCase = $this->makeUseCase( repository: $repository );
+		$useCase = $this->makeUseCase(
+			idGenerator: new StaticDonationIdRepository(),
+			repository: $repository
+		);
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
 		$request->setOptsIntoDonationReceipt( true );
 
 		$useCase->addDonation( $request );
-		$donation = $repository->getDonationById( 1 );
+		$donation = $repository->getDonationById( StaticDonationIdRepository::DONATION_ID );
 
 		$this->assertNotNull( $donation );
 		$this->assertTrue( $donation->getDonor()->wantsReceipt() );
@@ -322,13 +332,16 @@ class AddDonationUseCaseTest extends TestCase {
 
 	public function testOptingOutOfDonationReceipt_persistedInDonor(): void {
 		$repository = $this->makeDonationRepositoryStub();
-		$useCase = $this->makeUseCase( repository: $repository );
+		$useCase = $this->makeUseCase(
+			idGenerator: new StaticDonationIdRepository(),
+			repository: $repository
+		);
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
 		$request->setOptsIntoDonationReceipt( false );
 
 		$useCase->addDonation( $request );
-		$donation = $repository->getDonationById( 1 );
+		$donation = $repository->getDonationById( StaticDonationIdRepository::DONATION_ID );
 
 		$this->assertNotNull( $donation );
 		$this->assertFalse( $donation->getDonor()->wantsReceipt() );
@@ -336,13 +349,16 @@ class AddDonationUseCaseTest extends TestCase {
 
 	public function testOptingIntoNewsletter_persistedInDonor(): void {
 		$repository = $this->makeDonationRepositoryStub();
-		$useCase = $this->makeUseCase( repository: $repository );
+		$useCase = $this->makeUseCase(
+			idGenerator: new StaticDonationIdRepository(),
+			repository: $repository
+		);
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
 		$request->setOptsIntoNewsletter( true );
 
 		$useCase->addDonation( $request );
-		$donation = $repository->getDonationById( 1 );
+		$donation = $repository->getDonationById( StaticDonationIdRepository::DONATION_ID );
 
 		$this->assertNotNull( $donation );
 		$this->assertTrue( $donation->getDonor()->wantsNewsletter() );
@@ -350,19 +366,23 @@ class AddDonationUseCaseTest extends TestCase {
 
 	public function testOptingOutOfNewsletter_persistedInDonor(): void {
 		$repository = $this->makeDonationRepositoryStub();
-		$useCase = $this->makeUseCase( repository: $repository );
+		$useCase = $this->makeUseCase(
+			idGenerator: new StaticDonationIdRepository(),
+			repository: $repository
+		);
 
 		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
 		$request->setOptsIntoNewsletter( false );
 
 		$useCase->addDonation( $request );
-		$donation = $repository->getDonationById( 1 );
+		$donation = $repository->getDonationById( StaticDonationIdRepository::DONATION_ID );
 
 		$this->assertNotNull( $donation );
 		$this->assertFalse( $donation->getDonor()->wantsNewsletter() );
 	}
 
 	private function makeUseCase(
+		?DonationIdRepository $idGenerator = null,
 		?DonationRepository $repository = null,
 		?AddDonationValidator $donationValidator = null,
 		?ModerationService $policyValidator = null,
@@ -372,6 +392,7 @@ class AddDonationUseCaseTest extends TestCase {
 		?CreatePaymentService $paymentService = null,
 	): AddDonationUseCase {
 		return new AddDonationUseCase(
+			$idGenerator ?? new StaticDonationIdRepository(),
 			$repository ?? $this->makeDonationRepositoryStub(),
 			$donationValidator ?? $this->makeFakeSucceedingDonationValidator(),
 			$policyValidator ?? $this->makeFakeSucceedingModerationService(),
