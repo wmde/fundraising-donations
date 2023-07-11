@@ -19,7 +19,7 @@ class Donation {
 	private array $moderationReasons;
 	private bool $cancelled;
 
-	private ?int $id;
+	private int $id;
 	private Donor $donor;
 
 	private int $paymentId;
@@ -35,7 +35,7 @@ class Donation {
 	private DonationTrackingInfo $trackingInfo;
 
 	/**
-	 * @param int|null $id
+	 * @param int $id
 	 * @param Donor $donor
 	 * @param int $paymentId
 	 * @param DonationTrackingInfo $trackingInfo
@@ -43,7 +43,7 @@ class Donation {
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( ?int $id, Donor $donor, int $paymentId, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
+	public function __construct( int $id, Donor $donor, int $paymentId, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
 		$this->id = $id;
 		$this->donor = $donor;
 		$this->paymentId = $paymentId;
@@ -54,21 +54,8 @@ class Donation {
 		$this->moderationReasons = [];
 	}
 
-	public function getId(): ?int {
+	public function getId(): int {
 		return $this->id;
-	}
-
-	/**
-	 * @param int $id
-	 *
-	 * @throws \RuntimeException
-	 */
-	public function assignId( int $id ): void {
-		if ( $this->id !== null && $this->id !== $id ) {
-			throw new \RuntimeException( 'Id cannot be changed after initial assignment' );
-		}
-
-		$this->id = $id;
 	}
 
 	/**
@@ -124,12 +111,15 @@ class Donation {
 	}
 
 	public function confirmBooked(): void {
-		if ( $this->hasComment() && ( $this->isMarkedForModeration() || $this->isCancelled() ) ) {
+		if ( $this->isMarkedForModeration() || $this->isCancelled() ) {
 			$this->makeCommentPrivate();
 		}
 	}
 
 	private function makeCommentPrivate(): void {
+		if ( $this->comment === null ) {
+			return;
+		}
 		$this->comment = new DonationComment(
 			$this->comment->getCommentText(),
 			false,
@@ -206,9 +196,9 @@ class Donation {
 		return $this->donor instanceof AnonymousDonor;
 	}
 
-	public function createFollowupDonationForPayment( int $paymentId ): self {
+	public function createFollowupDonationForPayment( int $donationId, int $paymentId ): self {
 		return new Donation(
-			null,
+			$donationId,
 			$this->getDonor(),
 			$paymentId,
 			$this->getTrackingInfo(),

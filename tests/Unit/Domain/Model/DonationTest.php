@@ -45,28 +45,9 @@ class DonationTest extends TestCase {
 		$this->assertTrue( $donation->isCancelled() );
 	}
 
-	public function testIdIsNullWhenNotAssigned(): void {
-		$this->assertNull( ValidDonation::newDirectDebitDonation()->getId() );
-	}
-
-	public function testCanAssignIdToNewDonation(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-
-		$donation->assignId( 42 );
-		$this->assertSame( 42, $donation->getId() );
-	}
-
-	public function testCannotAssignIdToDonationWithIdentity(): void {
-		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->assignId( 42 );
-
-		$this->expectException( RuntimeException::class );
-		$donation->assignId( 43 );
-	}
-
 	public function testNewDonationsAreNotExported(): void {
 		$donation = new Donation(
-			null,
+			1,
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			ValidDonation::newTrackingInfo(),
@@ -83,7 +64,7 @@ class DonationTest extends TestCase {
 
 	public function testAddCommentThrowsExceptionWhenCommentAlreadySet(): void {
 		$donation = new Donation(
-			null,
+			1,
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			ValidDonation::newTrackingInfo(),
@@ -96,7 +77,7 @@ class DonationTest extends TestCase {
 
 	public function testAddCommentSetsWhenCommentNotSetYet(): void {
 		$donation = new Donation(
-			null,
+			1,
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			ValidDonation::newTrackingInfo(),
@@ -144,8 +125,8 @@ class DonationTest extends TestCase {
 	}
 
 	public function testCreateFollowupDonationForPayment_duplicatesRelevantFields(): void {
-		$donation = ValidDonation::newBookedPayPalDonation();
-		$followupUpDonation = $donation->createFollowupDonationForPayment( paymentId: 99 );
+		$donation = ValidDonation::newBookedPayPalDonation( donationId: 1 );
+		$followupUpDonation = $donation->createFollowupDonationForPayment( donationId: 1, paymentId: 99 );
 
 		$this->assertSame( 99, $followupUpDonation->getPaymentId() );
 		$this->assertEquals( $followupUpDonation->getDonor(), $donation->getDonor() );

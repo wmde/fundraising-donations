@@ -18,29 +18,15 @@ use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DonationAcceptedEventHandler
- *
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DonationAcceptedEventHandlerTest extends TestCase {
 
 	private const UNKNOWN_ID = 32202;
 	private const KNOWN_ID = 31337;
 
-	/**
-	 * @var DonationAuthorizer
-	 */
-	private $authorizer;
-
-	/**
-	 * @var DonationRepository
-	 */
-	private $repository;
-
-	/**
-	 * @var DonationNotifier&MockObject
-	 */
-	private $mailer;
+	private DonationAuthorizer $authorizer;
+	private DonationRepository $repository;
+	private MockObject&DonationNotifier $mailer;
 
 	public function setUp(): void {
 		$this->authorizer = new SucceedingDonationAuthorizer();
@@ -49,9 +35,7 @@ class DonationAcceptedEventHandlerTest extends TestCase {
 	}
 
 	private function newDonation(): Donation {
-		$donation = ValidDonation::newBankTransferDonation();
-		$donation->assignId( self::KNOWN_ID );
-		return $donation;
+		return ValidDonation::newBankTransferDonation( self::KNOWN_ID );
 	}
 
 	public function testWhenAuthorizationFails_errorIsReturned(): void {

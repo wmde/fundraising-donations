@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\CreditCardPayment
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Services\PaymentBookingService;
@@ -15,6 +16,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\StaticDonationIdRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
 use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase;
@@ -23,6 +25,7 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
 /**
+ * @covers \WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase\BookDonationUseCase
  * @covers \WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase
  * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
  *
@@ -140,14 +143,15 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 	}
 
 	private function newCreditCardNotificationUseCase(
+		?DonationIdRepository $idGenerator = null,
 		?DonationRepository $donationRepository = null,
 		?DonationAuthorizer $authorizer = null,
 		?DonationNotifier $notifier = null,
 		?PaymentBookingService $paymentBookingService = null,
 		?DonationEventLogger $eventLogger = null
-
 	): CreditCardNotificationUseCase {
 		return new CreditCardNotificationUseCase(
+			$idGenerator ?? new StaticDonationIdRepository(),
 			$donationRepository ?? new FakeDonationRepository(),
 			$authorizer ?? new SucceedingDonationAuthorizer(),
 			$notifier ?? $this->createNotifierStub(),

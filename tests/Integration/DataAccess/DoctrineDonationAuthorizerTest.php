@@ -28,6 +28,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 	private const EMPTY_TOKEN = '';
 	private const MEANINGLESS_DONATION_ID = 1337;
 	private const DUMMY_PAYMENT_ID = 23;
+	private const DONATION_ID = 42;
 
 	private EntityManager $entityManager;
 
@@ -49,10 +50,10 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 	 * @dataProvider updateTokenProvider
 	 */
 	public function testAuthorizerChecksUpdateTokenOfDonation( string $updateToken, bool $expectedResult ): void {
-		$donation = $this->givenDonationWithTokens();
+		$this->givenDonationWithTokens();
 		$authorizer = $this->newAuthorizationService( $updateToken );
 
-		$this->assertSame( $expectedResult, $authorizer->userCanModifyDonation( $donation->getId() ) );
+		$this->assertSame( $expectedResult, $authorizer->userCanModifyDonation( self::DONATION_ID ) );
 	}
 
 	/**
@@ -70,7 +71,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$donation = $this->givenDonationWithTokens();
 		$authorizer = $this->newAuthorizationService( '', $accessToken );
 
-		$this->assertSame( $expectedResult, $authorizer->canAccessDonation( $donation->getId() ) );
+		$this->assertSame( $expectedResult, $authorizer->canAccessDonation( self::DONATION_ID ) );
 	}
 
 	/**
@@ -89,42 +90,42 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$donation = $this->givenLegacyDonation();
 		$authorizer = $this->newAuthorizationService( self::MEANINGLESS_TOKEN );
 
-		$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
+		$this->assertFalse( $authorizer->userCanModifyDonation( self::DONATION_ID ) );
 	}
 
 	public function testGivenTokenAndLegacyDonation_accessAuthorizationFails(): void {
 		$donation = $this->givenLegacyDonation();
 		$authorizer = $this->newAuthorizationService( self::EMPTY_TOKEN, self::MEANINGLESS_TOKEN );
 
-		$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
+		$this->assertFalse( $authorizer->canAccessDonation( self::DONATION_ID ) );
 	}
 
 	public function testGivenEmptyTokenAndLegacyDonation_updateAuthorizationFails(): void {
 		$donation = $this->givenLegacyDonation();
 		$authorizer = $this->newAuthorizationService( self::EMPTY_TOKEN, self::EMPTY_TOKEN );
 
-		$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
+		$this->assertFalse( $authorizer->userCanModifyDonation( self::DONATION_ID ) );
 	}
 
 	public function testGivenEmptyTokenAndLegacyDonation_accessAuthorizationFails(): void {
 		$donation = $this->givenLegacyDonation();
 		$authorizer = $this->newAuthorizationService( self::EMPTY_TOKEN, self::EMPTY_TOKEN );
 
-		$this->assertFalse( $authorizer->canAccessDonation( $donation->getId() ) );
+		$this->assertFalse( $authorizer->canAccessDonation( self::DONATION_ID ) );
 	}
 
 	public function testWhenUpdateTokenIsExpiredUpdateCheckFailsForUser(): void {
 		$donation = $this->givenDonationWithExpiredUpdateToken();
 
 		$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
-		$this->assertFalse( $authorizer->userCanModifyDonation( $donation->getId() ) );
+		$this->assertFalse( $authorizer->userCanModifyDonation( self::DONATION_ID ) );
 	}
 
 	public function testWhenUpdateTokenIsExpiredUpdateCheckSucceedsForSystem(): void {
 		$donation = $this->givenDonationWithExpiredUpdateToken();
 		$authorizer = $this->newAuthorizationService( self::CORRECT_UPDATE_TOKEN );
 
-		$this->assertTrue( $authorizer->systemCanModifyDonation( $donation->getId() ) );
+		$this->assertTrue( $authorizer->systemCanModifyDonation( self::DONATION_ID ) );
 	}
 
 	public function testGivenExceptionFromEntityManager_authorizerWrapsExceptionForUserModification(): void {
@@ -175,6 +176,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 
 	private function givenDonationWithTokens(): Donation {
 		$donation = new Donation();
+		$donation->setId( self::DONATION_ID );
 		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$donationData = $donation->getDataObject();
 		$donationData->setUpdateToken( self::CORRECT_UPDATE_TOKEN );
@@ -187,6 +189,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 
 	private function givenDonationWithExpiredUpdateToken(): Donation {
 		$donation = new Donation();
+		$donation->setId( self::DONATION_ID );
 		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$donationData = $donation->getDataObject();
 		$donationData->setUpdateToken( self::CORRECT_UPDATE_TOKEN );
@@ -198,6 +201,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 
 	private function givenLegacyDonation(): Donation {
 		$donation = new Donation();
+		$donation->setId( self::DONATION_ID );
 		$donation->setPaymentId( self::DUMMY_PAYMENT_ID );
 		$this->storeDonation( $donation );
 		return $donation;

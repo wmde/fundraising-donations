@@ -17,6 +17,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
@@ -35,25 +36,16 @@ class AddDonationUseCase {
 	private const PREFIX_BANK_TRANSACTION_KNOWN_DONOR = 'XW';
 	private const PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR = 'XR';
 
-	private DonationRepository $donationRepository;
-	private AddDonationValidator $donationValidator;
-	private ModerationService $policyValidator;
-	private DonationNotifier $notifier;
-	private DonationTokenFetcher $tokenFetcher;
-	private EventEmitter $eventEmitter;
-	private CreatePaymentService $paymentService;
-
-	public function __construct( DonationRepository $donationRepository, AddDonationValidator $donationValidator,
-								 ModerationService $policyValidator, DonationNotifier $notifier,
-								 DonationTokenFetcher $tokenFetcher,
-								 EventEmitter $eventEmitter, CreatePaymentService $paymentService ) {
-		$this->donationRepository = $donationRepository;
-		$this->donationValidator = $donationValidator;
-		$this->policyValidator = $policyValidator;
-		$this->notifier = $notifier;
-		$this->tokenFetcher = $tokenFetcher;
-		$this->eventEmitter = $eventEmitter;
-		$this->paymentService = $paymentService;
+	public function __construct(
+		private readonly DonationIdRepository $idGenerator,
+		private readonly DonationRepository $donationRepository,
+		private readonly AddDonationValidator $donationValidator,
+		private readonly ModerationService $policyValidator,
+		private readonly DonationNotifier $notifier,
+		private readonly DonationTokenFetcher $tokenFetcher,
+		private readonly EventEmitter $eventEmitter,
+		private readonly CreatePaymentService $paymentService
+	) {
 	}
 
 	public function addDonation( AddDonationRequest $donationRequest ): AddDonationResponse {
@@ -102,7 +94,7 @@ class AddDonationUseCase {
 		$donor = $this->getPersonalInfoFromRequest( $donationRequest );
 		$this->processNewsletterAndReceiptOptions( $donationRequest, $donor );
 		return new Donation(
-			null,
+			$this->idGenerator->getNewId(),
 			$donor,
 			$paymentId,
 			$this->newTrackingInfoFromRequest( $donationRequest )

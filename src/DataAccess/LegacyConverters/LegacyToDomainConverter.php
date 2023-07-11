@@ -13,6 +13,10 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 
 class LegacyToDomainConverter {
 	public function createFromLegacyObject( DoctrineDonation $doctrineDonation ): Donation {
+		if ( $doctrineDonation->getId() === null ) {
+			throw new \InvalidArgumentException( "Doctrine donation ID must not be null" );
+		}
+
 		$donor = $this->getDonor( $doctrineDonation );
 		$donation = new Donation(
 			$doctrineDonation->getId(),

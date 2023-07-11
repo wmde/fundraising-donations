@@ -9,6 +9,7 @@ use WMDE\Fundraising\DonationContext\Services\PaypalBookingService;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayPalNotificationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\StaticDonationIdRepository;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\HandlePaypalPaymentWithoutDonation\HandlePaypalPaymentWithoutDonationUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\CreateBookedPayPalPayment\FailureResponse;
@@ -29,6 +30,7 @@ class HandlePaypalPaymentWithoutDonationUseCaseTest extends TestCase {
 		$useCase = new HandlePaypalPaymentWithoutDonationUseCase(
 			$this->createPaymentService( $bookingData ),
 			$repositorySpy,
+			new StaticDonationIdRepository(),
 			$this->createNotifierExpectingNotification(),
 			$loggerSpy
 		);
@@ -40,7 +42,7 @@ class HandlePaypalPaymentWithoutDonationUseCaseTest extends TestCase {
 		$logs = $loggerSpy->getLogCalls();
 
 		$this->assertCount( 1, $storeDonationCalls, 'Donation is stored' );
-		$this->assertNull( $donation->getId(), 'ID is not taken from request' );
+		$this->assertEquals( StaticDonationIdRepository::DONATION_ID, $donation->getId() );
 
 		$this->assertSame( 1, $donation->getPaymentId() );
 		$this->assertTrue( $donation->donorIsAnonymous() );
@@ -61,6 +63,7 @@ class HandlePaypalPaymentWithoutDonationUseCaseTest extends TestCase {
 		$useCase = new HandlePaypalPaymentWithoutDonationUseCase(
 			$paymentService,
 			$repositorySpy,
+			new StaticDonationIdRepository(),
 			$notifier,
 			$loggerSpy
 		);

@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase;
 
 use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Services\PaymentBookingService;
@@ -17,20 +18,14 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\FollowUpSuccessResponse
 
 class BookDonationUseCase {
 
-	private DonationRepository $repository;
-	private DonationAuthorizer $authorizationService;
-	private DonationNotifier $notifier;
-	private PaymentBookingService $paymentBookingService;
-	private DonationEventLogger $eventLogger;
-
-	public function __construct( DonationRepository $repository, DonationAuthorizer $authorizationService,
-								 DonationNotifier $notifier, PaymentBookingService $paymentBookingService,
-								 DonationEventLogger $eventLogger ) {
-		$this->repository = $repository;
-		$this->authorizationService = $authorizationService;
-		$this->notifier = $notifier;
-		$this->paymentBookingService = $paymentBookingService;
-		$this->eventLogger = $eventLogger;
+	public function __construct(
+		private readonly DonationIdRepository $idGenerator,
+		private readonly DonationRepository $repository,
+		private readonly DonationAuthorizer $authorizationService,
+		private readonly DonationNotifier $notifier,
+		private readonly PaymentBookingService $paymentBookingService,
+		private readonly DonationEventLogger $eventLogger
+	) {
 	}
 
 	public function handleNotification( NotificationRequest $request ): NotificationResponse {
@@ -56,7 +51,7 @@ class BookDonationUseCase {
 			return $this->createFailureResponseFromPaymentServiceResponse( $result );
 		}
 		if ( $result instanceof FollowUpSuccessResponse ) {
-			$donation = $donation->createFollowupDonationForPayment( $result->childPaymentId );
+			$donation = $donation->createFollowupDonationForPayment( $this->idGenerator->getNewId(), $result->childPaymentId );
 			$isFollowupPayment = true;
 		}
 		$donation->confirmBooked();
