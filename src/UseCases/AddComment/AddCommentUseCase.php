@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddComment;
 
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\NoName;
@@ -24,7 +24,7 @@ class AddCommentUseCase {
 
 	public function __construct(
 		private readonly DonationRepository $donationRepository,
-		private readonly DonationAuthorizer $authorizationService,
+		private readonly DonationAuthorizationChecker $authorizationService,
 		private readonly TextPolicyValidator $textPolicyValidator,
 		private readonly AddCommentValidator $commentValidator ) {
 	}

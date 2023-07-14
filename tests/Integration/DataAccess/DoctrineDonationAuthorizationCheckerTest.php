@@ -7,18 +7,16 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
-use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizer
- *
- * @license GPL-2.0-or-later
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizationChecker
  */
-class DoctrineDonationAuthorizerTest extends TestCase {
+class DoctrineDonationAuthorizationCheckerTest extends TestCase {
 
 	private const CORRECT_UPDATE_TOKEN = 'CorrectUpdateToken';
 	private const CORRECT_ACCESS_TOKEN = 'CorrectAccessToken';
@@ -36,8 +34,8 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 		$this->entityManager = TestEnvironment::newInstance()->getFactory()->getEntityManager();
 	}
 
-	private function newAuthorizationService( string $updateToken = '', string $accessToken = '' ): DonationAuthorizer {
-		return new DoctrineDonationAuthorizer( $this->entityManager, $updateToken, $accessToken );
+	private function newAuthorizationService( string $updateToken = '', string $accessToken = '' ): DonationAuthorizationChecker {
+		return new DoctrineDonationAuthorizationChecker( $this->entityManager, $updateToken, $accessToken );
 	}
 
 	public function testGivenNoDonation_authorizationFails(): void {
@@ -129,7 +127,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 	}
 
 	public function testGivenExceptionFromEntityManager_authorizerWrapsExceptionForUserModification(): void {
-		$authorizer = new DoctrineDonationAuthorizer(
+		$authorizer = new DoctrineDonationAuthorizationChecker(
 			$this->getThrowingEntityManager(),
 			self::CORRECT_UPDATE_TOKEN,
 			self::CORRECT_ACCESS_TOKEN
@@ -141,7 +139,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 	}
 
 	public function testGivenExceptionFromEntityManager_authorizerWrapsExceptionForSystemModification(): void {
-		$authorizer = new DoctrineDonationAuthorizer(
+		$authorizer = new DoctrineDonationAuthorizationChecker(
 			$this->getThrowingEntityManager(),
 			self::CORRECT_UPDATE_TOKEN,
 			self::CORRECT_ACCESS_TOKEN
@@ -153,7 +151,7 @@ class DoctrineDonationAuthorizerTest extends TestCase {
 	}
 
 	public function testGivenExceptionFromEntityManager_authorizerWrapsExceptionForAccessCheck(): void {
-		$authorizer = new DoctrineDonationAuthorizer(
+		$authorizer = new DoctrineDonationAuthorizationChecker(
 			$this->getThrowingEntityManager(),
 			self::CORRECT_UPDATE_TOKEN,
 			self::CORRECT_ACCESS_TOKEN

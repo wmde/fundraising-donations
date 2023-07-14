@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext;
 
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
@@ -16,11 +16,11 @@ class DonationAcceptedEventHandler {
 	public const DATABASE_ERROR_OCCURRED = 'Database error occurred';
 	public const SUCCESS = null;
 
-	private DonationAuthorizer $authorizer;
+	private DonationAuthorizationChecker $authorizer;
 	private DonationRepository $repository;
 	private DonationNotifier $notifier;
 
-	public function __construct( DonationAuthorizer $authorizer, DonationRepository $repository, DonationNotifier $notifier ) {
+	public function __construct( DonationAuthorizationChecker $authorizer, DonationRepository $repository, DonationNotifier $notifier ) {
 		$this->authorizer = $authorizer;
 		$this->repository = $repository;
 		$this->notifier = $notifier;

@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase;
 
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -21,7 +21,7 @@ class BookDonationUseCase {
 	public function __construct(
 		private readonly DonationIdRepository $idGenerator,
 		private readonly DonationRepository $repository,
-		private readonly DonationAuthorizer $authorizationService,
+		private readonly DonationAuthorizationChecker $authorizationService,
 		private readonly DonationNotifier $notifier,
 		private readonly PaymentBookingService $paymentBookingService,
 		private readonly DonationEventLogger $eventLogger

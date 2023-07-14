@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\GetDonation;
 
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -13,7 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 class GetDonationUseCase {
 
 	public function __construct(
-		private readonly DonationAuthorizer $authorizer,
+		private readonly DonationAuthorizationChecker $authorizer,
 		private readonly DonationTokenFetcher $tokenFetcher,
 		private readonly DonationRepository $donationRepository ) {
 	}
