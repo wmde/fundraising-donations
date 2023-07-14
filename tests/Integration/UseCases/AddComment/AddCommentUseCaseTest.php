@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddComment;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
@@ -31,7 +31,7 @@ class AddCommentUseCaseTest extends TestCase {
 	private const COMMENT_IS_PUBLIC = true;
 
 	private DonationRepository $donationRepository;
-	private DonationAuthorizer $authorizer;
+	private DonationAuthorizationChecker $authorizer;
 	private TextPolicyValidator $textPolicyValidator;
 	private AddCommentValidator $commentValidator;
 

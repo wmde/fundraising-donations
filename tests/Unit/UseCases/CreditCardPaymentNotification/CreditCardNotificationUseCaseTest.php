@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\CreditCardPaymentNotification;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
+use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
@@ -145,7 +145,7 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 	private function newCreditCardNotificationUseCase(
 		?DonationIdRepository $idGenerator = null,
 		?DonationRepository $donationRepository = null,
-		?DonationAuthorizer $authorizer = null,
+		?DonationAuthorizationChecker $authorizer = null,
 		?DonationNotifier $notifier = null,
 		?PaymentBookingService $paymentBookingService = null,
 		?DonationEventLogger $eventLogger = null

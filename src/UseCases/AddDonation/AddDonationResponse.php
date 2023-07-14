@@ -16,17 +16,11 @@ class AddDonationResponse {
 
 	private ?Donation $donation = null;
 
-	private ?string $updateToken = null;
-
-	private ?string $accessToken = null;
-
 	private ?string $paymentProviderRedirectUrl = null;
 
-	public static function newSuccessResponse( Donation $donation, string $updateToken, string $accessToken, ?string $paymentProviderRedirectUrl ): self {
+	public static function newSuccessResponse( Donation $donation, ?string $paymentProviderRedirectUrl ): self {
 		$response = new self();
 		$response->donation = $donation;
-		$response->updateToken = $updateToken;
-		$response->accessToken = $accessToken;
 		$response->paymentProviderRedirectUrl = $paymentProviderRedirectUrl;
 		return $response;
 	}
@@ -64,14 +58,6 @@ class AddDonationResponse {
 	 */
 	public function getDonation(): ?Donation {
 		return $this->donation;
-	}
-
-	public function getUpdateToken(): ?string {
-		return $this->updateToken;
-	}
-
-	public function getAccessToken(): ?string {
-		return $this->accessToken;
 	}
 
 	public function getPaymentProviderRedirectUrl(): ?string {
