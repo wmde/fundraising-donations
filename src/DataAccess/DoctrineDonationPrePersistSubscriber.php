@@ -10,6 +10,9 @@ use Doctrine\Persistence\Event\LifecycleEventArgs;
 use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 
+/**
+ * @deprecated We don't want to use Doctrine event subscribers any more.
+ */
 class DoctrineDonationPrePersistSubscriber implements EventSubscriber {
 
 	private const DATE_TIME_FORMAT = 'Y-m-d H:i:s';

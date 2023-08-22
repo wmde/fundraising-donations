@@ -36,6 +36,7 @@ class DonationContextFactory {
 
 	/**
 	 * @return EventSubscriber[]
+	 * @deprecated Use we don't want to use Doctrine event subscribers any more.
 	 */
 	public function newEventSubscribers(): array {
 		return [
@@ -50,6 +51,9 @@ class DonationContextFactory {
 		return [ self::DOCTRINE_CLASS_MAPPING_DIRECTORY ];
 	}
 
+	/**
+	 * @deprecated Use we don't want to use Doctrine event subscribers any more.
+	 */
 	private function newDoctrineDonationPrePersistSubscriber(): DoctrineDonationPrePersistSubscriber {
 		$tokenGenerator = $this->getTokenGenerator();
 		return new DoctrineDonationPrePersistSubscriber(

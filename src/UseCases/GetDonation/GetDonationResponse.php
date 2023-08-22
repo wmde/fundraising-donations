@@ -9,6 +9,10 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 class GetDonationResponse {
 
 	private ?Donation $donation;
+	/**
+	 * @var string|null Token to be used for updating the donation
+	 * @deprecated The calling code should get the tokens for the URL elsewhere
+	 */
 	private ?string $updateToken;
 
 	public static function newNotAllowedResponse(): self {
@@ -41,6 +45,9 @@ class GetDonationResponse {
 		return $this->donation !== null;
 	}
 
+	/**
+	 * @deprecated The calling code should get the tokens for the URL elsewhere
+	 */
 	public function getUpdateToken(): ?string {
 		return $this->updateToken;
 	}

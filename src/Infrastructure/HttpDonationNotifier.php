@@ -19,6 +19,10 @@ use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
  */
 class HttpDonationNotifier implements DonationNotifier {
 
+	/**
+	 * @var DonationTokenFetcher
+	 * @deprecated The FOC should use a special class to get donation tokens for this
+	 */
 	private DonationTokenFetcher $tokenFetcher;
 	private HttpClientInterface $httpClient;
 	private string $endpointUrl;
