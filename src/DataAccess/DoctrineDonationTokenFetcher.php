@@ -11,7 +11,7 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 
 /**
- * @license GPL-2.0-or-later
+ * @deprecated The HttpDonationNotifier should get a different implementation of DonationTokenFetcher and GetDonationUseCase should not return tokens
  */
 class DoctrineDonationTokenFetcher implements DonationTokenFetcher {
 

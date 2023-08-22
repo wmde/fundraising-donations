@@ -12,6 +12,11 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
 class GetDonationUseCase {
 
+	/**
+	 * @param DonationAuthorizationChecker $authorizer
+	 * @param DonationTokenFetcher $tokenFetcher (deprecated)
+	 * @param DonationRepository $donationRepository
+	 */
 	public function __construct(
 		private readonly DonationAuthorizationChecker $authorizer,
 		private readonly DonationTokenFetcher $tokenFetcher,
