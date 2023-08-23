@@ -6,6 +6,9 @@ namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
 use WMDE\Fundraising\DonationContext\Authorization\TokenGenerator;
 
+/**
+ * @deprecated
+ */
 class FixedTokenGenerator implements TokenGenerator {
 
 	public const TOKEN = 'fixed_token';

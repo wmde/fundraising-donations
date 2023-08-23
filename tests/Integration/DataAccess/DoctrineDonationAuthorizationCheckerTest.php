@@ -7,14 +7,15 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationAuthorizationChecker
+ * @deprecated Delete when deleting DoctrineDonationAuthorizationChecker
  */
 class DoctrineDonationAuthorizationCheckerTest extends TestCase {
 

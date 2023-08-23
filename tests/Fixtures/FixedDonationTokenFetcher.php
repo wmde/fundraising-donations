@@ -8,7 +8,7 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 
 /**
- * @license GPL-2.0-or-later
+ * @deprecated
  */
 class FixedDonationTokenFetcher implements DonationTokenFetcher {
 

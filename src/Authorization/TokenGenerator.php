@@ -5,8 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Authorization;
 
 /**
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
+ * @deprecated Tokens should be generated outside the bounded context
  */
 interface TokenGenerator {
 

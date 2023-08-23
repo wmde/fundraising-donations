@@ -4,10 +4,9 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\Infrastructure;
 
 use PHPUnit\Framework\TestCase;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\Infrastructure\HttpDonationNotifier;
+use WMDE\Fundraising\DonationContext\Infrastructure\HttpDonationNotifierUrlAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\Infrastructure\HttpDonationNotifier
@@ -16,9 +15,9 @@ class HttpDonationConfirmationNotifierTest extends TestCase {
 
 	public function testSendConfirmationFor(): void {
 		$donation = ValidDonation::newBookedAnonymousPayPalDonationUpdate( 1 );
-		$testToken = 'blabla';
+		$urlAuthorizer = $this->createStub( HttpDonationNotifierUrlAuthorizer::class );
+		$urlAuthorizer->method( 'addAuthorizationParameters' )->willReturnArgument( 1 );
 		$httpClient = $this->createMock( HttpClientInterface::class );
-		$fetcher = new FixedDonationTokenFetcher( new DonationTokens( 'some access token', $testToken ) );
 		$endpointUrl = 'https://somefancyendpoint.xyz/';
 
 		$httpClient->expects( $this->once() )->method( 'request' )->with(
@@ -26,11 +25,10 @@ class HttpDonationConfirmationNotifierTest extends TestCase {
 			$endpointUrl,
 			[ 'query' => [
 				'donation_id' => $donation->getId(),
-				'update_token' => $testToken
 			] ]
 		);
 
-		$notifier = new HttpDonationNotifier( $fetcher, $httpClient, $endpointUrl );
+		$notifier = new HttpDonationNotifier( $urlAuthorizer, $httpClient, $endpointUrl );
 		$notifier->sendConfirmationFor( $donation );
 	}
 }

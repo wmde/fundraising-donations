@@ -6,13 +6,12 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\ORMException;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 
 /**
- * This is only for checking legacy donation authorizations.
- * New donations should use an implementation of DonationAuthorizationChecker that uses tokens stored outside the bounded context.
+ * @deprecated Use the AuthorizationChecker from the Application layer instead
  */
 class DoctrineDonationAuthorizationChecker implements DonationAuthorizationChecker {
 
