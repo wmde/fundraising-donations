@@ -5,8 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Authorization;
 
 /**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
+ * @deprecated
  */
 interface DonationTokenFetcher {
 

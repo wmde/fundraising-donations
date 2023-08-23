@@ -4,9 +4,9 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext;
 
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
 class DonationAcceptedEventHandler {

@@ -4,10 +4,10 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase;
 
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Services\PaymentBookingService;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;

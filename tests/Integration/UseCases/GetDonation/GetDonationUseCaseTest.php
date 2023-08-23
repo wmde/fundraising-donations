@@ -4,31 +4,24 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\GetDonation;
 
-use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
+use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedDonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationUseCase;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationUseCase
- *
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class GetDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
+class GetDonationUseCaseTest extends TestCase {
 
 	private const CORRECT_DONATION_ID = 1;
-	private const ACCESS_TOKEN = 'some token';
-	private const UPDATE_TOKEN = 'some other token';
 
 	public function testWhenAuthorizerSaysNoCanHaz_accessIsNotPermitted(): void {
 		$useCase = new GetDonationUseCase(
 			new FailingDonationAuthorizer(),
-			$this->newFixedTokenFetcher(),
 			new FakeDonationRepository( ValidDonation::newDirectDebitDonation() )
 		);
 
@@ -45,7 +38,6 @@ class GetDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 	public function testWhenAuthorizerSaysSureThingBro_accessIsPermitted(): void {
 		$useCase = new GetDonationUseCase(
 			new SucceedingDonationAuthorizer(),
-			$this->newFixedTokenFetcher(),
 			new FakeDonationRepository( ValidDonation::newDirectDebitDonation() )
 		);
 
@@ -61,7 +53,6 @@ class GetDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 	public function testWhenDonationDoesNotExist_accessIsNotPermitted(): void {
 		$useCase = new GetDonationUseCase(
 			new SucceedingDonationAuthorizer(),
-			$this->newFixedTokenFetcher(),
 			new FakeDonationRepository()
 		);
 
@@ -80,7 +71,6 @@ class GetDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 
 		$useCase = new GetDonationUseCase(
 			new SucceedingDonationAuthorizer(),
-			$this->newFixedTokenFetcher(),
 			new FakeDonationRepository( $donation )
 		);
 
@@ -91,9 +81,5 @@ class GetDonationUseCaseTest extends \PHPUnit\Framework\TestCase {
 		);
 
 		$this->assertEquals( $donation, $response->getDonation() );
-	}
-
-	private function newFixedTokenFetcher(): FixedDonationTokenFetcher {
-		return new FixedDonationTokenFetcher( new DonationTokens( self::ACCESS_TOKEN, self::UPDATE_TOKEN ) );
 	}
 }

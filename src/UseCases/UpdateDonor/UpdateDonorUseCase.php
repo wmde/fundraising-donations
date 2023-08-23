@@ -4,7 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonorUpdatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
@@ -15,6 +14,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
 /**

@@ -9,23 +9,17 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 class GetDonationResponse {
 
 	private ?Donation $donation;
-	/**
-	 * @var string|null Token to be used for updating the donation
-	 * @deprecated The calling code should get the tokens for the URL elsewhere
-	 */
-	private ?string $updateToken;
 
 	public static function newNotAllowedResponse(): self {
 		return new self( null );
 	}
 
-	public static function newValidResponse( Donation $donation, string $updateToken ): self {
-		return new self( $donation, $updateToken );
+	public static function newValidResponse( Donation $donation ): self {
+		return new self( $donation );
 	}
 
-	private function __construct( Donation $donation = null, string $updateToken = null ) {
+	private function __construct( Donation $donation = null ) {
 		$this->donation = $donation;
-		$this->updateToken = $updateToken;
 	}
 
 	/**
@@ -43,13 +37,6 @@ class GetDonationResponse {
 
 	public function accessIsPermitted(): bool {
 		return $this->donation !== null;
-	}
-
-	/**
-	 * @deprecated The calling code should get the tokens for the URL elsewhere
-	 */
-	public function getUpdateToken(): ?string {
-		return $this->updateToken;
 	}
 
 }

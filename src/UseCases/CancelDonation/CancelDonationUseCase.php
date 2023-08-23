@@ -5,11 +5,11 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\CancelDonation;
 
 use WMDE\EmailAddress\EmailAddress;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\CancelPaymentUseCase;
