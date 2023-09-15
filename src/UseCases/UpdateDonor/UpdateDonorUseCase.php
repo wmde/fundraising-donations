@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Domain\Event\DonorUpdatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyContactName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
@@ -108,7 +108,13 @@ class UpdateDonorUseCase {
 
 		} elseif ( $updateDonorRequest->getDonorType()->is( DonorType::COMPANY() ) ) {
 			return new CompanyDonor(
-				new CompanyName( $updateDonorRequest->getCompanyName() ),
+				new CompanyContactName(
+					$updateDonorRequest->getCompanyName(),
+					$updateDonorRequest->getFirstName(),
+					$updateDonorRequest->getLastName(),
+					$updateDonorRequest->getSalutation(),
+					$updateDonorRequest->getTitle()
+				),
 				$this->getDonorAddressFromRequest( $updateDonorRequest ),
 				$updateDonorRequest->getEmailAddress()
 			);

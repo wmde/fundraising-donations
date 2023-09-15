@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
 use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyContactName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
@@ -295,7 +295,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$events = $eventEmitter->getEvents();
 		$this->assertCount( 1, $events, 'Only 1 event should be emitted' );
 		$this->assertInstanceOf( DonationCreatedEvent::class, $events[0] );
-		$this->assertInstanceOf( CompanyName::class, $events[0]->getDonor()->getName() );
+		$this->assertInstanceOf( CompanyContactName::class, $events[0]->getDonor()->getName() );
 	}
 
 	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsCancelled(): void {

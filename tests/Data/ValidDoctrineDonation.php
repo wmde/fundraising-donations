@@ -58,7 +58,8 @@ class ValidDoctrineDonation {
 					'firma' => ValidDonation::DONOR_COMPANY
 				],
 				$self->getAddressArray(),
-				[ 'email' => ValidDonation::DONOR_EMAIL_ADDRESS ]
+				[ 'email' => ValidDonation::DONOR_EMAIL_ADDRESS ],
+				$self->getPersonNameArray()
 			)
 		);
 		return $donation;
