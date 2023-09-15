@@ -11,7 +11,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\EmailDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyContactName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\PaymentContext\Domain\Model\Payment;
@@ -245,8 +245,14 @@ class ValidDonation {
 		);
 	}
 
-	private static function newCompanyName(): CompanyName {
-		return new CompanyName( self::DONOR_COMPANY );
+	private static function newCompanyName(): CompanyContactName {
+		return new CompanyContactName(
+			self::DONOR_COMPANY,
+			self::DONOR_FIRST_NAME,
+			self::DONOR_LAST_NAME,
+			self::DONOR_SALUTATION,
+			self::DONOR_TITLE
+		);
 	}
 
 	public static function newEmailOnlyDonor(): EmailDonor {
