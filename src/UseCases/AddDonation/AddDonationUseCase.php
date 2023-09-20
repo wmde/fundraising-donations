@@ -13,7 +13,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyContactName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
@@ -117,7 +117,13 @@ class AddDonationUseCase {
 			);
 		} elseif ( $donorType->is( DonorType::COMPANY() ) ) {
 			return new CompanyDonor(
-				new CompanyName( $request->getDonorCompany() ),
+				new CompanyContactName(
+					$request->getDonorCompany(),
+					$request->getDonorFirstName(),
+					$request->getDonorLastName(),
+					$request->getDonorSalutation(),
+					$request->getDonorTitle()
+				),
 				$this->getPhysicalAddressFromRequest( $request ),
 				$request->getDonorEmailAddress()
 			);

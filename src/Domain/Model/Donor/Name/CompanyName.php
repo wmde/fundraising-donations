@@ -6,6 +6,9 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 
+/**
+ * @deprecated Please use CompanyContactName instead
+ */
 class CompanyName implements DonorName {
 
 	private string $companyName;
