@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyContactName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 
@@ -31,7 +31,13 @@ class DonorFactory {
 				);
 			case 'firma':
 				return new CompanyDonor(
-					new CompanyName( $data->getValue( 'firma' ) ),
+					new CompanyContactName(
+						$data->getValue( 'firma' ),
+						$data->getValue( 'vorname' ),
+						$data->getValue( 'nachname' ),
+						$data->getValue( 'anrede' ),
+						$data->getValue( 'titel' )
+					),
 					self::createPhysicalAddress( $data ),
 					$donation->getDonorEmail() ?? ''
 				);
