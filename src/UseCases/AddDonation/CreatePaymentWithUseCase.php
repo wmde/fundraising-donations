@@ -18,7 +18,7 @@ class CreatePaymentWithUseCase implements CreatePaymentService {
 	public function __construct(
 		private CreatePaymentUseCase $createPaymentUseCase,
 		private array $allowedPaymentTypes
- ) {
+	) {
 	}
 
 	public function createPayment( PaymentCreationRequest $request ): PaymentCreationFailed|PaymentCreationSucceeded {

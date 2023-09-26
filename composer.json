@@ -42,7 +42,7 @@
 		"phpstan/phpstan": "^1.7",
 		"phpmd/phpmd": "~2.6",
 		"mikey179/vfsstream": "~1.6",
-		"wmde/fundraising-phpcs": "~8.0.0",
+		"wmde/fundraising-phpcs": "~9.0.0",
 		"wmde/psr-log-test-doubles": "~3.0",
 		"phpstan/phpstan-phpunit": "^1.3"
 	},
