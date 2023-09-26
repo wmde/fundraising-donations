@@ -74,7 +74,7 @@ class DonationAcceptedEventHandlerTest extends TestCase {
 	public function testGivenKnownIdAndValidAuth_mailerIsInvoked(): void {
 		$this->mailer->expects( $this->once() )
 			->method( 'sendConfirmationFor' )
-			->with( $this->equalTo( $this->newDonation() ) );
+			->with( $this->newDonation() );
 
 		$this->newDonationAcceptedEventHandler()->onDonationAccepted( self::KNOWN_ID );
 	}

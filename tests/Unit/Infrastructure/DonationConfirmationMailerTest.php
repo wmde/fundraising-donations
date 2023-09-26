@@ -69,7 +69,7 @@ class DonationConfirmationMailerTest extends TestCase {
 
 		$confirmationMailer->sendConfirmationFor( $donation );
 
-		[ ,$templateArguments ] = $mailerSpy->getSendMailCalls()[0];
+		[ , $templateArguments ] = $mailerSpy->getSendMailCalls()[0];
 		$this->assertTrue( $templateArguments['donation']['needsModeration'] );
 		$this->assertSame(
 			[
