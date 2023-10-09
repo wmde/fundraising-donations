@@ -10,7 +10,7 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator;
-use WMDE\Fundraising\DonationContext\UseCases\AddDonation\PaymentRequestBuilder;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\PaymentParameterBuilder;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\SucceedingDomainNameValidator;
@@ -48,8 +48,8 @@ class AddDonationValidatorTest extends TestCase {
 		$request->setDonorCity( '' );
 		$request->setDonorCountryCode( '' );
 		$request->setDonorEmailAddress( '' );
-		$paymentRequest = $request->getPaymentCreationRequest();
-		$request->setPaymentCreationRequest( PaymentRequestBuilder::fromExistingRequest( $paymentRequest )
+		$paymentRequest = $request->getPaymentParameters();
+		$request->setPaymentParameters( PaymentParameterBuilder::fromExistingParameters( $paymentRequest )
 			->withPaymentType( PaymentType::BankTransfer->value )
 			->build()
 		);

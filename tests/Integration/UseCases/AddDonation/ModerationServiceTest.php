@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
-use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
@@ -55,7 +55,7 @@ class ModerationServiceTest extends TestCase {
 			$this->newFailingTextPolicyValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setPaymentCreationRequest( new PaymentCreationRequest(
+		$request->setPaymentParameters( new PaymentParameters(
 			100,
 			0,
 			$paymentType

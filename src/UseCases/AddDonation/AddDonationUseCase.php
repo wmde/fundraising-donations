@@ -22,8 +22,8 @@ use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\UrlGenerator\DomainSpecificContext;
-use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\DomainSpecificPaymentCreationRequest;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\FunValidators\ConstraintViolation;
 
 /**
@@ -57,7 +57,7 @@ class AddDonationUseCase {
 		$paymentResult = $this->paymentService->createPayment( $this->getPaymentRequestForDonor( $donationRequest, $donationId ) );
 		if ( $paymentResult instanceof FailureResponse ) {
 			return AddDonationResponse::newFailureResponse( [
-				new ConstraintViolation( $donationRequest->getPaymentCreationRequest(), $paymentResult->errorMessage, 'payment' )
+				new ConstraintViolation( $donationRequest->getPaymentParameters(), $paymentResult->errorMessage, 'payment' )
 			] );
 		}
 		$donation = $this->newDonationFromRequest( $donationRequest, $donationId, $paymentResult->paymentId );
@@ -160,15 +160,15 @@ class AddDonationUseCase {
 	 * We need to add donor-type specific properties (bank transfer code and validation)
 	 * to the original request.
 	 */
-	private function getPaymentRequestForDonor( AddDonationRequest $request, int $donationId ): DomainSpecificPaymentCreationRequest {
-		$paymentRequest = $request->getPaymentCreationRequest();
+	private function getPaymentRequestForDonor( AddDonationRequest $request, int $donationId ): PaymentCreationRequest {
+		$paymentRequest = $request->getPaymentParameters();
 		$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
 		if ( $request->donorIsAnonymous() ) {
 			$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR;
 		}
-		$paymentRequest = PaymentRequestBuilder::fromExistingRequest( $paymentRequest )
+		$paymentRequest = PaymentParameterBuilder::fromExistingParameters( $paymentRequest )
 			->withPaymentReferenceCodePrefix( $paymentReferenceCodePrefix )
-			->getPaymentCreationRequest();
+			->getPaymentParameters();
 
 		$urlAuthenticator = $this->donationAuthorizer->authorizeDonationAccess( $donationId );
 		$context = new DomainSpecificContext(
@@ -178,7 +178,7 @@ class AddDonationUseCase {
 			$request->getDonorFirstName(),
 			$request->getDonorLastName()
 		);
-		return DomainSpecificPaymentCreationRequest::newFromBaseRequest(
+		return PaymentCreationRequest::newFromParameters(
 			$paymentRequest,
 			$this->paymentService->createPaymentValidator(),
 			$context,

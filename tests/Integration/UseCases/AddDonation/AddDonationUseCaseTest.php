@@ -32,7 +32,7 @@ use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Services\URLAuthenticator;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse as PaymentCreationFailed;
-use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as PaymentCreationSucceeded;
 use WMDE\FunValidators\ConstraintViolation;
 
@@ -95,7 +95,7 @@ class AddDonationUseCaseTest extends TestCase {
 
 	public function testWhenPaymentCreationFails_responseObjectContainsViolations(): void {
 		$request = $this->newMinimumDonationRequest();
-		$expectedViolation = new ConstraintViolation( $request->getPaymentCreationRequest(), 'payment_not_supported', 'payment' );
+		$expectedViolation = new ConstraintViolation( $request->getPaymentParameters(), 'payment_not_supported', 'payment' );
 		$useCase = $this->makeUseCase( paymentService: $this->makeFailingPaymentService( 'payment_not_supported' ) );
 
 		$result = $useCase->addDonation( $request );
@@ -106,7 +106,7 @@ class AddDonationUseCaseTest extends TestCase {
 
 	private function newMinimumDonationRequest(): AddDonationRequest {
 		$donationRequest = new AddDonationRequest();
-		$donationRequest->setPaymentCreationRequest( new PaymentCreationRequest(
+		$donationRequest->setPaymentParameters( new PaymentParameters(
 			100,
 			PaymentInterval::OneTime->value,
 			'UEB'
@@ -117,7 +117,7 @@ class AddDonationUseCaseTest extends TestCase {
 
 	private function newInvalidDonationRequest(): AddDonationRequest {
 		$donationRequest = new AddDonationRequest();
-		$donationRequest->setPaymentCreationRequest( new PaymentCreationRequest(
+		$donationRequest->setPaymentParameters( new PaymentParameters(
 			100,
 			PaymentInterval::OneTime->value,
 			'BEZ'
@@ -221,7 +221,7 @@ class AddDonationUseCaseTest extends TestCase {
 		return $request;
 	}
 
-	public function testUrlAuthenticatorIsPassedToPaymentCreationRequest(): void {
+	public function testUrlAuthenticatorIsPassedToPaymentParameters(): void {
 		$urlAuthenticator = $this->makeUrlAuthenticatorStub();
 		$donationAuthorizer = $this->makeDonationAuthorizerStub( $urlAuthenticator );
 		$paymentService = new CreatePaymentServiceSpy();
