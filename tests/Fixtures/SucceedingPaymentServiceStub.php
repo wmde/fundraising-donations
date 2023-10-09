@@ -7,7 +7,7 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\CreatePaymentService;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\DonationPaymentValidator;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
-use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\DomainSpecificPaymentCreationRequest;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as PaymentCreationSucceeded;
 
 class SucceedingPaymentServiceStub implements CreatePaymentService {
@@ -22,7 +22,7 @@ class SucceedingPaymentServiceStub implements CreatePaymentService {
 			);
 	}
 
-	public function createPayment( DomainSpecificPaymentCreationRequest $request ): PaymentCreationSucceeded {
+	public function createPayment( PaymentCreationRequest $request ): PaymentCreationSucceeded {
 		return $this->successResponse;
 	}
 

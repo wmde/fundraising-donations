@@ -7,7 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Data;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
-use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 
 /**
  * A Valid AddDonationRequest with a private person donor, donating
@@ -17,7 +17,7 @@ class ValidAddDonationRequest {
 
 	public static function getRequest(): AddDonationRequest {
 		$request = new AddDonationRequest();
-		$request->setPaymentCreationRequest( self::newPaymentCreationRequest() );
+		$request->setPaymentParameters( self::newPaymentParameters() );
 		$request->setOptsIntoNewsletter( ValidDonation::OPTS_INTO_NEWSLETTER );
 		$request->setDonorType( DonorType::PERSON() );
 		$request->setDonorSalutation( ValidDonation::DONOR_SALUTATION );
@@ -34,8 +34,8 @@ class ValidAddDonationRequest {
 		return $request;
 	}
 
-	public static function newPaymentCreationRequest(): PaymentCreationRequest {
-		return new PaymentCreationRequest(
+	public static function newPaymentParameters(): PaymentParameters {
+		return new PaymentParameters(
 			500,
 			PaymentInterval::OneTime->value,
 			'BEZ',
