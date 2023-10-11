@@ -22,8 +22,10 @@ use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\Domain\UrlGenerator\DomainSpecificContext;
+use WMDE\Fundraising\PaymentContext\Services\URLAuthenticator;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 use WMDE\FunValidators\ConstraintViolation;
 
 /**
@@ -48,18 +50,20 @@ class AddDonationUseCase {
 
 	public function addDonation( AddDonationRequest $donationRequest ): AddDonationResponse {
 		$validationResult = $this->donationValidator->validate( $donationRequest );
-
 		if ( $validationResult->hasViolations() ) {
 			return AddDonationResponse::newFailureResponse( $validationResult->getViolations() );
 		}
 
 		$donationId = $this->idGenerator->getNewId();
-		$paymentResult = $this->paymentService->createPayment( $this->getPaymentRequestForDonor( $donationRequest, $donationId ) );
+		$urlAuthenticator = $this->donationAuthorizer->authorizeDonationAccess( $donationId );
+		$paymentRequest = $this->getPaymentRequestForDonor( $donationRequest, $donationId, $urlAuthenticator );
+		$paymentResult = $this->paymentService->createPayment( $paymentRequest );
 		if ( $paymentResult instanceof FailureResponse ) {
 			return AddDonationResponse::newFailureResponse( [
 				new ConstraintViolation( $donationRequest->getPaymentParameters(), $paymentResult->errorMessage, 'payment' )
 			] );
 		}
+
 		$donation = $this->newDonationFromRequest( $donationRequest, $donationId, $paymentResult->paymentId );
 
 		$moderationResult = $this->policyValidator->moderateDonationRequest( $donationRequest );
@@ -154,23 +158,8 @@ class AddDonationUseCase {
 		}
 	}
 
-	/**
-	 * Modify PaymentCreationRequest from the AddDonationRequest
-	 *
-	 * We need to add donor-type specific properties (bank transfer code and validation)
-	 * to the original request.
-	 */
-	private function getPaymentRequestForDonor( AddDonationRequest $request, int $donationId ): PaymentCreationRequest {
-		$paymentRequest = $request->getPaymentParameters();
-		$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
-		if ( $request->donorIsAnonymous() ) {
-			$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR;
-		}
-		$paymentRequest = PaymentParameterBuilder::fromExistingParameters( $paymentRequest )
-			->withPaymentReferenceCodePrefix( $paymentReferenceCodePrefix )
-			->getPaymentParameters();
-
-		$urlAuthenticator = $this->donationAuthorizer->authorizeDonationAccess( $donationId );
+	private function getPaymentRequestForDonor( AddDonationRequest $request, int $donationId,
+												URLAuthenticator $urlAuthenticator ): PaymentCreationRequest {
 		$context = new DomainSpecificContext(
 			$donationId,
 			null,
@@ -179,11 +168,28 @@ class AddDonationUseCase {
 			$request->getDonorLastName()
 		);
 		return PaymentCreationRequest::newFromParameters(
-			$paymentRequest,
+			$this->getPaymentParametersForDonor( $request ),
 			$this->paymentService->createPaymentValidator(),
 			$context,
 			$urlAuthenticator
 		);
+	}
+
+	/**
+	 * Modify PaymentParameters from the AddDonationRequest
+	 *
+	 * We need to add donor-type specific properties (bank transfer code)
+	 * to the original request.
+	 */
+	private function getPaymentParametersForDonor( AddDonationRequest $request ): PaymentParameters {
+		$paymentParameters = $request->getPaymentParameters();
+		$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
+		if ( $request->donorIsAnonymous() ) {
+			$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR;
+		}
+		return PaymentParameterBuilder::fromExistingParameters( $paymentParameters )
+			->withPaymentReferenceCodePrefix( $paymentReferenceCodePrefix )
+			->getPaymentParameters();
 	}
 
 	/**
