@@ -30,9 +30,7 @@ class TestDonationContextFactory {
 	 */
 	public function __construct( array $config ) {
 		$this->config = $config;
-		$this->contextFactory = new DonationContextFactory(
-			$config,
-		);
+		$this->contextFactory = new DonationContextFactory();
 		$this->entityManager = null;
 		$this->connection = null;
 	}
