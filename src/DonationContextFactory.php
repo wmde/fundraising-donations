@@ -7,24 +7,9 @@ namespace WMDE\Fundraising\DonationContext;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Types\Type;
 
-/**
- * @license GPL-2.0-or-later
- */
 class DonationContextFactory {
 
 	private const DOCTRINE_CLASS_MAPPING_DIRECTORY = __DIR__ . '/../config/DoctrineClassMapping';
-
-	/**
-	 * @var array{token-length:int,token-validity-timestamp:string}
-	 */
-	protected array $config;
-
-	/**
-	 * @param array{token-length:int,token-validity-timestamp:string} $config
-	 */
-	public function __construct( array $config ) {
-		$this->config = $config;
-	}
 
 	/**
 	 * @return string[]
