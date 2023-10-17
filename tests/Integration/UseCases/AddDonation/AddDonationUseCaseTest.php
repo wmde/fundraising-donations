@@ -163,7 +163,7 @@ class AddDonationUseCaseTest extends TestCase {
 	public function testGivenValidRequest_withIncompletePayment_confirmationEmailIsNotSent(): void {
 		$paymentService = new SucceedingPaymentServiceStub( new PaymentCreationSucceeded(
 			paymentId: 1,
-			externalPaymentCompletionUrl: '',
+			paymentCompletionUrl: '',
 			paymentComplete: false
 		) );
 		$mockNotifier = $this->createMock( DonationNotifier::class );
@@ -243,7 +243,7 @@ class AddDonationUseCaseTest extends TestCase {
 
 		$response = $useCase->addDonation( $this->newMinimumDonationRequest() );
 
-		$this->assertSame( self::PAYMENT_PROVIDER_URL, $response->getPaymentProviderRedirectUrl() );
+		$this->assertSame( self::PAYMENT_PROVIDER_URL, $response->getPaymentCompletionUrl() );
 	}
 
 	public function testUrlGeneratorGetsDonationData(): void {

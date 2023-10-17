@@ -83,7 +83,7 @@ class AddDonationUseCase {
 		// The notifier checks if a notification is really needed (e.g. amount too high)
 		$this->notifier->sendModerationNotificationToAdmin( $donation );
 
-		return AddDonationResponse::newSuccessResponse( $donation, $paymentResult->externalPaymentCompletionUrl );
+		return AddDonationResponse::newSuccessResponse( $donation, $paymentResult->paymentCompletionUrl );
 	}
 
 	private function newDonationFromRequest( AddDonationRequest $donationRequest, int $donationId, int $paymentId ): Donation {
