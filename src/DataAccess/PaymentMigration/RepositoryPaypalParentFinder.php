@@ -5,7 +5,7 @@ namespace WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration;
 
 use Doctrine\ORM\EntityManager;
 use WMDE\Fundraising\PaymentContext\DataAccess\DoctrinePaymentRepository;
-use WMDE\Fundraising\PaymentContext\DataAccess\PaymentNotFoundException;
+use WMDE\Fundraising\PaymentContext\Domain\Exception\PaymentNotFoundException;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PayPalPayment;
 
 class RepositoryPaypalParentFinder implements PaypalParentFinder {

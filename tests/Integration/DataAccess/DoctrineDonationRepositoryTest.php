@@ -18,7 +18,6 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationExistsChecker;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\FixedTokenGenerator;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationExistsChecker;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
@@ -80,13 +79,6 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		// and then modify our expected value (where it's null) to match the date, so the comparison succeeds
 		$this->assertNotNull( $actual->getCreationTime() );
 		$expected->setCreationTime( $actual->getCreationTime() );
-
-		// pre-persist subscriber automatically access and update tokens. We're using fixed values in the test
-		$expected->encodeAndSetData( array_merge( $expected->getDecodedData(), [
-			'token' => FixedTokenGenerator::TOKEN,
-			'utoken' => FixedTokenGenerator::TOKEN,
-			'uexpiry' => FixedTokenGenerator::EXPIRY_DATE
-		] ) );
 
 		$this->assertEquals( $expected->getModerationReasons()->toArray(), $actual->getModerationReasons()->toArray() );
 		$this->assertEquals( $expected->getDecodedData(), $actual->getDecodedData() );

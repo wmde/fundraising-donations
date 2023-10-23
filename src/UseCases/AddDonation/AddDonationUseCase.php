@@ -4,8 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
-use WMDE\Fundraising\DonationContext\Authorization\DonationTokenFetcher;
-use WMDE\Fundraising\DonationContext\Authorization\DonationTokens;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
@@ -20,12 +18,14 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
-use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\PaymentProviderURLGenerator;
-use WMDE\Fundraising\PaymentContext\Domain\PaymentUrlGenerator\RequestContext;
+use WMDE\Fundraising\PaymentContext\Domain\UrlGenerator\DomainSpecificContext;
+use WMDE\Fundraising\PaymentContext\Services\URLAuthenticator;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 use WMDE\FunValidators\ConstraintViolation;
 
 /**
@@ -42,7 +42,7 @@ class AddDonationUseCase {
 		private readonly AddDonationValidator $donationValidator,
 		private readonly ModerationService $policyValidator,
 		private readonly DonationNotifier $notifier,
-		private readonly DonationTokenFetcher $tokenFetcher,
+		private readonly DonationAuthorizer $donationAuthorizer,
 		private readonly EventEmitter $eventEmitter,
 		private readonly CreatePaymentService $paymentService
 	) {
@@ -50,18 +50,21 @@ class AddDonationUseCase {
 
 	public function addDonation( AddDonationRequest $donationRequest ): AddDonationResponse {
 		$validationResult = $this->donationValidator->validate( $donationRequest );
-
 		if ( $validationResult->hasViolations() ) {
 			return AddDonationResponse::newFailureResponse( $validationResult->getViolations() );
 		}
 
-		$paymentResult = $this->paymentService->createPayment( $this->getPaymentRequestForDonor( $donationRequest ) );
+		$donationId = $this->idGenerator->getNewId();
+		$urlAuthenticator = $this->donationAuthorizer->authorizeDonationAccess( $donationId );
+		$paymentRequest = $this->getPaymentRequestForDonor( $donationRequest, $donationId, $urlAuthenticator );
+		$paymentResult = $this->paymentService->createPayment( $paymentRequest );
 		if ( $paymentResult instanceof FailureResponse ) {
 			return AddDonationResponse::newFailureResponse( [
-				new ConstraintViolation( $donationRequest->getPaymentCreationRequest(), $paymentResult->errorMessage, 'payment' )
+				new ConstraintViolation( $donationRequest->getPaymentParameters(), $paymentResult->errorMessage, 'payment' )
 			] );
 		}
-		$donation = $this->newDonationFromRequest( $donationRequest, $paymentResult->paymentId );
+
+		$donation = $this->newDonationFromRequest( $donationRequest, $donationId, $paymentResult->paymentId );
 
 		$moderationResult = $this->policyValidator->moderateDonationRequest( $donationRequest );
 		if ( $moderationResult->needsModeration() ) {
@@ -74,27 +77,20 @@ class AddDonationUseCase {
 
 		$this->donationRepository->storeDonation( $donation );
 
-		$tokens = $this->tokenFetcher->getTokens( $donation->getId() );
-
 		$this->eventEmitter->emit( new DonationCreatedEvent( $donation->getId(), $donation->getDonor() ) );
 
 		$this->sendDonationConfirmationEmail( $donation, $paymentResult->paymentComplete );
 		// The notifier checks if a notification is really needed (e.g. amount too high)
 		$this->notifier->sendModerationNotificationToAdmin( $donation );
 
-		return AddDonationResponse::newSuccessResponse(
-			$donation,
-			$tokens->getUpdateToken(),
-			$tokens->getAccessToken(),
-			$this->generatePaymentProviderUrl( $paymentResult->paymentProviderURLGenerator, $donation, $tokens )
-		);
+		return AddDonationResponse::newSuccessResponse( $donation, $paymentResult->paymentCompletionUrl );
 	}
 
-	private function newDonationFromRequest( AddDonationRequest $donationRequest, int $paymentId ): Donation {
+	private function newDonationFromRequest( AddDonationRequest $donationRequest, int $donationId, int $paymentId ): Donation {
 		$donor = $this->getPersonalInfoFromRequest( $donationRequest );
 		$this->processNewsletterAndReceiptOptions( $donationRequest, $donor );
 		return new Donation(
-			$this->idGenerator->getNewId(),
+			$donationId,
 			$donor,
 			$paymentId,
 			$this->newTrackingInfoFromRequest( $donationRequest )
@@ -168,50 +164,46 @@ class AddDonationUseCase {
 		}
 	}
 
+	private function getPaymentRequestForDonor( AddDonationRequest $request, int $donationId,
+												URLAuthenticator $urlAuthenticator ): PaymentCreationRequest {
+		$context = new DomainSpecificContext(
+			$donationId,
+			null,
+			$this->generatePayPalInvoiceId( $donationId ),
+			$request->getDonorFirstName(),
+			$request->getDonorLastName()
+		);
+		return PaymentCreationRequest::newFromParameters(
+			$this->getPaymentParametersForDonor( $request ),
+			$this->paymentService->createPaymentValidator(),
+			$context,
+			$urlAuthenticator
+		);
+	}
+
 	/**
-	 * Modify PaymentCreationRequest from the AddDonationRequest
+	 * Modify PaymentParameters from the AddDonationRequest
 	 *
-	 * We need to add donor-type specific properties (bank transfer code and validation)
+	 * We need to add donor-type specific properties (bank transfer code)
 	 * to the original request.
-	 *
-	 * @param AddDonationRequest $request
-	 * @return PaymentCreationRequest
 	 */
-	private function getPaymentRequestForDonor( AddDonationRequest $request ): PaymentCreationRequest {
-		$paymentRequest = $request->getPaymentCreationRequest();
+	private function getPaymentParametersForDonor( AddDonationRequest $request ): PaymentParameters {
+		$paymentParameters = $request->getPaymentParameters();
 		$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_KNOWN_DONOR;
 		if ( $request->donorIsAnonymous() ) {
 			$paymentReferenceCodePrefix = self::PREFIX_BANK_TRANSACTION_ANONYMOUS_DONOR;
 		}
-
-		$paymentRequest = PaymentRequestBuilder::fromExistingRequest( $paymentRequest )
+		return PaymentParameterBuilder::fromExistingParameters( $paymentParameters )
 			->withPaymentReferenceCodePrefix( $paymentReferenceCodePrefix )
-			->getPaymentCreationRequest();
-		$paymentRequest->setDomainSpecificPaymentValidator( $this->paymentService->createPaymentValidator() );
-		return $paymentRequest;
-	}
-
-	private function generatePaymentProviderUrl( PaymentProviderURLGenerator $paymentProviderURLGenerator, Donation $donation, DonationTokens $tokens ): string {
-		$name = $donation->getDonor()->getName()->toArray();
-		return $paymentProviderURLGenerator->generateURL( new RequestContext(
-			$donation->getId(),
-			$this->generatePayPalInvoiceId( $donation ),
-			$tokens->getUpdateToken(),
-			$tokens->getAccessToken(),
-			$name['firstName'] ?? '',
-			$name['lastName'] ?? '',
-		) );
+			->getPaymentParameters();
 	}
 
 	/**
 	 * We use the donation primary key as the InvoiceId because they're unique
 	 * But we prepend a letter to make sure they don't clash with memberships
-	 *
-	 * @param Donation $donation
-	 * @return string
 	 */
-	private function generatePayPalInvoiceId( Donation $donation ): string {
-		return 'D' . $donation->getId();
+	private function generatePayPalInvoiceId( int $donationId ): string {
+		return 'D' . $donationId;
 	}
 
 	private function processNewsletterAndReceiptOptions( AddDonationRequest $donationRequest, Donor $donor ): void {

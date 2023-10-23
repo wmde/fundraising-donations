@@ -128,7 +128,7 @@ class AddDonationValidator {
 
 	private function validateDonorAndPaymentTypeCombination(): void {
 		$donorType = $this->request->getDonorType();
-		$paymentType = $this->request->getPaymentCreationRequest()->paymentType;
+		$paymentType = $this->request->getPaymentParameters()->paymentType;
 		if ( $donorType->is( DonorType::ANONYMOUS() ) && $paymentType === PaymentType::DirectDebit->value ) {
 			$this->violations[] = new ConstraintViolation(
 				$paymentType,

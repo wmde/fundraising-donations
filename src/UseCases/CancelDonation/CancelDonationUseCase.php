@@ -5,11 +5,11 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\CancelDonation;
 
 use WMDE\EmailAddress\EmailAddress;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\CancelPaymentUseCase;
@@ -23,7 +23,7 @@ class CancelDonationUseCase {
 	public function __construct(
 		private DonationRepository $donationRepository,
 		private TemplateMailerInterface $mailer,
-		private DonationAuthorizer $authorizationService,
+		private DonationAuthorizationChecker $authorizationService,
 		private DonationEventLogger $donationLogger,
 		private CancelPaymentUseCase $cancelPaymentUseCase ) {
 	}

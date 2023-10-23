@@ -5,12 +5,12 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\UpdateDonor;
 
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonorUpdatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\EventEmitterSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
@@ -173,7 +173,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 		return new FakeDonationRepository();
 	}
 
-	private function newDonationAuthorizer(): DonationAuthorizer {
+	private function newDonationAuthorizer(): DonationAuthorizationChecker {
 		return new SucceedingDonationAuthorizer();
 	}
 
@@ -183,7 +183,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 		return $validator;
 	}
 
-	private function newUpdateDonorUseCase( DonationRepository $repository, ?DonationNotifier $confirmationMailer = null, ?EventEmitter $eventEmitter = null, ?UpdateDonorValidator $donorValidator = null, ?DonationAuthorizer $donationAuthorizer = null ): UpdateDonorUseCase {
+	private function newUpdateDonorUseCase( DonationRepository $repository, ?DonationNotifier $confirmationMailer = null, ?EventEmitter $eventEmitter = null, ?UpdateDonorValidator $donorValidator = null, ?DonationAuthorizationChecker $donationAuthorizer = null ): UpdateDonorUseCase {
 		return new UpdateDonorUseCase(
 			$donationAuthorizer ?? $this->newDonationAuthorizer(),
 			$donorValidator ?? $this->newDonorValidator(),

@@ -7,9 +7,9 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CancelDona
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\EmailAddress\EmailAddress;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -36,7 +36,7 @@ class CancelDonationUseCaseTest extends TestCase {
 	private function newCancelDonationUseCase(
 		DonationRepository $repository = null,
 		TemplateMailerInterface $mailer = null,
-		DonationAuthorizer $authorizer = null,
+		DonationAuthorizationChecker $authorizer = null,
 		DonationEventLogger $logger = null,
 		CancelPaymentUseCase $cancelPaymentUseCase = null
 	): CancelDonationUseCase {
