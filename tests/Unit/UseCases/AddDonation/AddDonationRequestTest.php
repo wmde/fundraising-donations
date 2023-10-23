@@ -7,7 +7,7 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
-use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest
@@ -61,26 +61,26 @@ class AddDonationRequestTest extends TestCase {
 	public function testPaymentRequestDefaultValues(): void {
 		$request = new AddDonationRequest();
 
-		$paymentCreationRequest = $request->getPaymentCreationRequest();
+		$paymentParameters = $request->getPaymentParameters();
 
-		$this->assertSame( 0, $paymentCreationRequest->amountInEuroCents );
-		$this->assertSame( PaymentInterval::OneTime->value, $paymentCreationRequest->interval );
-		$this->assertSame( '', $paymentCreationRequest->paymentType );
-		$this->assertSame( '', $paymentCreationRequest->iban );
-		$this->assertSame( '', $paymentCreationRequest->bic );
-		$this->assertSame( '', $paymentCreationRequest->transferCodePrefix );
+		$this->assertSame( 0, $paymentParameters->amountInEuroCents );
+		$this->assertSame( PaymentInterval::OneTime->value, $paymentParameters->interval );
+		$this->assertSame( '', $paymentParameters->paymentType );
+		$this->assertSame( '', $paymentParameters->iban );
+		$this->assertSame( '', $paymentParameters->bic );
+		$this->assertSame( '', $paymentParameters->transferCodePrefix );
 	}
 
 	public function testPaymentRequestGetterAndSetter(): void {
-		$paymentCreationRequest = new PaymentCreationRequest(
+		$paymentParameters = new PaymentParameters(
 			100,
 			PaymentInterval::OneTime->value,
 			'BEZ'
 		);
 		$request = new AddDonationRequest();
-		$request->setPaymentCreationRequest( $paymentCreationRequest );
+		$request->setPaymentParameters( $paymentParameters );
 
-		$this->assertSame( $paymentCreationRequest, $request->getPaymentCreationRequest() );
+		$this->assertSame( $paymentParameters, $request->getPaymentParameters() );
 	}
 
 	public function testTrackingFields(): void {

@@ -6,9 +6,9 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\HandlePayPalPayme
 
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
-use WMDE\Fundraising\DonationContext\Authorization\DonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Services\PaymentBookingService;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -248,7 +248,7 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	private function givenNewUseCase(
 		?DonationIdRepository $idGenerator = null,
 		?DonationRepository $repository = null,
-		?DonationAuthorizer $authorizer = null,
+		?DonationAuthorizationChecker $authorizer = null,
 		?DonationNotifier $notifier = null,
 		?PaymentBookingService $paymentBookingService = null,
 		?DonationEventLogger $eventLogger = null,

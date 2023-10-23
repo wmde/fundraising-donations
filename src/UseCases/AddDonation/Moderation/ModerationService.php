@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult as Result;
-use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationRequest;
+use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
@@ -68,12 +68,12 @@ class ModerationService {
 	 */
 	public function moderateDonationRequest( AddDonationRequest $request ): ModerationResult {
 		$this->result = new ModerationResult();
-		$paymentCreationRequest = $request->getPaymentCreationRequest();
-		if ( $this->paymentTypeBypassesModeration( $paymentCreationRequest->paymentType ) ) {
+		$paymentParameters = $request->getPaymentParameters();
+		if ( $this->paymentTypeBypassesModeration( $paymentParameters->paymentType ) ) {
 			return $this->result;
 		}
 
-		$this->getAmountViolations( $paymentCreationRequest );
+		$this->getAmountViolations( $paymentParameters );
 		$this->getBadWordViolations( $request );
 
 		return $this->result;
@@ -141,7 +141,7 @@ class ModerationService {
 		$this->result->addModerationReason( new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, $fieldName ) );
 	}
 
-	private function getAmountViolations( PaymentCreationRequest $request ): void {
+	private function getAmountViolations( PaymentParameters $request ): void {
 		$amountViolations = $this->amountPolicyValidator->validate(
 			Euro::newFromCents( $request->amountInEuroCents )->getEuroFloat(),
 			$request->interval
