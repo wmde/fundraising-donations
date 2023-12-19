@@ -175,6 +175,19 @@ class AddDonationUseCaseTest extends TestCase {
 		$useCase->addDonation( $request );
 	}
 
+	public function testGivenValidRequest_withBlockedEmail_confirmationEmailIsNotSent(): void {
+		$mockNotifier = $this->createMock( DonationNotifier::class );
+		$mockNotifier->expects( $this->never() )->method( 'sendConfirmationFor' );
+
+		$useCase = $this->makeUseCase(
+			policyValidator: $this->makeEmailBlockedModerationService(),
+			notifier: $mockNotifier
+		);
+
+		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+		$useCase->addDonation( $request );
+	}
+
 	public function testGivenValidRequestWithPolicyViolation_donationIsModerated(): void {
 		$useCase = $this->makeUseCase( policyValidator: $this->makeFakeFailingModerationService() );
 
@@ -406,6 +419,14 @@ class AddDonationUseCaseTest extends TestCase {
 	private function makeFakeFailingModerationService(): ModerationService {
 		$result = new ModerationResult();
 		$result->addModerationReason( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
+		$validator = $this->createStub( ModerationService::class );
+		$validator->method( 'moderateDonationRequest' )->willReturn( $result );
+		return $validator;
+	}
+
+	private function makeEmailBlockedModerationService(): ModerationService {
+		$result = new ModerationResult();
+		$result->addModerationReason( new ModerationReason( ModerationIdentifier::EMAIL_BLOCKED ) );
 		$validator = $this->createStub( ModerationService::class );
 		$validator->method( 'moderateDonationRequest' )->willReturn( $result );
 		return $validator;
