@@ -41,6 +41,7 @@ class ModerationService {
 
 	private AmountPolicyValidator $amountPolicyValidator;
 	private TextPolicyValidator $textPolicyValidator;
+
 	/**
 	 * @var string[]
 	 */
@@ -51,7 +52,7 @@ class ModerationService {
 	/**
 	 * @param AmountPolicyValidator $amountPolicyValidator
 	 * @param TextPolicyValidator $textPolicyValidator
-	 * @param string[] $forbiddenEmailAddresses
+	 * @param string[] $forbiddenEmailAddresses A list of email addresses
 	 */
 	public function __construct( AmountPolicyValidator $amountPolicyValidator, TextPolicyValidator $textPolicyValidator,
 		array $forbiddenEmailAddresses = [] ) {

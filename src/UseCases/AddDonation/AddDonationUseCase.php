@@ -155,7 +155,7 @@ class AddDonationUseCase {
 	}
 
 	private function sendDonationConfirmationEmail( Donation $donation, bool $paymentIsComplete ): void {
-		if ( $donation->getDonor()->hasEmailAddress() && $paymentIsComplete ) {
+		if ( $donation->shouldSendConfirmationMail() && $paymentIsComplete ) {
 			$this->notifier->sendConfirmationFor( $donation );
 		}
 	}

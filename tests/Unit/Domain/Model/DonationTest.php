@@ -140,4 +140,21 @@ class DonationTest extends TestCase {
 		$donation->markForModeration();
 	}
 
+	public function testAnonymousDonorsShouldNotReceiveConfirmationEmail(): void {
+		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
+		$this->assertFalse( $donation->shouldSendConfirmationMail() );
+	}
+
+	public function testDonationWithEmailModerationShouldNotReceiveConfirmationEmail(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->markForModeration( new ModerationReason( ModerationIdentifier::EMAIL_BLOCKED ) );
+		$this->assertFalse( $donation->shouldSendConfirmationMail() );
+	}
+
+	public function testDonationWithEmailAndOtherModerationReasonsShouldReceiveConfirmationEmail(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
+		$this->assertTrue( $donation->shouldSendConfirmationMail() );
+	}
+
 }
