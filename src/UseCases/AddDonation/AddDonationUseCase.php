@@ -71,10 +71,6 @@ class AddDonationUseCase {
 			$donation->markForModeration( ...$moderationResult->getViolations() );
 		}
 
-		if ( $this->policyValidator->isAutoDeleted( $donationRequest ) ) {
-			$donation->cancelWithoutChecks();
-		}
-
 		$this->donationRepository->storeDonation( $donation );
 
 		$this->eventEmitter->emit( new DonationCreatedEvent( $donation->getId(), $donation->getDonor() ) );
