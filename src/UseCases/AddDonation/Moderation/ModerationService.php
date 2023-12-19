@@ -75,6 +75,7 @@ class ModerationService {
 
 		$this->getAmountViolations( $paymentParameters );
 		$this->getBadWordViolations( $request );
+		$this->getForbiddenEmailViolations( $request );
 
 		return $this->result;
 	}
@@ -131,5 +132,13 @@ class ModerationService {
 
 	private function paymentTypeBypassesModeration( string $paymentType ): bool {
 		return in_array( $paymentType, self::PAYMENT_TYPES_THAT_SKIP_MODERATION );
+	}
+
+	private function getForbiddenEmailViolations( AddDonationRequest $request ): void {
+		if ( !$request->donorIsAnonymous() && in_array( $request->getDonorEmailAddress(), $this->forbiddenEmailAddresses ) ) {
+			$this->result->addModerationReason(
+				new ModerationReason( ModerationIdentifier::EMAIL_BLOCKED, Result::SOURCE_DONOR_EMAIL )
+			);
+		}
 	}
 }

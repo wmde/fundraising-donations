@@ -291,10 +291,6 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertInstanceOf( CompanyContactName::class, $events[0]->getDonor()->getName() );
 	}
 
-	public function testWhenEmailAddressIsBlacklisted_donationIsModerated(): void {
-		$this->markTestIncomplete( 'This test is not yet implemented.' );
-	}
-
 	public function testOptingIntoDonationReceipt_persistedInDonor(): void {
 		$repository = $this->makeDonationRepositoryStub();
 		$useCase = $this->makeUseCase(
