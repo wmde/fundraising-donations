@@ -73,9 +73,9 @@ class ModerationService {
 			return $this->result;
 		}
 
-		$this->getAmountViolations( $paymentParameters );
-		$this->getBadWordViolations( $request );
-		$this->getForbiddenEmailViolations( $request );
+		$this->moderateAmountViolations( $paymentParameters );
+		$this->moderateBadWordViolations( $request );
+		$this->moderateForbiddenEmailViolations( $request );
 
 		return $this->result;
 	}
@@ -93,22 +93,22 @@ class ModerationService {
 	 *
 	 * @param AddDonationRequest $request
 	 */
-	private function getBadWordViolations( AddDonationRequest $request ): void {
+	private function moderateBadWordViolations( AddDonationRequest $request ): void {
 		if ( $request->donorIsAnonymous() ) {
 			return;
 		}
 
-		$this->getPolicyViolationsForField( $request->getDonorFirstName(), Result::SOURCE_DONOR_FIRST_NAME );
-		$this->getPolicyViolationsForField( $request->getDonorLastName(), Result::SOURCE_DONOR_LAST_NAME );
-		$this->getPolicyViolationsForField( $request->getDonorCompany(), Result::SOURCE_DONOR_COMPANY );
-		$this->getPolicyViolationsForField(
+		$this->addAddressPolicyViolationsForField( $request->getDonorFirstName(), Result::SOURCE_DONOR_FIRST_NAME );
+		$this->addAddressPolicyViolationsForField( $request->getDonorLastName(), Result::SOURCE_DONOR_LAST_NAME );
+		$this->addAddressPolicyViolationsForField( $request->getDonorCompany(), Result::SOURCE_DONOR_COMPANY );
+		$this->addAddressPolicyViolationsForField(
 			$request->getDonorStreetAddress(),
 			Result::SOURCE_DONOR_STREET_ADDRESS
 		);
-		$this->getPolicyViolationsForField( $request->getDonorCity(), Result::SOURCE_DONOR_CITY );
+		$this->addAddressPolicyViolationsForField( $request->getDonorCity(), Result::SOURCE_DONOR_CITY );
 	}
 
-	private function getPolicyViolationsForField( string $fieldContent, string $fieldName ): void {
+	private function addAddressPolicyViolationsForField( string $fieldContent, string $fieldName ): void {
 		if ( $fieldContent === '' ) {
 			return;
 		}
@@ -118,7 +118,7 @@ class ModerationService {
 		$this->result->addModerationReason( new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, $fieldName ) );
 	}
 
-	private function getAmountViolations( PaymentParameters $request ): void {
+	private function moderateAmountViolations( PaymentParameters $request ): void {
 		$amountViolations = $this->amountPolicyValidator->validate(
 			Euro::newFromCents( $request->amountInEuroCents )->getEuroFloat(),
 			$request->interval
@@ -134,7 +134,7 @@ class ModerationService {
 		return in_array( $paymentType, self::PAYMENT_TYPES_THAT_SKIP_MODERATION );
 	}
 
-	private function getForbiddenEmailViolations( AddDonationRequest $request ): void {
+	private function moderateForbiddenEmailViolations( AddDonationRequest $request ): void {
 		if ( !$request->donorIsAnonymous() && in_array( $request->getDonorEmailAddress(), $this->forbiddenEmailAddresses ) ) {
 			$this->result->addModerationReason(
 				new ModerationReason( ModerationIdentifier::EMAIL_BLOCKED, Result::SOURCE_DONOR_EMAIL )
