@@ -84,30 +84,6 @@ class ModerationService {
 	}
 
 	/**
-	 * Indicate go-ahead for deleting donations where the email is on the forbidden list.
-	 *
-	 * When the request indicates that the donor is anonymous, don't check the list.
-	 * This behavior ensures that even when the frontend sends form data,
-	 * it will not lead to validation for anonymous users.
-	 *
-	 * @param AddDonationRequest $request
-	 * @return bool
-	 * @deprecated This has not been used after 2016 and might be removed. See https://phabricator.wikimedia.org/T280391
-	 */
-	public function isAutoDeleted( AddDonationRequest $request ): bool {
-		if ( $request->donorIsAnonymous() ) {
-			return false;
-		}
-		foreach ( $this->forbiddenEmailAddresses as $blocklistEntry ) {
-			if ( preg_match( $blocklistEntry, $request->getDonorEmailAddress() ) ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-
-	/**
 	 * Validate address fields with text policy (allow- and deny lists).
 	 *
 	 * When the request indicates that the donor is anonymous, skip the validation.
