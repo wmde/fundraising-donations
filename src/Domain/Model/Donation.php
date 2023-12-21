@@ -192,6 +192,18 @@ class Donation {
 		return $this->donor->wantsReceipt();
 	}
 
+	public function shouldSendConfirmationMail(): bool {
+		if ( !$this->getDonor()->hasEmailAddress() ) {
+			return false;
+		}
+		foreach ( $this->moderationReasons as $moderationReason ) {
+			if ( $moderationReason->getModerationIdentifier() === ModerationIdentifier::EMAIL_BLOCKED ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public function donorIsAnonymous(): bool {
 		return $this->donor instanceof AnonymousDonor;
 	}

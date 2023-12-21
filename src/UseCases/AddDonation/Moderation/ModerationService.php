@@ -41,6 +41,7 @@ class ModerationService {
 
 	private AmountPolicyValidator $amountPolicyValidator;
 	private TextPolicyValidator $textPolicyValidator;
+
 	/**
 	 * @var string[]
 	 */
@@ -51,7 +52,7 @@ class ModerationService {
 	/**
 	 * @param AmountPolicyValidator $amountPolicyValidator
 	 * @param TextPolicyValidator $textPolicyValidator
-	 * @param string[] $forbiddenEmailAddresses
+	 * @param string[] $forbiddenEmailAddresses A list of email addresses
 	 */
 	public function __construct( AmountPolicyValidator $amountPolicyValidator, TextPolicyValidator $textPolicyValidator,
 		array $forbiddenEmailAddresses = [] ) {
@@ -73,38 +74,15 @@ class ModerationService {
 			return $this->result;
 		}
 
-		$this->getAmountViolations( $paymentParameters );
-		$this->getBadWordViolations( $request );
+		$this->moderateAmountViolations( $paymentParameters );
+		$this->moderateBadWordViolations( $request );
+		$this->moderateForbiddenEmailViolations( $request );
 
 		return $this->result;
 	}
 
 	public function needsModeration( AddDonationRequest $request ): bool {
 		return $this->moderateDonationRequest( $request )->needsModeration();
-	}
-
-	/**
-	 * Indicate go-ahead for deleting donations where the email is on the forbidden list.
-	 *
-	 * When the request indicates that the donor is anonymous, don't check the list.
-	 * This behavior ensures that even when the frontend sends form data,
-	 * it will not lead to validation for anonymous users.
-	 *
-	 * @param AddDonationRequest $request
-	 * @return bool
-	 * @deprecated This has not been used after 2016 and might be removed. See https://phabricator.wikimedia.org/T280391
-	 */
-	public function isAutoDeleted( AddDonationRequest $request ): bool {
-		if ( $request->donorIsAnonymous() ) {
-			return false;
-		}
-		foreach ( $this->forbiddenEmailAddresses as $blocklistEntry ) {
-			if ( preg_match( $blocklistEntry, $request->getDonorEmailAddress() ) ) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 
 	/**
@@ -116,22 +94,22 @@ class ModerationService {
 	 *
 	 * @param AddDonationRequest $request
 	 */
-	private function getBadWordViolations( AddDonationRequest $request ): void {
+	private function moderateBadWordViolations( AddDonationRequest $request ): void {
 		if ( $request->donorIsAnonymous() ) {
 			return;
 		}
 
-		$this->getPolicyViolationsForField( $request->getDonorFirstName(), Result::SOURCE_DONOR_FIRST_NAME );
-		$this->getPolicyViolationsForField( $request->getDonorLastName(), Result::SOURCE_DONOR_LAST_NAME );
-		$this->getPolicyViolationsForField( $request->getDonorCompany(), Result::SOURCE_DONOR_COMPANY );
-		$this->getPolicyViolationsForField(
+		$this->addAddressPolicyViolationsForField( $request->getDonorFirstName(), Result::SOURCE_DONOR_FIRST_NAME );
+		$this->addAddressPolicyViolationsForField( $request->getDonorLastName(), Result::SOURCE_DONOR_LAST_NAME );
+		$this->addAddressPolicyViolationsForField( $request->getDonorCompany(), Result::SOURCE_DONOR_COMPANY );
+		$this->addAddressPolicyViolationsForField(
 			$request->getDonorStreetAddress(),
 			Result::SOURCE_DONOR_STREET_ADDRESS
 		);
-		$this->getPolicyViolationsForField( $request->getDonorCity(), Result::SOURCE_DONOR_CITY );
+		$this->addAddressPolicyViolationsForField( $request->getDonorCity(), Result::SOURCE_DONOR_CITY );
 	}
 
-	private function getPolicyViolationsForField( string $fieldContent, string $fieldName ): void {
+	private function addAddressPolicyViolationsForField( string $fieldContent, string $fieldName ): void {
 		if ( $fieldContent === '' ) {
 			return;
 		}
@@ -141,7 +119,7 @@ class ModerationService {
 		$this->result->addModerationReason( new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, $fieldName ) );
 	}
 
-	private function getAmountViolations( PaymentParameters $request ): void {
+	private function moderateAmountViolations( PaymentParameters $request ): void {
 		$amountViolations = $this->amountPolicyValidator->validate(
 			Euro::newFromCents( $request->amountInEuroCents )->getEuroFloat(),
 			$request->interval
@@ -155,5 +133,13 @@ class ModerationService {
 
 	private function paymentTypeBypassesModeration( string $paymentType ): bool {
 		return in_array( $paymentType, self::PAYMENT_TYPES_THAT_SKIP_MODERATION );
+	}
+
+	private function moderateForbiddenEmailViolations( AddDonationRequest $request ): void {
+		if ( !$request->donorIsAnonymous() && in_array( $request->getDonorEmailAddress(), $this->forbiddenEmailAddresses ) ) {
+			$this->result->addModerationReason(
+				new ModerationReason( ModerationIdentifier::EMAIL_BLOCKED, Result::SOURCE_DONOR_EMAIL )
+			);
+		}
 	}
 }

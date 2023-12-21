@@ -6,7 +6,9 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonatio
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidationResult;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 use WMDE\FunValidators\ConstraintViolation;
@@ -103,12 +105,12 @@ class ModerationServiceTest extends TestCase {
 	}
 
 	/** @dataProvider allowedEmailAddressProvider */
-	public function testWhenEmailAddressIsNotForbidden_isAutoDeletedReturnsFalse( string $emailAddress ): void {
+	public function testWhenEmailAddressIsNotOnBlockList_needsModerationReturnsFalse( string $emailAddress ): void {
 		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorEmailAddress( $emailAddress );
 
-		$this->assertFalse( $policyValidator->isAutoDeleted( ValidAddDonationRequest::getRequest() ) );
+		$this->assertFalse( $policyValidator->needsModeration( $request ) );
 	}
 
 	/**
@@ -123,12 +125,17 @@ class ModerationServiceTest extends TestCase {
 	}
 
 	/** @dataProvider forbiddenEmailsProvider */
-	public function testWhenEmailAddressIsForbidden_isAutoDeletedReturnsTrue( string $emailAddress ): void {
+	public function testWhenEmailAddressIsOnBlockList_needsModerationReturnsTrue( string $emailAddress ): void {
 		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorEmailAddress( $emailAddress );
 
-		$this->assertTrue( $policyValidator->isAutoDeleted( $request ) );
+		$result = $policyValidator->moderateDonationRequest( $request );
+
+		$this->assertTrue( $result->needsModeration() );
+		$this->assertCount( 1, $result->getViolations() );
+		$this->assertSame( ModerationIdentifier::EMAIL_BLOCKED, $result->getViolations()[0]->getModerationIdentifier() );
+		$this->assertSame( AddDonationValidationResult::SOURCE_DONOR_EMAIL, $result->getViolations()[0]->getSource() );
 	}
 
 	/**
@@ -137,8 +144,7 @@ class ModerationServiceTest extends TestCase {
 	public static function forbiddenEmailsProvider(): array {
 		return [
 			[ 'blocked.person@bar.baz' ],
-			[ 'test@example.com' ],
-			[ 'Test@EXAMPLE.com' ]
+			[ 'foo@example.com' ]
 		];
 	}
 
@@ -146,16 +152,16 @@ class ModerationServiceTest extends TestCase {
 		return new ModerationService(
 			$this->newSucceedingAmountValidator(),
 			$this->newSucceedingTextPolicyValidator(),
-			[ '/^blocked.person@bar\.baz$/', '/@example.com$/i' ]
+			[ 'blocked.person@bar.baz', 'foo@example.com' ]
 		);
 	}
 
-	public function testGivenAnonymousDonorWithEmailData_itIgnoresForbiddenEmails(): void {
+	public function testGivenAnonymousDonorWithEmailData_itDoesNotModerateEmail(): void {
 		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorType( DonorType::ANONYMOUS() );
 		$request->setDonorEmailAddress( 'blocked.person@bar.baz' );
 
-		$this->assertFalse( $policyValidator->isAutoDeleted( $request ) );
+		$this->assertFalse( $policyValidator->needsModeration( $request ) );
 	}
 }
