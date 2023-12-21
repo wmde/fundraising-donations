@@ -71,10 +71,6 @@ class AddDonationUseCase {
 			$donation->markForModeration( ...$moderationResult->getViolations() );
 		}
 
-		if ( $this->policyValidator->isAutoDeleted( $donationRequest ) ) {
-			$donation->cancelWithoutChecks();
-		}
-
 		$this->donationRepository->storeDonation( $donation );
 
 		$this->eventEmitter->emit( new DonationCreatedEvent( $donation->getId(), $donation->getDonor() ) );
@@ -159,7 +155,7 @@ class AddDonationUseCase {
 	}
 
 	private function sendDonationConfirmationEmail( Donation $donation, bool $paymentIsComplete ): void {
-		if ( $donation->getDonor()->hasEmailAddress() && $paymentIsComplete ) {
+		if ( $donation->shouldSendConfirmationMail() && $paymentIsComplete ) {
 			$this->notifier->sendConfirmationFor( $donation );
 		}
 	}

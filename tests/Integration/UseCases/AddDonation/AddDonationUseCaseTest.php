@@ -175,6 +175,19 @@ class AddDonationUseCaseTest extends TestCase {
 		$useCase->addDonation( $request );
 	}
 
+	public function testGivenValidRequest_withBlockedEmail_confirmationEmailIsNotSent(): void {
+		$mockNotifier = $this->createMock( DonationNotifier::class );
+		$mockNotifier->expects( $this->never() )->method( 'sendConfirmationFor' );
+
+		$useCase = $this->makeUseCase(
+			policyValidator: $this->makeEmailBlockedModerationService(),
+			notifier: $mockNotifier
+		);
+
+		$request = $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' );
+		$useCase->addDonation( $request );
+	}
+
 	public function testGivenValidRequestWithPolicyViolation_donationIsModerated(): void {
 		$useCase = $this->makeUseCase( policyValidator: $this->makeFakeFailingModerationService() );
 
@@ -289,21 +302,6 @@ class AddDonationUseCaseTest extends TestCase {
 		$this->assertCount( 1, $events, 'Only 1 event should be emitted' );
 		$this->assertInstanceOf( DonationCreatedEvent::class, $events[0] );
 		$this->assertInstanceOf( CompanyContactName::class, $events[0]->getDonor()->getName() );
-	}
-
-	public function testWhenEmailAddressIsBlacklisted_donationIsMarkedAsCancelled(): void {
-		$repository = $this->makeDonationRepositoryStub();
-		$useCase = $this->makeUseCase(
-			idGenerator: new StaticDonationIdRepository(),
-			repository: $repository,
-			policyValidator: $this->makeFakeAutodeletingPolicyValidator()
-		);
-
-		$useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
-		$donation = $repository->getDonationById( StaticDonationIdRepository::DONATION_ID );
-
-		$this->assertNotNull( $donation );
-		$this->assertTrue( $donation->isCancelled() );
 	}
 
 	public function testOptingIntoDonationReceipt_persistedInDonor(): void {
@@ -426,10 +424,11 @@ class AddDonationUseCaseTest extends TestCase {
 		return $validator;
 	}
 
-	private function makeFakeAutodeletingPolicyValidator(): ModerationService {
+	private function makeEmailBlockedModerationService(): ModerationService {
+		$result = new ModerationResult();
+		$result->addModerationReason( new ModerationReason( ModerationIdentifier::EMAIL_BLOCKED ) );
 		$validator = $this->createStub( ModerationService::class );
-		$validator->method( 'moderateDonationRequest' )->willReturn( new ModerationResult() );
-		$validator->method( 'isAutoDeleted' )->willReturn( true );
+		$validator->method( 'moderateDonationRequest' )->willReturn( $result );
 		return $validator;
 	}
 
