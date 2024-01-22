@@ -28,15 +28,15 @@ class AnonymousDonor extends AbstractDonor {
 		return (string)DonorType::ANONYMOUS();
 	}
 
-	public function subscribeToNewsletter(): void {
+	public function subscribeToMailingList(): void {
 		// Do nothing, this donor doesn't support newsletters
 	}
 
-	public function unsubscribeFromNewsletter(): void {
+	public function unsubscribeFromMailingList(): void {
 		// Do nothing, this donor doesn't support newsletters
 	}
 
-	public function wantsNewsletter(): bool {
+	public function isSubscribedToMailingList(): bool {
 		return false;
 	}
 

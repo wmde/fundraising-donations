@@ -9,14 +9,14 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
 class EmailDonor extends AbstractDonor {
-	use NewsletterTrait;
+	use MailingListTrait;
 
 	public function __construct( PersonName $name, string $emailAddress ) {
 		$this->name = $name;
 		$this->emailAddress = $emailAddress;
 		$this->physicalAddress = new NoAddress();
 		// Server defaults for newsletter
-		$this->unsubscribeFromNewsletter();
+		$this->unsubscribeFromMailingList();
 	}
 
 	public function isPrivatePerson(): bool {

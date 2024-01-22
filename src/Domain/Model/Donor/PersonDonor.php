@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
 class PersonDonor extends AbstractDonor {
-	use NewsletterTrait;
+	use MailingListTrait;
 	use ReceiptTrait;
 
 	public function __construct( PersonName $name, PostalAddress $address, string $emailAddress ) {
@@ -18,7 +18,7 @@ class PersonDonor extends AbstractDonor {
 		$this->emailAddress = $emailAddress;
 
 		// Server defaults for newsletter and receipt
-		$this->unsubscribeFromNewsletter();
+		$this->unsubscribeFromMailingList();
 		$this->requireReceipt();
 	}
 

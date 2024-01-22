@@ -31,11 +31,11 @@ interface Donor {
 	 */
 	public function getDonorType(): string;
 
-	public function subscribeToNewsletter(): void;
+	public function subscribeToMailingList(): void;
 
-	public function unsubscribeFromNewsletter(): void;
+	public function unsubscribeFromMailingList(): void;
 
-	public function wantsNewsletter(): bool;
+	public function isSubscribedToMailingList(): bool;
 
 	public function requireReceipt(): void;
 

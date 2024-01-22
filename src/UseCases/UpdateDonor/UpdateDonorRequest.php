@@ -24,6 +24,8 @@ class UpdateDonorRequest {
 	private string $countryCode = '';
 	private string $emailAddress = '';
 
+	private bool $mailingList = false;
+
 	public function __construct() {
 		$this->donorType = DonorType::PERSON();
 	}
@@ -104,6 +106,18 @@ class UpdateDonorRequest {
 		return $request;
 	}
 
+	public function acceptMailingList(): self {
+		$request = clone $this;
+		$request->mailingList = true;
+		return $request;
+	}
+
+	public function declineMailingList(): self {
+		$request = clone $this;
+		$request->mailingList = false;
+		return $request;
+	}
+
 	public function getDonorType(): DonorType {
 		return $this->donorType;
 	}
@@ -150,5 +164,9 @@ class UpdateDonorRequest {
 
 	public function getDonationId(): int {
 		return $this->donationId;
+	}
+
+	public function getMailingList(): bool {
+		return $this->mailingList;
 	}
 }

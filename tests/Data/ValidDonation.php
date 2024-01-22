@@ -162,7 +162,7 @@ class ValidDonation {
 
 	private static function createDonation( int $donationId, Payment $payment ): Donation {
 		$donor = self::newDonor();
-		$donor->subscribeToNewsletter();
+		$donor->subscribeToMailingList();
 		return new Donation(
 			$donationId,
 			$donor,
@@ -173,7 +173,7 @@ class ValidDonation {
 
 	private static function createCancelledDonation( int $donationId, Payment $payment ): Donation {
 		$donor = self::newDonor();
-		$donor->subscribeToNewsletter();
+		$donor->subscribeToMailingList();
 		$donation = new Donation(
 			$donationId,
 			$donor,
