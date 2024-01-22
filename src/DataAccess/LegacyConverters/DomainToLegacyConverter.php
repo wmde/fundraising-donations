@@ -29,7 +29,7 @@ class DomainToLegacyConverter {
 		$donor = $donation->getDonor();
 		DonorFieldMapper::updateDonorInformation( $doctrineDonation, $donor );
 		$this->updateComment( $doctrineDonation, $donation->getComment() );
-		$doctrineDonation->setDonorOptsIntoNewsletter( $donor->wantsNewsletter() );
+		$doctrineDonation->setDonorOptsIntoNewsletter( $donor->isSubscribedToMailingList() );
 		$doctrineDonation->setDonationReceipt( $donor->wantsReceipt() );
 		$this->updateStatusInformation( $doctrineDonation, $donation, $legacyPaymentData );
 

@@ -210,9 +210,9 @@ class AddDonationUseCase {
 		}
 
 		if ( $donationRequest->getOptsIntoNewsletter() ) {
-			$donor->subscribeToNewsletter();
+			$donor->subscribeToMailingList();
 		} else {
-			$donor->unsubscribeFromNewsletter();
+			$donor->unsubscribeFromMailingList();
 		}
 	}
 

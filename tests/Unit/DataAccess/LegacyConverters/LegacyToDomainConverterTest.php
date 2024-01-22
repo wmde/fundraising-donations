@@ -69,7 +69,7 @@ class LegacyToDomainConverterTest extends TestCase {
 
 		$donation = $converter->createFromLegacyObject( $doctrineDonation );
 
-		$this->assertSame( $expectedDonorValue, $donation->getDonor()->wantsNewsletter() );
+		$this->assertSame( $expectedDonorValue, $donation->getDonor()->isSubscribedToMailingList() );
 	}
 
 	/**
