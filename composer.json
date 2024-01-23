@@ -4,13 +4,13 @@
 	"homepage": "https://github.com/wmde/fundraising-donations",
 	"license": "GPL-2.0-or-later",
 	"require": {
-		"php": ">=8.1",
+		"php": ">=8.2",
 		"ext-curl": "*",
 
 		"doctrine/orm": "~2.18 | ~3.0",
 		"doctrine/migrations": "^3.5",
 		"psr/log": "^3.0",
-		"symfony/http-client": "^6.1",
+		"symfony/http-client": "^7.0",
 
 		"wmde/email-address": "~1.0",
 		"wmde/euro": "~1.0",
@@ -37,7 +37,7 @@
 	],
 	"require-dev": {
 		"ext-pdo_sqlite": "*",
-		"symfony/cache": "^6.1",
+		"symfony/cache": "^6.0|^7.0",
 		"phpunit/phpunit": "~10.4.0",
 		"phpstan/phpstan": "^1.7",
 		"phpmd/phpmd": "~2.6",
