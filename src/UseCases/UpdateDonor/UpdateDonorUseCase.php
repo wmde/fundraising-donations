@@ -74,6 +74,7 @@ class UpdateDonorUseCase {
 
 		$previousDonor = $donation->getDonor();
 		$newDonor = $this->getDonorFromRequest( $updateDonorRequest );
+		$this->updateMailingListSubscription( $updateDonorRequest, $newDonor );
 
 		$donation->setDonor( $newDonor );
 		$this->donationRepository->storeDonation( $donation );
@@ -126,5 +127,13 @@ class UpdateDonorUseCase {
 
 	private function requestIsAllowed( UpdateDonorRequest $updateDonorRequest ): bool {
 		return $this->authorizationService->userCanModifyDonation( $updateDonorRequest->getDonationId() );
+	}
+
+	public function updateMailingListSubscription( UpdateDonorRequest $updateDonorRequest, Donor $newDonor ): void {
+		if ( $updateDonorRequest->getMailingList() ) {
+			$newDonor->subscribeToMailingList();
+		} else {
+			$newDonor->unsubscribeFromMailingList();
+		}
 	}
 }
