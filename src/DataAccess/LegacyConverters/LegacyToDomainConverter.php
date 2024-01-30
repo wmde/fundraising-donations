@@ -78,9 +78,9 @@ class LegacyToDomainConverter {
 		}
 
 		if ( $doctrineDonation->getDonorOptsIntoNewsletter() ) {
-			$donor->subscribeToNewsletter();
+			$donor->subscribeToMailingList();
 		} else {
-			$donor->unsubscribeFromNewsletter();
+			$donor->unsubscribeFromMailingList();
 		}
 
 		return $donor;

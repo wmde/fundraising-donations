@@ -352,7 +352,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$donation = $repository->getDonationById( StaticDonationIdRepository::DONATION_ID );
 
 		$this->assertNotNull( $donation );
-		$this->assertTrue( $donation->getDonor()->wantsNewsletter() );
+		$this->assertTrue( $donation->getDonor()->isSubscribedToMailingList() );
 	}
 
 	public function testOptingOutOfNewsletter_persistedInDonor(): void {
@@ -369,7 +369,7 @@ class AddDonationUseCaseTest extends TestCase {
 		$donation = $repository->getDonationById( StaticDonationIdRepository::DONATION_ID );
 
 		$this->assertNotNull( $donation );
-		$this->assertFalse( $donation->getDonor()->wantsNewsletter() );
+		$this->assertFalse( $donation->getDonor()->isSubscribedToMailingList() );
 	}
 
 	private function makeUseCase(

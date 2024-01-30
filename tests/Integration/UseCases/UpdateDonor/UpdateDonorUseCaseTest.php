@@ -6,7 +6,10 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\UpdateDono
 
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonorUpdatedEvent;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyContactName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\EventEmitter;
@@ -43,7 +46,50 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 		$this->assertTrue( $response->isSuccessful() );
 		$this->assertNotNull( $donation );
-		$this->assertNotNull( $donation->getDonor() );
+		$donor = $donation->getDonor();
+		$this->assertNotNull( $donor );
+		$this->assertEquals(
+			new PersonName(
+				ValidDonation::DONOR_FIRST_NAME,
+				ValidDonation::DONOR_LAST_NAME,
+				ValidDonation::DONOR_SALUTATION,
+				ValidDonation::DONOR_TITLE
+			),
+			$donor->getName()
+		);
+		$this->assertEquals(
+			new PostalAddress(
+				ValidDonation::DONOR_STREET_ADDRESS,
+				ValidDonation::DONOR_POSTAL_CODE,
+				ValidDonation::DONOR_CITY,
+				ValidDonation::DONOR_COUNTRY_CODE
+			),
+			$donor->getPhysicalAddress()
+		);
+		$this->assertSame( ValidDonation::DONOR_EMAIL_ADDRESS, $donor->getEmailAddress() );
+		$this->assertFalse( $donor->isSubscribedToMailingList() );
+	}
+
+	/**
+	 * We don't test subscribing to mailingList with a Company, because the code should take the same path for both
+	 * address types.
+	 */
+	public function testGivenAnonymousDonationAndUserAcceptsMailingList_donationIsUpdated(): void {
+		$repository = $this->newRepository();
+		$useCase = $this->newUpdateDonorUseCase( $repository );
+		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
+		$repository->storeDonation( $donation );
+		$request = $this->newUpdateDonorRequestForPerson( $donation->getId() );
+		$request = $request->acceptMailingList();
+
+		$response = $useCase->updateDonor( $request );
+		$donation = $repository->getDonationById( $donation->getId() );
+
+		$this->assertTrue( $response->isSuccessful() );
+		$this->assertNotNull( $donation );
+		$donor = $donation->getDonor();
+		$this->assertNotNull( $donor );
+		$this->assertTrue( $donor->isSubscribedToMailingList() );
 	}
 
 	public function testGivenAnonymousDonationAndValidCompanyAddressData_donationIsUpdated(): void {
@@ -57,7 +103,29 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 		$this->assertTrue( $response->isSuccessful() );
 		$this->assertNotNull( $donation );
-		$this->assertFalse( $donation->donorIsAnonymous() );
+		$donor = $donation->getDonor();
+		$this->assertNotNull( $donor );
+		$this->assertEquals(
+			new CompanyContactName(
+				ValidDonation::DONOR_COMPANY,
+				ValidDonation::DONOR_FIRST_NAME,
+				ValidDonation::DONOR_LAST_NAME,
+				ValidDonation::DONOR_SALUTATION,
+				ValidDonation::DONOR_TITLE
+			),
+			$donor->getName()
+		);
+		$this->assertEquals(
+			new PostalAddress(
+				ValidDonation::DONOR_STREET_ADDRESS,
+				ValidDonation::DONOR_POSTAL_CODE,
+				ValidDonation::DONOR_CITY,
+				ValidDonation::DONOR_COUNTRY_CODE
+			),
+			$donor->getPhysicalAddress()
+		);
+		$this->assertSame( ValidDonation::DONOR_EMAIL_ADDRESS, $donor->getEmailAddress() );
+		$this->assertFalse( $donor->isSubscribedToMailingList() );
 	}
 
 	public function testGivenAnonymousDonationAndValidAddressData_confirmationMailIsSent(): void {
@@ -200,12 +268,13 @@ class UpdateDonorUseCaseTest extends TestCase {
 			->withFirstName( ValidDonation::DONOR_FIRST_NAME )
 			->withLastName( ValidDonation::DONOR_LAST_NAME )
 			->withSalutation( ValidDonation::DONOR_SALUTATION )
-			->withTitle( '' )
+			->withTitle( ValidDonation::DONOR_TITLE )
 			->withStreetAddress( ValidDonation::DONOR_STREET_ADDRESS )
 			->withPostalCode( ValidDonation::DONOR_POSTAL_CODE )
 			->withCity( ValidDonation::DONOR_CITY )
 			->withCountryCode( ValidDonation::DONOR_COUNTRY_CODE )
-			->withEmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS );
+			->withEmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS )
+			->declineMailingList();
 	}
 
 	private function newUpdateDonorRequestForCompany( int $donationId ): UpdateDonorRequest {
@@ -213,11 +282,16 @@ class UpdateDonorUseCaseTest extends TestCase {
 			->withDonationId( $donationId )
 			->withType( DonorType::COMPANY() )
 			->withCompanyName( ValidDonation::DONOR_COMPANY )
+			->withFirstName( ValidDonation::DONOR_FIRST_NAME )
+			->withLastName( ValidDonation::DONOR_LAST_NAME )
+			->withSalutation( ValidDonation::DONOR_SALUTATION )
+			->withTitle( ValidDonation::DONOR_TITLE )
 			->withStreetAddress( ValidDonation::DONOR_STREET_ADDRESS )
 			->withPostalCode( ValidDonation::DONOR_POSTAL_CODE )
 			->withCity( ValidDonation::DONOR_CITY )
 			->withCountryCode( ValidDonation::DONOR_COUNTRY_CODE )
-			->withEmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS );
+			->withEmailAddress( ValidDonation::DONOR_EMAIL_ADDRESS )
+			->declineMailingList();
 	}
 
 	private function newConfirmationMailer(): DonationNotifier {

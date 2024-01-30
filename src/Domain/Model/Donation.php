@@ -99,7 +99,7 @@ class Donation {
 	 * @deprecated use $this->getDonor()->wantsNewsletter()
 	 */
 	public function getOptsIntoNewsletter(): bool {
-		return $this->donor->wantsNewsletter();
+		return $this->donor->isSubscribedToMailingList();
 	}
 
 	public function cancel(): void {
