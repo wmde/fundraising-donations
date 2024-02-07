@@ -5,6 +5,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess\PaymentM
 
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
+use Doctrine\DBAL\Tools\DsnParser;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\PaymentMigration\ChunkedQueryResultIterator;
 
@@ -16,7 +17,10 @@ class ChunkedQueryResultIteratorTest extends TestCase {
 
 	protected function setUp(): void {
 		parent::setUp();
-		$this->db = DriverManager::getConnection( [ 'url' => 'sqlite:///:memory:' ] );
+		$dsnParser  = new DsnParser( [ 'sqlite' => 'pdo_sqlite' ] );
+		$this->db = DriverManager::getConnection(
+			$dsnParser->parse( 'sqlite:///:memory:' )
+		);
 		$this->db->executeQuery( "CREATE TABLE test( id INTEGER PRIMARY KEY )" );
 	}
 
