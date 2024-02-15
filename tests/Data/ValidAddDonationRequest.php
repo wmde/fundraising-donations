@@ -19,7 +19,7 @@ class ValidAddDonationRequest {
 		$request = new AddDonationRequest();
 		$request->setPaymentParameters( self::newPaymentParameters() );
 		$request->setOptsIntoNewsletter( ValidDonation::OPTS_INTO_NEWSLETTER );
-		$request->setDonorType( DonorType::PERSON() );
+		$request->setDonorType( DonorType::PERSON );
 		$request->setDonorSalutation( ValidDonation::DONOR_SALUTATION );
 		$request->setDonorTitle( ValidDonation::DONOR_TITLE );
 		$request->setDonorCompany( '' );

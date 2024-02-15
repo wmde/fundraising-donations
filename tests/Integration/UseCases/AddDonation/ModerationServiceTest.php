@@ -43,7 +43,7 @@ class ModerationServiceTest extends TestCase {
 			$this->newFailingTextPolicyValidator()
 		);
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setDonorType( DonorType::ANONYMOUS() );
+		$request->setDonorType( DonorType::ANONYMOUS );
 
 		$this->assertFalse( $policyValidator->needsModeration( $request ) );
 	}
@@ -159,7 +159,7 @@ class ModerationServiceTest extends TestCase {
 	public function testGivenAnonymousDonorWithEmailData_itDoesNotModerateEmail(): void {
 		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setDonorType( DonorType::ANONYMOUS() );
+		$request->setDonorType( DonorType::ANONYMOUS );
 		$request->setDonorEmailAddress( 'blocked.person@bar.baz' );
 
 		$this->assertFalse( $policyValidator->needsModeration( $request ) );
