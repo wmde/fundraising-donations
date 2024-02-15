@@ -21,15 +21,7 @@ interface Donor {
 
 	public function hasEmailAddress(): bool;
 
-	/**
-	 * Get string identifier for Donor.
-	 *
-	 * Call is function ONLY when serializing a donor (form field values, templating or DB storage).
-	 * DO NOT call this function for comparing donor types.
-	 *
-	 * @return string
-	 */
-	public function getDonorType(): string;
+	public function getDonorType(): DonorType;
 
 	public function subscribeToMailingList(): void;
 

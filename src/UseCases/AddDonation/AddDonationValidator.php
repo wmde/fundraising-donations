@@ -63,21 +63,21 @@ class AddDonationValidator {
 	private function validateDonor(): void {
 		$this->validateFieldLength( $this->request->getDonorEmailAddress(), Result::SOURCE_DONOR_EMAIL );
 		$donorType = $this->request->getDonorType();
-		if ( $donorType->is( DonorType::PERSON() ) ) {
+		if ( $donorType === DonorType::PERSON ) {
 			$this->violations = array_merge(
 				$this->violations,
 				$this->getPersonNameViolations(),
 				$this->getAddressViolations(),
 				$this->validateEmail()->getViolations()
 			);
-		} elseif ( $donorType->is( DonorType::COMPANY() ) ) {
+		} elseif ( $donorType === DonorType::COMPANY ) {
 			$this->violations = array_merge(
 				$this->violations,
 				$this->getCompanyNameViolations(),
 				$this->getAddressViolations(),
 				$this->validateEmail()->getViolations()
 			);
-		} elseif ( $donorType->is( DonorType::EMAIL() ) ) {
+		} elseif ( $donorType === DonorType::EMAIL ) {
 			$this->violations = array_merge(
 				$this->violations,
 				$this->getPersonNameViolations(),
@@ -129,7 +129,7 @@ class AddDonationValidator {
 	private function validateDonorAndPaymentTypeCombination(): void {
 		$donorType = $this->request->getDonorType();
 		$paymentType = $this->request->getPaymentParameters()->paymentType;
-		if ( $donorType->is( DonorType::ANONYMOUS() ) && $paymentType === PaymentType::DirectDebit->value ) {
+		if ( $donorType === DonorType::ANONYMOUS && $paymentType === PaymentType::DirectDebit->value ) {
 			$this->violations[] = new ConstraintViolation(
 				$paymentType,
 				Result::VIOLATION_FORBIDDEN_PAYMENT_TYPE_FOR_DONOR_TYPE,

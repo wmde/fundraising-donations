@@ -24,8 +24,8 @@ class AnonymousDonor extends AbstractDonor {
 		return false;
 	}
 
-	public function getDonorType(): string {
-		return (string)DonorType::ANONYMOUS();
+	public function getDonorType(): DonorType {
+		return DonorType::ANONYMOUS;
 	}
 
 	public function subscribeToMailingList(): void {

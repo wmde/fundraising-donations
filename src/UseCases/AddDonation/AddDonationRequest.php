@@ -57,7 +57,7 @@ class AddDonationRequest {
 	 * AddDonationRequest constructor.
 	 */
 	public function __construct() {
-		$this->donorType = DonorType::ANONYMOUS();
+		$this->donorType = DonorType::ANONYMOUS;
 		$this->paymentParameterBuilder = new PaymentParameterBuilder();
 	}
 
@@ -259,11 +259,11 @@ class AddDonationRequest {
 	}
 
 	public function donorIsAnonymous(): bool {
-		return $this->getDonorType()->is( DonorType::ANONYMOUS() );
+		return $this->getDonorType() === DonorType::ANONYMOUS;
 	}
 
 	public function donorIsEmailOnly(): bool {
-		return $this->getDonorType()->is( DonorType::EMAIL() );
+		return $this->getDonorType() === DonorType::EMAIL;
 	}
 
 	public function setOptsIntoDonationReceipt( bool $optIn ): void {

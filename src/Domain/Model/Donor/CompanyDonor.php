@@ -31,7 +31,7 @@ class CompanyDonor extends AbstractDonor {
 		return true;
 	}
 
-	public function getDonorType(): string {
-		return (string)DonorType::COMPANY();
+	public function getDonorType(): DonorType {
+		return DonorType::COMPANY;
 	}
 }
