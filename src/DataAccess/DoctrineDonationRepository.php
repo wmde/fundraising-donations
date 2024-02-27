@@ -17,9 +17,6 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
-/**
- * @license GPL-2.0-or-later
- */
 class DoctrineDonationRepository implements DonationRepository {
 
 	public function __construct(

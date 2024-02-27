@@ -23,6 +23,6 @@ class DoctrineDonationExistsChecker implements DonationExistsChecker {
 			[ ParameterType::INTEGER ]
 		)->fetchOne();
 
-		return intval( $count ) === 1;
+		return intval( is_numeric( $count ) ? $count : 0 ) === 1;
 	}
 }

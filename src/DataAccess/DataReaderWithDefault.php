@@ -19,6 +19,10 @@ class DataReaderWithDefault {
 	}
 
 	public function getValue( string $key ): string {
-		return $this->data[$key] ?? '';
+		$value = $this->data[$key] ?? '';
+		if ( !is_scalar( $value ) ) {
+			throw new \DomainException( "Trying to access a non-string value in data blob: " . $key );
+		}
+		return strval( $value );
 	}
 }

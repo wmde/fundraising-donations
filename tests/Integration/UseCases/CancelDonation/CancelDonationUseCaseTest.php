@@ -28,8 +28,6 @@ use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\SuccessResponse;
  * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase
  * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationResponse
  * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest
- *
- * @license GPL-2.0-or-later
  */
 class CancelDonationUseCaseTest extends TestCase {
 
