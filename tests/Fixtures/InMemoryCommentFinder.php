@@ -7,10 +7,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentFinder;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class InMemoryCommentFinder implements CommentFinder {
 
 	/**

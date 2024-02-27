@@ -80,7 +80,7 @@ class DomainToLegacyConverter {
 		$doctrineDonation->setAmount( Euro::newFromCents( $legacyPaymentData->amountInEuroCents )->getEuroString() );
 		$doctrineDonation->setPaymentIntervalInMonths( $legacyPaymentData->intervalInMonths );
 		if ( isset( $legacyPaymentData->paymentSpecificValues['ueb_code'] ) ) {
-			$doctrineDonation->setBankTransferCode( $legacyPaymentData->paymentSpecificValues['ueb_code'] );
+			$doctrineDonation->setBankTransferCode( is_string( $legacyPaymentData->paymentSpecificValues['ueb_code'] ) ? $legacyPaymentData->paymentSpecificValues['ueb_code'] : '' );
 		}
 
 		$doctrineDonation->setPaymentType( $legacyPaymentData->paymentName );

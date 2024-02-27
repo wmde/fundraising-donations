@@ -4,9 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\ModerateDonation;
 
-/**
- * @license GPL-2.0-or-later
- */
 class ModerateDonationResponse {
 
 	public const SUCCESS = 'success';

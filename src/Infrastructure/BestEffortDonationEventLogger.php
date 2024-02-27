@@ -6,9 +6,6 @@ namespace WMDE\Fundraising\DonationContext\Infrastructure;
 
 use Psr\Log\LoggerInterface;
 
-/**
- * @license GPL-2.0-or-later
- */
 class BestEffortDonationEventLogger implements DonationEventLogger {
 
 	private DonationEventLogger $donationEventLogger;

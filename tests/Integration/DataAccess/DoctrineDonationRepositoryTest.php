@@ -31,8 +31,6 @@ use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter
- *
- * @license GPL-2.0-or-later
  */
 class DoctrineDonationRepositoryTest extends TestCase {
 

@@ -10,10 +10,6 @@ use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentFinder;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 class LoggingCommentFinder implements CommentFinder {
 
 	private const CONTEXT_EXCEPTION_KEY = 'exception';

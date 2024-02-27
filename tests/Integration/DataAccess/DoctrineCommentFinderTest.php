@@ -16,7 +16,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
- * @covers WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder
  */
 class DoctrineCommentFinderTest extends TestCase {
 

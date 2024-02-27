@@ -7,10 +7,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 
-/**
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- */
 class DonationRepositorySpy extends FakeDonationRepository {
 
 	/**

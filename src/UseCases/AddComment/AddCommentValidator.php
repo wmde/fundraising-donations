@@ -6,10 +6,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddComment;
 
 use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentValidationResult as Result;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class AddCommentValidator {
 
 	private const MAX_COMMENT_LENGTH = 2048;

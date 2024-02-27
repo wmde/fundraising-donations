@@ -6,9 +6,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 
-/**
- * @license GPL-2.0-or-later
- */
 class UpdateDonorResponse {
 
 	public const SUCCESS_TEXT = 'donor_change_success_text';

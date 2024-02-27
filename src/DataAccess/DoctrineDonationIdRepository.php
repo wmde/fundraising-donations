@@ -28,7 +28,7 @@ class DoctrineDonationIdRepository implements DonationIdRepository {
 				throw new \RuntimeException( 'The ID generator needs a row with initial donation_id set to 0.' );
 			}
 
-			return intval( $id );
+			return intval( is_numeric( $id ) ? $id : 0 );
 		} );
 	}
 

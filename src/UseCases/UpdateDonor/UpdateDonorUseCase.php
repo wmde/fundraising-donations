@@ -21,8 +21,6 @@ use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
  * This use case is for adding donor information to a donation after it was created.
  *
  * This allows for "quick" anonymous donations that the donor updates later in the funnel.
- *
- * @license GPL-2.0-or-later
  */
 class UpdateDonorUseCase {
 
