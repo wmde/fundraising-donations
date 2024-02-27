@@ -11,9 +11,6 @@ use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
 /**
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation
  * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonationData
- *
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
 class DonationTest extends TestCase {
 

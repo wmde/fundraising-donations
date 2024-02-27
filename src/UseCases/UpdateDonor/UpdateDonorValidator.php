@@ -9,9 +9,6 @@ use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
 
-/**
- * @license GPL-2.0-or-later
- */
 class UpdateDonorValidator {
 
 	public const VIOLATION_ANONYMOUS_ADDRESS = 'address_form_error';

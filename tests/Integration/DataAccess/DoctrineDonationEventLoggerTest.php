@@ -12,7 +12,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
- * @covers WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationEventLogger
+ * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationEventLogger
  */
 class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
 

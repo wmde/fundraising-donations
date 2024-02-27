@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters;
 
+use WMDE\Fundraising\DonationContext\DataAccess\DataReaderWithDefault;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFactory;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -42,12 +43,12 @@ class LegacyToDomainConverter {
 	}
 
 	private function createTrackingInfo( DoctrineDonation $dd ): DonationTrackingInfo {
-		$data = $dd->getDecodedData();
+		$data = new DataReaderWithDefault( $dd->getDecodedData() );
 
 		return new DonationTrackingInfo(
-			tracking: $data['tracking'] ?? '',
-			totalImpressionCount: intval( $data['impCount'] ?? '0' ),
-			singleBannerImpressionCount: intval( $data['bImpCount'] ?? '0' )
+			tracking: $data->getValue( 'tracking' ),
+			totalImpressionCount: intval( $data->getValue( 'impCount' ) ),
+			singleBannerImpressionCount: intval( $data->getValue( 'bImpCount' ) )
 		);
 	}
 
