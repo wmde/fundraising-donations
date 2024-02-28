@@ -264,7 +264,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 	private function newUpdateDonorRequestForPerson( int $donationId ): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
 			->withDonationId( $donationId )
-			->withType( DonorType::PERSON() )
+			->withType( DonorType::PERSON )
 			->withFirstName( ValidDonation::DONOR_FIRST_NAME )
 			->withLastName( ValidDonation::DONOR_LAST_NAME )
 			->withSalutation( ValidDonation::DONOR_SALUTATION )
@@ -280,7 +280,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 	private function newUpdateDonorRequestForCompany( int $donationId ): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
 			->withDonationId( $donationId )
-			->withType( DonorType::COMPANY() )
+			->withType( DonorType::COMPANY )
 			->withCompanyName( ValidDonation::DONOR_COMPANY )
 			->withFirstName( ValidDonation::DONOR_FIRST_NAME )
 			->withLastName( ValidDonation::DONOR_LAST_NAME )

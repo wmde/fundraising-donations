@@ -111,7 +111,7 @@ class AddDonationUseCaseTest extends TestCase {
 			PaymentInterval::OneTime->value,
 			'UEB'
 		) );
-		$donationRequest->setDonorType( DonorType::ANONYMOUS() );
+		$donationRequest->setDonorType( DonorType::ANONYMOUS );
 		return $donationRequest;
 	}
 
@@ -122,7 +122,7 @@ class AddDonationUseCaseTest extends TestCase {
 			PaymentInterval::OneTime->value,
 			'BEZ'
 		) );
-		$donationRequest->setDonorType( DonorType::ANONYMOUS() );
+		$donationRequest->setDonorType( DonorType::ANONYMOUS );
 		return $donationRequest;
 	}
 
@@ -201,7 +201,7 @@ class AddDonationUseCaseTest extends TestCase {
 	private function newValidAddDonationRequestWithEmail( string $email ): AddDonationRequest {
 		$request = $this->newMinimumDonationRequest();
 
-		$request->setDonorType( DonorType::PERSON() );
+		$request->setDonorType( DonorType::PERSON );
 		$request->setDonorFirstName( ValidDonation::DONOR_FIRST_NAME );
 		$request->setDonorLastName( ValidDonation::DONOR_LAST_NAME );
 		$request->setDonorCompany( '' );
@@ -219,7 +219,7 @@ class AddDonationUseCaseTest extends TestCase {
 	private function newValidCompanyDonationRequest(): AddDonationRequest {
 		$request = $this->newMinimumDonationRequest();
 
-		$request->setDonorType( DonorType::COMPANY() );
+		$request->setDonorType( DonorType::COMPANY );
 		$request->setDonorFirstName( '' );
 		$request->setDonorLastName( '' );
 		$request->setDonorCompany( ValidDonation::DONOR_LAST_NAME );

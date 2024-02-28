@@ -37,7 +37,7 @@ class AddDonationValidatorTest extends TestCase {
 	public function testGivenAnonymousDonorAndEmptyAddressFields_validatorReturnsNoViolations(): void {
 		$request = ValidAddDonationRequest::getRequest();
 
-		$request->setDonorType( DonorType::ANONYMOUS() );
+		$request->setDonorType( DonorType::ANONYMOUS );
 		$request->setDonorSalutation( '' );
 		$request->setDonorTitle( '' );
 		$request->setDonorCompany( '' );
@@ -59,7 +59,7 @@ class AddDonationValidatorTest extends TestCase {
 
 	public function testPersonalInfoValidationFails_validatorReturnsFalse(): void {
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setDonorType( DonorType::COMPANY() );
+		$request->setDonorType( DonorType::COMPANY );
 		$request->setDonorCompany( '' );
 
 		$this->assertFalse( $this->donationValidator->validate( $request )->isSuccessful() );
@@ -100,7 +100,7 @@ class AddDonationValidatorTest extends TestCase {
 	public function testGivenEmailOnlyDonorWithMissingNameParts_validationFails(): void {
 		$request = ValidAddDonationRequest::getRequest();
 
-		$request->setDonorType( DonorType::EMAIL() );
+		$request->setDonorType( DonorType::EMAIL );
 		$request->setDonorSalutation( '' );
 		$request->setDonorFirstName( '' );
 		$request->setDonorLastName( '' );
@@ -116,7 +116,7 @@ class AddDonationValidatorTest extends TestCase {
 	public function testGivenCompleteEmailOnlyDonor_validationSucceeds(): void {
 		$request = ValidAddDonationRequest::getRequest();
 
-		$request->setDonorType( DonorType::EMAIL() );
+		$request->setDonorType( DonorType::EMAIL );
 		$request->setDonorStreetAddress( '' );
 		$request->setDonorPostalCode( '' );
 		$request->setDonorCity( '' );
@@ -127,7 +127,7 @@ class AddDonationValidatorTest extends TestCase {
 
 	public function testGivenAnonymousDonorWithDirectDebit_validationFails(): void {
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setDonorType( DonorType::ANONYMOUS() );
+		$request->setDonorType( DonorType::ANONYMOUS );
 
 		$result = $this->donationValidator->validate( $request );
 		$this->assertFalse( $result->isSuccessful() );
@@ -138,7 +138,7 @@ class AddDonationValidatorTest extends TestCase {
 
 	public function testGivenEmailOnlyDonorWithDirectDebit_validationSucceeds(): void {
 		$request = ValidAddDonationRequest::getRequest();
-		$request->setDonorType( DonorType::EMAIL() );
+		$request->setDonorType( DonorType::EMAIL );
 
 		$result = $this->donationValidator->validate( $request );
 

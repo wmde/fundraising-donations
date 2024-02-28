@@ -26,14 +26,14 @@ class UpdateDonorValidatorTest extends TestCase {
 			new AddressValidator( ValidatorPatterns::COUNTRY_POSTCODE, ValidatorPatterns::ADDRESS_PATTERNS ),
 			new SucceedingEmailValidator()
 		);
-		$request = ( new UpdateDonorRequest() )->withType( DonorType::ANONYMOUS() );
+		$request = ( new UpdateDonorRequest() )->withType( DonorType::ANONYMOUS );
 
 		$result = $validator->validateDonorData( $request );
 
 		$this->assertFalse( $result->isSuccessful() );
 		$this->assertEquals(
 			new ConstraintViolation(
-				DonorType::ANONYMOUS(),
+				DonorType::ANONYMOUS,
 				UpdateDonorValidator::VIOLATION_ANONYMOUS_ADDRESS,
 				UpdateDonorValidator::SOURCE_ADDRESS_TYPE
 			),
@@ -95,7 +95,7 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	private function newEmptyUpdateDonorRequest(): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
-			->withType( DonorType::PERSON() )
+			->withType( DonorType::PERSON )
 			->withStreetAddress( '' )
 			->withPostalCode( '' )
 			->withCity( '' )
@@ -109,7 +109,7 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	private function newInvalidUpdateCompanyDonorRequest(): UpdateDonorRequest {
 		return ( new UpdateDonorRequest() )
-			->withType( DonorType::COMPANY() )
+			->withType( DonorType::COMPANY )
 			->withCompanyName( str_repeat( 'TEST', 26 ) )
 			->withStreetAddress( str_repeat( 'TEST', 26 ) )
 			->withPostalCode( str_repeat( '1', 17 ) )

@@ -95,44 +95,44 @@ class AddDonationUseCase {
 
 	private function getPersonalInfoFromRequest( AddDonationRequest $request ): Donor {
 		$donorType = $request->getDonorType();
-		if ( $donorType->is( DonorType::PERSON() ) ) {
 
-			return new PersonDonor(
-				new PersonName(
-					$request->getDonorFirstName(),
-					$request->getDonorLastName(),
-					$request->getDonorSalutation(),
-					$request->getDonorTitle()
-				),
-				$this->getPhysicalAddressFromRequest( $request ),
-				$request->getDonorEmailAddress()
-			);
-		} elseif ( $donorType->is( DonorType::COMPANY() ) ) {
-			return new CompanyDonor(
-				new CompanyContactName(
-					$request->getDonorCompany(),
-					$request->getDonorFirstName(),
-					$request->getDonorLastName(),
-					$request->getDonorSalutation(),
-					$request->getDonorTitle()
-				),
-				$this->getPhysicalAddressFromRequest( $request ),
-				$request->getDonorEmailAddress()
-			);
-		} elseif ( $donorType->is( DonorType::EMAIL() ) ) {
-			return new Donor\EmailDonor(
-				new PersonName(
-					$request->getDonorFirstName(),
-					$request->getDonorLastName(),
-					$request->getDonorSalutation(),
-					$request->getDonorTitle()
-				),
-				$request->getDonorEmailAddress()
-			);
-		} elseif ( $donorType->is( DonorType::ANONYMOUS() ) ) {
-			return new AnonymousDonor();
+		switch ( $donorType ) {
+			case DonorType::PERSON:
+				return new PersonDonor(
+					new PersonName(
+						$request->getDonorFirstName(),
+						$request->getDonorLastName(),
+						$request->getDonorSalutation(),
+						$request->getDonorTitle()
+					),
+					$this->getPhysicalAddressFromRequest( $request ),
+					$request->getDonorEmailAddress()
+				);
+			case DonorType::COMPANY:
+				return new CompanyDonor(
+					new CompanyContactName(
+						$request->getDonorCompany(),
+						$request->getDonorFirstName(),
+						$request->getDonorLastName(),
+						$request->getDonorSalutation(),
+						$request->getDonorTitle()
+					),
+					$this->getPhysicalAddressFromRequest( $request ),
+					$request->getDonorEmailAddress()
+				);
+			case DonorType::EMAIL:
+				return new Donor\EmailDonor(
+					new PersonName(
+						$request->getDonorFirstName(),
+						$request->getDonorLastName(),
+						$request->getDonorSalutation(),
+						$request->getDonorTitle()
+					),
+					$request->getDonorEmailAddress()
+				);
+			case DonorType::ANONYMOUS:
+				return new AnonymousDonor();
 		}
-		throw new \InvalidArgumentException( sprintf( 'Unknown donor type: %s', $request->getDonorType() ) );
 	}
 
 	private function getPhysicalAddressFromRequest( AddDonationRequest $request ): PostalAddress {
