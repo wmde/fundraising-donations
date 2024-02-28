@@ -37,7 +37,7 @@ class ChunkedQueryResultIterator implements \IteratorAggregate {
 		private int $chunkSize,
 		private int $maxOffset,
 		private int $offsetStart = 0 ) {
-		if ( $qb->getType() !== QueryBuilder::SELECT ) {
+		if ( stripos( $qb->getSQL(), 'SELECT' ) !== 0 ) {
 			throw new \LogicException( 'This iterator is for iterating SELECT results' );
 		}
 	}

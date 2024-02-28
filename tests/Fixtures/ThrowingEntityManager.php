@@ -5,8 +5,9 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 
 /**
  * @license GPL-2.0-or-later
@@ -20,7 +21,8 @@ class ThrowingEntityManager {
 
 		$entityManager->expects( $testCase->any() )
 			->method( $testCase->anything() )
-			->willThrowException( new ORMException() );
+			->willThrowException( new class() extends RuntimeException implements ORMException {
+			} );
 
 		return $entityManager;
 	}

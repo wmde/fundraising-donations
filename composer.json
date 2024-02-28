@@ -7,7 +7,7 @@
 		"php": ">=8.1",
 		"ext-curl": "*",
 
-		"doctrine/orm": "~2.9",
+		"doctrine/orm": "~2.18 | ~3.0",
 		"doctrine/migrations": "^3.5",
 		"psr/log": "^3.0",
 		"symfony/http-client": "^6.1",

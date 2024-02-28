@@ -43,9 +43,11 @@ class InsertingPaymentHandler implements NewPaymentHandler {
 		$this->entityManager->clear();
 
 		$this->startTransactionIfNeeded();
-		$stmt = $this->entityManager->getConnection()->prepare( "UPDATE spenden SET payment_id=? WHERE id=?" );
+		$statement = $this->entityManager->getConnection()->prepare( "UPDATE spenden SET payment_id=? WHERE id=?" );
 		foreach ( $this->paymentIdCollection as $donationId => $paymentId ) {
-			$stmt->executeQuery( [ $paymentId, $donationId ] );
+			$statement->bindValue( 1, $paymentId );
+			$statement->bindValue( 2, $donationId );
+			$statement->executeQuery();
 		}
 		$this->commit();
 		$this->paymentIdCollection->clear();

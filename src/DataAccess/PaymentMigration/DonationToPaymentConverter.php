@@ -477,10 +477,12 @@ class DonationToPaymentConverter {
 			return $interval;
 		}
 		$log = $row['data']['log'] ?? [];
+
 		$log = array_filter(
 			$log,
 			fn ( $msg ) => preg_match( '/new transaction id (?:to )?corresponding child donation/', $msg ) === 1
 		);
+
 		// If Payment is not a parent payment, we don't care
 		if ( empty( $log ) ) {
 			return $interval;
