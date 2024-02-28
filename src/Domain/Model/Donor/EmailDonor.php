@@ -27,8 +27,8 @@ class EmailDonor extends AbstractDonor {
 		return false;
 	}
 
-	public function getDonorType(): string {
-		return (string)DonorType::EMAIL();
+	public function getDonorType(): DonorType {
+		return DonorType::EMAIL;
 	}
 
 	public function requireReceipt(): void {

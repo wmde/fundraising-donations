@@ -27,14 +27,17 @@ class UpdateDonorValidator {
 
 	public function validateDonorData( UpdateDonorRequest $donorRequest ): UpdateDonorValidationResult {
 		$donorType = $donorRequest->getDonorType();
-		if ( $donorType->is( DonorType::PERSON() ) ) {
-			$nameViolations = $this->getPersonViolations( $donorRequest );
-		} elseif ( $donorType->is( DonorType::COMPANY() ) ) {
-			$nameViolations = $this->getCompanyViolations( $donorRequest );
-		} elseif ( $donorType->is( DonorType::ANONYMOUS() ) ) {
-			return new UpdateDonorValidationResult( $this->getAnonymousViolation( $donorRequest ) );
-		} else {
-			throw new \InvalidArgumentException( sprintf( ' Unknown donor type: %s', $donorType ) );
+		switch ( $donorType ) {
+			case DonorType::PERSON:
+				$nameViolations = $this->getPersonViolations( $donorRequest );
+				break;
+			case DonorType::COMPANY:
+				$nameViolations = $this->getCompanyViolations( $donorRequest );
+				break;
+			case DonorType::ANONYMOUS:
+				return new UpdateDonorValidationResult( $this->getAnonymousViolation( $donorRequest ) );
+			default:
+				throw new \InvalidArgumentException( sprintf( ' Unknown donor type: %s', $donorType->name ) );
 		}
 
 		$violations = array_merge(

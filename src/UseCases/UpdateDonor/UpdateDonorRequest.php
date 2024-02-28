@@ -27,7 +27,7 @@ class UpdateDonorRequest {
 	private bool $mailingList = false;
 
 	public function __construct() {
-		$this->donorType = DonorType::PERSON();
+		$this->donorType = DonorType::PERSON;
 	}
 
 	public static function newInstance(): self {

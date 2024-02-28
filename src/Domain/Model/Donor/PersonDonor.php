@@ -30,7 +30,7 @@ class PersonDonor extends AbstractDonor {
 		return false;
 	}
 
-	public function getDonorType(): string {
-		return (string)DonorType::PERSON();
+	public function getDonorType(): DonorType {
+		return DonorType::PERSON;
 	}
 }

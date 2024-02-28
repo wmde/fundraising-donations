@@ -95,7 +95,7 @@ class UpdateDonorUseCase {
 	}
 
 	private function getDonorFromRequest( UpdateDonorRequest $updateDonorRequest ): Donor {
-		if ( $updateDonorRequest->getDonorType()->is( DonorType::PERSON() ) ) {
+		if ( $updateDonorRequest->getDonorType() === DonorType::PERSON ) {
 			return new PersonDonor(
 				new PersonName(
 					$updateDonorRequest->getFirstName(),
@@ -107,7 +107,7 @@ class UpdateDonorUseCase {
 				$updateDonorRequest->getEmailAddress()
 			);
 
-		} elseif ( $updateDonorRequest->getDonorType()->is( DonorType::COMPANY() ) ) {
+		} elseif ( $updateDonorRequest->getDonorType() === DonorType::COMPANY ) {
 			return new CompanyDonor(
 				new CompanyContactName(
 					$updateDonorRequest->getCompanyName(),

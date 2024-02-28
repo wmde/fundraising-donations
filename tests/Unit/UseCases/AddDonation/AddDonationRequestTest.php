@@ -39,9 +39,9 @@ class AddDonationRequestTest extends TestCase {
 		$request->setDonorCity( 'Battweiler' );
 		$request->setDonorCountryCode( 'ZZ' );
 		$request->setDonorEmailAddress( 'bw@waynecorp.biz' );
-		$request->setDonorType( DonorType::PERSON() );
+		$request->setDonorType( DonorType::PERSON );
 		$anonymousRequest = new AddDonationRequest();
-		$anonymousRequest->setDonorType( DonorType::ANONYMOUS() );
+		$anonymousRequest->setDonorType( DonorType::ANONYMOUS );
 
 		$this->assertSame( 'Herr', $request->getDonorSalutation() );
 		$this->assertSame( 'Dr.', $request->getDonorTitle() );
@@ -53,7 +53,7 @@ class AddDonationRequestTest extends TestCase {
 		$this->assertSame( 'Battweiler', $request->getDonorCity() );
 		$this->assertSame( 'ZZ', $request->getDonorCountryCode() );
 		$this->assertSame( 'bw@waynecorp.biz', $request->getDonorEmailAddress() );
-		$this->assertEquals( DonorType::PERSON(), $request->getDonorType() );
+		$this->assertEquals( DonorType::PERSON, $request->getDonorType() );
 		$this->assertFalse( $request->donorIsAnonymous() );
 		$this->assertTrue( $anonymousRequest->donorIsAnonymous() );
 	}
@@ -135,11 +135,11 @@ class AddDonationRequestTest extends TestCase {
 
 	public function testDonorIsAnonymous(): void {
 		$anonRequest = new AddDonationRequest();
-		$anonRequest->setDonorType( DonorType::ANONYMOUS() );
+		$anonRequest->setDonorType( DonorType::ANONYMOUS );
 		$personRequest = new AddDonationRequest();
-		$personRequest->setDonorType( DonorType::PERSON() );
+		$personRequest->setDonorType( DonorType::PERSON );
 		$emailOnlyRequest = new AddDonationRequest();
-		$emailOnlyRequest->setDonorType( DonorType::EMAIL() );
+		$emailOnlyRequest->setDonorType( DonorType::EMAIL );
 
 		$this->assertTrue( $anonRequest->donorIsAnonymous() );
 		$this->assertFalse( $personRequest->donorIsAnonymous() );
@@ -148,11 +148,11 @@ class AddDonationRequestTest extends TestCase {
 
 	public function testDonorIsEmailOnly(): void {
 		$anonRequest = new AddDonationRequest();
-		$anonRequest->setDonorType( DonorType::ANONYMOUS() );
+		$anonRequest->setDonorType( DonorType::ANONYMOUS );
 		$personRequest = new AddDonationRequest();
-		$personRequest->setDonorType( DonorType::PERSON() );
+		$personRequest->setDonorType( DonorType::PERSON );
 		$emailOnlyRequest = new AddDonationRequest();
-		$emailOnlyRequest->setDonorType( DonorType::EMAIL() );
+		$emailOnlyRequest->setDonorType( DonorType::EMAIL );
 
 		$this->assertFalse( $anonRequest->donorIsEmailOnly() );
 		$this->assertFalse( $personRequest->donorIsEmailOnly() );
