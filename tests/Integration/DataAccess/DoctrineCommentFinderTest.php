@@ -6,8 +6,9 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use DateTime;
 use Doctrine\ORM\EntityManager;
-use Doctrine\ORM\ORMException;
+use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\TestCase;
+use RuntimeException;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
@@ -197,7 +198,8 @@ class DoctrineCommentFinderTest extends TestCase {
 
 		$entityManager->expects( $this->any() )
 			->method( $this->anything() )
-			->willThrowException( new ORMException( 'Such error!' ) );
+			->willThrowException( new class( 'Such error' ) extends RuntimeException implements ORMException {
+			} );
 
 		return $entityManager;
 	}

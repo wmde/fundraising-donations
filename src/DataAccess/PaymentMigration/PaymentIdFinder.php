@@ -24,7 +24,8 @@ class PaymentIdFinder {
 	}
 
 	private function getPaymentIdFromDb( int $donationId ): ?int {
-		$paymentId = $this->getPaymentIdStatement->executeQuery( [ $donationId ] )->fetchOne();
+		$this->getPaymentIdStatement->bindValue( 1, $donationId );
+		$paymentId = $this->getPaymentIdStatement->executeQuery()->fetchOne();
 		if ( $paymentId === false ) {
 			return null;
 		}
