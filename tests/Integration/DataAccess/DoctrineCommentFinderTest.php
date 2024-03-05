@@ -11,8 +11,8 @@ use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
+use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
-use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 /**
@@ -183,14 +183,14 @@ class DoctrineCommentFinderTest extends TestCase {
 		$this->entityManager->persist( $donation );
 	}
 
-	private function getComment( int $donationId, string $date ): CommentWithAmount {
-		return CommentWithAmount::newInstance()
-			->setAuthorName( self::COMMENT_NAME )
-			->setCommentText( self::COMMENT )
-			->setDonationAmount( self::DONATION_AMOUNT_FLOAT )
-			->setDonationTime( new \DateTime( $date ) )
-			->setDonationId( $donationId )
-			->freeze()->assertNoNullFields();
+	private function getComment( int $donationId, string $date ): Comment {
+		return new Comment(
+			authorName: self::COMMENT_NAME,
+			donationAmount: self::DONATION_AMOUNT_FLOAT,
+			commentText: self::COMMENT,
+			donationTime: new \DateTime( $date ),
+			donationId: $donationId
+		);
 	}
 
 	private function newThrowingEntityManager(): EntityManager {

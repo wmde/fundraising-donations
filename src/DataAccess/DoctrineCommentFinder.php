@@ -7,9 +7,9 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
+use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentFinder;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
-use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
 
 /**
  * @todo Use database tables and arrays instead of ORM to avoid deprecated getAmount
@@ -24,24 +24,23 @@ class DoctrineCommentFinder implements CommentFinder {
 	}
 
 	/**
-	 * @see CommentFinder::getPublicComments
-	 *
 	 * @param int $limit
 	 * @param int $offset
 	 *
-	 * @return CommentWithAmount[]
+	 * @return Comment[]
+	 * @see CommentFinder::getPublicComments
+	 *
 	 */
 	public function getPublicComments( int $limit, int $offset = 0 ): array {
 		return array_map(
 			static function ( Donation $donation ) {
-				return CommentWithAmount::newInstance()
-					->setAuthorName( $donation->getPublicRecord() )
-					->setCommentText( $donation->getComment() )
-					->setDonationAmount( (float)$donation->getAmount() )
-					->setDonationTime( $donation->getCreationTime() )
-					->setDonationId( $donation->getId() ?? 0 )
-					->freeze()
-					->assertNoNullFields();
+				return new Comment(
+					authorName: $donation->getPublicRecord(),
+					donationAmount: (float)$donation->getAmount(),
+					commentText: $donation->getComment(),
+					donationTime: $donation->getCreationTime(),
+					donationId: $donation->getId() ?? 0
+				);
 			},
 			$this->getDonations( $limit, $offset )
 		);
