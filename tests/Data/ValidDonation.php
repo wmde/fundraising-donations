@@ -220,13 +220,11 @@ class ValidDonation {
 	}
 
 	public static function newTrackingInfo(): DonationTrackingInfo {
-		$trackingInfo = DonationTrackingInfo::newBlankTrackingInfo();
-
-		$trackingInfo->setSingleBannerImpressionCount( self::TRACKING_BANNER_IMPRESSION_COUNT );
-		$trackingInfo->setTotalImpressionCount( self::TRACKING_TOTAL_IMPRESSION_COUNT );
-		$trackingInfo->setTracking( self::TRACKING_TRACKING );
-
-		return $trackingInfo->freeze()->assertNoNullFields();
+		return new DonationTrackingInfo(
+			tracking: self::TRACKING_TRACKING,
+			totalImpressionCount: self::TRACKING_TOTAL_IMPRESSION_COUNT,
+			singleBannerImpressionCount: self::TRACKING_BANNER_IMPRESSION_COUNT
+		);
 	}
 
 	public static function newPublicComment(): DonationComment {

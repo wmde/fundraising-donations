@@ -44,13 +44,11 @@ class LegacyToDomainConverter {
 	private function createTrackingInfo( DoctrineDonation $dd ): DonationTrackingInfo {
 		$data = $dd->getDecodedData();
 
-		$trackingInfo = DonationTrackingInfo::newBlankTrackingInfo();
-
-		$trackingInfo->setTotalImpressionCount( intval( $data['impCount'] ?? '0' ) );
-		$trackingInfo->setSingleBannerImpressionCount( intval( $data['bImpCount'] ?? '0' ) );
-		$trackingInfo->setTracking( $data['tracking'] ?? '' );
-
-		return $trackingInfo->freeze()->assertNoNullFields();
+		return new DonationTrackingInfo(
+			tracking: $data['tracking'] ?? '',
+			totalImpressionCount: intval( $data['impCount'] ?? '0' ),
+			singleBannerImpressionCount: intval( $data['bImpCount'] ?? '0' )
+		);
 	}
 
 	private function createComment( DoctrineDonation $dd ): ?DonationComment {
