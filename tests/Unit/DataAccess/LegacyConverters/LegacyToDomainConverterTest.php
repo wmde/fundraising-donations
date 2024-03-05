@@ -23,9 +23,9 @@ class LegacyToDomainConverterTest extends TestCase {
 		$info = $donation->getTrackingInfo();
 
 		$this->assertNotNull( $info );
-		$this->assertSame( 0, $info->getTotalImpressionCount() );
-		$this->assertSame( 0, $info->getSingleBannerImpressionCount() );
-		$this->assertSame( '', $info->getTracking() );
+		$this->assertSame( 0, $info->totalImpressionCount );
+		$this->assertSame( 0, $info->singleBannerImpressionCount );
+		$this->assertSame( '', $info->tracking );
 	}
 
 	public function testGivenDataSetWithExportDate_donationIsMarkedAsExported(): void {
