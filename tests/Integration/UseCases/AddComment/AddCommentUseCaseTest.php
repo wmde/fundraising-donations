@@ -95,14 +95,12 @@ class AddCommentUseCaseTest extends TestCase {
 	}
 
 	private function newValidRequest(): AddCommentRequest {
-		$addCommentRequest = new AddCommentRequest();
-
-		$addCommentRequest->setCommentText( self::COMMENT_TEXT );
-		$addCommentRequest->setIsPublic( self::COMMENT_IS_PUBLIC );
-		$addCommentRequest->setIsNamed();
-		$addCommentRequest->setDonationId( self::DONATION_ID );
-
-		return $addCommentRequest->freeze()->assertNoNullFields();
+		return new AddCommentRequest(
+			commentText: self::COMMENT_TEXT,
+			isPublic: self::COMMENT_IS_PUBLIC,
+			isAnonymous: false,
+			donationId: self::DONATION_ID
+		);
 	}
 
 	public function testWhenRepositoryThrowsExceptionOnGet_failureResponseIsReturned(): void {
@@ -210,12 +208,12 @@ class AddCommentUseCaseTest extends TestCase {
 	public function testGivenAnonymousRequest_authorDisplayNameIsAnonymous(): void {
 		$this->donationRepository = $this->newFakeRepositoryWithDonation();
 
-		$addCommentRequest = new AddCommentRequest();
-
-		$addCommentRequest->setIsAnonymous();
-		$addCommentRequest->setCommentText( self::COMMENT_TEXT );
-		$addCommentRequest->setIsPublic( self::COMMENT_IS_PUBLIC );
-		$addCommentRequest->setDonationId( self::DONATION_ID );
+		$addCommentRequest = new AddCommentRequest(
+			commentText: self::COMMENT_TEXT,
+			isPublic: self::COMMENT_IS_PUBLIC,
+			isAnonymous: true,
+			donationId: self::DONATION_ID
+		);
 
 		$response = $this->newUseCase()->addComment( $addCommentRequest );
 		$donation = $this->donationRepository->getDonationById( self::DONATION_ID );
@@ -228,13 +226,13 @@ class AddCommentUseCaseTest extends TestCase {
 	public function testGivenMaliciousAnonymousRequest_authorDisplayNameIsAnonymous(): void {
 		$this->donationRepository = $this->newFakeRepositoryWithAnonDonation();
 
-		$addCommentRequest = new AddCommentRequest();
-
 		// Request is set to be named but donation is actually anonymous
-		$addCommentRequest->setIsNamed();
-		$addCommentRequest->setCommentText( self::COMMENT_TEXT );
-		$addCommentRequest->setIsPublic( self::COMMENT_IS_PUBLIC );
-		$addCommentRequest->setDonationId( self::DONATION_ID );
+		$addCommentRequest = new AddCommentRequest(
+			commentText: self::COMMENT_TEXT,
+			isPublic: self::COMMENT_IS_PUBLIC,
+			isAnonymous: false,
+			donationId: self::DONATION_ID
+		);
 
 		$response = $this->newUseCase()->addComment( $addCommentRequest );
 		$donation = $this->donationRepository->getDonationById( self::DONATION_ID );
