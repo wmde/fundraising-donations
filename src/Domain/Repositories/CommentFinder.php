@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Domain\Repositories;
 
+use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
+
 /**
  * @license GPL-2.0-or-later
  * @author Jeroen De Dauw < jeroendedauw@gmail.com >
@@ -16,7 +18,7 @@ interface CommentFinder {
 	 * @param int $limit
 	 * @param int $offset
 	 *
-	 * @return CommentWithAmount[]
+	 * @return Comment[]
 	 */
 	public function getPublicComments( int $limit, int $offset = 0 ): array;
 
