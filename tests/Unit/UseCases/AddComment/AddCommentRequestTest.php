@@ -14,26 +14,37 @@ class AddCommentRequestTest extends TestCase {
 
 	public function testFieldMutation(): void {
 		$text = 'Wikipedia helped me to find proof, but i couldn\'t write it in the margin';
-		$request = new AddCommentRequest();
-		$request->setCommentText( $text );
-		$request->setIsNamed();
-		$request->setDonationId( self::DONATION_ID );
-		$request->setIsPublic( true );
-		$anonymousRequest = new AddCommentRequest();
-		$anonymousRequest->setIsAnonymous();
 
-		$this->assertSame( $text, $request->getCommentText() );
-		$this->assertSame( self::DONATION_ID, $request->getDonationId() );
-		$this->assertFalse( $request->isAnonymous() );
-		$this->assertTrue( $request->isPublic() );
-		$this->assertTrue( $anonymousRequest->isAnonymous() );
+		$request = new AddCommentRequest(
+			commentText: $text,
+			isPublic: true,
+			isAnonymous: false,
+			donationId: self::DONATION_ID
+		);
+
+		$anonymousRequest = new AddCommentRequest(
+			commentText: $text,
+			isPublic: true,
+			isAnonymous: true,
+			donationId: self::DONATION_ID
+		);
+
+		$this->assertSame( $text, $request->commentText );
+		$this->assertSame( self::DONATION_ID, $request->donationId );
+		$this->assertFalse( $request->isAnonymous );
+		$this->assertTrue( $request->isPublic );
+		$this->assertTrue( $anonymousRequest->isAnonymous );
 	}
 
 	public function testCommentIsTrimmed(): void {
-		$request = new AddCommentRequest();
-		$request->setCommentText( "    \n\n\nWikipedia\nis\nmy\nfitness\ncoach!\n      " );
+		$request = new AddCommentRequest(
+			commentText: "    \n\n\nWikipedia\nis\nmy\nfitness\ncoach!\n      ",
+			isPublic: true,
+			isAnonymous: false,
+			donationId: self::DONATION_ID
+		);
 
-		$this->assertSame( "Wikipedia\nis\nmy\nfitness\ncoach!", $request->getCommentText() );
+		$this->assertSame( "Wikipedia\nis\nmy\nfitness\ncoach!", $request->commentText );
 	}
 
 }
