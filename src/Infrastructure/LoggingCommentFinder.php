@@ -6,9 +6,9 @@ namespace WMDE\Fundraising\DonationContext\Infrastructure;
 
 use Psr\Log\LoggerInterface;
 use Psr\Log\LogLevel;
+use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentFinder;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
-use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
 
 /**
  * @license GPL-2.0-or-later
@@ -28,13 +28,13 @@ class LoggingCommentFinder implements CommentFinder {
 	}
 
 	/**
-	 * @see CommentFinder::getPublicComments
-	 *
 	 * @param int $limit
 	 * @param int $offset
 	 *
-	 * @return CommentWithAmount[]
+	 * @return Comment[]
 	 * @throws CommentListingException
+	 * @see CommentFinder::getPublicComments
+	 *
 	 */
 	public function getPublicComments( int $limit, int $offset = 0 ): array {
 		try {

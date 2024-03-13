@@ -21,36 +21,12 @@ class AddDonationRequest {
 	private string $donorCity = '';
 	private string $donorCountryCode = '';
 	private string $donorEmailAddress = '';
-
 	private bool $optsInToNewsletter = false;
-
 	private PaymentParameterBuilder $paymentParameterBuilder;
-
 	private PaymentParameters $paymentParameters;
-
 	private string $tracking = '';
 	private int $totalImpressionCount = 0;
-
 	private int $singleBannerImpressionCount = 0;
-
-	/**
-	 * @var string
-	 * @deprecated
-	 */
-	private string $color = '';
-
-	/**
-	 * @var string
-	 * @deprecated
-	 */
-	private string $skin = '';
-
-	/**
-	 * @var string
-	 * @deprecated
-	 */
-	private string $layout = '';
-
 	private bool $optsIntoDonationReceipt = true;
 
 	/**
@@ -147,27 +123,6 @@ class AddDonationRequest {
 
 	public function setSingleBannerImpressionCount( int $singleBannerImpressionCount ): void {
 		$this->singleBannerImpressionCount = $singleBannerImpressionCount;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public function getColor(): string {
-		return $this->color;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public function getSkin(): string {
-		return $this->skin;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public function getLayout(): string {
-		return $this->layout;
 	}
 
 	public function getDonorType(): DonorType {

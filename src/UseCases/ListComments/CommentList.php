@@ -4,21 +4,21 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\ListComments;
 
-use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
+use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 
 class CommentList {
 
 	/**
-	 * @var CommentWithAmount[]
+	 * @var Comment[]
 	 */
 	private readonly array $comments;
 
-	public function __construct( CommentWithAmount ...$comments ) {
+	public function __construct( Comment ...$comments ) {
 		$this->comments = $comments;
 	}
 
 	/**
-	 * @return CommentWithAmount[]
+	 * @return Comment[]
 	 */
 	public function toArray(): array {
 		return $this->comments;

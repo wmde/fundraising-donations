@@ -15,11 +15,6 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
-/**
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class AddCommentUseCase {
 
 	public function __construct(
@@ -40,7 +35,7 @@ class AddCommentUseCase {
 		}
 
 		try {
-			$donation = $this->donationRepository->getDonationById( $addCommentRequest->getDonationId() );
+			$donation = $this->donationRepository->getDonationById( $addCommentRequest->donationId );
 		} catch ( GetDonationException $ex ) {
 			return AddCommentResponse::newFailureResponse( 'comment_failure_donation_error' );
 		}
@@ -60,7 +55,7 @@ class AddCommentUseCase {
 
 		$donation->addComment( $this->newComment( $donation, $addCommentRequest ) );
 
-		if ( !$this->commentTextPassesValidation( $addCommentRequest->getCommentText() ) ) {
+		if ( !$this->commentTextPassesValidation( $addCommentRequest->commentText ) ) {
 			$donation->markForModeration( new ModerationReason( ModerationIdentifier::COMMENT_CONTENT_VIOLATION ) );
 
 			$successMessage = 'comment_success_needs_moderation';
@@ -76,24 +71,24 @@ class AddCommentUseCase {
 	}
 
 	private function requestIsAllowed( AddCommentRequest $addCommentRequest ): bool {
-		return $this->authorizationService->userCanModifyDonation( $addCommentRequest->getDonationId() );
+		return $this->authorizationService->userCanModifyDonation( $addCommentRequest->donationId );
 	}
 
 	private function newComment( Donation $donation, AddCommentRequest $request ): DonationComment {
 		$authorName = $donation->getDonor()->getName()->getFullName();
-		if ( $request->isAnonymous() ) {
+		if ( $request->isAnonymous ) {
 			$authorName = ( new NoName() )->getFullName();
 		}
 		return new DonationComment(
-			$request->getCommentText(),
+			$request->commentText,
 			$this->commentCanBePublic( $request ),
 			$authorName
 		);
 	}
 
 	private function commentCanBePublic( AddCommentRequest $request ): bool {
-		return $request->isPublic()
-			&& $this->commentTextPassesValidation( $request->getCommentText() );
+		return $request->isPublic
+			&& $this->commentTextPassesValidation( $request->commentText );
 	}
 
 	private function commentTextPassesValidation( string $text ): bool {

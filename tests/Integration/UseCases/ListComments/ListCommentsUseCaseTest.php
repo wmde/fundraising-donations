@@ -4,7 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\ListComments;
 
-use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentWithAmount;
+use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\InMemoryCommentFinder;
 use WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentList;
 use WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentListingRequest;
@@ -12,11 +13,8 @@ use WMDE\Fundraising\DonationContext\UseCases\ListComments\ListCommentsUseCase;
 
 /**
  * @covers WMDE\Fundraising\DonationContext\UseCases\ListComments\ListCommentsUseCase
- *
- * @license GPL-2.0-or-later
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
  */
-class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {
+class ListCommentsUseCaseTest extends TestCase {
 
 	public function testWhenThereAreNoComments_anEmptyListIsPresented(): void {
 		$useCase = new ListCommentsUseCase( new InMemoryCommentFinder() );
@@ -46,12 +44,14 @@ class ListCommentsUseCaseTest extends \PHPUnit\Framework\TestCase {
 		);
 	}
 
-	private function newCommentWithAuthorName( string $authorName ): CommentWithAmount {
-		return CommentWithAmount::newInstance()
-			->setAuthorName( $authorName )
-			->setCommentText( 'comment' )
-			->setDonationAmount( 42 )
-			->setDonationTime( new \DateTime( '1984-01-01' ) );
+	private function newCommentWithAuthorName( string $authorName ): Comment {
+		return new Comment(
+			authorName: $authorName,
+			donationAmount: 42,
+			commentText: 'comment',
+			donationTime: new \DateTime( '1984-01-01' ),
+			donationId: 0
+		);
 	}
 
 	public function testWhenThereAreMoreCommentsThanTheLimit_onlyTheFirstFewArePresented(): void {
