@@ -121,13 +121,9 @@ class DomainToLegacyConverter {
 	 */
 	private function getDataFieldsFromTrackingInfo( DonationTrackingInfo $trackingInfo ): array {
 		return [
-			'layout' => $trackingInfo->getLayout(),
-			'impCount' => $trackingInfo->getTotalImpressionCount(),
-			'bImpCount' => $trackingInfo->getSingleBannerImpressionCount(),
-			'tracking' => $trackingInfo->getTracking(),
-			'skin' => $trackingInfo->getSkin(),
-			'color' => $trackingInfo->getColor(),
-			'source' => $trackingInfo->getSource(),
+			'impCount' => $trackingInfo->totalImpressionCount,
+			'bImpCount' => $trackingInfo->singleBannerImpressionCount,
+			'tracking' => $trackingInfo->tracking,
 		];
 	}
 }

@@ -15,7 +15,7 @@ class AddCommentValidator {
 	private const MAX_COMMENT_LENGTH = 2048;
 
 	public function validate( AddCommentRequest $request ): Result {
-		$text = $request->getCommentText();
+		$text = $request->commentText;
 
 		if ( $this->containsInvalidCharacters( $text ) ) {
 			return new Result( [ Result::SOURCE_COMMENT => Result::VIOLATION_COMMENT_INVALID_CHARS ] );

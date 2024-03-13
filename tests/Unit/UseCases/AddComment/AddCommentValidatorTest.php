@@ -14,12 +14,12 @@ use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentValidator;
 class AddCommentValidatorTest extends TestCase {
 
 	private function newAddCommentRequest( string $text ): AddCommentRequest {
-		$request = new AddCommentRequest();
-		$request->setIsNamed();
-		$request->setCommentText( $text );
-		$request->setIsPublic( true );
-		$request->setDonationId( 1 );
-		return $request;
+		return new AddCommentRequest(
+			commentText: $text,
+			isPublic: true,
+			isAnonymous: false,
+			donationId: 1
+		);
 	}
 
 	/**

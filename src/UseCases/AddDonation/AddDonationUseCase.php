@@ -145,13 +145,11 @@ class AddDonationUseCase {
 	}
 
 	private function newTrackingInfoFromRequest( AddDonationRequest $request ): DonationTrackingInfo {
-		$trackingInfo = DonationTrackingInfo::newBlankTrackingInfo();
-
-		$trackingInfo->setTracking( $request->getTracking() );
-		$trackingInfo->setTotalImpressionCount( $request->getTotalImpressionCount() );
-		$trackingInfo->setSingleBannerImpressionCount( $request->getSingleBannerImpressionCount() );
-
-		return $trackingInfo->freeze()->assertNoNullFields();
+		return new DonationTrackingInfo(
+			tracking: $request->getTracking(),
+			totalImpressionCount: $request->getTotalImpressionCount(),
+			singleBannerImpressionCount: $request->getSingleBannerImpressionCount()
+		);
 	}
 
 	private function sendDonationConfirmationEmail( Donation $donation, bool $paymentIsComplete ): void {

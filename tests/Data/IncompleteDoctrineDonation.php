@@ -116,13 +116,9 @@ class IncompleteDoctrineDonation {
 	 */
 	private function getTrackingInfoArray(): array {
 		return [
-			'layout' => '',
 			'impCount' => ValidDonation::TRACKING_TOTAL_IMPRESSION_COUNT,
 			'bImpCount' => ValidDonation::TRACKING_BANNER_IMPRESSION_COUNT,
 			'tracking' => ValidDonation::TRACKING_TRACKING,
-			'skin' => '',
-			'color' => '',
-			'source' => 'ValidDonation::TRACKING_SOURCE',
 		];
 	}
 
