@@ -1,5 +1,17 @@
 <?xml version="1.0"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.2/phpunit.xsd" backupGlobals="false" bootstrap="tests/bootstrap.php" colors="true" stopOnError="false" stopOnFailure="false" stopOnIncomplete="false" cacheDirectory=".phpunit.cache" backupStaticProperties="false">
+<phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.2/phpunit.xsd"
+	backupGlobals="false"
+	bootstrap="tests/bootstrap.php"
+	colors="true"
+	stopOnError="false"
+	stopOnFailure="false"
+	stopOnIncomplete="false"
+	cacheDirectory=".phpunit.cache"
+	backupStaticProperties="false"
+	requireCoverageMetadata="true" 
+>
   <coverage includeUncoveredFiles="true"/>
   <testsuites>
     <testsuite name="unit">
