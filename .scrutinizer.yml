@@ -16,15 +16,15 @@ filter:
 
 build:
     image: default-bionic
-        environment:
-            php: 8.1.4
+    environment:
+        php: 8.1.4
     nodes:
         analysis:
             tests:
                 override:
                 - php-scrutinizer-run
                 - phpcs-run
-    
+
 build_failure_conditions:
     - 'project.metric_change("scrutinizer.test_coverage", < 0)'
     - 'project.metric_change("scrutinizer.quality", < -0.3)'
