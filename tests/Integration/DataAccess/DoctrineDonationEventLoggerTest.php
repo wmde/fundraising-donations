@@ -5,12 +5,12 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationEventLogger;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogException;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 #[CoversClass( DoctrineDonationEventLogger::class )]
@@ -36,7 +36,7 @@ class DoctrineDonationEventLoggerTest extends TestCase {
 
 	public function testWhenPersistenceFails_domainExceptionIsThrown(): void {
 		$logger = new DoctrineDonationEventLogger(
-			ThrowingEntityManager::newInstance( $this ),
+			$this->newThrowingEntityManager(),
 			$this->getDefaultTimeFunction()
 		);
 
@@ -99,6 +99,14 @@ class DoctrineDonationEventLoggerTest extends TestCase {
 		return static function () {
 			return self::LOG_TIMESTAMP;
 		};
+	}
+
+	private function newThrowingEntityManager(): EntityManager {
+		$stub = $this->createStub( EntityManager::class );
+		$stub->method( 'persist' )
+			->willThrowException( new class() extends \RuntimeException implements ORMException {
+			} );
+		return $stub;
 	}
 
 }

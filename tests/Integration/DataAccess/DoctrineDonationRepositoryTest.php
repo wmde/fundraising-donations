@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationExistsChecker;
@@ -24,7 +25,6 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationExistsChecker;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationExistsChecker;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
 use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
@@ -105,7 +105,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$repository = new DoctrineDonationRepository(
-			ThrowingEntityManager::newInstance( $this ),
+			$this->newEntityManagerThatThrowsOnPersist(),
 			new SucceedingDonationExistsChecker(),
 			$this->makeGetPaymentUseCaseStub(),
 			$this->moderationRepository
@@ -171,7 +171,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 	public function testWhenDoctrineThrowsException_domainExceptionIsThrown(): void {
 		$repository = new DoctrineDonationRepository(
-			ThrowingEntityManager::newInstance( $this ),
+			$this->newEntityManagerThatThrowsOnFind(),
 			new SucceedingDonationExistsChecker(),
 			$this->makeGetPaymentUseCaseStub(),
 			$this->moderationRepository
@@ -230,7 +230,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$donation = ValidDonation::newDirectDebitDonation( 42 );
 
 		$repository = new DoctrineDonationRepository(
-			ThrowingEntityManager::newInstance( $this ),
+			$this->newEntityManagerThatThrowsOnPersist(),
 			new FailingDonationExistsChecker(),
 			$this->makeGetPaymentUseCaseStub(),
 			$this->moderationRepository
@@ -273,5 +273,21 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$connection = $this->entityManager->getConnection();
 		$result = $connection->executeQuery( "SELECT COUNT(*) FROM donation_moderation_reason " );
 		$this->assertSame( 1, $result->fetchOne() );
+	}
+
+	private function newEntityManagerThatThrowsOnFind(): EntityManager {
+		$stub = $this->createStub( EntityManager::class );
+		$stub->method( 'find' )
+			->willThrowException( new class() extends \RuntimeException implements ORMException {
+			} );
+		return $stub;
+	}
+
+	private function newEntityManagerThatThrowsOnPersist(): EntityManager {
+		$stub = $this->createStub( EntityManager::class );
+		$stub->method( 'persist' )
+			->willThrowException( new class() extends \RuntimeException implements ORMException {
+			} );
+		return $stub;
 	}
 }
