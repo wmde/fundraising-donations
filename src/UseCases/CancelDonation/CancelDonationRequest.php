@@ -6,12 +6,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases\CancelDonation;
 
 class CancelDonationRequest {
 
-	private int $donationId;
-	private ?string $authorizedUser;
-
-	public function __construct( int $donationId, ?string $authorizedUser = null ) {
-		$this->donationId = $donationId;
-		$this->authorizedUser = $authorizedUser;
+	public function __construct( private readonly int $donationId, private readonly string $authorizedUser ) {
 	}
 
 	public function getDonationId(): int {
@@ -19,13 +14,10 @@ class CancelDonationRequest {
 	}
 
 	public function isAuthorizedRequest(): bool {
-		return $this->authorizedUser !== null;
+		return true;
 	}
 
 	public function getUserName(): string {
-		if ( $this->authorizedUser == null ) {
-			throw new \LogicException( "Tried to access user name of unauthorized user. Call isAuthorizedRequest() first!" );
-		}
 		return $this->authorizedUser;
 	}
 
