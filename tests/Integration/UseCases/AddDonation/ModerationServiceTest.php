@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
@@ -16,9 +18,7 @@ use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AmountPolicyValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\Moderation\ModerationService
- */
+#[CoversClass( ModerationService::class )]
 class ModerationServiceTest extends TestCase {
 
 	public function testTooHighAmountGiven_needsModerationReturnsTrue(): void {
@@ -48,9 +48,7 @@ class ModerationServiceTest extends TestCase {
 		$this->assertFalse( $policyValidator->needsModeration( $request ) );
 	}
 
-	/**
-	 * @dataProvider paymentTypeProvider
-	 */
+	#[DataProvider( 'paymentTypeProvider' )]
 	public function testGivenExternalPayment_needsModerationReturnsFalse( string $paymentType, bool $expectedNeedsModeration ): void {
 		$policyValidator = new ModerationService(
 			$this->newFailingAmountValidator(),
@@ -104,7 +102,7 @@ class ModerationServiceTest extends TestCase {
 		return $failingTextPolicyValidator;
 	}
 
-	/** @dataProvider allowedEmailAddressProvider */
+	#[DataProvider( 'allowedEmailAddressProvider' )]
 	public function testWhenEmailAddressIsNotOnBlockList_needsModerationReturnsFalse( string $emailAddress ): void {
 		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();
@@ -124,7 +122,7 @@ class ModerationServiceTest extends TestCase {
 		];
 	}
 
-	/** @dataProvider forbiddenEmailsProvider */
+	#[DataProvider( 'forbiddenEmailsProvider' )]
 	public function testWhenEmailAddressIsOnBlockList_needsModerationReturnsTrue( string $emailAddress ): void {
 		$policyValidator = $this->newPolicyValidatorWithForbiddenEmails();
 		$request = ValidAddDonationRequest::getRequest();

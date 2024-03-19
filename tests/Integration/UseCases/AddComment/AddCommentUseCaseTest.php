@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddComment;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
@@ -21,9 +22,7 @@ use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentValidationRes
 use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentValidator;
 use WMDE\FunValidators\Validators\TextPolicyValidator;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentUseCase
- */
+#[CoversClass( AddCommentUseCase::class )]
 class AddCommentUseCaseTest extends TestCase {
 
 	private const DONATION_ID = 9001;

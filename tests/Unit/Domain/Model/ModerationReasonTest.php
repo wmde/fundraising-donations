@@ -3,13 +3,13 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason
- */
+#[CoversClass( ModerationReason::class )]
 class ModerationReasonTest extends TestCase {
 	public function testObjectGetsBuiltCorrectly(): void {
 		$reason = new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'email' );
@@ -18,9 +18,7 @@ class ModerationReasonTest extends TestCase {
 		$this->assertSame( 'email', $reason->getSource() );
 	}
 
-	/**
-	 * @dataProvider stringifyProvider
-	 */
+	#[DataProvider( 'stringifyProvider' )]
 	public function testStringify( ModerationReason $reason, string $expected ): void {
 		$this->assertSame( $expected, (string)$reason );
 	}

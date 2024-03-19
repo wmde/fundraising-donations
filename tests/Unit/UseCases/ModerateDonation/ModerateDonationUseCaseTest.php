@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ModerateDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -15,13 +16,12 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\NotificationLogStub;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\ModerateDonationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\ModerateDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\NotificationLog;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\ModerateDonationUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\ModerateDonationResponse
- */
+#[CoversClass( ModerateDonationUseCase::class )]
+#[CoversClass( ModerateDonationResponse::class )]
 class ModerateDonationUseCaseTest extends TestCase {
 
 	private const AUTH_USER_NAME = "coolAdmin";

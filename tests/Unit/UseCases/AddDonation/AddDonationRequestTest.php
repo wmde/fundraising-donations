@@ -3,15 +3,14 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest
- */
+#[CoversClass( AddDonationRequest::class )]
 class AddDonationRequestTest extends TestCase {
 	public function testDonorFieldsAreEmptyByDefault(): void {
 		$request = new AddDonationRequest();

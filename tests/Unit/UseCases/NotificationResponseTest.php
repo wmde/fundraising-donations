@@ -3,12 +3,11 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\UseCases\NotificationResponse;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
- */
+#[CoversClass( NotificationResponse::class )]
 class NotificationResponseTest extends TestCase {
 	public function testSuccessResponseHasNoErrors(): void {
 		$response = NotificationResponse::newSuccessResponse();

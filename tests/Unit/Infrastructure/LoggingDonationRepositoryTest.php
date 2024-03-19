@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Infrastructure;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 use Psr\Log\LogLevel;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
@@ -13,10 +15,8 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\PsrLogTestDoubles\LoggerSpy;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\Infrastructure\LoggingDonationRepository
- */
-class LoggingDonationRepositoryTest extends \PHPUnit\Framework\TestCase {
+#[CoversClass( LoggingDonationRepository::class )]
+class LoggingDonationRepositoryTest extends TestCase {
 
 	public function testWhenGetDonationByIdThrowException_itIsLogged(): void {
 		$loggingRepo = new LoggingDonationRepository(

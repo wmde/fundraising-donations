@@ -5,15 +5,14 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationId;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\DonationId
- */
+#[CoversClass( DonationId::class )]
 class DoctrineDonationIdRepositoryTest extends TestCase {
 
 	private EntityManager $entityManager;

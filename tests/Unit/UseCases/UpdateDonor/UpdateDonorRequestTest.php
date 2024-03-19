@@ -3,12 +3,11 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\UpdateDonor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorRequest
- */
+#[CoversClass( UpdateDonorRequest::class )]
 class UpdateDonorRequestTest extends TestCase {
 	public function testConstruction(): void {
 		$request = UpdateDonorRequest::newInstance()

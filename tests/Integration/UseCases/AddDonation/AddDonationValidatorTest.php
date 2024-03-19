@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidAddDonationRequest;
@@ -18,9 +19,7 @@ use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationValidator
- */
+#[CoversClass( AddDonationValidator::class )]
 class AddDonationValidatorTest extends TestCase {
 
 	private AddDonationValidator $donationValidator;

@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess\LegacyConverters;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter;
@@ -15,16 +17,12 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
 use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentStatus;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter
- */
+#[CoversClass( DomainToLegacyConverter::class )]
 class DomainToLegacyConverterTest extends TestCase {
 
 	private const BOGUS_STATUS = 'R';
 
-	/**
-	 * @dataProvider getPaymentMethodsAndTransferCodes
-	 */
+	#[DataProvider( 'getPaymentMethodsAndTransferCodes' )]
 	public function testGivenPaymentMethodWithBankTransferCode_converterGetsCodeFromPayment( string $expectedOutput, Donation $donation ): void {
 		$converter = new DomainToLegacyConverter();
 
@@ -163,9 +161,7 @@ class DomainToLegacyConverterTest extends TestCase {
 		$this->assertEquals( $moderationReasons, $doctrineDonation->getModerationReasons()->toArray() );
 	}
 
-	/**
-	 * @dataProvider getStatusValues
-	 */
+	#[DataProvider( 'getStatusValues' )]
 	public function testStatusGetsSetFromLegacyPaymentData( string $status ): void {
 		$converter = new DomainToLegacyConverter();
 		$donation = ValidDonation::newDirectDebitDonation();
