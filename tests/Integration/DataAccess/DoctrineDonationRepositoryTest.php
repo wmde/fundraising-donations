@@ -5,10 +5,15 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationExistsChecker;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\DataAccess\DonorFactory;
+use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
+use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter;
+use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
@@ -24,14 +29,12 @@ use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
 use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonorFactory
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter
- */
+#[CoversClass( DoctrineDonationRepository::class )]
+#[CoversClass( DonorFieldMapper::class )]
+#[CoversClass( DonorFactory::class )]
+#[CoversClass( DoctrineDonation::class )]
+#[CoversClass( DomainToLegacyConverter::class )]
+#[CoversClass( LegacyToDomainConverter::class )]
 class DoctrineDonationRepositoryTest extends TestCase {
 
 	private const ID_OF_DONATION_NOT_IN_DB = 35505;

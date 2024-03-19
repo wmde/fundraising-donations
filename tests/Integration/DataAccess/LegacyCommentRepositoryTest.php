@@ -2,6 +2,7 @@
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyCommentRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyException;
@@ -10,9 +11,7 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyCommentRepository
- */
+#[CoversClass( LegacyCommentRepository::class )]
 class LegacyCommentRepositoryTest extends TestCase {
 
 	private const MISSING_COMMENT_ID = 99;

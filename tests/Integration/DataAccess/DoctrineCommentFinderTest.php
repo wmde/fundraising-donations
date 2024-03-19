@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use DateTime;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder;
@@ -15,9 +16,7 @@ use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentListingException;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineCommentFinder
- */
+#[CoversClass( DoctrineCommentFinder::class )]
 class DoctrineCommentFinderTest extends TestCase {
 
 	private const COMMENT_NAME = 'Donor name';

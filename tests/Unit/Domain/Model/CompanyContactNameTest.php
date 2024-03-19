@@ -2,12 +2,11 @@
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyContactName;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyContactName
- */
+#[CoversClass( CompanyContactName::class )]
 class CompanyContactNameTest extends TestCase {
 
 	public function testGivenCompanyNameOnly_getFullNameReturnsCompanyName(): void {

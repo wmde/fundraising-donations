@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Infrastructure;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
@@ -12,6 +14,7 @@ use WMDE\Fundraising\DonationContext\Infrastructure\AdminNotificationInterface;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationNotifier\TemplateArgumentsAdmin;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationNotifier\TemplateArgumentsDonation;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationNotifier\TemplateArgumentsDonationConfirmation;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonorNotificationInterface;
 use WMDE\Fundraising\DonationContext\Infrastructure\TemplateDonationNotifier;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
@@ -20,9 +23,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingAdminNotifier;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingDonorNotification;
 use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\Infrastructure\TemplateDonationNotifier
- */
+#[CoversClass( TemplateDonationNotifier::class )]
 class TemplateDonationNotifierTest extends TestCase {
 
 	private const ADMIN_EMAIL = 'picard@starfleet.com';
@@ -99,10 +100,10 @@ class TemplateDonationNotifierTest extends TestCase {
 	}
 
 	public function testGivenUnmoderatedDonation_adminIsNotNotified(): void {
-		$mailerSpy = $this->createMock( AdminNotificationInterface::class );
-		$mailerSpy->expects( $this->never() )->method( 'sendMail' );
-
-		$confirmationMailer = new TemplateDonationNotifier( new ThrowingDonorNotification(), $mailerSpy,  $this->createStub( GetPaymentUseCase::class ), self::ADMIN_EMAIL );
+		$donorNotification = $this->createStub( DonorNotificationInterface::class );
+		$adminNotification = $this->createMock( AdminNotificationInterface::class );
+		$adminNotification->expects( $this->never() )->method( 'sendMail' );
+		$confirmationMailer = new TemplateDonationNotifier( $donorNotification, $adminNotification, $this->createStub( GetPaymentUseCase::class ), self::ADMIN_EMAIL );
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$confirmationMailer->sendModerationNotificationToAdmin( $donation );
@@ -113,8 +114,8 @@ class TemplateDonationNotifierTest extends TestCase {
 	 * @param int $expectedMailCount
 	 *
 	 * @return void
-	 * @dataProvider moderationReasonProvider
 	 */
+	#[DataProvider( 'moderationReasonProvider' )]
 	public function testGivenModeratedDonation_adminIsNotNotifiedOfAnyModerationExceptAmountTooHigh( array $moderationReasons, int $expectedMailCount ): void {
 		$mailerSpy = $this->createMock( AdminNotificationInterface::class );
 		$mailerSpy->expects( $this->exactly( $expectedMailCount ) )->method( 'sendMail' );

@@ -4,13 +4,12 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\InMemoryCommentFinder;
 
-/**
- * @covers WMDE\Fundraising\DonationContext\Tests\Fixtures\InMemoryCommentFinder
- */
+#[CoversClass( InMemoryCommentFinder::class )]
 class InMemoryCommentFinderTest extends TestCase {
 
 	public function testWhenThereAreNoComments_getCommentsReturnsEmptyArray(): void {

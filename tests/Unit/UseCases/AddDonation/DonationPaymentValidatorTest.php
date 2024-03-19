@@ -3,6 +3,8 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\DonationPaymentValidator;
@@ -10,18 +12,14 @@ use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 use WMDE\FunValidators\ConstraintViolation;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\DonationPaymentValidator
- */
+#[CoversClass( DonationPaymentValidator::class )]
 class DonationPaymentValidatorTest extends TestCase {
 
 	private const ALLOWED_PAYMENT_TYPES = [
 		PaymentType::DirectDebit
 	];
 
-	/**
-	 * @dataProvider getValidAmounts
-	 */
+	#[DataProvider( 'getValidAmounts' )]
 	public function testGivenValidAmount_validatorReturnsNoViolations( float $amount ): void {
 		$validator = new DonationPaymentValidator( self::ALLOWED_PAYMENT_TYPES );
 

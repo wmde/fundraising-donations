@@ -5,16 +5,16 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationEventLogger;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogException;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingEntityManager;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationEventLogger
- */
-class DoctrineDonationEventLoggerTest extends \PHPUnit\Framework\TestCase {
+#[CoversClass( DoctrineDonationEventLogger::class )]
+class DoctrineDonationEventLoggerTest extends TestCase {
 
 	private const DEFAULT_MESSAGE = 'Log message';
 	private const LOG_TIMESTAMP = '2015-10-21 21:00:04';

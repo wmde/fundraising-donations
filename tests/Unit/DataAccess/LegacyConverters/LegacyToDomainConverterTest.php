@@ -2,6 +2,8 @@
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess\LegacyConverters;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
@@ -10,9 +12,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter
- */
+#[CoversClass( LegacyToDomainConverter::class )]
 class LegacyToDomainConverterTest extends TestCase {
 
 	public function testGivenIncompleteTrackingData_converterFillsTrackingDataWithDefaults(): void {
@@ -61,9 +61,7 @@ class LegacyToDomainConverterTest extends TestCase {
 		$this->assertSame( $moderationReasons, $donation->getModerationReasons() );
 	}
 
-	/**
-	 * @dataProvider donationProviderForNewsletterSubscription
-	 */
+	#[DataProvider( 'donationProviderForNewsletterSubscription' )]
 	public function testConverterPassesNewsletterSubscriptionToDonor( DoctrineDonation $doctrineDonation, bool $expectedDonorValue ): void {
 		$converter = new LegacyToDomainConverter();
 
@@ -108,9 +106,7 @@ class LegacyToDomainConverterTest extends TestCase {
 		yield 'converter ignores invalid newsletter subscription data from DB for anonymous' => [ $doctrineDonation, false ];
 	}
 
-	/**
-	 * @dataProvider donationProviderForReceipt
-	 */
+	#[DataProvider( 'donationProviderForReceipt' )]
 	public function testConverterPassesReceiptRequirementsToDonor( DoctrineDonation $doctrineDonation, bool $expectedDonorValue ): void {
 		$converter = new LegacyToDomainConverter();
 
