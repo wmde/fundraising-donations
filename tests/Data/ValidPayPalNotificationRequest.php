@@ -83,19 +83,19 @@ class ValidPayPalNotificationRequest {
 	 */
 	private static function getBaseTransactionData(): array {
 		return [
-			'paypal_payer_id' => self::PAYER_ID ,
+			'paypal_payer_id' => self::PAYER_ID,
 			'paypal_subscr_id' => self::SUBSCRIBER_ID,
 			'paypal_payer_status' => self::PAYER_STATUS,
 			'paypal_mc_gross' => self::AMOUNT_GROSS_CENTS,
-			'paypal_mc_currency' => self::CURRENCY_CODE ,
+			'paypal_mc_currency' => self::CURRENCY_CODE,
 			'paypal_mc_fee' => self::TRANSACTION_FEE_EURO_STRING,
-			'paypal_settle_amount' => self::SETTLE_AMOUNT_CENTS ,
+			'paypal_settle_amount' => self::SETTLE_AMOUNT_CENTS,
 			'ext_payment_id' => self::TRANSACTION_ID,
 			'ext_subscr_id' => self::SUBSCRIBER_ID,
-			'ext_payment_type' => self::PAYMENT_TYPE ,
-			'ext_payment_status' => self::PAYMENT_STATUS_COMPLETED ,
+			'ext_payment_type' => self::PAYMENT_TYPE,
+			'ext_payment_status' => self::PAYMENT_STATUS_COMPLETED,
 			'ext_payment_account' => self::PAYER_ID,
-			'ext_payment_timestamp' => self::PAYMENT_TIMESTAMP ,
+			'ext_payment_timestamp' => self::PAYMENT_TIMESTAMP,
 		];
 	}
 

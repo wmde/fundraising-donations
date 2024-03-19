@@ -4,12 +4,11 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\CancelDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest
- */
+#[CoversClass( CancelDonationRequest::class )]
 class CancelDonationRequestTest extends TestCase {
 
 	public function testUnauthorizedRequest(): void {

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\SofortPaymentNotification;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
@@ -16,17 +17,18 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\StaticDonationIdRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
+use WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase\BookDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\NotificationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\NotificationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase\BookDonationUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\SofortPaymentNotification\SofortPaymentNotificationUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationRequest
- * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
- */
+#[CoversClass( BookDonationUseCase::class )]
+#[CoversClass( SofortPaymentNotificationUseCase::class )]
+#[CoversClass( NotificationRequest::class )]
+#[CoversClass( NotificationResponse::class )]
 class SofortPaymentNotificationUseCaseTest extends TestCase {
 
 	private function getMailer(): DonationNotifier&MockObject {

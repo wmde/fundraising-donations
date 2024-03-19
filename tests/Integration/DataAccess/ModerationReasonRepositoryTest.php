@@ -5,16 +5,16 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineTypes\ModerationIdentifier as DoctrineModerationIdentifierType;
 use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineTypes\ModerationIdentifier
- */
+#[CoversClass( ModerationReasonRepository::class )]
+#[CoversClass( DoctrineModerationIdentifierType::class )]
 class ModerationReasonRepositoryTest extends TestCase {
 	private EntityManager $entityManager;
 

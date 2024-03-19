@@ -2,6 +2,8 @@
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ModerateComment;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\CommentRepository;
@@ -12,12 +14,10 @@ use WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentReq
 use WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentSuccessResponse;
 use WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentUseCase;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentRequest
- * @covers \WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentSuccessResponse
- * @covers \WMDE\Fundraising\DonationContext\UseCases\ModerateComment\ModerateCommentErrorResponse
- */
+#[CoversClass( ModerateCommentUseCase::class )]
+#[CoversClass( ModerateCommentRequest::class )]
+#[CoversClass( ModerateCommentSuccessResponse::class )]
+#[CoversClass( ModerateCommentErrorResponse::class )]
 class ModerateCommentUseCaseTest extends TestCase {
 
 	private const AUTHORIZED_USER_NAME = 'MarkusTheModerator';
@@ -50,9 +50,7 @@ class ModerateCommentUseCaseTest extends TestCase {
 		$this->assertSame( ModerateCommentErrorResponse::ERROR_DONATION_HAS_NO_COMMENT, $response->getError() );
 	}
 
-	/**
-	 * @dataProvider commentProviderForPublication
-	 */
+	#[DataProvider( 'commentProviderForPublication' )]
 	public function testWhenDonationHasComment_publicationSucceeds( DonationComment $comment, string $assertMessage ): void {
 		$repository = $this->createMock( CommentRepository::class );
 		$repository->method( 'getCommentByDonationId' )->willReturn( $comment );
@@ -87,9 +85,7 @@ class ModerateCommentUseCaseTest extends TestCase {
 		$useCase->moderateComment( $request );
 	}
 
-	/**
-	 * @dataProvider commentProviderForRetraction
-	 */
+	#[DataProvider( 'commentProviderForRetraction' )]
 	public function testWhenDonationHasComment_retractionSucceeds( DonationComment $comment, string $assertMessage ): void {
 		$repository = $this->createMock( CommentRepository::class );
 		$repository->method( 'getCommentByDonationId' )->willReturn( $comment );
