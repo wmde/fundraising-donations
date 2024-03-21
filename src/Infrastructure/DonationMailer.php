@@ -12,9 +12,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
-/**
- * @license GPL-2.0-or-later
- */
 class DonationMailer implements DonationNotifier {
 
 	public function __construct(

@@ -18,7 +18,7 @@ class PaypalBookingServiceWithUseCase implements PaypalBookingService {
 
 	/**
 	 * @param int $amountInCents
-	 * @param array<string,mixed> $transactionData
+	 * @param array<string,scalar> $transactionData
 	 *
 	 * @return SuccessResponse|FailureResponse
 	 */

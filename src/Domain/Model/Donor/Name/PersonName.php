@@ -6,9 +6,6 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 
-/**
- * @license GPL-2.0-or-later
- */
 class PersonName implements DonorName {
 
 	private string $salutation;

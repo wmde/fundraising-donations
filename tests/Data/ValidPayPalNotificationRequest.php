@@ -6,10 +6,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use WMDE\Fundraising\DonationContext\UseCases\NotificationRequest;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class ValidPayPalNotificationRequest {
 
 	public const DATA_SET_ID = 12345;

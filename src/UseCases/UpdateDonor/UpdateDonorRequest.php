@@ -6,9 +6,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
-/**
- * @license GPL-2.0-or-later
- */
 class UpdateDonorRequest {
 
 	private int $donationId = 0;

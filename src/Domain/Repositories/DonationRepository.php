@@ -6,11 +6,6 @@ namespace WMDE\Fundraising\DonationContext\Domain\Repositories;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 
-/**
- * @license GPL-2.0-or-later
- * @author Kai Nissen < kai.nissen@wikimedia.de >
- * @author Jeroen De Dauw < jeroendedauw@gmail.com >
- */
 interface DonationRepository {
 
 	/**

@@ -9,7 +9,7 @@ namespace WMDE\Fundraising\DonationContext\UseCases;
 class NotificationRequest {
 
 	/**
-	 * @param array<string,mixed> $bookingData
+	 * @param array<string,scalar> $bookingData
 	 * @param int $donationId
 	 */
 	public function __construct(

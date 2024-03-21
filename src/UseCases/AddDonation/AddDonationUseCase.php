@@ -28,9 +28,6 @@ use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentCreationReques
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 use WMDE\FunValidators\ConstraintViolation;
 
-/**
- * @license GPL-2.0-or-later
- */
 class AddDonationUseCase {
 
 	private const PREFIX_BANK_TRANSACTION_KNOWN_DONOR = 'XW';

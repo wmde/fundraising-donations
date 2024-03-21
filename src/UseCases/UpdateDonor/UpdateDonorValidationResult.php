@@ -7,9 +7,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\UpdateDonor;
 use WMDE\FunValidators\ConstraintViolation;
 use WMDE\FunValidators\ValidationResult;
 
-/**
- * @license GPL-2.0-or-later
- */
 class UpdateDonorValidationResult extends ValidationResult {
 
 	public function getFirstViolation(): ConstraintViolation {
