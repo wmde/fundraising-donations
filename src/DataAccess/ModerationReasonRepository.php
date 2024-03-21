@@ -43,7 +43,11 @@ class ModerationReasonRepository {
 		}
 
 		$query = $queryBuilder->getQuery();
-		return $query->getResult();
+
+		/** @var array<int, ModerationReason> $result */
+		$result = $query->getResult();
+
+		return $result;
 	}
 
 }

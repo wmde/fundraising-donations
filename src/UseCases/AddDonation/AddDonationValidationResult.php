@@ -7,10 +7,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AddressValidator;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class AddDonationValidationResult extends ValidationResult {
 
 	public const SOURCE_PAYMENT_TYPE = 'zahlweise';

@@ -12,9 +12,6 @@ use WMDE\FunValidators\ValidationResult;
 use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
 
-/**
- * @license GPL-2.0-or-later
- */
 class AddDonationValidator {
 
 	private AddressValidator $addressValidator;

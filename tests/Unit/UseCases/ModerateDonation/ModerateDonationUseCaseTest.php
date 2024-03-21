@@ -21,8 +21,6 @@ use WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\NotificationLog;
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\ModerateDonationUseCase
  * @covers \WMDE\Fundraising\DonationContext\UseCases\ModerateDonation\ModerateDonationResponse
- *
- * @license GPL-2.0-or-later
  */
 class ModerateDonationUseCaseTest extends TestCase {
 

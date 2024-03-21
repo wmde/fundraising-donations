@@ -14,8 +14,6 @@ use WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationUse
 /**
  * @covers \WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationUseCase
  * @covers \WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationResponse
- *
- * @license GPL-2.0-or-later
  */
 class RestoreDonationUseCaseTest extends TestCase {
 

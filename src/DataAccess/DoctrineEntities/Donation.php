@@ -504,9 +504,9 @@ class Donation {
 
 		$data = new DonationData();
 
-		$data->setAccessToken( array_key_exists( 'token', $dataArray ) ? $dataArray['token'] : null );
-		$data->setUpdateToken( array_key_exists( 'utoken', $dataArray ) ? $dataArray['utoken'] : null );
-		$data->setUpdateTokenExpiry( array_key_exists( 'uexpiry', $dataArray ) ? $dataArray['uexpiry'] : null );
+		$data->setAccessToken( array_key_exists( 'token', $dataArray ) && is_string( $dataArray['token'] ) ? $dataArray['token'] : null );
+		$data->setUpdateToken( array_key_exists( 'utoken', $dataArray ) && is_string( $dataArray['utoken'] ) ? $dataArray['utoken'] : null );
+		$data->setUpdateTokenExpiry( array_key_exists( 'uexpiry', $dataArray ) && is_string( $dataArray['uexpiry'] ) ? $dataArray['uexpiry'] : null );
 
 		return $data;
 	}

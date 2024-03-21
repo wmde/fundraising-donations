@@ -4,10 +4,6 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\AddComment;
 
-/**
- * @license GPL-2.0-or-later
- * @author Gabriel Birke < gabriel.birke@wikimedia.de >
- */
 class AddCommentValidationResult {
 
 	public const VIOLATION_NAME_TOO_LONG = 'comment_failure_name_too_long';

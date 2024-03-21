@@ -8,9 +8,6 @@ use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 
-/**
- * @license GPL-2.0-or-later
- */
 class Donation {
 
 	/**

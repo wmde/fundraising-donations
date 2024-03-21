@@ -6,9 +6,6 @@ namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 
-/**
- * @license GPL-2.0-or-later
- */
 class SucceedingDonationAuthorizerSpy implements DonationAuthorizationChecker {
 
 	private bool $authorizedAsUser = false;

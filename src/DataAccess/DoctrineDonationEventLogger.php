@@ -40,7 +40,7 @@ class DoctrineDonationEventLogger implements DonationEventLogger {
 		}
 
 		$data = $donation->getDecodedData();
-		if ( empty( $data['log'] ) ) {
+		if ( empty( $data['log'] ) || !is_array( $data['log'] ) ) {
 			$data['log'] = [];
 		}
 		$data['log'][call_user_func( $this->timestampFunction )] = $message;
