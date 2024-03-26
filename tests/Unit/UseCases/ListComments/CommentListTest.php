@@ -4,13 +4,12 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ListComments;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentList;
 
-/**
- * @covers WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentList
- */
+#[CoversClass( CommentList::class )]
 class CommentListTest extends TestCase {
 
 	public function testGivenNoArguments_constructorCreatesEmptyList(): void {

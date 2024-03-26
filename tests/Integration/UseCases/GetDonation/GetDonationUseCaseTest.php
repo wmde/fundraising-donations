@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\GetDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
@@ -12,9 +13,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer
 use WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationRequest;
 use WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationUseCase;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\GetDonation\GetDonationUseCase
- */
+#[CoversClass( GetDonationUseCase::class )]
 class GetDonationUseCaseTest extends TestCase {
 
 	private const CORRECT_DONATION_ID = 1;

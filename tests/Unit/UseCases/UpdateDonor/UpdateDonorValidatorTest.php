@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\UpdateDonor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidatorPatterns;
@@ -16,9 +17,7 @@ use WMDE\FunValidators\Validators\AddressValidator;
 use WMDE\FunValidators\Validators\EmailValidator;
 use WMDE\FunValidators\Validators\SucceedingEmailValidator;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidator
- */
+#[CoversClass( UpdateDonorValidator::class )]
 class UpdateDonorValidatorTest extends TestCase {
 
 	public function testGivenAnonymousDonor_validationFails(): void {

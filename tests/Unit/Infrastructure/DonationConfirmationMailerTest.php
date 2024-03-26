@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Infrastructure;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\EmailAddress\EmailAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
@@ -15,9 +17,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\TemplateBasedMailerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\ThrowingTemplateMailer;
 use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\Infrastructure\DonationMailer
- */
+#[CoversClass( DonationMailer::class )]
 class DonationConfirmationMailerTest extends TestCase {
 
 	private const ADMIN_EMAIL = 'picard@starfleet.com';
@@ -95,7 +95,7 @@ class DonationConfirmationMailerTest extends TestCase {
 
 	public function testGivenUnmoderatedDonation_adminIsNotNotified(): void {
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
-		$confirmationMailer = new DonationMailer( new ThrowingTemplateMailer(), $mailerSpy,  $this->createStub( GetPaymentUseCase::class ), self::ADMIN_EMAIL );
+		$confirmationMailer = new DonationMailer( new ThrowingTemplateMailer(), $mailerSpy, $this->createStub( GetPaymentUseCase::class ), self::ADMIN_EMAIL );
 		$donation = ValidDonation::newDirectDebitDonation();
 
 		$confirmationMailer->sendModerationNotificationToAdmin( $donation );
@@ -108,9 +108,8 @@ class DonationConfirmationMailerTest extends TestCase {
 	 * @param int $expectedMailCount
 	 *
 	 * @return void
-	 * @throws \PHPUnit\Framework\MockObject\Exception
-	 * @dataProvider moderationReasonProvider
 	 */
+	#[DataProvider( 'moderationReasonProvider' )]
 	public function testGivenModeratedDonation_adminIsNotNotifiedOfAnyModerationExceptAmountTooHigh( array $moderationReasons, int $expectedMailCount ): void {
 		$mailerSpy = new TemplateBasedMailerSpy( $this );
 		$donation = ValidDonation::newDirectDebitDonation();

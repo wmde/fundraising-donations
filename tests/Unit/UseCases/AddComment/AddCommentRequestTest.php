@@ -3,12 +3,11 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddComment;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentRequest;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentRequest
- */
+#[CoversClass( AddCommentRequest::class )]
 class AddCommentRequestTest extends TestCase {
 	private const DONATION_ID = 1234567;
 

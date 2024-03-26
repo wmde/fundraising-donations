@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\UpdateDonor;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonorUpdatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
@@ -28,11 +29,9 @@ use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidationR
 use WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidator;
 use WMDE\FunValidators\ConstraintViolation;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorResponse
- * @covers \WMDE\Fundraising\DonationContext\UseCases\UpdateDonor\UpdateDonorValidationResult
- */
+#[CoversClass( UpdateDonorUseCase::class )]
+#[CoversClass( UpdateDonorResponse::class )]
+#[CoversClass( UpdateDonorValidationResult::class )]
 class UpdateDonorUseCaseTest extends TestCase {
 
 	public function testGivenAnonymousDonationAndValidAddressPersonalData_donationIsUpdated(): void {
