@@ -9,7 +9,9 @@ interface DonorName {
 	public function getFullName(): string;
 
 	/**
-	 * @return string[]
+	 * Get name components for usage in templates
+	 *
+	 * @return array<string,string>
 	 */
 	public function toArray(): array;
 
