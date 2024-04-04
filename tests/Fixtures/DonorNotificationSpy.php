@@ -6,13 +6,15 @@ namespace WMDE\Fundraising\DonationContext\Tests\Fixtures;
 
 use PHPUnit\Framework\TestCase;
 use WMDE\EmailAddress\EmailAddress;
-use WMDE\Fundraising\DonationContext\Infrastructure\TemplateMailerInterface;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonationNotifier\TemplateArgumentsDonationConfirmation;
+use WMDE\Fundraising\DonationContext\Infrastructure\DonorNotificationInterface;
 
-class TemplateBasedMailerSpy implements TemplateMailerInterface {
+class DonorNotificationSpy implements DonorNotificationInterface {
 
 	private TestCase $testCase;
+
 	/**
-	 * @var array<array{EmailAddress,array<string,mixed>}>
+	 * @var array{EmailAddress,TemplateArgumentsDonationConfirmation}[]
 	 */
 	private array $sendMailCalls = [];
 
@@ -20,24 +22,18 @@ class TemplateBasedMailerSpy implements TemplateMailerInterface {
 		$this->testCase = $testCase;
 	}
 
-	public function sendMail( EmailAddress $recipient, array $templateArguments = [] ): void {
+	public function sendMail( EmailAddress $recipient, TemplateArgumentsDonationConfirmation $templateArguments ): void {
 		$this->sendMailCalls[] = [ $recipient, $templateArguments ];
 	}
 
 	/**
-	 * @return array<array{EmailAddress,array<string,mixed>}>
+	 * @return array{EmailAddress,TemplateArgumentsDonationConfirmation}[]
 	 */
 	public function getSendMailCalls(): array {
 		return $this->sendMailCalls;
 	}
 
-	/**
-	 * @param EmailAddress $expectedEmail
-	 * @param array<string,mixed> $expectedArguments
-	 *
-	 * @return void
-	 */
-	public function assertCalledOnceWith( EmailAddress $expectedEmail, array $expectedArguments ): void {
+	public function assertCalledOnceWith( EmailAddress $expectedEmail, TemplateArgumentsDonationConfirmation $expectedArguments ): void {
 		$this->assertCalledOnce();
 
 		$this->testCase->assertEquals(
