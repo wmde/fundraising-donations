@@ -3,14 +3,13 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationResponse;
 use WMDE\FunValidators\ConstraintViolation;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationResponse
- */
+#[CoversClass( AddDonationResponse::class )]
 class AddDonationResponseTest extends TestCase {
 	private const PAYMENT_COMPLETION_URL = 'https://spenden.wikimedia.de/payments/complete';
 

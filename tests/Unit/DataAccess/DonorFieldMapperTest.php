@@ -2,6 +2,7 @@
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
@@ -12,9 +13,8 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonor;
 /**
  * This test is only testing the safeguards against developer error,
  * other functionality is tested in DoctrineDonationRepositoryTest.
- *
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper
  */
+#[CoversClass( DonorFieldMapper::class )]
 class DonorFieldMapperTest extends TestCase {
 
 	public function testDonorTypeDoesNotAllowUnknownDonorClasses(): void {

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CancelDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -16,16 +17,15 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizerSpy;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest;
+use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\CancelPaymentUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\SuccessResponse;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationResponse
- * @covers \WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest
- */
+#[CoversClass( CancelDonationUseCase::class )]
+#[CoversClass( CancelDonationResponse::class )]
+#[CoversClass( CancelDonationRequest::class )]
 class CancelDonationUseCaseTest extends TestCase {
 
 	private const AUTHORIZED_USER = 'admin_adminson';

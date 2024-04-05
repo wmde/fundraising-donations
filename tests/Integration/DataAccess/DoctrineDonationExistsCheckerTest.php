@@ -5,14 +5,13 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationExistsChecker;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationExistsChecker
- */
+#[CoversClass( DoctrineDonationExistsChecker::class )]
 class DoctrineDonationExistsCheckerTest extends TestCase {
 
 	private const EXISTING_DONATION_ID = 1;

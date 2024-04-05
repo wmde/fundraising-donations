@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\CreditCardPaymentNotification;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationIdRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -19,17 +20,16 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\StaticDonationIdRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Integration\DonationEventLoggerAsserter;
+use WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase\BookDonationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
+use WMDE\Fundraising\DonationContext\UseCases\NotificationResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\BookDonationUseCase\BookDonationUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\CreditCardPaymentNotification\CreditCardNotificationUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
- *
- */
+#[CoversClass( BookDonationUseCase::class )]
+#[CoversClass( CreditCardNotificationUseCase::class )]
+#[CoversClass( NotificationResponse::class )]
 class CreditCardNotificationUseCaseTest extends TestCase {
 
 	use DonationEventLoggerAsserter;

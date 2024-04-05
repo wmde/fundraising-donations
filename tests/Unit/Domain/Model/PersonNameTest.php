@@ -2,12 +2,11 @@
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName
- */
+#[CoversClass( PersonName::class )]
 class PersonNameTest extends TestCase {
 
 	public function testGivenNameWithoutSalutation_getFullNameReturnsNameWithoutSalutation(): void {

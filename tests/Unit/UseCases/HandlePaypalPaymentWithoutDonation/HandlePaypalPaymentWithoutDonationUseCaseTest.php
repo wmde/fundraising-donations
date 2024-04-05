@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\HandlePaypalPaymentWithoutDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Services\PaypalBookingService;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayPalNotificationRequest;
@@ -12,13 +13,12 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\StaticDonationIdRepository;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 use WMDE\Fundraising\DonationContext\UseCases\HandlePaypalPaymentWithoutDonation\HandlePaypalPaymentWithoutDonationUseCase;
+use WMDE\Fundraising\DonationContext\UseCases\NotificationResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\CreateBookedPayPalPayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\CreateBookedPayPalPayment\SuccessResponse;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\HandlePaypalPaymentWithoutDonation\HandlePaypalPaymentWithoutDonationUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\NotificationResponse
- */
+#[CoversClass( HandlePaypalPaymentWithoutDonationUseCase::class )]
+#[CoversClass( NotificationResponse::class )]
 class HandlePaypalPaymentWithoutDonationUseCaseTest extends TestCase {
 
 	private const PAYMENT_AMOUNT = 3465;

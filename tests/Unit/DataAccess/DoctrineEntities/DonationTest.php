@@ -4,14 +4,13 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess\DoctrineEntities;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\DataAccess\DonationData;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonationData
- */
+#[CoversClass( Donation::class )]
+#[CoversClass( DonationData::class )]
 class DonationTest extends TestCase {
 
 	public function testDataEncodingAndDecodingRoundtrips(): void {

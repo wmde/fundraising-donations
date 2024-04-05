@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -16,9 +17,7 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DonationAcceptedEventHandler
- */
+#[CoversClass( DonationAcceptedEventHandler::class )]
 class DonationAcceptedEventHandlerTest extends TestCase {
 
 	private const UNKNOWN_ID = 32202;

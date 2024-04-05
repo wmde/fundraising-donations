@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\AddDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -36,10 +37,8 @@ use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\SuccessResponse as PaymentCreationSucceeded;
 use WMDE\FunValidators\ConstraintViolation;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationUseCase
- * @covers \WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent
- */
+#[CoversClass( AddDonationUseCase::class )]
+#[CoversClass( DonationCreatedEvent::class )]
 class AddDonationUseCaseTest extends TestCase {
 
 	private const PAYMENT_PROVIDER_URL = 'https://paypal.example.com/';
