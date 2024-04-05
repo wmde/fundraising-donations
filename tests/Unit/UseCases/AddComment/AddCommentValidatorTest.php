@@ -4,13 +4,13 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddComment;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentRequest;
 use WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentValidator;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\AddComment\AddCommentValidator
- */
+#[CoversClass( AddCommentValidator::class )]
 class AddCommentValidatorTest extends TestCase {
 
 	private function newAddCommentRequest( string $text ): AddCommentRequest {
@@ -22,9 +22,7 @@ class AddCommentValidatorTest extends TestCase {
 		);
 	}
 
-	/**
-	 * @dataProvider getCreativeButValidCommentTexts
-	 */
+	#[DataProvider( 'getCreativeButValidCommentTexts' )]
 	public function testValidCommentRequest_isSuccessful( string $text ): void {
 		$validator = new AddCommentValidator();
 		$this->assertTrue( $validator->validate( $this->newAddCommentRequest( $text ) )->isSuccessful() );

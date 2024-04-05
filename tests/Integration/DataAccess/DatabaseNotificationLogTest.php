@@ -4,14 +4,13 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManager;
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DatabaseNotificationLog;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationNotificationLog;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DatabaseNotificationLog
- */
+#[CoversClass( DatabaseNotificationLog::class )]
 class DatabaseNotificationLogTest extends TestCase {
 
 	private const MISSING_DONATION_ID = 41;

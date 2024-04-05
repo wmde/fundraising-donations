@@ -4,6 +4,8 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\ListComments;
 
+use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\ReadModel\Comment;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\InMemoryCommentFinder;
@@ -11,9 +13,7 @@ use WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentList;
 use WMDE\Fundraising\DonationContext\UseCases\ListComments\CommentListingRequest;
 use WMDE\Fundraising\DonationContext\UseCases\ListComments\ListCommentsUseCase;
 
-/**
- * @covers WMDE\Fundraising\DonationContext\UseCases\ListComments\ListCommentsUseCase
- */
+#[CoversClass( ListCommentsUseCase::class )]
 class ListCommentsUseCaseTest extends TestCase {
 
 	public function testWhenThereAreNoComments_anEmptyListIsPresented(): void {
@@ -91,9 +91,7 @@ class ListCommentsUseCaseTest extends TestCase {
 		);
 	}
 
-	/**
-	 * @dataProvider invalidPageNumberProvider
-	 */
+	#[DataProvider( 'invalidPageNumberProvider' )]
 	public function testGivenInvalidPageNumber_firstPageIsReturned( int $invalidPageNumber ): void {
 		$useCase = new ListCommentsUseCase(
 			new InMemoryCommentFinder(
@@ -125,9 +123,7 @@ class ListCommentsUseCaseTest extends TestCase {
 		];
 	}
 
-	/**
-	 * @dataProvider invalidLimitProvider
-	 */
+	#[DataProvider( 'invalidLimitProvider' )]
 	public function testGivenInvalidLimit_10resultsAreReturned( int $invalidLimit ): void {
 		$useCase = new ListCommentsUseCase( $this->newInMemoryCommentFinderWithComments() );
 

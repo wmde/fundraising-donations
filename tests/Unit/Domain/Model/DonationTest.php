@@ -4,20 +4,22 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donation
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor
- * @covers \WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor
- */
+#[CoversClass( Donation::class )]
+#[CoversClass( PersonDonor::class )]
+#[CoversClass( CompanyDonor::class )]
+#[CoversClass( AnonymousDonor::class )]
 class DonationTest extends TestCase {
 
 	public function testCancelingADonationSucceeds(): void {

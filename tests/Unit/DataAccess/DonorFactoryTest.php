@@ -2,6 +2,7 @@
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFactory;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
@@ -11,9 +12,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\DataAccess\DonorFactory
- */
+#[CoversClass( DonorFactory::class )]
 class DonorFactoryTest extends TestCase {
 
 	public function testCreatePrivateDonor(): void {

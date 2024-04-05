@@ -4,17 +4,17 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\RestoreDonation;
 
+use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
+use WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationResponse;
 use WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationUseCase;
 
-/**
- * @covers \WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationUseCase
- * @covers \WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationResponse
- */
+#[CoversClass( RestoreDonationUseCase::class )]
+#[CoversClass( RestoreDonationResponse::class )]
 class RestoreDonationUseCaseTest extends TestCase {
 
 	private const AUTH_USER_NAME = "coolAdmin";
