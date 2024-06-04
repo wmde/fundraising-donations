@@ -12,6 +12,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
 
 class DomainToLegacyConverter {
 
@@ -68,11 +69,53 @@ class DomainToLegacyConverter {
 		return array_values( $resultArray );
 	}
 
+	/**
+	 * Set the legacy donation status for the database entity.
+	 *
+	 * Some code in the Fundraising Operation Center repository still uses the status.
+	 * We track the progress of removing the status in https://phabricator.wikimedia.org/T359954
+	 * Last checked: 2024-05-24
+	 *
+	 * @deprecated
+	 */
 	private function updateStatusInformation( DoctrineDonation $doctrineDonation, Donation $donation, LegacyPaymentData $legacyPaymentData ): void {
-		$doctrineDonation->setStatus( $legacyPaymentData->paymentStatus );
+		if ( $donation->isCancelled() ) {
+			$doctrineDonation->setStatus( DoctrineDonation::STATUS_CANCELLED );
+			return;
+		}
 
-		if ( $donation->isMarkedForModeration() && !$donation->isCancelled() ) {
+		if ( $donation->isMarkedForModeration() ) {
 			$doctrineDonation->setStatus( DoctrineDonation::STATUS_MODERATION );
+			return;
+		}
+
+		// Set status from payment type. This encodes a bit of payment domain knowledge into the donation domain.
+		// But as long as we have the status field in the database and the Fundraising Operation Center and export
+		// script uses the status, we have to have this code.
+		switch ( $legacyPaymentData->paymentName ) {
+			case PaymentType::DirectDebit->value:
+				$doctrineDonation->setStatus( DoctrineDonation::STATUS_NEW );
+				break;
+			case PaymentType::BankTransfer->value:
+				$doctrineDonation->setStatus( DoctrineDonation::STATUS_PROMISE );
+				break;
+			case PaymentType::Sofort->value:
+				if ( empty( $legacyPaymentData->paymentSpecificValues['valuation_date'] ) ) {
+					$doctrineDonation->setStatus( DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE );
+				} else {
+					$doctrineDonation->setStatus( DoctrineDonation::STATUS_PROMISE );
+				}
+				break;
+			case PaymentType::CreditCard->value:
+			case PaymentType::Paypal->value:
+				if ( !empty( $legacyPaymentData->paymentSpecificValues['ext_payment_id'] ) ) {
+					$doctrineDonation->setStatus( DoctrineDonation::STATUS_EXTERNAL_BOOKED );
+				} else {
+					$doctrineDonation->setStatus( DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE );
+				}
+				break;
+			default:
+				throw new \DomainException( 'Unknown legacy payment method: ' . $legacyPaymentData->paymentName );
 		}
 	}
 
