@@ -15,7 +15,7 @@
 		"wmde/email-address": "~1.0",
 		"wmde/euro": "~1.0",
 		"wmde/fun-validators": "~4.0",
-		"wmde/fundraising-payments": "~7.0"
+		"wmde/fundraising-payments": "~8.0"
 	},
 	"repositories": [
 		{

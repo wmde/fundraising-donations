@@ -251,12 +251,11 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		return new LegacyPaymentData(
 			999999,
 			999,
-			'BLA',
+			'PPL',
 			[
 				'paymentValue' => 'almostInfinite',
 				'paid' => 'certainly'
 			],
-			'*'
 		);
 	}
 
