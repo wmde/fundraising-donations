@@ -36,10 +36,12 @@ class DomainToLegacyConverter {
 
 		// TODO create $this->updateExportState($doctrineDonation, $donation);
 		// currently, that method is not needed because the export state is set in a dedicated
-		// export script that does not use the domain model
+		// export script that does not use the domain model. We might also have to convert our boolean `exported`
+		// property into a date to keep the export date information on a roundtrip.
 
 		$doctrineDonation->setModerationReasons( ...$this->mergeModerationReasons( $existingModerationReasons, $donation->getModerationReasons() ) );
 
+		// TODO check for anonymized donor and unset all PII fields when it's an instance of `AnonymizedDonor`
 		$doctrineDonation->encodeAndSetData(
 			array_merge(
 				$doctrineDonation->getDecodedData(),

@@ -5,28 +5,20 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
-use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonor;
 
 /**
  * This test is only testing the safeguards against developer error,
- * other functionality is tested in DoctrineDonationRepositoryTest.
+ * other functionality is tested in {@see DoctrineDonationRepositoryTest}.
  */
 #[CoversClass( DonorFieldMapper::class )]
 class DonorFieldMapperTest extends TestCase {
-
-	public function testDonorTypeDoesNotAllowUnknownDonorClasses(): void {
-		$this->expectException( \UnexpectedValueException::class );
-		$this->expectExceptionMessageMatches( '/Could not determine address type/' );
-
-		$testDonor = new FakeDonor();
-
-		DonorFieldMapper::getPersonalDataFields( $testDonor );
-	}
 
 	public function testNameMapperProtectsAgainstUnknownFields(): void {
 		$this->expectException( \UnexpectedValueException::class );
@@ -79,5 +71,11 @@ class DonorFieldMapperTest extends TestCase {
 		DonorFieldMapper::updateDonorInformation( $personalDonation, ValidDonation::newEmailOnlyDonor() );
 
 		$this->assertSame( ValidDonation::DONOR_CITY, $personalDonation->getDonorCity() );
+	}
+
+	public function testGivenScrubbedDonorItPassesTheOriginalDonorTypeAsForTheAddressType(): void {
+		$fields = DonorFieldMapper::getPersonalDataFields( new Donor\ScrubbedDonor( DonorType::COMPANY ) );
+
+		$this->assertSame( 'firma', $fields['adresstyp'] );
 	}
 }
