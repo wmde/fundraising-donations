@@ -10,6 +10,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\NoAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
 /**
  * Convert a Donor into an array of fields for the legacy database schema that
@@ -96,17 +97,13 @@ class DonorFieldMapper {
 	}
 
 	private static function getAddressType( Donor $donor ): string {
-		$donorTypeMap = [
-			Donor\PersonDonor::class => 'person',
-			Donor\CompanyDonor::class => 'firma',
-			Donor\EmailDonor::class => 'email',
-			AnonymousDonor::class => 'anonym'
-		];
-		$donorNameClass = get_class( $donor );
-		if ( empty( $donorTypeMap[$donorNameClass] ) ) {
-			throw new \UnexpectedValueException( sprintf( 'Could not determine address type, unexpected donor class "%s"', $donorNameClass ) );
-		}
-		return $donorTypeMap[$donorNameClass];
+		$donorType = $donor->getDonorType();
+		return match ( $donorType ) {
+			DonorType::PERSON => 'person',
+			DonorType::COMPANY => 'firma',
+			DonorType::EMAIL => 'email',
+			DonorType::ANONYMOUS => 'anonym'
+		};
 	}
 
 }

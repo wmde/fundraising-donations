@@ -5,18 +5,19 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\NoAddress;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\NoName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\ScrubbedName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
 /**
- * This is a donor where the person has actively declined to provide an address.
+ * This is a donor "placeholder" class for donations that were exported and anonymized.
  *
- * This class is different from {@see ScrubbedDonor}, which is the class used after the donation has been exported and anoymized.
+ * This class is different from {@see AnonymousDonor}, which is the class used where the person has actively
+ * declined to provide an address.
  */
-class AnonymousDonor extends AbstractDonor {
+class ScrubbedDonor extends AbstractDonor {
 
-	public function __construct() {
-		$this->name = new NoName();
+	public function __construct( private readonly DonorType $originalDonorType ) {
+		$this->name = new ScrubbedName();
 		$this->physicalAddress = new NoAddress();
 		$this->emailAddress = '';
 	}
@@ -30,7 +31,7 @@ class AnonymousDonor extends AbstractDonor {
 	}
 
 	public function getDonorType(): DonorType {
-		return DonorType::ANONYMOUS;
+		return $this->originalDonorType;
 	}
 
 	public function subscribeToMailingList(): void {

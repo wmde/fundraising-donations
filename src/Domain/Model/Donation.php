@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\ScrubbedDonor;
 
 class Donation {
 
@@ -202,7 +203,11 @@ class Donation {
 	}
 
 	public function donorIsAnonymous(): bool {
-		return $this->donor instanceof AnonymousDonor;
+		return $this->donor instanceof AnonymousDonor || $this->donor instanceof ScrubbedDonor;
+	}
+
+	public function donorIsScrubbed(): bool {
+		return $this->donor instanceof ScrubbedDonor;
 	}
 
 	public function createFollowupDonationForPayment( int $donationId, int $paymentId ): self {
@@ -216,5 +221,12 @@ class Donation {
 			// we can point the comment to the comment of the original donation (db relationship)
 			null
 		);
+	}
+
+	public function scrubPersonalData(): void {
+		if ( !$this->isExported() ) {
+			throw new \DomainException( "You must not anonymize unexported donations, otherwise you'd lose data." );
+		}
+		$this->donor = new ScrubbedDonor( $this->donor->getDonorType() );
 	}
 }
