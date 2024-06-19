@@ -132,7 +132,10 @@ class DonationTest extends TestCase {
 		$this->assertSame( 99, $followupUpDonation->getPaymentId() );
 		$this->assertEquals( $followupUpDonation->getDonor(), $donation->getDonor() );
 		$this->assertEquals( $followupUpDonation->getTrackingInfo(), $donation->getTrackingInfo() );
-		$this->assertFalse( $followupUpDonation->isExported() );
+		$this->assertFalse(
+			$followupUpDonation->isExported(),
+			'Followup donations are for exporting recurring payments, therefore the ew donation must not e exported'
+		);
 	}
 
 	public function testMarkForModerationNeedsAtLeastOneModerationReason(): void {
@@ -177,6 +180,18 @@ class DonationTest extends TestCase {
 		$this->expectException( \DomainException::class );
 
 		$donation->scrubPersonalData();
+	}
+
+	public function testMarkExportedWithoutDateSetsCurrentDate(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$this->assertNull( $donation->getExportDate() );
+		$now = new \DateTimeImmutable();
+
+		$donation->markAsExported();
+
+		$exportDate = $donation->getExportDate();
+		$this->assertNotNull( $exportDate );
+		$this->assertEqualsWithDelta( $now->getTimestamp(), $exportDate->getTimestamp(), 3 );
 	}
 
 }
