@@ -13,6 +13,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFactory;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
+use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DataBlobScrubber;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
@@ -35,6 +36,7 @@ use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
 #[CoversClass( DoctrineDonation::class )]
 #[CoversClass( DomainToLegacyConverter::class )]
 #[CoversClass( LegacyToDomainConverter::class )]
+#[CoversClass( DataBlobScrubber::class )]
 class DoctrineDonationRepositoryTest extends TestCase {
 
 	private const ID_OF_DONATION_NOT_IN_DB = 35505;
@@ -146,6 +148,24 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertEquals(
 			$donation->getModerationReasons(),
 			$storedDonation->getModerationReasons()
+		);
+	}
+
+	public function testScrubbedDonationPersistenceRoundTrip(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->markAsExported( new \DateTimeImmutable( '2024-06-21 00:05:00' ) );
+		$donation->scrubPersonalData();
+
+		$repository = $this->newRepository();
+
+		$repository->storeDonation( $donation );
+		// find() will retrieve a cached value, so we should clear the entity cache here
+		$this->entityManager->clear();
+
+		$this->assertTrue( $donation->donorIsScrubbed() );
+		$this->assertEquals(
+			$donation,
+			$repository->getDonationById( $donation->getId() )
 		);
 	}
 
@@ -272,6 +292,46 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$connection = $this->entityManager->getConnection();
 		$result = $connection->executeQuery( "SELECT COUNT(*) FROM donation_moderation_reason " );
 		$this->assertSame( 1, $result->fetchOne() );
+	}
+
+	public function testWhenScrubbingDonation_repositoryRemovesDataAndSets(): void {
+		$donationId = 3;
+		$donation = ValidDonation::newBankTransferDonation( $donationId );
+		$donation->markAsExported();
+		$repository = $this->newRepository();
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$donation->scrubPersonalData();
+		$repository->storeDonation( $donation );
+
+		$connection = $this->entityManager->getConnection();
+		$row = $connection->executeQuery( "SELECT * FROM spenden WHERE id=$donationId" )->fetchAssociative();
+		$this->assertIsArray( $row );
+		$this->assertSame( 1, $row['is_scrubbed'], 'Donation scrub status should be true' );
+		$this->assertSame( '', $row['name'] );
+		$this->assertSame( '', $row['ort'] );
+		$this->assertSame( '', $row['email'] );
+		$this->assertSame( '', $row['ueb_code'] );
+		// @phpstan-ignore argument.type
+		$data = unserialize( base64_decode( $row['data'] ) );
+		$this->assertIsArray( $data );
+		$this->assertArrayNotHasKey( 'titel', $data );
+		$this->assertArrayNotHasKey( 'vorname', $data );
+		$this->assertArrayNotHasKey( 'nachname', $data );
+		$this->assertArrayNotHasKey( 'email', $data );
+		$this->assertArrayNotHasKey( 'strasse', $data );
+		$this->assertArrayNotHasKey( 'plz', $data );
+		$this->assertArrayNotHasKey( 'ort', $data );
+		$this->assertArrayNotHasKey( 'phone', $data );
+		$this->assertArrayNotHasKey( 'bankname', $data );
+		$this->assertArrayNotHasKey( 'iban', $data );
+		$this->assertArrayNotHasKey( 'bic', $data );
+		$this->assertArrayNotHasKey( 'blz', $data );
+		$this->assertArrayNotHasKey( 'konto', $data );
+		$this->assertArrayNotHasKey( 'paypal_first_name', $data );
+		$this->assertArrayNotHasKey( 'paypal_last_name', $data );
+		$this->assertArrayNotHasKey( 'paypal_address_name', $data );
 	}
 
 	private function newEntityManagerThatThrowsOnFind(): EntityManager {

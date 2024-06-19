@@ -22,7 +22,7 @@ class Donation {
 
 	private int $paymentId;
 	private ?DonationComment $comment;
-	private bool $exported;
+	private ?\DateTimeImmutable $exportDate;
 
 	/**
 	 * TODO: move out of Donation when database model is refactored
@@ -47,7 +47,7 @@ class Donation {
 		$this->paymentId = $paymentId;
 		$this->trackingInfo = $trackingInfo;
 		$this->comment = $comment;
-		$this->exported = false;
+		$this->exportDate = null;
 		$this->cancelled = false;
 		$this->moderationReasons = [];
 	}
@@ -159,11 +159,15 @@ class Donation {
 	}
 
 	public function isExported(): bool {
-		return $this->exported;
+		return $this->exportDate !== null;
 	}
 
-	public function markAsExported(): void {
-		$this->exported = true;
+	public function markAsExported( \DateTimeImmutable $exportDate = null ): void {
+		$this->exportDate = $exportDate ?? new \DateTimeImmutable();
+	}
+
+	public function getExportDate(): ?\DateTimeImmutable {
+		return $this->exportDate;
 	}
 
 	public function isCancelled(): bool {
