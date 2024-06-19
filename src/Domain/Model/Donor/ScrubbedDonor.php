@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\NoAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\ScrubbedAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\ScrubbedName;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
@@ -18,7 +18,7 @@ class ScrubbedDonor extends AbstractDonor {
 
 	public function __construct( private readonly DonorType $originalDonorType ) {
 		$this->name = new ScrubbedName();
-		$this->physicalAddress = new NoAddress();
+		$this->physicalAddress = new ScrubbedAddress();
 		$this->emailAddress = '';
 	}
 

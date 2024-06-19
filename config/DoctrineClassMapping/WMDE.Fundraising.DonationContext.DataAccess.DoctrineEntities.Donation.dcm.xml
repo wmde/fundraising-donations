@@ -67,7 +67,12 @@
       </options>
     </field>
     <field name="hash" type="string" column="hash" length="250" nullable="true"/>
-    <field name="isPublic" type="boolean" column="is_public" nullable="false">
+    <field name="isPublic" type="boolean" column="is_public" nullable="false" >
+      <options>
+          <option name="default">0</option>
+      </options>
+    </field>
+    <field name="isScrubbed" type="boolean" column="is_scrubbed" nullable="false">
       <options>
         <option name="default">0</option>
       </options>
