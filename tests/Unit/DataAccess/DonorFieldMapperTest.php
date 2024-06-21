@@ -5,7 +5,9 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\DataAccess;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
-use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonor;
@@ -30,7 +32,7 @@ class DonorFieldMapperTest extends TestCase {
 		$this->expectException( \UnexpectedValueException::class );
 		$this->expectExceptionMessageMatches( '/Name class returned unexpected value /' );
 
-		$specialName = new class extends Donor\Name\PersonName {
+		$specialName = new class extends PersonName {
 
 			public function __construct() {
 				parent::__construct(
@@ -50,10 +52,10 @@ class DonorFieldMapperTest extends TestCase {
 		};
 		$validDonor = ValidDonation::newDonor();
 		/**
-		 * @var Donor\Address\PostalAddress $address
+		 * @var PostalAddress $address
 		 */
 		$address = $validDonor->getPhysicalAddress();
-		$extendedDonor = new Donor\PersonDonor( $specialName, $address, $validDonor->getEmailAddress() );
+		$extendedDonor = new PersonDonor( $specialName, $address, $validDonor->getEmailAddress() );
 
 		DonorFieldMapper::getPersonalDataFields( $extendedDonor );
 	}

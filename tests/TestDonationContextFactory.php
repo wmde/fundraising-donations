@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Tests;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\Exception\ORMException;
 use Doctrine\ORM\ORMSetup;
 use WMDE\Fundraising\DonationContext\DonationContextFactory;
 use WMDE\Fundraising\PaymentContext\PaymentContextFactory;
@@ -52,7 +53,7 @@ class TestDonationContextFactory {
 
 	/**
 	 * @return EntityManager
-	 * @throws \Doctrine\ORM\Exception\ORMException
+	 * @throws ORMException
 	 */
 	private function newEntityManager(): EntityManager {
 		$conn = $this->getConnection();
