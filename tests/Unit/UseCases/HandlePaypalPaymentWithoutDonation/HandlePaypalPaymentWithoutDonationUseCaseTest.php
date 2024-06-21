@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\HandlePaypalPaymentWithoutDonation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\MockObject\Exception;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Services\PaypalBookingService;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayPalNotificationRequest;
@@ -79,7 +80,7 @@ class HandlePaypalPaymentWithoutDonationUseCaseTest extends TestCase {
 	 * @param array<mixed> $bookingData
 	 *
 	 * @return PaypalBookingService
-	 * @throws \PHPUnit\Framework\MockObject\Exception
+	 * @throws Exception
 	 */
 	private function createPaymentService( array $bookingData ): PaypalBookingService {
 		$paymentService = $this->createMock( PaypalBookingService::class );
