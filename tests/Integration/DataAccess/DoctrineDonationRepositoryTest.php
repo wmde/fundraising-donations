@@ -309,10 +309,10 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$row = $connection->executeQuery( "SELECT * FROM spenden WHERE id=$donationId" )->fetchAssociative();
 		$this->assertIsArray( $row );
 		$this->assertSame( 1, $row['is_scrubbed'], 'Donation scrub status should be true' );
-		$this->assertSame( '', $row['name'] );
-		$this->assertSame( '', $row['ort'] );
-		$this->assertSame( '', $row['email'] );
-		$this->assertSame( '', $row['ueb_code'] );
+		$this->assertSame( '', $row['name'], 'Should remove full name' );
+		$this->assertSame( '', $row['email'], 'Should remove email address' );
+		$this->assertSame( '', $row['ort'], 'Should remove city' );
+		$this->assertSame( '', $row['ueb_code'], ' Should remove bank transfer code' );
 		// @phpstan-ignore argument.type
 		$data = unserialize( base64_decode( $row['data'] ) );
 		$this->assertIsArray( $data );
