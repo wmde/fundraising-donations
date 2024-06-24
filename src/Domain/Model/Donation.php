@@ -7,6 +7,7 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\ScrubbedDonor;
 
 class Donation {
 
@@ -21,7 +22,7 @@ class Donation {
 
 	private int $paymentId;
 	private ?DonationComment $comment;
-	private bool $exported;
+	private ?\DateTimeImmutable $exportDate;
 
 	/**
 	 * TODO: move out of Donation when database model is refactored
@@ -46,7 +47,7 @@ class Donation {
 		$this->paymentId = $paymentId;
 		$this->trackingInfo = $trackingInfo;
 		$this->comment = $comment;
-		$this->exported = false;
+		$this->exportDate = null;
 		$this->cancelled = false;
 		$this->moderationReasons = [];
 	}
@@ -158,11 +159,15 @@ class Donation {
 	}
 
 	public function isExported(): bool {
-		return $this->exported;
+		return $this->exportDate !== null;
 	}
 
-	public function markAsExported(): void {
-		$this->exported = true;
+	public function markAsExported( \DateTimeImmutable $exportDate = null ): void {
+		$this->exportDate = $exportDate ?? new \DateTimeImmutable();
+	}
+
+	public function getExportDate(): ?\DateTimeImmutable {
+		return $this->exportDate;
 	}
 
 	public function isCancelled(): bool {
@@ -202,7 +207,11 @@ class Donation {
 	}
 
 	public function donorIsAnonymous(): bool {
-		return $this->donor instanceof AnonymousDonor;
+		return $this->donor instanceof AnonymousDonor || $this->donor instanceof ScrubbedDonor;
+	}
+
+	public function donorIsScrubbed(): bool {
+		return $this->donor instanceof ScrubbedDonor;
 	}
 
 	public function createFollowupDonationForPayment( int $donationId, int $paymentId ): self {
@@ -216,5 +225,12 @@ class Donation {
 			// we can point the comment to the comment of the original donation (db relationship)
 			null
 		);
+	}
+
+	public function scrubPersonalData(): void {
+		if ( !$this->isExported() ) {
+			throw new \DomainException( "You must not anonymize unexported donations, otherwise you'd lose data." );
+		}
+		$this->donor = new ScrubbedDonor( $this->donor->getDonorType() );
 	}
 }

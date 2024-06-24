@@ -101,6 +101,12 @@ class Donation {
 
 	private bool $isPublic = false;
 
+	/**
+	 * This represents the fact that the personal data was removed from the donation.
+	 * This is different from addressType = 'anonym' which indicates that the user donation anonymously.
+	 */
+	private bool $isScrubbed = false;
+
 	private \DateTime $creationTime;
 
 	private ?\DateTime $deletionTime = null;
@@ -549,5 +555,13 @@ class Donation {
 	 */
 	public function getModerationReasons(): Collection {
 		return $this->moderationReasons;
+	}
+
+	public function isScrubbed(): bool {
+		return $this->isScrubbed;
+	}
+
+	public function setIsScrubbed( bool $isScrubbed ): void {
+		$this->isScrubbed = $isScrubbed;
 	}
 }
