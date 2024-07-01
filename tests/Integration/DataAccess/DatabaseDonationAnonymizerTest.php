@@ -67,7 +67,7 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$this->insertOneRow();
 		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager );
 
-		$anonymizer->anonymize( self::DEFAULT_DONATION_ID );
+		$anonymizer->anonymizeWithIds( self::DEFAULT_DONATION_ID );
 
 		$this->assertNumberOfScrubbedDonations( 1 );
 	}
@@ -78,7 +78,7 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$this->expectExceptionMessageMatches( "/Could not find donation with id $missingDonationId/" );
 		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager );
 
-		$anonymizer->anonymize( $missingDonationId );
+		$anonymizer->anonymizeWithIds( $missingDonationId );
 	}
 
 	private function assertNumberOfScrubbedDonations( int $expectedNumberOfScrubbedDonations ): void {

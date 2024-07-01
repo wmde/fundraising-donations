@@ -23,9 +23,9 @@ interface DonationAnonymizer {
 	public function anonymizeAt( \DateTimeImmutable $timestamp ): int;
 
 	/**
-	 * Anonymize an individual entity.
+	 * Anonymize individual donations
 	 *
 	 * @throws AnonymizationException
 	 */
-	public function anonymize( int $donationId ): void;
+	public function anonymizeWithIds( int ...$donationIds ): void;
 }
