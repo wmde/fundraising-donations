@@ -38,12 +38,14 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		return $count;
 	}
 
-	public function anonymize( int $donationId ): void {
-		$donation = $this->donationRepository->getDonationById( $donationId );
-		if ( $donation === null ) {
-			throw new AnonymizationException( "Could not find donation with id $donationId" );
+	public function anonymizeWithIds( int ...$donationIds ): void {
+		foreach ( $donationIds as $id ) {
+			$donation = $this->donationRepository->getDonationById( $id );
+			if ( $donation === null ) {
+				throw new AnonymizationException( "Could not find donation with id $id" );
+			}
+			$donation->scrubPersonalData();
+			$this->donationRepository->storeDonation( $donation );
 		}
-		$donation->scrubPersonalData();
-		$this->donationRepository->storeDonation( $donation );
 	}
 }
