@@ -154,7 +154,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	public function testScrubbedDonationPersistenceRoundTrip(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->markAsExported( new \DateTimeImmutable( '2024-06-21 00:05:00' ) );
-		$donation->scrubPersonalData();
+		$donation->scrubPersonalData( new \DateTimeImmutable() );
 
 		$repository = $this->newRepository();
 
@@ -302,7 +302,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$repository->storeDonation( $donation );
 		$this->entityManager->clear();
 
-		$donation->scrubPersonalData();
+		$donation->scrubPersonalData( new \DateTimeImmutable() );
 		$repository->storeDonation( $donation );
 
 		$connection = $this->entityManager->getConnection();

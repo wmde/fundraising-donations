@@ -44,6 +44,7 @@ class HandlePaypalPaymentWithoutDonationUseCase {
 			new AnonymousDonor(),
 			$result->paymentId,
 			DonationTrackingInfo::newBlankTrackingInfo(),
+			new \DateTimeImmutable()
 		);
 
 		$this->donationRepository->storeDonation( $donation );

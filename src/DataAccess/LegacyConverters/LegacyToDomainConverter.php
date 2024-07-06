@@ -24,6 +24,7 @@ class LegacyToDomainConverter {
 			$donor,
 			$doctrineDonation->getPaymentId(),
 			$this->createTrackingInfo( $doctrineDonation ),
+			\DateTimeImmutable::createFromMutable( $doctrineDonation->getCreationTime() ),
 			$this->createComment( $doctrineDonation )
 		);
 		$this->setExportStatus( $doctrineDonation, $donation );

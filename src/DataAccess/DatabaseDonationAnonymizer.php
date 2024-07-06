@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\ORM\EntityManager;
+use WMDE\Clock\Clock;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Domain\AnonymizationException;
@@ -15,6 +16,8 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	public function __construct(
 		private readonly DonationRepository $donationRepository,
 		private readonly EntityManager $entityManager,
+		private readonly Clock $clock,
+		private readonly \DateInterval $exportGracePeriod
 	) {
 	}
 
@@ -27,11 +30,12 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 			->from( Donation::class, 'd' )
 			->where( 'd.dtBackup = ?1' )
 			->setParameter( 1, \DateTime::createFromImmutable( $timestamp ) );
+		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 		$count = 0;
 		/** @var Donation $doctrineDonation */
 		foreach ( $qb->getQuery()->toIterable() as $doctrineDonation ) {
 			$donation = $converter->createFromLegacyObject( $doctrineDonation );
-			$donation->scrubPersonalData();
+			$donation->scrubPersonalData( $cutoffDate );
 			$this->donationRepository->storeDonation( $donation );
 			$count++;
 		}
@@ -39,12 +43,13 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	}
 
 	public function anonymizeWithIds( int ...$donationIds ): void {
+		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 		foreach ( $donationIds as $id ) {
 			$donation = $this->donationRepository->getDonationById( $id );
 			if ( $donation === null ) {
 				throw new AnonymizationException( "Could not find donation with id $id" );
 			}
-			$donation->scrubPersonalData();
+			$donation->scrubPersonalData( $cutoffDate );
 			$this->donationRepository->storeDonation( $donation );
 		}
 	}
