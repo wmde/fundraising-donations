@@ -52,6 +52,7 @@ class DonationTest extends TestCase {
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			ValidDonation::newTrackingInfo(),
+			ValidDonation::newDonatedOnDate(),
 			null
 		);
 		$this->assertFalse( $donation->isExported() );
@@ -69,6 +70,7 @@ class DonationTest extends TestCase {
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			ValidDonation::newTrackingInfo(),
+			ValidDonation::newDonatedOnDate(),
 			ValidDonation::newPublicComment()
 		);
 
@@ -82,6 +84,7 @@ class DonationTest extends TestCase {
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			ValidDonation::newTrackingInfo(),
+			ValidDonation::newDonatedOnDate(),
 			null
 		);
 
@@ -166,20 +169,33 @@ class DonationTest extends TestCase {
 		$donation->markAsExported();
 		$this->assertFalse( $donation->donorIsAnonymous(), 'We expect the fixture to be anonymous' );
 
-		$donation->scrubPersonalData();
+		$donation->scrubPersonalData( new \DateTimeImmutable() );
 
 		$this->assertTrue( $donation->donorIsAnonymous(), 'Donor should be anonymous' );
 		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
 		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
 	}
 
-	public function testPreventsAnonymizeDonationOnUnexportedDonations(): void {
+	public function testPreventsAnonymizeDonationOnUnexportedDonationsAfterTheCutoffDate(): void {
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
 		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
+		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->sub( new \DateInterval( 'PT1H' ) );
 
 		$this->expectException( \DomainException::class );
 
-		$donation->scrubPersonalData();
+		$donation->scrubPersonalData( $cutoffDateInsideGracePeriod );
+	}
+
+	public function testAllowsAnonymizeDonationOnUnexportedDonationsBeforeTheCutoffDate(): void {
+		$donation = ValidDonation::newIncompleteCreditCardDonation();
+		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
+		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->modify( "+1 hour" );
+
+		$donation->scrubPersonalData( $cutoffDateInsideGracePeriod );
+
+		$this->assertTrue( $donation->donorIsAnonymous(), 'Donor should be anonymous' );
+		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
+		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
 	}
 
 	public function testMarkExportedWithoutDateSetsCurrentDate(): void {

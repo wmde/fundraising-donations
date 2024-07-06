@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Domain\Model;
 
+use DateTimeImmutable;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
@@ -22,7 +23,8 @@ class Donation {
 
 	private int $paymentId;
 	private ?DonationComment $comment;
-	private ?\DateTimeImmutable $exportDate;
+	private DateTimeImmutable $donatedOn;
+	private ?DateTimeImmutable $exportDate;
 
 	/**
 	 * TODO: move out of Donation when database model is refactored
@@ -37,15 +39,17 @@ class Donation {
 	 * @param Donor $donor
 	 * @param int $paymentId
 	 * @param DonationTrackingInfo $trackingInfo
+	 * @param DateTimeImmutable $donatedOn
 	 * @param DonationComment|null $comment
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( int $id, Donor $donor, int $paymentId, DonationTrackingInfo $trackingInfo, DonationComment $comment = null ) {
+	public function __construct( int $id, Donor $donor, int $paymentId, DonationTrackingInfo $trackingInfo, DateTimeImmutable $donatedOn, DonationComment $comment = null ) {
 		$this->id = $id;
 		$this->donor = $donor;
 		$this->paymentId = $paymentId;
 		$this->trackingInfo = $trackingInfo;
+		$this->donatedOn = $donatedOn;
 		$this->comment = $comment;
 		$this->exportDate = null;
 		$this->cancelled = false;
@@ -162,11 +166,11 @@ class Donation {
 		return $this->exportDate !== null;
 	}
 
-	public function markAsExported( \DateTimeImmutable $exportDate = null ): void {
-		$this->exportDate = $exportDate ?? new \DateTimeImmutable();
+	public function markAsExported( DateTimeImmutable $exportDate = null ): void {
+		$this->exportDate = $exportDate ?? new DateTimeImmutable();
 	}
 
-	public function getExportDate(): ?\DateTimeImmutable {
+	public function getExportDate(): ?DateTimeImmutable {
 		return $this->exportDate;
 	}
 
@@ -186,7 +190,7 @@ class Donation {
 	 * This might be used by the fundraising application for display purposes,
 	 * but should be removed when not used any more.
 	 *
-	 * See also https://phabricator.wikimedia.org/T323710
+	 * See also https://phabricator.wiknimedia.org/T323710
 	 *
 	 * @deprecated
 	 */
@@ -223,14 +227,41 @@ class Donation {
 			// We don't want to clone comments for followup donations because they would show up again in the feed.
 			// When we refactor the donation model,
 			// we can point the comment to the comment of the original donation (db relationship)
+			new DateTimeImmutable(),
 			null
 		);
 	}
 
-	public function scrubPersonalData(): void {
-		if ( !$this->isExported() ) {
-			throw new \DomainException( "You must not anonymize unexported donations, otherwise you'd lose data." );
+	public function getDonatedOn(): DateTimeImmutable {
+		return $this->donatedOn;
+	}
+
+	public function scrubPersonalData( \DateTimeInterface $exportGracePeriodCutoffDate ): void {
+		if ( !$this->scrubbingIsAllowed( $exportGracePeriodCutoffDate ) ) {
+			throw new \DomainException( sprintf(
+				"You must not anonymize unexported donations before %s, otherwise you'd lose data.",
+				$exportGracePeriodCutoffDate->format( 'Y-m-d H:i:s' )
+			) );
 		}
 		$this->donor = new ScrubbedDonor( $this->donor->getDonorType() );
+	}
+
+	/**
+	 * We allow scrubbing of individual un-exported donations when the "grace period" (for completing payments) is over.
+	 *
+	 * Calling code is expected to calculate the grace period by subtracting an interval from the current time.
+	 *
+	 * Example: Scrubbing 2 donations with dates 2024-12-11 and 2024-12-13, on 2024-12-14 with a 2-day interval
+	 *          for the grace period will lead to a cutoff date of 2024-12-12,
+	 *          which allows for the donation on 2024-12-11 to be scrubbed
+	 */
+	private function scrubbingIsAllowed( \DateTimeInterface $exportGracePeriodCutoffDate ): bool {
+		if ( $this->isExported() ) {
+			return true;
+		}
+		if ( $this->donatedOn <= $exportGracePeriodCutoffDate ) {
+			return true;
+		}
+		return false;
 	}
 }

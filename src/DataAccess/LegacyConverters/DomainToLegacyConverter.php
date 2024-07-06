@@ -35,6 +35,7 @@ class DomainToLegacyConverter {
 		$doctrineDonation->setDonationReceipt( $donor->wantsReceipt() );
 		$this->updateStatusInformation( $doctrineDonation, $donation, $legacyPaymentData );
 		$this->updateExportInformation( $doctrineDonation, $donation );
+		$doctrineDonation->setCreationTime( \DateTime::createFromImmutable( $donation->getDonatedOn() ) );
 
 		$doctrineDonation->setModerationReasons( ...$this->mergeModerationReasons( $existingModerationReasons, $donation->getModerationReasons() ) );
 

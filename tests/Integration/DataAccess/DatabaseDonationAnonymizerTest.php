@@ -5,6 +5,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use WMDE\Clock\SystemClock;
 use WMDE\Fundraising\DonationContext\DataAccess\DatabaseDonationAnonymizer;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationExistsChecker;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
@@ -27,6 +28,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 	private EntityManager $entityManager;
 
 	private \DateTime $anonymizationMarkerTime;
+	private \DateInterval $gracePeriod;
+	private SystemClock $clock;
 
 	public function setUp(): void {
 		$factory = TestEnvironment::newInstance()->getFactory();
@@ -38,6 +41,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			$this->makeGetPaymentUseCaseStub(),
 			new ModerationReasonRepository( $this->entityManager )
 		);
+		$this->clock = new SystemClock();
+		$this->gracePeriod = new \DateInterval( 'P2D' );
 	}
 
 	public function testAnonymizeAtReturnsNumberOfAnonymizedDonations(): void {
@@ -45,7 +50,7 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$this->entityManager->persist( $this->newExportedDonation( 2 ) );
 		$this->entityManager->persist( $this->newExportedDonation( 3 ) );
 		$this->entityManager->flush();
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager );
+		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
 
 		$count = $anonymizer->anonymizeAt( \DateTimeImmutable::createFromMutable( $this->anonymizationMarkerTime ) );
 
@@ -56,7 +61,7 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 	public function testGivenOneDonation_itIsNotCleanedWhenTimestampDoesNotMatch(): void {
 		$this->insertOneRow();
 		$yesterday = \DateTimeImmutable::createFromMutable( $this->anonymizationMarkerTime )->modify( '-1 day' );
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager );
+		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
 
 		$anonymizer->anonymizeAt( $yesterday );
 
@@ -65,7 +70,7 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 
 	public function testGivenDonation_anonymizeWillAnonymizeIt(): void {
 		$this->insertOneRow();
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager );
+		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
 
 		$anonymizer->anonymizeWithIds( self::DEFAULT_DONATION_ID );
 
@@ -76,7 +81,7 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$missingDonationId = 42;
 		$this->expectException( AnonymizationException::class );
 		$this->expectExceptionMessageMatches( "/Could not find donation with id $missingDonationId/" );
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager );
+		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
 
 		$anonymizer->anonymizeWithIds( $missingDonationId );
 	}

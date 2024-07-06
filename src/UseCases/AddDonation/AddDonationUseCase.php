@@ -86,7 +86,8 @@ class AddDonationUseCase {
 			$donationId,
 			$donor,
 			$paymentId,
-			$this->newTrackingInfoFromRequest( $donationRequest )
+			$this->newTrackingInfoFromRequest( $donationRequest ),
+			new \DateTimeImmutable(),
 		);
 	}
 
