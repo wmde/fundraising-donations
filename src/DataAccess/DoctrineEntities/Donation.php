@@ -103,7 +103,7 @@ class Donation {
 
 	/**
 	 * This represents the fact that the personal data was removed from the donation.
-	 * This is different from addressType = 'anonym' which indicates that the user donation anonymously.
+	 * This is different from addressType = 'anonym' which indicates that the user donated anonymously.
 	 */
 	private bool $isScrubbed = false;
 
