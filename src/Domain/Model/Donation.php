@@ -188,9 +188,9 @@ class Donation {
 
 	/**
 	 * This might be used by the fundraising application for display purposes,
-	 * but should be removed when not used any more.
+	 * but should be removed when not used anymore.
 	 *
-	 * See also https://phabricator.wiknimedia.org/T323710
+	 * See also https://phabricator.wikimedia.org/T323710
 	 *
 	 * @deprecated
 	 */

@@ -137,7 +137,7 @@ class DonationTest extends TestCase {
 		$this->assertEquals( $followupUpDonation->getTrackingInfo(), $donation->getTrackingInfo() );
 		$this->assertFalse(
 			$followupUpDonation->isExported(),
-			'Followup donations are for exporting recurring payments, therefore the ew donation must not e exported'
+			'Followup donations are for exporting recurring payments, therefore the new donation must not be exported'
 		);
 	}
 
