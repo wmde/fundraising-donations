@@ -561,7 +561,7 @@ class Donation {
 		return $this->isScrubbed;
 	}
 
-	public function setIsScrubbed( bool $isScrubbed ): void {
-		$this->isScrubbed = $isScrubbed;
+	public function scrub(): void {
+		$this->isScrubbed = true;
 	}
 }
