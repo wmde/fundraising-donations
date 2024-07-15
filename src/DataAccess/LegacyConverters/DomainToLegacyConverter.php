@@ -10,6 +10,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
 use WMDE\Fundraising\PaymentContext\Domain\PaymentType;
@@ -33,10 +34,8 @@ class DomainToLegacyConverter {
 		$doctrineDonation->setDonorOptsIntoNewsletter( $donor->isSubscribedToMailingList() );
 		$doctrineDonation->setDonationReceipt( $donor->wantsReceipt() );
 		$this->updateStatusInformation( $doctrineDonation, $donation, $legacyPaymentData );
-
-		// TODO create $this->updateExportState($doctrineDonation, $donation);
-		// currently, that method is not needed because the export state is set in a dedicated
-		// export script that does not use the domain model
+		$this->updateExportInformation( $doctrineDonation, $donation );
+		$doctrineDonation->setCreationTime( \DateTime::createFromImmutable( $donation->getDonatedOn() ) );
 
 		$doctrineDonation->setModerationReasons( ...$this->mergeModerationReasons( $existingModerationReasons, $donation->getModerationReasons() ) );
 
@@ -46,6 +45,8 @@ class DomainToLegacyConverter {
 				$this->getDataMap( $donation, $legacyPaymentData )
 			)
 		);
+
+		$this->modifyDonationForAnonymousDonor( $donation->getDonor(), $doctrineDonation );
 
 		return $doctrineDonation;
 	}
@@ -168,5 +169,23 @@ class DomainToLegacyConverter {
 			'bImpCount' => $trackingInfo->singleBannerImpressionCount,
 			'tracking' => $trackingInfo->tracking,
 		];
+	}
+
+	private function modifyDonationForAnonymousDonor( Donor $donor, DoctrineDonation $doctrineDonation ): DoctrineDonation {
+		if ( $donor instanceof Donor\ScrubbedDonor ) {
+			$doctrineDonation->scrub();
+			return DataBlobScrubber::scrubPersonalDataFromDataBlob( $doctrineDonation );
+		}
+		return $doctrineDonation;
+	}
+
+	private function updateExportInformation( DoctrineDonation $doctrineDonation, Donation $donation ): void {
+		$exportDate = $donation->getExportDate();
+		if ( $exportDate === null ) {
+			$doctrineDonation->setDtGruen( null );
+		} else {
+			// We DON'T use setDtExport, because that field is deprecated and not in use
+			$doctrineDonation->setDtGruen( \DateTime::createFromImmutable( $exportDate ) );
+		}
 	}
 }
