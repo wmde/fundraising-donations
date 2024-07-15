@@ -172,12 +172,11 @@ class DomainToLegacyConverter {
 	}
 
 	private function modifyDonationForAnonymousDonor( Donor $donor, DoctrineDonation $doctrineDonation ): DoctrineDonation {
-		if ( !( $donor instanceof Donor\ScrubbedDonor ) ) {
-			$doctrineDonation->setIsScrubbed( false );
-			return $doctrineDonation;
+		if ( $donor instanceof Donor\ScrubbedDonor ) {
+			$doctrineDonation->scrub();
+			return DataBlobScrubber::scrubPersonalDataFromDataBlob( $doctrineDonation );
 		}
-		$doctrineDonation->setIsScrubbed( true );
-		return DataBlobScrubber::scrubPersonalDataFromDataBlob( $doctrineDonation );
+		return $doctrineDonation;
 	}
 
 	private function updateExportInformation( DoctrineDonation $doctrineDonation, Donation $donation ): void {
