@@ -6,13 +6,10 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name;
 
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
 
-/**
- * This is the name for anonymous donors.
- */
-class NoName implements DonorName {
+class ScrubbedName implements DonorName {
 
 	public function getFullName(): string {
-		return 'Anonym';
+		return '';
 	}
 
 	public function toArray(): array {

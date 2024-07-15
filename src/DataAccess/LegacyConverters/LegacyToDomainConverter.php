@@ -24,11 +24,10 @@ class LegacyToDomainConverter {
 			$donor,
 			$doctrineDonation->getPaymentId(),
 			$this->createTrackingInfo( $doctrineDonation ),
+			\DateTimeImmutable::createFromMutable( $doctrineDonation->getCreationTime() ),
 			$this->createComment( $doctrineDonation )
 		);
-		if ( $this->entityIsExported( $doctrineDonation ) ) {
-			$donation->markAsExported();
-		}
+		$this->setExportStatus( $doctrineDonation, $donation );
 		$this->assignCancellationAndModeration( $doctrineDonation, $donation );
 		return $donation;
 	}
@@ -64,10 +63,6 @@ class LegacyToDomainConverter {
 		);
 	}
 
-	private function entityIsExported( DoctrineDonation $dd ): bool {
-		return $dd->getDtGruen() && $dd->getDtGruen()->getTimestamp() > 0;
-	}
-
 	private function getDonor( DoctrineDonation $doctrineDonation ): Donor {
 		$donor = DonorFactory::createDonorFromEntity( $doctrineDonation );
 		if ( $doctrineDonation->getDonationReceipt() ) {
@@ -83,5 +78,12 @@ class LegacyToDomainConverter {
 		}
 
 		return $donor;
+	}
+
+	private function setExportStatus( DoctrineDonation $doctrineDonation, Donation $donation ): void {
+		$exportDate = $doctrineDonation->getDtGruen();
+		if ( $exportDate !== null && $exportDate->getTimestamp() > 0 ) {
+			$donation->markAsExported( \DateTimeImmutable::createFromMutable( $exportDate ) );
+		}
 	}
 }

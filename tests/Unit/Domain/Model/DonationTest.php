@@ -11,6 +11,7 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\ScrubbedDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -51,6 +52,7 @@ class DonationTest extends TestCase {
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			ValidDonation::newTrackingInfo(),
+			ValidDonation::newDonatedOnDate(),
 			null
 		);
 		$this->assertFalse( $donation->isExported() );
@@ -68,6 +70,7 @@ class DonationTest extends TestCase {
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			ValidDonation::newTrackingInfo(),
+			ValidDonation::newDonatedOnDate(),
 			ValidDonation::newPublicComment()
 		);
 
@@ -81,6 +84,7 @@ class DonationTest extends TestCase {
 			ValidDonation::newDonor(),
 			ValidPayments::newDirectDebitPayment()->getId(),
 			ValidDonation::newTrackingInfo(),
+			ValidDonation::newDonatedOnDate(),
 			null
 		);
 
@@ -131,7 +135,10 @@ class DonationTest extends TestCase {
 		$this->assertSame( 99, $followupUpDonation->getPaymentId() );
 		$this->assertEquals( $followupUpDonation->getDonor(), $donation->getDonor() );
 		$this->assertEquals( $followupUpDonation->getTrackingInfo(), $donation->getTrackingInfo() );
-		$this->assertFalse( $followupUpDonation->isExported() );
+		$this->assertFalse(
+			$followupUpDonation->isExported(),
+			'Followup donations are for exporting recurring payments, therefore the new donation must not be exported'
+		);
 	}
 
 	public function testMarkForModerationNeedsAtLeastOneModerationReason(): void {
@@ -155,6 +162,52 @@ class DonationTest extends TestCase {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 		$this->assertTrue( $donation->shouldSendConfirmationMail() );
+	}
+
+	public function testAnonymizeDonationReplacesExistingDonorWithAnonymizedDonor(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->markAsExported();
+		$this->assertFalse( $donation->donorIsAnonymous(), 'We expect the fixture to be anonymous' );
+
+		$donation->scrubPersonalData( new \DateTimeImmutable() );
+
+		$this->assertTrue( $donation->donorIsAnonymous(), 'Donor should be anonymous' );
+		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
+		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
+	}
+
+	public function testPreventsAnonymizeDonationOnUnexportedDonationsAfterTheCutoffDate(): void {
+		$donation = ValidDonation::newIncompleteCreditCardDonation();
+		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
+		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->sub( new \DateInterval( 'PT1H' ) );
+
+		$this->expectException( \DomainException::class );
+
+		$donation->scrubPersonalData( $cutoffDateInsideGracePeriod );
+	}
+
+	public function testAllowsAnonymizeDonationOnUnexportedDonationsBeforeTheCutoffDate(): void {
+		$donation = ValidDonation::newIncompleteCreditCardDonation();
+		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
+		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->modify( "+1 hour" );
+
+		$donation->scrubPersonalData( $cutoffDateInsideGracePeriod );
+
+		$this->assertTrue( $donation->donorIsAnonymous(), 'Donor should be anonymous' );
+		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
+		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
+	}
+
+	public function testMarkExportedWithoutDateSetsCurrentDate(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$this->assertNull( $donation->getExportDate() );
+		$now = new \DateTimeImmutable();
+
+		$donation->markAsExported();
+
+		$exportDate = $donation->getExportDate();
+		$this->assertNotNull( $exportDate );
+		$this->assertEqualsWithDelta( $now->getTimestamp(), $exportDate->getTimestamp(), 3 );
 	}
 
 }

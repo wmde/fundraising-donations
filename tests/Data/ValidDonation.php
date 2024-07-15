@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
+use DateTimeImmutable;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
@@ -167,7 +168,8 @@ class ValidDonation {
 			$donationId,
 			$donor,
 			$payment->getId(),
-			self::newTrackingInfo()
+			self::newTrackingInfo(),
+			self::newDonatedOnDate()
 		);
 	}
 
@@ -178,7 +180,8 @@ class ValidDonation {
 			$donationId,
 			$donor,
 			$payment->getId(),
-			self::newTrackingInfo()
+			self::newTrackingInfo(),
+			self::newDonatedOnDate()
 		);
 		$donation->cancelWithoutChecks();
 		return $donation;
@@ -189,7 +192,8 @@ class ValidDonation {
 			$donationId,
 			new AnonymousDonor(),
 			$payment->getId(),
-			self::newTrackingInfo()
+			self::newTrackingInfo(),
+			self::newDonatedOnDate()
 		);
 	}
 
@@ -255,6 +259,10 @@ class ValidDonation {
 
 	public static function newEmailOnlyDonor(): EmailDonor {
 		return new EmailDonor( self::newPersonName(), self::DONOR_EMAIL_ADDRESS );
+	}
+
+	public static function newDonatedOnDate(): DateTimeImmutable {
+		return new DateTimeImmutable( '2015-12-14 16:25:44' );
 	}
 
 }
