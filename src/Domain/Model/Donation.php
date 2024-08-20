@@ -239,8 +239,9 @@ class Donation {
 	public function scrubPersonalData( \DateTimeInterface $exportGracePeriodCutoffDate ): void {
 		if ( !$this->scrubbingIsAllowed( $exportGracePeriodCutoffDate ) ) {
 			throw new \DomainException( sprintf(
-				"You must not anonymize unexported donations before %s, otherwise you'd lose data.",
-				$exportGracePeriodCutoffDate->format( 'Y-m-d H:i:s' )
+				"You must not anonymize unexported donations before %s, otherwise you'd lose data. Offending donation ID: %s",
+				$exportGracePeriodCutoffDate->format( 'Y-m-d H:i:s' ),
+				$this->getId()
 			) );
 		}
 		$this->donor = new ScrubbedDonor( $this->donor->getDonorType() );
