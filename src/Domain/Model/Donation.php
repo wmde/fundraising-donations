@@ -8,6 +8,7 @@ use DateTimeImmutable;
 use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\ScrubbedName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\ScrubbedDonor;
 
 class Donation {
@@ -244,7 +245,12 @@ class Donation {
 				$this->getId()
 			) );
 		}
-		$this->donor = new ScrubbedDonor( $this->donor->getDonorType() );
+		$this->donor = new ScrubbedDonor(
+			new ScrubbedName( $this->donor->getName()->getSalutation() ),
+			$this->donor->getDonorType(),
+			$this->donor->isSubscribedToMailingList(),
+			$this->donor->wantsReceipt()
+		);
 	}
 
 	/**

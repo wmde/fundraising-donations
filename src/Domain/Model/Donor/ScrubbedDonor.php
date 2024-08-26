@@ -12,14 +12,33 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
  * This is a donor "placeholder" class for donations that were exported and anonymized.
  *
  * This class is different from {@see AnonymousDonor}, which is the class used where the person has actively
- * declined to provide an address.
+ * declined to provide an address. It preserves certain settings of the original donor.
  */
 class ScrubbedDonor extends AbstractDonor {
+	use MailingListTrait;
+	use ReceiptTrait;
 
-	public function __construct( private readonly DonorType $originalDonorType ) {
-		$this->name = new ScrubbedName();
+	public function __construct(
+		ScrubbedName $name,
+		private readonly DonorType $originalDonorType,
+		bool $mailingListOptIn,
+		bool $requireReceipt
+	) {
+		$this->name = $name;
 		$this->physicalAddress = new ScrubbedAddress();
 		$this->emailAddress = '';
+
+		if ( $mailingListOptIn ) {
+			$this->subscribeToMailingList();
+		} else {
+			$this->unsubscribeFromMailingList();
+		}
+
+		if ( $requireReceipt ) {
+			$this->requireReceipt();
+		} else {
+			$this->declineReceipt();
+		}
 	}
 
 	public function isPrivatePerson(): bool {
@@ -32,30 +51,6 @@ class ScrubbedDonor extends AbstractDonor {
 
 	public function getDonorType(): DonorType {
 		return $this->originalDonorType;
-	}
-
-	public function subscribeToMailingList(): void {
-		// Do nothing, this donor doesn't support newsletters
-	}
-
-	public function unsubscribeFromMailingList(): void {
-		// Do nothing, this donor doesn't support newsletters
-	}
-
-	public function isSubscribedToMailingList(): bool {
-		return false;
-	}
-
-	public function requireReceipt(): void {
-		// Do nothing, this donor doesn't support receipts
-	}
-
-	public function declineReceipt(): void {
-		// Do nothing, this donor doesn't support receipts
-	}
-
-	public function wantsReceipt(): bool {
-		return false;
 	}
 
 }
