@@ -19,4 +19,8 @@ class NoName implements DonorName {
 		return [];
 	}
 
+	public function getSalutation(): string {
+		return '';
+	}
+
 }
