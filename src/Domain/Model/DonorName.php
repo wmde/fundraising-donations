@@ -8,6 +8,8 @@ interface DonorName {
 
 	public function getFullName(): string;
 
+	public function getSalutation(): string;
+
 	/**
 	 * Get name components for usage in templates
 	 *

@@ -73,9 +73,15 @@ class DonorFieldMapperTest extends TestCase {
 		$this->assertSame( ValidDonation::DONOR_CITY, $personalDonation->getDonorCity() );
 	}
 
-	public function testGivenScrubbedDonorItPassesTheOriginalDonorTypeAsForTheAddressType(): void {
-		$fields = DonorFieldMapper::getPersonalDataFields( new Donor\ScrubbedDonor( DonorType::COMPANY ) );
+	public function testGivenScrubbedDonorItPassesTheOriginalDonorTypeAndTitle(): void {
+		$fields = DonorFieldMapper::getPersonalDataFields( new Donor\ScrubbedDonor(
+			new Donor\Name\ScrubbedName( 'Divers' ),
+			DonorType::COMPANY,
+			true,
+			true
+		) );
 
 		$this->assertSame( 'firma', $fields['adresstyp'] );
+		$this->assertSame( 'Divers', $fields['anrede'] );
 	}
 }

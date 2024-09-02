@@ -27,4 +27,8 @@ class CompanyName implements DonorName {
 		return $this->companyName;
 	}
 
+	public function getSalutation(): string {
+		return 'firma';
+	}
+
 }

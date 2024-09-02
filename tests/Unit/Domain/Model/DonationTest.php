@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\Domain\Model;
 
 use PHPUnit\Framework\Attributes\CoversClass;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
@@ -168,11 +169,15 @@ class DonationTest extends TestCase {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->markAsExported();
 		$this->assertFalse( $donation->donorIsAnonymous(), 'We expect the fixture to be anonymous' );
+		$this->assertTrue( $donation->getDonor()->wantsReceipt(), 'We expect the fixture to want a receipt' );
+		$this->assertTrue( $donation->getDonor()->isSubscribedToMailingList(), 'We expect the fixture to be subscribed to the mailing list' );
 
 		$donation->scrubPersonalData( new \DateTimeImmutable() );
 
 		$this->assertTrue( $donation->donorIsAnonymous(), 'Donor should be anonymous' );
 		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
+		$this->assertTrue( $donation->getDonor()->wantsReceipt(), 'Donor should still want a receipt' );
+		$this->assertTrue( $donation->getDonor()->isSubscribedToMailingList(), 'Donor should still be subscribed to the mailing list' );
 		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
 	}
 
@@ -196,6 +201,24 @@ class DonationTest extends TestCase {
 		$this->assertTrue( $donation->donorIsAnonymous(), 'Donor should be anonymous' );
 		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
 		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
+	}
+
+	#[DataProvider( 'provideDonationsForAnonymization' )]
+	public function testAnonymizeDonationPreservesSalutation( Donation $donation ): void {
+		$this->assertFalse( $donation->donorIsAnonymous(), 'We expect the fixture to be non-anonymous' );
+		$originalSalutation = $donation->getDonor()->getName()->getSalutation();
+		$donation->markAsExported();
+		$donation->scrubPersonalData( new \DateTimeImmutable() );
+
+		$this->assertSame( $originalSalutation, $donation->getDonor()->getName()->getSalutation() );
+	}
+
+	/**
+	 * @return iterable<array{Donation}>
+	 */
+	public static function provideDonationsForAnonymization(): iterable {
+		yield [ ValidDonation::newBankTransferDonation() ];
+		yield [ ValidDonation::newCompanyBankTransferDonation() ];
 	}
 
 	public function testMarkExportedWithoutDateSetsCurrentDate(): void {
