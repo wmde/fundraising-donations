@@ -42,4 +42,8 @@ class PersonName implements DonorName {
 		);
 	}
 
+	public function getSalutation(): string {
+		return $this->salutation;
+	}
+
 }

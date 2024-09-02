@@ -22,7 +22,12 @@ class DonorFactory {
 
 		if ( $donation->isScrubbed() ) {
 			$donorType = self::createDonorTypeFromRawAddressType( $rawAddressType );
-			return new ScrubbedDonor( $donorType );
+			return new ScrubbedDonor(
+				new Donor\Name\ScrubbedName( $data->getValue( 'anrede' ) ),
+				$donorType,
+				$donation->getDonorOptsIntoNewsletter(),
+				(bool)$donation->getDonationReceipt()
+			);
 		}
 
 		switch ( $rawAddressType ) {

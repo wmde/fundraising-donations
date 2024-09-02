@@ -34,6 +34,10 @@ class CompanyContactName implements DonorName {
 		return $name;
 	}
 
+	public function getSalutation(): string {
+		return 'firma';
+	}
+
 	public function toArray(): array {
 		return array_merge( [
 			'companyName' => $this->companyName,
