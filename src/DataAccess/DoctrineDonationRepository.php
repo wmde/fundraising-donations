@@ -70,9 +70,13 @@ class DoctrineDonationRepository implements DonationRepository {
 			throw new StoreDonationException( $ex );
 		}
 
+		// This should never happen because we checked for existence with the donationExistsChecker in storeDonation,
+		// but due to the type signature of getDoctrineDonationById we have to check again
+		// @codeCoverageIgnoreStart
 		if ( $doctrineDonation === null ) {
-			throw new StoreDonationException();
+			throw new StoreDonationException( null, "Could not find donation with id '{$donation->getId()}'" );
 		}
+		// @codeCoverageIgnoreEnd
 
 		$converter = new DomainToLegacyConverter();
 		$doctrineDonation = $converter->convert(
@@ -94,7 +98,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		try {
 			return $this->entityManager->find( DoctrineDonation::class, $id );
 		} catch ( ORMException $ex ) {
-			throw new GetDonationException( $ex );
+			throw new GetDonationException( $ex, "Could not get donation with id '$id'" );
 		}
 	}
 
@@ -109,7 +113,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		try {
 			return $converter->createFromLegacyObject( $doctrineDonation );
 		} catch ( \InvalidArgumentException $ex ) {
-			throw new GetDonationException( $ex );
+			throw new GetDonationException( $ex, "Could not get donation with id '$id'" );
 		}
 	}
 }
