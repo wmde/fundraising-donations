@@ -113,7 +113,7 @@ class DoctrineDonationRepository implements DonationRepository {
 		try {
 			return $converter->createFromLegacyObject( $doctrineDonation );
 		} catch ( \InvalidArgumentException $ex ) {
-			throw new GetDonationException( $ex, "Could not get donation with id '$id'" );
+			throw new GetDonationException( $ex, "Could not convert donation with id '$id' - " . $ex->getMessage() );
 		}
 	}
 }
