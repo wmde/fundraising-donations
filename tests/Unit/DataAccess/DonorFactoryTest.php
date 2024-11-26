@@ -9,6 +9,8 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\EmailDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\ScrubbedDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 
@@ -42,11 +44,39 @@ class DonorFactoryTest extends TestCase {
 		$this->assertEquals( ValidDonation::newEmailOnlyDonor(), $donor );
 	}
 
-	public function testCreatePrivateAnonymizedDonor(): void {
-		$donor = DonorFactory::createDonorFromEntity( ValidDoctrineDonation::newAnyonymizedDonation() );
+	public function testCreatePrivateScrubbedDonor(): void {
+		$donor = DonorFactory::createDonorFromEntity( ValidDoctrineDonation::newScrubbedDonation() );
 
-		$this->assertInstanceOf( PersonDonor::class, $donor );
+		$this->assertInstanceOf( ScrubbedDonor::class, $donor );
+		$this->assertSame( DonorType::PERSON, $donor->getDonorType() );
 		$this->assertSame( '', $donor->getName()->getFullName() );
+	}
+
+	public function testCreateCompanyScrubbedDonor(): void {
+		$donation = ValidDoctrineDonation::newCompanyDonation();
+		$donation->scrub();
+		$donor = DonorFactory::createDonorFromEntity( $donation );
+
+		$this->assertInstanceOf( ScrubbedDonor::class, $donor );
+		$this->assertSame( DonorType::COMPANY, $donor->getDonorType() );
+	}
+
+	public function testCreateEmailScrubbedDonor(): void {
+		$donation = ValidDoctrineDonation::newEmailDonation();
+		$donation->scrub();
+		$donor = DonorFactory::createDonorFromEntity( $donation );
+
+		$this->assertInstanceOf( ScrubbedDonor::class, $donor );
+		$this->assertSame( DonorType::EMAIL, $donor->getDonorType() );
+	}
+
+	public function testCreateAnonymousScrubbedDonor(): void {
+		$donation = ValidDoctrineDonation::newAnonymousDonation();
+		$donation->scrub();
+		$donor = DonorFactory::createDonorFromEntity( $donation );
+
+		$this->assertInstanceOf( ScrubbedDonor::class, $donor );
+		$this->assertSame( DonorType::ANONYMOUS, $donor->getDonorType() );
 	}
 
 	public function testUnknownAddressTypeThrowsException(): void {
