@@ -85,7 +85,7 @@ class DonorFactory {
 			'firma' => DonorType::COMPANY,
 			'email' => DonorType::EMAIL,
 			'person' => DonorType::PERSON,
-			'anonymous' => DonorType::ANONYMOUS,
+			'anonym' => DonorType::ANONYMOUS,
 			default => throw new \InvalidArgumentException( sprintf( 'Unknown donor type: %s', $addressType ) ),
 		};
 	}
