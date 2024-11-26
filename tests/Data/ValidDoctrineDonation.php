@@ -110,7 +110,7 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
-	public static function newAnyonymizedDonation(): Donation {
+	public static function newScrubbedDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();
 		$donation->setPaymentType( self::PAYMENT_PAYPAL );
@@ -127,6 +127,7 @@ class ValidDoctrineDonation {
 		);
 		$donation->setDonorCity( '' );
 		$donation->setDonorEmail( '' );
+		$donation->scrub();
 		return $donation;
 	}
 
