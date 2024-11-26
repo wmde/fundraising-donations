@@ -52,6 +52,33 @@ class DonorFactoryTest extends TestCase {
 		$this->assertSame( '', $donor->getName()->getFullName() );
 	}
 
+	public function testCreateCompanyScrubbedDonor(): void {
+		$donation = ValidDoctrineDonation::newCompanyDonation();
+		$donation->scrub();
+		$donor = DonorFactory::createDonorFromEntity( $donation );
+
+		$this->assertInstanceOf( ScrubbedDonor::class, $donor );
+		$this->assertSame( DonorType::COMPANY, $donor->getDonorType() );
+	}
+
+	public function testCreateEmailScrubbedDonor(): void {
+		$donation = ValidDoctrineDonation::newEmailDonation();
+		$donation->scrub();
+		$donor = DonorFactory::createDonorFromEntity( $donation );
+
+		$this->assertInstanceOf( ScrubbedDonor::class, $donor );
+		$this->assertSame( DonorType::EMAIL, $donor->getDonorType() );
+	}
+
+	public function testCreateAnonymousScrubbedDonor(): void {
+		$donation = ValidDoctrineDonation::newAnonymousDonation();
+		$donation->scrub();
+		$donor = DonorFactory::createDonorFromEntity( $donation );
+
+		$this->assertInstanceOf( ScrubbedDonor::class, $donor );
+		$this->assertSame( DonorType::ANONYMOUS, $donor->getDonorType() );
+	}
+
 	public function testUnknownAddressTypeThrowsException(): void {
 		$doctrineDonation = ValidDoctrineDonation::newAnonymousDonation();
 		$doctrineDonation->encodeAndSetData( [ 'adresstyp' => 'unknown' ] );
