@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DonorTypeConverter;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
@@ -13,7 +14,6 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\CompanyContactName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\ScrubbedDonor;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
 class DonorFactory {
 	public static function createDonorFromEntity( DoctrineDonation $donation ): Donor {
@@ -21,7 +21,7 @@ class DonorFactory {
 		$rawAddressType = $data->getValue( 'adresstyp' );
 
 		if ( $donation->isScrubbed() ) {
-			$donorType = self::createDonorTypeFromRawAddressType( $rawAddressType );
+			$donorType = DonorTypeConverter::getDonorTypeFromString( $rawAddressType );
 			return new ScrubbedDonor(
 				new Donor\Name\ScrubbedName( $data->getValue( 'anrede' ) ),
 				$donorType,
@@ -67,7 +67,7 @@ class DonorFactory {
 			case 'anonym':
 				return new AnonymousDonor();
 			default:
-				throw new \UnexpectedValueException( sprintf( 'Unknown address type: %s', $data->getValue( 'adresstyp' ) ) );
+				throw new \UnexpectedValueException( sprintf( 'Unknown address type: %s', $rawAddressType ) );
 		}
 	}
 
@@ -78,15 +78,5 @@ class DonorFactory {
 			$data->getValue( 'ort' ),
 			$data->getValue( 'country' )
 		);
-	}
-
-	private static function createDonorTypeFromRawAddressType( string $addressType ): DonorType {
-		return match ( $addressType ) {
-			'firma' => DonorType::COMPANY,
-			'email' => DonorType::EMAIL,
-			'person' => DonorType::PERSON,
-			'anonym' => DonorType::ANONYMOUS,
-			default => throw new \InvalidArgumentException( sprintf( 'Unknown donor type: %s', $addressType ) ),
-		};
 	}
 }

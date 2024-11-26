@@ -5,12 +5,12 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DonorTypeConverter;
 use WMDE\Fundraising\DonationContext\Domain\Model\Address;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\NoAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 
 /**
  * Convert a Donor into an array of fields for the legacy database schema that
@@ -27,7 +27,7 @@ class DonorFieldMapper {
 			// Order of the fields is the same as the resulting array of ValidDoctrineDonation,
 			// otherwise comparing the serialized data will fail
 			[
-				'adresstyp' => self::getAddressType( $donor ),
+				'adresstyp' => DonorTypeConverter::getLegacyDonorType( $donor->getDonorType() ),
 			],
 			self::getDataFieldsFromPersonName( $donor->getName() ),
 			self::getDataFieldsFromAddress( $donor->getPhysicalAddress() ),
@@ -94,16 +94,6 @@ class DonorFieldMapper {
 		}
 
 		$doctrineDonation->setDonorCity( $donor->getPhysicalAddress()->getCity() );
-	}
-
-	private static function getAddressType( Donor $donor ): string {
-		$donorType = $donor->getDonorType();
-		return match ( $donorType ) {
-			DonorType::PERSON => 'person',
-			DonorType::COMPANY => 'firma',
-			DonorType::EMAIL => 'email',
-			DonorType::ANONYMOUS => 'anonym'
-		};
 	}
 
 }
