@@ -11,8 +11,18 @@ use WMDE\Fundraising\DonationContext\Domain\Model\DonorName;
  */
 class NoName implements DonorName {
 
+	/**
+	 * The name displayed in {@see self::getFullName()}
+	 *
+	 * For historical reasons, this is German and won't follow our translation key rules (kebab-case) in the foreseeable future.
+	 * You can use it as a translation key in the frontend, though.
+	 *
+	 * This is mostly used for displaying the confirmation page and when creating comments.
+	 */
+	public const DISPLAY_NAME = 'Anonym';
+
 	public function getFullName(): string {
-		return 'Anonym';
+		return self::DISPLAY_NAME;
 	}
 
 	public function toArray(): array {
