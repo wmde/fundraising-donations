@@ -130,7 +130,7 @@ class DomainToLegacyConverter {
 		$doctrineDonation->setPaymentType( $legacyPaymentData->paymentName );
 	}
 
-	private function updateComment( DoctrineDonation $doctrineDonation, DonationComment $comment = null ): void {
+	private function updateComment( DoctrineDonation $doctrineDonation, ?DonationComment $comment = null ): void {
 		if ( $comment === null ) {
 			$doctrineDonation->setIsPublic( false );
 			$doctrineDonation->setComment( '' );

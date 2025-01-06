@@ -8,7 +8,7 @@ use Throwable;
 
 class StoreDonationException extends \RuntimeException {
 
-	public function __construct( Throwable $previous = null, string $message = 'Could not store donation' ) {
+	public function __construct( ?Throwable $previous = null, string $message = 'Could not store donation' ) {
 		parent::__construct( $message, 0, $previous );
 	}
 

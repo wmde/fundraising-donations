@@ -31,10 +31,10 @@ class CancelDonationUseCaseTest extends TestCase {
 	private const AUTHORIZED_USER = 'admin_adminson';
 
 	private function newCancelDonationUseCase(
-		DonationRepository $repository = null,
-		DonationAuthorizationChecker $authorizer = null,
-		DonationEventLogger $logger = null,
-		CancelPaymentUseCase $cancelPaymentUseCase = null
+		?DonationRepository $repository = null,
+		?DonationAuthorizationChecker $authorizer = null,
+		?DonationEventLogger $logger = null,
+		?CancelPaymentUseCase $cancelPaymentUseCase = null
 	): CancelDonationUseCase {
 		return new CancelDonationUseCase(
 			$repository ?? new FakeDonationRepository(),

@@ -18,15 +18,15 @@ class UpdateDonorResponse {
 	private string $errorMessage;
 	private string $successMessage;
 
-	public static function newSuccessResponse( string $successMessage, Donation $donation = null ): self {
+	public static function newSuccessResponse( string $successMessage, ?Donation $donation = null ): self {
 		return new self( '', $successMessage, $donation );
 	}
 
-	public static function newFailureResponse( string $errorMessage, Donation $donation = null ): self {
+	public static function newFailureResponse( string $errorMessage, ?Donation $donation = null ): self {
 		return new self( $errorMessage, '', $donation );
 	}
 
-	private function __construct( string $errorMessage = '', string $successMessage = '', Donation $donation = null ) {
+	private function __construct( string $errorMessage = '', string $successMessage = '', ?Donation $donation = null ) {
 		$this->errorMessage = $errorMessage;
 		$this->successMessage = $successMessage;
 		$this->donation = $donation;
