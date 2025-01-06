@@ -45,7 +45,7 @@ class Donation {
 	 *
 	 * @throws \InvalidArgumentException
 	 */
-	public function __construct( int $id, Donor $donor, int $paymentId, DonationTrackingInfo $trackingInfo, DateTimeImmutable $donatedOn, DonationComment $comment = null ) {
+	public function __construct( int $id, Donor $donor, int $paymentId, DonationTrackingInfo $trackingInfo, DateTimeImmutable $donatedOn, ?DonationComment $comment = null ) {
 		$this->id = $id;
 		$this->donor = $donor;
 		$this->paymentId = $paymentId;
@@ -167,7 +167,7 @@ class Donation {
 		return $this->exportDate !== null;
 	}
 
-	public function markAsExported( DateTimeImmutable $exportDate = null ): void {
+	public function markAsExported( ?DateTimeImmutable $exportDate = null ): void {
 		$this->exportDate = $exportDate ?? new DateTimeImmutable();
 	}
 
