@@ -24,15 +24,15 @@ to update the dependencies, to get the same version you'd get in CI.
 
     make ci
 
-This implicitly builds the `app` container as defined in `docker-compose.yml` & `Dockerfile`
+This implicitly builds the `app` container as defined in `docker-compose.yml`
 and executes all CI checks. For commands that run only a subset, see `Makefile`.
 
 #### PHPUnit with filter
 
 You can run individual commands, e.g. PHPUnit with a filter, with
-`docker-compose`: 
+`docker compose`: 
 
-    docker-compose run --rm app ./vendor/bin/phpunit --filter valid
+    docker compose run --rm app ./vendor/bin/phpunit --filter valid
 
 ## Architecture
 
