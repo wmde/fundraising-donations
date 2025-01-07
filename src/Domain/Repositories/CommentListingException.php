@@ -9,7 +9,7 @@ use Throwable;
 
 class CommentListingException extends RuntimeException {
 
-	public function __construct( Throwable $previous = null ) {
+	public function __construct( ?Throwable $previous = null ) {
 		parent::__construct( 'Could not list comments', 0, $previous );
 	}
 
