@@ -18,7 +18,7 @@ class GetDonationResponse {
 		return new self( $donation );
 	}
 
-	private function __construct( Donation $donation = null ) {
+	private function __construct( ?Donation $donation = null ) {
 		$this->donation = $donation;
 	}
 

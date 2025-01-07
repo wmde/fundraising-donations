@@ -9,7 +9,7 @@ use Throwable;
 
 class GetDonationException extends RuntimeException {
 
-	public function __construct( Throwable $previous = null, string $message = 'Could not get donation' ) {
+	public function __construct( ?Throwable $previous = null, string $message = 'Could not get donation' ) {
 		parent::__construct( $message, 0, $previous );
 	}
 
