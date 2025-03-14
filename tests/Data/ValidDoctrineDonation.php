@@ -147,6 +147,9 @@ class ValidDoctrineDonation {
 		$donation->setDonorOptsIntoNewsletter( ValidDonation::OPTS_INTO_NEWSLETTER );
 		$donation->setDonationReceipt( true );
 
+		$donation->setImpressionCount( ValidDonation::TRACKING_TOTAL_IMPRESSION_COUNT );
+		$donation->setBannerImpressionCount( ValidDonation::TRACKING_BANNER_IMPRESSION_COUNT );
+
 		$donation->encodeAndSetData(
 			array_merge(
 				$this->getTrackingInfoArray(),

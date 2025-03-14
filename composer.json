@@ -53,6 +53,9 @@
 			"WMDE\\Fundraising\\DonationContext\\Tests\\": "tests/"
 		}
 	},
+	"bin": [
+		"bin/migrate-donation-tracking-data"
+	],
 	"config": {
 		"discard-changes": true,
 		"allow-plugins": {
