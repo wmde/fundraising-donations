@@ -46,8 +46,8 @@ class LegacyToDomainConverter {
 
 		return new DonationTrackingInfo(
 			tracking: $data->getValue( 'tracking' ),
-			totalImpressionCount: intval( $data->getValue( 'impCount' ) ),
-			singleBannerImpressionCount: intval( $data->getValue( 'bImpCount' ) )
+			totalImpressionCount: $dd->getImpressionCount(),
+			singleBannerImpressionCount: $dd->getBannerImpressionCount()
 		);
 	}
 

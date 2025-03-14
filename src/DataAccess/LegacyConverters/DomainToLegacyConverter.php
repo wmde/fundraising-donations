@@ -39,6 +39,9 @@ class DomainToLegacyConverter {
 
 		$doctrineDonation->setModerationReasons( ...$this->mergeModerationReasons( $existingModerationReasons, $donation->getModerationReasons() ) );
 
+		$doctrineDonation->setImpressionCount( $donation->getTrackingInfo()->totalImpressionCount );
+		$doctrineDonation->setBannerImpressionCount( $donation->getTrackingInfo()->singleBannerImpressionCount );
+
 		$doctrineDonation->encodeAndSetData(
 			array_merge(
 				$doctrineDonation->getDecodedData(),
