@@ -55,7 +55,8 @@
 	},
 	"bin": [
 		"bin/check-donation-payment-data",
-		"bin/migrate-donation-payment-data"
+		"bin/migrate-donation-payment-data",
+		"bin/migrate-donation-tracking-data"
 	],
 	"config": {
 		"discard-changes": true,
