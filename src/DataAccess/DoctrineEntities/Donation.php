@@ -56,6 +56,10 @@ class Donation {
 
 	private ?string $donorFullName = null;
 
+	private ?string $streetName = null;
+
+	private ?string $houseNumber = null;
+
 	private ?string $donorCity = null;
 
 	private ?string $donorEmail = null;
@@ -159,6 +163,26 @@ class Donation {
 
 	public function getDonorCity(): ?string {
 		return $this->donorCity;
+	}
+
+	public function setStreetName( string $streetName ): self {
+		$this->streetName = $streetName;
+
+		return $this;
+	}
+
+	public function getStreetName(): ?string {
+		return $this->streetName;
+	}
+
+	public function setHouseNumber( ?string $houseNumber ): self {
+		$this->houseNumber = $houseNumber;
+
+		return $this;
+	}
+
+	public function getHouseNumber(): ?string {
+		return $this->houseNumber;
 	}
 
 	public function setDonorEmail( string $donorEmail ): self {

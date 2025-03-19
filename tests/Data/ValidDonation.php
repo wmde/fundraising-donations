@@ -215,7 +215,7 @@ class ValidDonation {
 	}
 
 	private static function newAddress(): PostalAddress {
-		return new PostalAddress(
+		return PostalAddress::fromLegacyStreetName(
 			self::DONOR_STREET_ADDRESS,
 			self::DONOR_POSTAL_CODE,
 			self::DONOR_CITY,

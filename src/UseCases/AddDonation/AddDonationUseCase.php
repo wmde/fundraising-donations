@@ -134,7 +134,7 @@ class AddDonationUseCase {
 	}
 
 	private function getPhysicalAddressFromRequest( AddDonationRequest $request ): PostalAddress {
-		return new PostalAddress(
+		return PostalAddress::fromLegacyStreetName(
 			$request->getDonorStreetAddress(),
 			$request->getDonorPostalCode(),
 			$request->getDonorCity(),
