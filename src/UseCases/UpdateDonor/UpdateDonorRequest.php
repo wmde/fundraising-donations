@@ -15,7 +15,13 @@ class UpdateDonorRequest {
 	private string $salutation = '';
 	private string $title = '';
 	private string $companyName = '';
+
+	/**
+	 * @deprecated Use $streetName and $houseNumber instead.
+	 */
 	private string $streetAddress = '';
+	private string $streetName = '';
+	private string $houseNumber = '';
 	private string $postalCode = '';
 	private string $city = '';
 	private string $countryCode = '';
@@ -67,9 +73,24 @@ class UpdateDonorRequest {
 		return $request;
 	}
 
+	/**
+	 * @deprecated Use withStreetName() and withHouseNumber() instead.
+	 */
 	public function withStreetAddress( string $streetAddress ): self {
 		$request = clone $this;
 		$request->streetAddress = trim( $streetAddress );
+		return $request;
+	}
+
+	public function withStreetName( string $streetName ): self {
+		$request = clone $this;
+		$request->streetName = trim( $streetName );
+		return $request;
+	}
+
+	public function withHouseNumber( string $houseNumber ): self {
+		$request = clone $this;
+		$request->houseNumber = trim( $houseNumber );
 		return $request;
 	}
 
@@ -139,8 +160,19 @@ class UpdateDonorRequest {
 		return $this->companyName;
 	}
 
+	/**
+	 * @deprecated Use getStreetName() and getHouseNumber() instead.
+	 */
 	public function getStreetAddress(): string {
 		return $this->streetAddress;
+	}
+
+	public function getStreetName(): string {
+		return $this->streetName;
+	}
+
+	public function getHouseNumber(): string {
+		return $this->houseNumber;
 	}
 
 	public function getPostalCode(): string {

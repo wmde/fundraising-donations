@@ -20,6 +20,8 @@ class AddDonationRequestTest extends TestCase {
 		$this->assertSame( '', $request->getDonorFirstName() );
 		$this->assertSame( '', $request->getDonorLastName() );
 		$this->assertSame( '', $request->getDonorCompany() );
+		$this->assertSame( '', $request->getDonorStreetName() );
+		$this->assertSame( '', $request->getDonorHouseNumber() );
 		$this->assertSame( '', $request->getDonorStreetAddress() );
 		$this->assertSame( '', $request->getDonorPostalCode() );
 		$this->assertSame( '', $request->getDonorCity() );
@@ -34,6 +36,8 @@ class AddDonationRequestTest extends TestCase {
 		$request->setDonorLastName( 'Wayne' );
 		$request->setDonorCompany( 'Wayne Enterprises' );
 		$request->setDonorPostalCode( '66484' );
+		$request->setDonorStreetName( 'Fledergasse' );
+		$request->setDonorHouseNumber( '9' );
 		$request->setDonorStreetAddress( 'Fledergasse 9' );
 		$request->setDonorCity( 'Battweiler' );
 		$request->setDonorCountryCode( 'ZZ' );
@@ -47,6 +51,8 @@ class AddDonationRequestTest extends TestCase {
 		$this->assertSame( 'Bruce', $request->getDonorFirstName() );
 		$this->assertSame( 'Wayne', $request->getDonorLastName() );
 		$this->assertSame( 'Wayne Enterprises', $request->getDonorCompany() );
+		$this->assertSame( 'Fledergasse', $request->getDonorStreetName() );
+		$this->assertSame( '9', $request->getDonorHouseNumber() );
 		$this->assertSame( 'Fledergasse 9', $request->getDonorStreetAddress() );
 		$this->assertSame( '66484', $request->getDonorPostalCode() );
 		$this->assertSame( 'Battweiler', $request->getDonorCity() );
@@ -110,6 +116,8 @@ class AddDonationRequestTest extends TestCase {
 		$request->setDonorLastName( ' Wayne ' );
 		$request->setDonorCompany( "Wayne Enterprises\n" );
 		$request->setDonorPostalCode( '66484   ' );
+		$request->setDonorStreetName( ' Fledergasse   ' );
+		$request->setDonorHouseNumber( ' 9   ' );
 		$request->setDonorStreetAddress( ' Fledergasse 9   ' );
 		$request->setDonorCity( ' Battweiler ' );
 		$request->setDonorCountryCode( ' ZZ ' );
@@ -123,6 +131,8 @@ class AddDonationRequestTest extends TestCase {
 		$this->assertSame( 'Bruce', $request->getDonorFirstName() );
 		$this->assertSame( 'Wayne', $request->getDonorLastName() );
 		$this->assertSame( 'Wayne Enterprises', $request->getDonorCompany() );
+		$this->assertSame( 'Fledergasse', $request->getDonorStreetName() );
+		$this->assertSame( '9', $request->getDonorHouseNumber() );
 		$this->assertSame( 'Fledergasse 9', $request->getDonorStreetAddress() );
 		$this->assertSame( '66484', $request->getDonorPostalCode() );
 		$this->assertSame( 'Battweiler', $request->getDonorCity() );
