@@ -67,8 +67,28 @@ class DonorFieldMapper {
 		if ( $address instanceof NoAddress ) {
 			return [];
 		}
+
+		/*
+		if ( trim( $address->getStreetName() ) === '' && trim( $address->getHouseNumber() ) === '' ) {
+			return [
+				'strasse' => $address->getStreetAddress(),
+				'plz' => $address->getPostalCode(),
+				'ort' => $address->getCity(),
+				'country' => $address->getCountryCode(),
+			];
+		}
+		return [
+			'street_name' => $address->getStreetName(),
+			'house_number' => $address->getHouseNumber(),
+			'plz' => $address->getPostalCode(),
+			'ort' => $address->getCity(),
+			'country' => $address->getCountryCode(),
+		];
+		*/
 		return [
 			'strasse' => $address->getStreetAddress(),
+			'street_name' => $address->getStreetName(),
+			'house_number' => $address->getHouseNumber(),
 			'plz' => $address->getPostalCode(),
 			'ort' => $address->getCity(),
 			'country' => $address->getCountryCode(),
