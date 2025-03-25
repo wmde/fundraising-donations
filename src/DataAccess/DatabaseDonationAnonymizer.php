@@ -24,22 +24,16 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	public function anonymizeAt( \DateTimeImmutable $timestamp ): int {
 		// We're using individual entities with the converter because we can't issue an UPDATE statement.
 		// When we have extracted the address information from the
-		$converter = new LegacyToDomainConverter();
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb->select( 'd' )
 			->from( Donation::class, 'd' )
 			->where( 'd.dtBackup = ?1' )
 			->setParameter( 1, \DateTime::createFromImmutable( $timestamp ) );
-		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
-		$count = 0;
-		/** @var Donation $doctrineDonation */
-		foreach ( $qb->getQuery()->toIterable() as $doctrineDonation ) {
-			$donation = $converter->createFromLegacyObject( $doctrineDonation );
-			$donation->scrubPersonalData( $cutoffDate );
-			$this->donationRepository->storeDonation( $donation );
-			$count++;
-		}
-		return $count;
+
+		/** @var iterable<Donation> $donations */
+		$donations = $qb->getQuery()->toIterable();
+
+		return $this->anonymizeDonations( $donations );
 	}
 
 	public function anonymizeWithIds( int ...$donationIds ): void {
@@ -52,5 +46,39 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 			$donation->scrubPersonalData( $cutoffDate );
 			$this->donationRepository->storeDonation( $donation );
 		}
+	}
+
+	public function anonymizeAll(): int {
+		// We're using individual entities with the converter because we can't issue an UPDATE statement.
+		// When we have extracted the address information from the
+		$qb = $this->entityManager->createQueryBuilder();
+		$qb->select( 'd' )
+			->from( Donation::class, 'd' )
+			->where( 'd.isScrubbed = 0' );
+
+		/** @var iterable<Donation> $donations */
+		$donations = $qb->getQuery()->toIterable();
+
+		return $this->anonymizeDonations( $donations );
+	}
+
+	/**
+	 * @param iterable<Donation> $donations
+	 *
+	 * @return int
+	 * @throws \DateInvalidOperationException
+	 */
+	private function anonymizeDonations( iterable $donations ): int {
+		$converter = new LegacyToDomainConverter();
+		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+		$count = 0;
+
+		foreach ( $donations as $doctrineDonation ) {
+			$donation = $converter->createFromLegacyObject( $doctrineDonation );
+			$donation->scrubPersonalData( $cutoffDate );
+			$this->donationRepository->storeDonation( $donation );
+			$count++;
+		}
+		return $count;
 	}
 }
