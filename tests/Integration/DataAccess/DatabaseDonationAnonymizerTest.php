@@ -68,6 +68,19 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$this->assertNumberOfScrubbedDonations( 0 );
 	}
 
+	public function testAnonymizeAllReturnsNumberOfAnonymizedDonations(): void {
+		$this->entityManager->persist( $this->newExportedDonation( 1 ) );
+		$this->entityManager->persist( $this->newExportedDonation( 2 ) );
+		$this->entityManager->persist( $this->newExportedDonation( 3 ) );
+		$this->entityManager->flush();
+		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
+
+		$count = $anonymizer->anonymizeAll();
+
+		$this->assertSame( 3, $count );
+		$this->assertNumberOfScrubbedDonations( 3 );
+	}
+
 	public function testGivenDonation_anonymizeWillAnonymizeIt(): void {
 		$this->insertOneRow();
 		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
