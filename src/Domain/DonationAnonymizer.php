@@ -19,6 +19,7 @@ interface DonationAnonymizer {
 	 * @param \DateTimeImmutable $timestamp
 	 * @throws AnonymizationException
 	 * @return int number of anonymized rows
+	 * @deprecated We no longer want to anonymise by date, but rather all exported donations and ones older than 2 days
 	 */
 	public function anonymizeAt( \DateTimeImmutable $timestamp ): int;
 
@@ -28,4 +29,12 @@ interface DonationAnonymizer {
 	 * @throws AnonymizationException
 	 */
 	public function anonymizeWithIds( int ...$donationIds ): void;
+
+	/**
+	 * Anonymize all donations that have been exported or are older than 2 days
+	 *
+	 * @return int number of anonymized rows
+	 * @throws AnonymizationException
+	 */
+	public function anonymizeAll(): int;
 }
