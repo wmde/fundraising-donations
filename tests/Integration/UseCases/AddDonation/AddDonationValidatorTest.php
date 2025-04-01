@@ -160,7 +160,6 @@ class AddDonationValidatorTest extends TestCase {
 
 		foreach ( $result->getViolations() as $violation ) {
 			if ( $violation->getSource() === $fieldName ) {
-				$this->assertTrue( true );
 				return;
 			}
 		}

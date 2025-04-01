@@ -450,31 +450,6 @@ class Donation {
 	}
 
 	/**
-	 * Get name for donations comments
-	 *
-	 * @deprecated This functionality should be moved to the domain/presentation code.
-	 */
-	public function getEntryType( ?int $mode = null ): string {
-		$data = $this->getDecodedData();
-
-		if ( $mode === null ) {
-			$mode = $this->publicRecord;
-		}
-
-		if ( $mode == 1 || $mode == 2 ) {
-			$eintrag = $this->donorFullName ?? '';
-		} else {
-			$eintrag = 'anonym';
-		}
-
-		if ( ( $mode == 1 || $mode == 3 ) && !empty( $data['ort'] ) ) {
-			$eintrag .= ', ' . $data['ort'];
-		}
-
-		return $eintrag;
-	}
-
-	/**
 	 * NOTE: if possible, use @see getDataObject instead, as it provides a nicer API.
 	 *
 	 * @return array<string,mixed>
