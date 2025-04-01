@@ -11,6 +11,13 @@ use WMDE\Fundraising\DonationContext\Domain\AnonymizationException;
 use WMDE\Fundraising\DonationContext\Domain\DonationAnonymizer;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 
+/**
+ * This class selects and anonymizes individual donation entities.
+ *
+ * We're updating each individual entity, because we can't issue an UPDATE statement:
+ * - The legacy address data is in the data blob
+ * - When we implement more normalized address data, we need to replace the donor with a scrubbed donor entity
+ */
 class DatabaseDonationAnonymizer implements DonationAnonymizer {
 
 	public function __construct(
@@ -22,8 +29,6 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	}
 
 	public function anonymizeAt( \DateTimeImmutable $timestamp ): int {
-		// We're using individual entities with the converter because we can't issue an UPDATE statement.
-		// When we have extracted the address information from the
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb->select( 'd' )
 			->from( Donation::class, 'd' )
@@ -49,8 +54,6 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	}
 
 	public function anonymizeAll(): int {
-		// We're using individual entities with the converter because we can't issue an UPDATE statement.
-		// When we have extracted the address information from the
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb->select( 'd' )
 			->from( Donation::class, 'd' )
