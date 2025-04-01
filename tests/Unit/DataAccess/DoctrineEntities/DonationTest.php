@@ -153,15 +153,4 @@ class DonationTest extends TestCase {
 			$donation->getDecodedData()
 		);
 	}
-
-	public function testStatusConstantsExist(): void {
-		$this->assertNotNull( Donation::STATUS_NEW );
-		$this->assertNotNull( Donation::STATUS_CANCELLED );
-		$this->assertNotNull( Donation::STATUS_EXTERNAL_BOOKED );
-		$this->assertNotNull( Donation::STATUS_EXTERNAL_INCOMPLETE );
-		$this->assertNotNull( Donation::STATUS_MODERATION );
-		$this->assertNotNull( Donation::STATUS_PROMISE );
-		$this->assertNotNull( Donation::STATUS_EXPORTED );
-	}
-
 }

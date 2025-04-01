@@ -22,7 +22,6 @@ class LegacyToDomainConverterTest extends TestCase {
 		$donation = $converter->createFromLegacyObject( $doctrineDonation );
 		$info = $donation->getTrackingInfo();
 
-		$this->assertNotNull( $info );
 		$this->assertSame( 0, $info->totalImpressionCount );
 		$this->assertSame( 0, $info->singleBannerImpressionCount );
 		$this->assertSame( '', $info->tracking );

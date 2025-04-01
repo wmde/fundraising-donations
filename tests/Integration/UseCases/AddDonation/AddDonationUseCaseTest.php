@@ -193,7 +193,6 @@ class AddDonationUseCaseTest extends TestCase {
 		$response = $useCase->addDonation( $this->newValidAddDonationRequestWithEmail( 'foo@bar.baz' ) );
 		$donation = $response->getDonation();
 
-		$this->assertNotNull( $donation );
 		$this->assertTrue( $donation->isMarkedForModeration() );
 	}
 
@@ -299,6 +298,7 @@ class AddDonationUseCaseTest extends TestCase {
 		/** @var DonationCreatedEvent[] $events */
 		$events = $eventEmitter->getEvents();
 		$this->assertCount( 1, $events, 'Only 1 event should be emitted' );
+		/** @phpstan-ignore-next-line method.alreadyNarrowedType */
 		$this->assertInstanceOf( DonationCreatedEvent::class, $events[0] );
 		$this->assertInstanceOf( CompanyContactName::class, $events[0]->getDonor()->getName() );
 	}
