@@ -19,6 +19,11 @@ namespace WMDE\Fundraising\DonationContext\Domain\Model;
  * @codeCoverageIgnore
  */
 class DonationId {
+
+	/**
+	 * used for doctrine mapping only
+	 * @phpstan-ignore-next-line property.unusedType
+	 */
 	private ?int $id = null;
 	private int $donationId;
 
