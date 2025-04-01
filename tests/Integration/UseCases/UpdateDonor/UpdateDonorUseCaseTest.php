@@ -46,7 +46,6 @@ class UpdateDonorUseCaseTest extends TestCase {
 		$this->assertTrue( $response->isSuccessful() );
 		$this->assertNotNull( $donation );
 		$donor = $donation->getDonor();
-		$this->assertNotNull( $donor );
 		$this->assertEquals(
 			new PersonName(
 				ValidDonation::DONOR_FIRST_NAME,
@@ -87,7 +86,6 @@ class UpdateDonorUseCaseTest extends TestCase {
 		$this->assertTrue( $response->isSuccessful() );
 		$this->assertNotNull( $donation );
 		$donor = $donation->getDonor();
-		$this->assertNotNull( $donor );
 		$this->assertTrue( $donor->isSubscribedToMailingList() );
 	}
 
@@ -103,7 +101,6 @@ class UpdateDonorUseCaseTest extends TestCase {
 		$this->assertTrue( $response->isSuccessful() );
 		$this->assertNotNull( $donation );
 		$donor = $donation->getDonor();
-		$this->assertNotNull( $donor );
 		$this->assertEquals(
 			new CompanyContactName(
 				ValidDonation::DONOR_COMPANY,
@@ -228,6 +225,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 		$events = $eventEmitter->getEvents();
 
 		$this->assertCount( 1, $events, 'Only 1 event should be emitted' );
+		/** @phpstan-ignore-next-line method.alreadyNarrowedType */
 		$this->assertInstanceOf( DonorUpdatedEvent::class, $events[0] );
 		$this->assertSame( $donation->getId(), $events[0]->getDonationId() );
 		$this->assertSame( $previousDonor->getName(), $events[0]->getPreviousDonor()->getName() );
