@@ -136,6 +136,12 @@ class Donation {
 
 	private int $paymentId;
 
+	private DonationTracking $donationTracking;
+
+	private int $impressionCount = 0;
+
+	private int $bannerImpressionCount = 0;
+
 	public function __construct() {
 		$this->moderationReasons = new ArrayCollection( [] );
 		$this->creationTime = new \DateTime();
@@ -538,5 +544,29 @@ class Donation {
 
 	public function scrub(): void {
 		$this->isScrubbed = true;
+	}
+
+	public function getDonationTracking(): DonationTracking {
+		return $this->donationTracking;
+	}
+
+	public function setDonationTracking( DonationTracking $donationTracking ): void {
+		$this->donationTracking = $donationTracking;
+	}
+
+	public function getImpressionCount(): int {
+		return $this->impressionCount;
+	}
+
+	public function setImpressionCount( int $impressionCount ): void {
+		$this->impressionCount = $impressionCount;
+	}
+
+	public function getBannerImpressionCount(): int {
+		return $this->bannerImpressionCount;
+	}
+
+	public function setBannerImpressionCount( int $bannerImpressionCount ): void {
+		$this->bannerImpressionCount = $bannerImpressionCount;
 	}
 }
