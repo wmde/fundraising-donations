@@ -45,29 +45,6 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$this->gracePeriod = new \DateInterval( 'P2D' );
 	}
 
-	public function testAnonymizeAtReturnsNumberOfAnonymizedDonations(): void {
-		$this->entityManager->persist( $this->newExportedDonation( 1 ) );
-		$this->entityManager->persist( $this->newExportedDonation( 2 ) );
-		$this->entityManager->persist( $this->newExportedDonation( 3 ) );
-		$this->entityManager->flush();
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
-
-		$count = $anonymizer->anonymizeAt( \DateTimeImmutable::createFromMutable( $this->anonymizationMarkerTime ) );
-
-		$this->assertSame( 3, $count );
-		$this->assertNumberOfScrubbedDonations( 3 );
-	}
-
-	public function testGivenOneDonation_itIsNotCleanedWhenTimestampDoesNotMatch(): void {
-		$this->insertOneRow();
-		$yesterday = \DateTimeImmutable::createFromMutable( $this->anonymizationMarkerTime )->modify( '-1 day' );
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
-
-		$anonymizer->anonymizeAt( $yesterday );
-
-		$this->assertNumberOfScrubbedDonations( 0 );
-	}
-
 	public function testAnonymizeAllReturnsNumberOfAnonymizedDonations(): void {
 		$this->entityManager->persist( $this->newExportedDonation( 1 ) );
 		$this->entityManager->persist( $this->newExportedDonation( 2 ) );
