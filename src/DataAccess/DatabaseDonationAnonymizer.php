@@ -65,6 +65,12 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 			$donation->scrubPersonalData( $cutoffDate );
 			$this->donationRepository->storeDonation( $donation );
 			$count++;
+
+			// Clear entity manager memory to avoid running out of memory
+			// See: https://www.doctrine-project.org/projects/doctrine-orm/en/3.3/reference/batch-processing.html#iterating-results
+			if ( $count % 20 === 0 ) {
+				$this->entityManager->clear();
+			}
 		}
 		return $count;
 	}
