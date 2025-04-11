@@ -41,16 +41,23 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	}
 
 	public function anonymizeAll(): int {
+		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb->select( 'd' )
 			->from( Donation::class, 'd' )
-			->where( 'd.isScrubbed = 0' );
+			->where( 'd.isScrubbed = 0' )
+			->andWhere(
+				$qb->expr()->orX(
+					$qb->expr()->isNotNull( 'd.dtGruen' ),
+					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
+				)
+			)->setParameter( 'cutoffDate', $cutoffDate );
 
 		/** @var iterable<Donation> $donations */
 		$donations = $qb->getQuery()->toIterable();
 
 		$converter = new LegacyToDomainConverter();
-		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 		$count = 0;
 
 		foreach ( $donations as $doctrineDonation ) {
