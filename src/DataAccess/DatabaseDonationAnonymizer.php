@@ -28,19 +28,6 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	) {
 	}
 
-	public function anonymizeAt( \DateTimeImmutable $timestamp ): int {
-		$qb = $this->entityManager->createQueryBuilder();
-		$qb->select( 'd' )
-			->from( Donation::class, 'd' )
-			->where( 'd.dtBackup = ?1' )
-			->setParameter( 1, \DateTime::createFromImmutable( $timestamp ) );
-
-		/** @var iterable<Donation> $donations */
-		$donations = $qb->getQuery()->toIterable();
-
-		return $this->anonymizeDonations( $donations );
-	}
-
 	public function anonymizeWithIds( int ...$donationIds ): void {
 		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 		foreach ( $donationIds as $id ) {
@@ -54,26 +41,23 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	}
 
 	public function anonymizeAll(): int {
+		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb->select( 'd' )
 			->from( Donation::class, 'd' )
-			->where( 'd.isScrubbed = 0' );
+			->where( 'd.isScrubbed = 0' )
+			->andWhere(
+				$qb->expr()->orX(
+					$qb->expr()->isNotNull( 'd.dtGruen' ),
+					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
+				)
+			)->setParameter( 'cutoffDate', $cutoffDate );
 
 		/** @var iterable<Donation> $donations */
 		$donations = $qb->getQuery()->toIterable();
 
-		return $this->anonymizeDonations( $donations );
-	}
-
-	/**
-	 * @param iterable<Donation> $donations
-	 *
-	 * @return int
-	 * @throws \DateInvalidOperationException
-	 */
-	private function anonymizeDonations( iterable $donations ): int {
 		$converter = new LegacyToDomainConverter();
-		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 		$count = 0;
 
 		foreach ( $donations as $doctrineDonation ) {
@@ -84,4 +68,5 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		}
 		return $count;
 	}
+
 }
