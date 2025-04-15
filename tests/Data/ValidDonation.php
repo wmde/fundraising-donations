@@ -39,8 +39,8 @@ class ValidDonation {
 	public const OPTS_INTO_NEWSLETTER = true;
 	public const TRACKING_BANNER_IMPRESSION_COUNT = 1;
 	public const TRACKING_TOTAL_IMPRESSION_COUNT = 3;
-	// "tracking" is the name of the property on the object, "TRACKING" is our prefix, hence TRACKING_TRACKING
 
+	// "tracking" is the name of the property on the object, "TRACKING" is our prefix, hence TRACKING_TRACKING
 	public const TRACKING_TRACKING = 'test/gelb';
 
 	public const COMMENT_TEXT = 'For great justice!';
