@@ -45,7 +45,7 @@
 		"wmde/psr-log-test-doubles": "~3.0",
 		"phpstan/phpstan-phpunit": "^2.0.6",
 		"phpstan/phpstan-doctrine": "~2.0.2",
-		"wmde/clock": "^1.0"
+		"wmde/clock": "^2.0"
 	},
 	"autoload": {
 		"psr-4": {
