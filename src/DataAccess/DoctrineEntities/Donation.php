@@ -485,6 +485,7 @@ class Donation {
 	 * To update the Donation state, explicitly call @see setDataObject.
 	 *
 	 * @return DonationData
+	 * @deprecated The access tokens have been removed from the blob. You should get this information from the AuthenticationToken entity in the Application or Op Center
 	 */
 	public function getDataObject(): DonationData {
 		$dataArray = $this->getDecodedData();
@@ -498,6 +499,12 @@ class Donation {
 		return $data;
 	}
 
+	/**
+	 * @param DonationData $data
+	 *
+	 * @return void
+	 * @deprecated The access tokens have been removed from the blob. You should set this information using the AuthenticationToken entity in the Application or Op Center
+	 */
 	public function setDataObject( DonationData $data ): void {
 		$dataArray = array_merge(
 			$this->getDecodedData(),
