@@ -456,8 +456,6 @@ class Donation {
 	}
 
 	/**
-	 * NOTE: if possible, use @see getDataObject instead, as it provides a nicer API.
-	 *
 	 * @return array<string,mixed>
 	 */
 	public function getDecodedData(): array {
@@ -471,8 +469,6 @@ class Donation {
 	}
 
 	/**
-	 * NOTE: if possible, use @see modifyDataObject instead, as it provides a nicer API.
-	 *
 	 * @param array<string,mixed> $data
 	 */
 	public function encodeAndSetData( array $data ): void {
@@ -526,6 +522,7 @@ class Donation {
 
 	/**
 	 * @param callable $modificationFunction Takes a modifiable DonationData parameter
+	 * @deprecated The access tokens have been removed from the blob. You should set this information using the AuthenticationToken entity in the Application or Op Center
 	 */
 	public function modifyDataObject( callable $modificationFunction ): void {
 		$dataObject = $this->getDataObject();
