@@ -153,15 +153,14 @@ class DonationTest extends TestCase {
 		$this->assertFalse( $donation->shouldSendConfirmationMail() );
 	}
 
-	public function testDonationWithEmailModerationShouldNotReceiveConfirmationEmail(): void {
+	public function testDonationWithModerationReasonsShouldNotReceiveConfirmationEmail(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->markForModeration( new ModerationReason( ModerationIdentifier::EMAIL_BLOCKED ) );
 		$this->assertFalse( $donation->shouldSendConfirmationMail() );
 	}
 
-	public function testDonationWithEmailAndOtherModerationReasonsShouldReceiveConfirmationEmail(): void {
+	public function testDonationWithoutModerationReasonsShouldReceiveConfirmationEmail(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
-		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 		$this->assertTrue( $donation->shouldSendConfirmationMail() );
 	}
 
