@@ -9,7 +9,7 @@ use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
-use WMDE\Fundraising\DonationContext\DonationAcceptedEventHandler;
+use WMDE\Fundraising\DonationContext\DonationApprovedEventHandler;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
@@ -17,8 +17,8 @@ use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
-#[CoversClass( DonationAcceptedEventHandler::class )]
-class DonationAcceptedEventHandlerTest extends TestCase {
+#[CoversClass( DonationApprovedEventHandler::class )]
+class DonationApprovedEventHandlerTest extends TestCase {
 
 	private const UNKNOWN_ID = 32202;
 	private const KNOWN_ID = 31337;
@@ -39,15 +39,15 @@ class DonationAcceptedEventHandlerTest extends TestCase {
 
 	public function testWhenAuthorizationFails_errorIsReturned(): void {
 		$this->authorizer = new FailingDonationAuthorizer();
-		$eventHandler = $this->newDonationAcceptedEventHandler();
+		$eventHandler = $this->newDonationApprovedEventHandler();
 
-		$result = $eventHandler->onDonationAccepted( self::UNKNOWN_ID );
+		$result = $eventHandler->onDonationApproved( self::UNKNOWN_ID );
 
-		$this->assertSame( DonationAcceptedEventHandler::AUTHORIZATION_FAILED, $result );
+		$this->assertSame( DonationApprovedEventHandler::AUTHORIZATION_FAILED, $result );
 	}
 
-	private function newDonationAcceptedEventHandler(): DonationAcceptedEventHandler {
-		return new DonationAcceptedEventHandler(
+	private function newDonationApprovedEventHandler(): DonationApprovedEventHandler {
+		return new DonationApprovedEventHandler(
 			$this->authorizer,
 			$this->repository,
 			$this->mailer
@@ -55,19 +55,19 @@ class DonationAcceptedEventHandlerTest extends TestCase {
 	}
 
 	public function testGivenIdOfUnknownDonation_errorIsReturned(): void {
-		$eventHandler = $this->newDonationAcceptedEventHandler();
+		$eventHandler = $this->newDonationApprovedEventHandler();
 
-		$result = $eventHandler->onDonationAccepted( self::UNKNOWN_ID );
+		$result = $eventHandler->onDonationApproved( self::UNKNOWN_ID );
 
-		$this->assertSame( DonationAcceptedEventHandler::UNKNOWN_ID_PROVIDED, $result );
+		$this->assertSame( DonationApprovedEventHandler::UNKNOWN_ID_PROVIDED, $result );
 	}
 
 	public function testGivenKnownIdAndValidAuth_successIsReturned(): void {
-		$eventHandler = $this->newDonationAcceptedEventHandler();
+		$eventHandler = $this->newDonationApprovedEventHandler();
 
-		$result = $eventHandler->onDonationAccepted( self::KNOWN_ID );
+		$result = $eventHandler->onDonationApproved( self::KNOWN_ID );
 
-		$this->assertSame( DonationAcceptedEventHandler::SUCCESS, $result );
+		$this->assertSame( DonationApprovedEventHandler::SUCCESS, $result );
 	}
 
 	public function testGivenKnownIdAndValidAuth_mailerIsInvoked(): void {
@@ -75,18 +75,18 @@ class DonationAcceptedEventHandlerTest extends TestCase {
 			->method( 'sendConfirmationFor' )
 			->with( $this->newDonation() );
 
-		$this->newDonationAcceptedEventHandler()->onDonationAccepted( self::KNOWN_ID );
+		$this->newDonationApprovedEventHandler()->onDonationApproved( self::KNOWN_ID );
 	}
 
 	public function testGivenIdOfUnknownDonation_mailerIsNotInvoked(): void {
 		$this->mailer->expects( $this->never() )->method( $this->anything() );
-		$this->newDonationAcceptedEventHandler()->onDonationAccepted( self::UNKNOWN_ID );
+		$this->newDonationApprovedEventHandler()->onDonationApproved( self::UNKNOWN_ID );
 	}
 
 	public function testWhenAuthorizationFails_mailerIsNotInvoked(): void {
 		$this->authorizer = new FailingDonationAuthorizer();
 		$this->mailer->expects( $this->never() )->method( $this->anything() );
-		$this->newDonationAcceptedEventHandler()->onDonationAccepted( self::KNOWN_ID );
+		$this->newDonationApprovedEventHandler()->onDonationApproved( self::KNOWN_ID );
 	}
 
 }
