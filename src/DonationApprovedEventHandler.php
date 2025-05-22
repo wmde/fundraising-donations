@@ -9,7 +9,7 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\UseCases\DonationNotifier;
 
-class DonationAcceptedEventHandler {
+class DonationApprovedEventHandler {
 
 	public const AUTHORIZATION_FAILED = 'Authorization failed';
 	public const UNKNOWN_ID_PROVIDED = 'Unknown donation id';
@@ -31,7 +31,7 @@ class DonationAcceptedEventHandler {
 	 *
 	 * @return string|null Null on success, string with error message otherwise
 	 */
-	public function onDonationAccepted( int $donationId ): ?string {
+	public function onDonationApproved( int $donationId ): ?string {
 		if ( !$this->authorizer->systemCanModifyDonation( $donationId ) ) {
 			return self::AUTHORIZATION_FAILED;
 		}
