@@ -118,7 +118,7 @@
     </many-to-many>
 
     <many-to-one field="donationTracking" target-entity="DonationTracking">
-      <join-column name="tracking_id" referenced-column-name="id" />
+      <join-column name="tracking_id" referenced-column-name="id" nullable="true" />
     </many-to-one>
   </entity>
 </doctrine-mapping>

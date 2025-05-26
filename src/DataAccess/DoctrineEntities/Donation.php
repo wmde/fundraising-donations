@@ -136,7 +136,7 @@ class Donation {
 
 	private int $paymentId;
 
-	private DonationTracking $donationTracking;
+	private ?DonationTracking $donationTracking = null;
 
 	private int $impressionCount = 0;
 
@@ -550,7 +550,7 @@ class Donation {
 		$this->isScrubbed = true;
 	}
 
-	public function getDonationTracking(): DonationTracking {
+	public function getDonationTracking(): ?DonationTracking {
 		return $this->donationTracking;
 	}
 
