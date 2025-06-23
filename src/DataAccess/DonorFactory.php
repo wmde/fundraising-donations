@@ -72,7 +72,7 @@ class DonorFactory {
 	}
 
 	private static function createPhysicalAddress( DataReaderWithDefault $data ): PostalAddress {
-		return new PostalAddress(
+		return PostalAddress::fromLegacyStreetName(
 			$data->getValue( 'strasse' ),
 			$data->getValue( 'plz' ),
 			$data->getValue( 'ort' ),
