@@ -1,5 +1,6 @@
 <?php
-declare( strict_types=1 );
+
+declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
@@ -9,6 +10,8 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Domain\AnonymizationException;
 use WMDE\Fundraising\DonationContext\Domain\DonationAnonymizer;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 
 /**
@@ -44,6 +47,8 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 
 		$qb = $this->entityManager->createQueryBuilder();
+		$amountTooHighModerationId = $this->getAmountTooHighModerationReasonId();
+
 		$qb->select( 'd' )
 			->from( Donation::class, 'd' )
 			->where( 'd.isScrubbed = 0' )
@@ -52,7 +57,12 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 					$qb->expr()->isNotNull( 'd.dtGruen' ),
 					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
 				)
-			)->setParameter( 'cutoffDate', $cutoffDate );
+			)
+			->andWhere(
+				$qb->expr()->not( $qb->expr()->isMemberOf( ':moderationReason', 'd.moderationReasons' ) )
+			)
+			->setParameter( 'moderationReason', $amountTooHighModerationId )
+			->setParameter( 'cutoffDate', $cutoffDate );
 
 		/** @var iterable<Donation> $donations */
 		$donations = $qb->getQuery()->toIterable();
@@ -69,4 +79,22 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		return $count;
 	}
 
+	private function getAmountTooHighModerationReasonId(): ?ModerationReason {
+		$qb = $this->entityManager->createQueryBuilder();
+		$qb->select( 'mr' )
+			->from( ModerationReason::class, 'mr' )
+			->where( 'mr.moderationIdentifier = :moderationIdentifier' )
+			->andWhere( 'mr.source = :source' )
+			->setParameter( 'moderationIdentifier', ModerationIdentifier::AMOUNT_TOO_HIGH->value )
+			->setParameter( 'source', 'amount' );
+
+		/** @var array<ModerationReason> $result */
+		$result = $qb->getQuery()->getResult();
+
+		if ( count( $result ) === 0 ) {
+			return null;
+		}
+
+		return $result[ 0 ];
+	}
 }

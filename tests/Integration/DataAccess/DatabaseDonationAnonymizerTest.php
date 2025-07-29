@@ -51,8 +51,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 
 		$count = $anonymizer->anonymizeAll();
 
-		$this->assertSame( 4, $count );
-		$this->assertNumberOfScrubbedDonations( 5 );
+		$this->assertSame( 5, $count );
+		$this->assertNumberOfScrubbedDonations( 6 );
 	}
 
 	public function testGivenDonation_anonymizeWillAnonymizeIt(): void {
@@ -71,6 +71,19 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
 
 		$anonymizer->anonymizeWithIds( $missingDonationId );
+	}
+
+	public function testDoesNotAnonymiseModeratedForAmountTooHighDonations(): void {
+		$threeDaysAgo = \DateTime::createFromImmutable( $this->clock->now()->modify( '-3 days' ) );
+		$this->entityManager->persist( $this->newModeratedAmountTooHighDonation( 1, $threeDaysAgo ) );
+		$this->entityManager->flush();
+
+		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
+
+		$count = $anonymizer->anonymizeAll();
+
+		$this->assertSame( 0, $count );
+		$this->assertNumberOfScrubbedDonations( 0 );
 	}
 
 	private function assertNumberOfScrubbedDonations( int $expectedNumberOfScrubbedDonations ): void {
@@ -93,6 +106,20 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 	private function newExportedDonation( int $id = self::DEFAULT_DONATION_ID ): DoctrineDonation {
 		$donation = ValidDoctrineDonation::newExportedirectDebitDoctrineDonation();
 		$donation->setDtBackup( $this->anonymizationMarkerTime );
+		$donation->setId( $id );
+		return $donation;
+	}
+
+	private function newModeratedAmountTooHighDonation( int $id, \DateTime $donationDate ): DoctrineDonation {
+		$donation = ValidDoctrineDonation::newModeratedForAmountTooHighDonation();
+		$donation->setCreationTime( $donationDate );
+		$donation->setId( $id );
+		return $donation;
+	}
+
+	private function newModeratedContentViolationDonation( int $id, \DateTime $donationDate ): DoctrineDonation {
+		$donation = ValidDoctrineDonation::newModeratedForContentViolationDonation();
+		$donation->setCreationTime( $donationDate );
 		$donation->setId( $id );
 		return $donation;
 	}
@@ -138,6 +165,15 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 
 		// Insert an already scrubbed donation, that should NOT be scrubbed
 		$this->entityManager->persist( $this->newScrubbedDonation( 6 ) );
+
+		// A donation that has been moderated for language violation
+		$this->entityManager->persist( $this->newModeratedContentViolationDonation( 7, \DateTime::createFromImmutable( $this->clock->now() ) ) );
+
+		// A donation that has been moderated for language violation a few days ago
+		$this->entityManager->persist( $this->newModeratedContentViolationDonation( 8, $threeDaysAgo ) );
+
+		// A donation that has been moderated for a high amount a few days ago
+		$this->entityManager->persist( $this->newModeratedAmountTooHighDonation( 9, $threeDaysAgo ) );
 
 		$this->entityManager->flush();
 	}
