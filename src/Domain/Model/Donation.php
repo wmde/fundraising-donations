@@ -169,6 +169,12 @@ class Donation {
 		return $this->exportDate !== null;
 	}
 
+	/**
+	 * This setter is only used in tests and in the legacy converter (to create a domain object).
+	 * It is NOT used by any export scripts. The export scripts change donations in bulk in the database.
+	 * @param DateTimeImmutable|null $exportDate
+	 * @return void
+	 */
 	public function markAsExported( ?DateTimeImmutable $exportDate = null ): void {
 		$this->exportDate = $exportDate ?? new DateTimeImmutable();
 	}
