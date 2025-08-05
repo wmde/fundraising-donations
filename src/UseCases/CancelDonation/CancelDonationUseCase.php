@@ -63,12 +63,7 @@ class CancelDonationUseCase {
 	}
 
 	public function requestIsAllowedToModifyDonation( CancelDonationRequest $cancellationRequest ): bool {
-		if ( $cancellationRequest->isAuthorizedRequest() ) {
-			return $this->authorizationService->systemCanModifyDonation( $cancellationRequest->getDonationId() );
-
-		}
-		// Users on the frontend are no longer allowed to cancel donations
-		return false;
+		return $this->authorizationService->systemCanModifyDonation( $cancellationRequest->getDonationId() );
 	}
 
 }
