@@ -14,18 +14,21 @@ use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FailingDonationAuthorizer;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\SucceedingDonationAuthorizerSpy;
+use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationFailureResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationRequest;
-use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationResponse;
+use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationSuccessResponse;
 use WMDE\Fundraising\DonationContext\UseCases\CancelDonation\CancelDonationUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\CancelPaymentUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\FailureResponse;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\SuccessResponse;
 
 #[CoversClass( CancelDonationUseCase::class )]
-#[CoversClass( CancelDonationResponse::class )]
 #[CoversClass( CancelDonationRequest::class )]
+#[CoversClass( CancelDonationSuccessResponse::class )]
+#[CoversClass( CancelDonationFailureResponse::class )]
 class CancelDonationUseCaseTest extends TestCase {
 
 	private const AUTHORIZED_USER = 'admin_adminson';
@@ -52,20 +55,21 @@ class CancelDonationUseCaseTest extends TestCase {
 
 	private function getFailingCancelPaymentUseCase(): CancelPaymentUseCase&MockObject {
 		$cancelPaymentUseCase = $this->createMock( CancelPaymentUseCase::class );
-		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new FailureResponse( "failed for whatever reason" ) );
+		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new FailureResponse( "canceling payment not allowed" ) );
 		return $cancelPaymentUseCase;
 	}
 
 	public function testGivenIdOfUnknownDonation_cancellationIsNotSuccessful(): void {
 		$response = $this->newCancelDonationUseCase()->cancelDonation( new CancelDonationRequest( 1, self::AUTHORIZED_USER ) );
 
-		$this->assertFalse( $response->cancellationSucceeded() );
+		$this->assertInstanceOf( CancelDonationFailureResponse::class, $response );
+		$this->assertSame( 'Donation not found.', $response->message );
 	}
 
 	public function testResponseContainsDonationId(): void {
 		$response = $this->newCancelDonationUseCase()->cancelDonation( new CancelDonationRequest( 1337, self::AUTHORIZED_USER ) );
 
-		$this->assertSame( 1337, $response->getDonationId() );
+		$this->assertSame( 1337, $response->donationId );
 	}
 
 	public function testGivenIdOfCancellableDonation_cancellationIsSuccessful(): void {
@@ -78,9 +82,8 @@ class CancelDonationUseCaseTest extends TestCase {
 		$donation = $repository->getDonationById( $donation->getId() );
 
 		$this->assertNotNull( $donation );
-		$this->assertTrue( $response->cancellationSucceeded() );
-		$this->assertFalse( $response->mailDeliveryFailed() );
 		$this->assertTrue( $donation->isCancelled() );
+		$this->assertInstanceOf( CancelDonationSuccessResponse::class, $response );
 	}
 
 	public function testGivenIdOfNonCancellableDonation_cancellationIsNotSuccessful(): void {
@@ -94,7 +97,8 @@ class CancelDonationUseCaseTest extends TestCase {
 			cancelPaymentUseCase: $this->getFailingCancelPaymentUseCase()
 		)->cancelDonation( $request );
 
-		$this->assertFalse( $response->cancellationSucceeded() );
+		$this->assertInstanceOf( CancelDonationFailureResponse::class, $response );
+		$this->assertSame( 'canceling payment not allowed', $response->message );
 	}
 
 	private function newCancelableDonation(): Donation {
@@ -134,7 +138,8 @@ class CancelDonationUseCaseTest extends TestCase {
 		$request = new CancelDonationRequest( $donation->getId(), self::AUTHORIZED_USER );
 		$response = $this->newCancelDonationUseCase( repository: $repository )->cancelDonation( $request );
 
-		$this->assertFalse( $response->cancellationSucceeded() );
+		$this->assertInstanceOf( CancelDonationFailureResponse::class, $response );
+		$this->assertSame( 'Could not get donation', $response->message );
 	}
 
 	public function testWhenDonationSavingFails_cancellationIsNotSuccessful(): void {
@@ -146,7 +151,8 @@ class CancelDonationUseCaseTest extends TestCase {
 		$request = new CancelDonationRequest( $donation->getId(), self::AUTHORIZED_USER );
 		$response = $this->newCancelDonationUseCase( repository: $repository )->cancelDonation( $request );
 
-		$this->assertFalse( $response->cancellationSucceeded() );
+		$this->assertInstanceOf( CancelDonationFailureResponse::class, $response );
+		$this->assertSame( 'Could not store donation', $response->message );
 	}
 
 	public function testWhenAdminUserCancelsDonation_authorizerChecksIfSystemCanModifyDonation(): void {
@@ -165,6 +171,21 @@ class CancelDonationUseCaseTest extends TestCase {
 		$this->assertFalse( $authorizer->hasAuthorizedAsUser() );
 	}
 
+	public function testWhenAuthorizationFails_cancellationIsNotSuccessful(): void {
+		$donation = $this->newCancelableDonation();
+		$repository = new FakeDonationRepository();
+		$repository->storeDonation( $donation );
+
+		$request = new CancelDonationRequest( $donation->getId(), self::AUTHORIZED_USER );
+		$response = $this->newCancelDonationUseCase(
+			repository: $repository,
+			authorizer: new FailingDonationAuthorizer()
+		)->cancelDonation( $request );
+
+		$this->assertInstanceOf( CancelDonationFailureResponse::class, $response );
+		$this->assertSame( 'Not allowed to cancel donations.', $response->message );
+	}
+
 	public function testCanceledDonationIsPersisted(): void {
 		$donation = $this->newCancelableDonation();
 		$repository = new DonationRepositorySpy( $donation );
@@ -172,7 +193,7 @@ class CancelDonationUseCaseTest extends TestCase {
 		$request = new CancelDonationRequest( $donation->getId(), "coolAdmin" );
 		$response = $this->newCancelDonationUseCase( repository: $repository )->cancelDonation( $request );
 
-		$this->assertTrue( $response->cancellationSucceeded() );
+		$this->assertInstanceOf( CancelDonationSuccessResponse::class, $response );
 		$storeCalls = $repository->getStoreDonationCalls();
 		$this->assertCount( 1, $storeCalls );
 		$this->assertSame( 1, $storeCalls[0]->getId() );
