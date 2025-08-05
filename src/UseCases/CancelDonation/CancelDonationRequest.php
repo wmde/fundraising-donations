@@ -13,10 +13,6 @@ class CancelDonationRequest {
 		return $this->donationId;
 	}
 
-	public function isAuthorizedRequest(): bool {
-		return true;
-	}
-
 	public function getUserName(): string {
 		return $this->authorizedUser;
 	}
