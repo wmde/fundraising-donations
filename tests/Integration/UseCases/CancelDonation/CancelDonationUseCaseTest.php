@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration\UseCases\CancelDonation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -42,14 +41,14 @@ class CancelDonationUseCaseTest extends TestCase {
 		);
 	}
 
-	private function getSucceedingCancelPaymentUseCase(): CancelPaymentUseCase&MockObject {
-		$cancelPaymentUseCase = $this->createMock( CancelPaymentUseCase::class );
+	private function getSucceedingCancelPaymentUseCase(): CancelPaymentUseCase {
+		$cancelPaymentUseCase = $this->createStub( CancelPaymentUseCase::class );
 		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new SuccessResponse( true ) );
 		return $cancelPaymentUseCase;
 	}
 
-	private function getFailingCancelPaymentUseCase(): CancelPaymentUseCase&MockObject {
-		$cancelPaymentUseCase = $this->createMock( CancelPaymentUseCase::class );
+	private function getFailingCancelPaymentUseCase(): CancelPaymentUseCase {
+		$cancelPaymentUseCase = $this->createStub( CancelPaymentUseCase::class );
 		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new FailureResponse( "canceling payment not allowed" ) );
 		return $cancelPaymentUseCase;
 	}
