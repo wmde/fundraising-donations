@@ -7,7 +7,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\CancelDonation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\GetDonationException;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\StoreDonationException;
-use WMDE\Fundraising\DonationContext\Infrastructure\DonationAuthorizationChecker;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\CancelPaymentUseCase;
 use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\FailureResponse;
@@ -18,7 +17,6 @@ class CancelDonationUseCase {
 
 	public function __construct(
 		private readonly DonationRepository $donationRepository,
-		private readonly DonationAuthorizationChecker $authorizationService,
 		private readonly DonationEventLogger $donationLogger,
 		private readonly CancelPaymentUseCase $cancelPaymentUseCase
 	) {
@@ -26,10 +24,6 @@ class CancelDonationUseCase {
 
 	public function cancelDonation( CancelDonationRequest $cancellationRequest ): CancelDonationSuccessResponse|CancelDonationFailureResponse {
 		$donationId = $cancellationRequest->getDonationId();
-		if ( !$this->requestIsAllowedToModifyDonation( $cancellationRequest ) ) {
-			return new CancelDonationFailureResponse( $donationId, 'Not allowed to cancel donations.' );
-		}
-
 		try {
 			$donation = $this->donationRepository->getDonationById( $donationId );
 		} catch ( GetDonationException $ex ) {
@@ -60,10 +54,6 @@ class CancelDonationUseCase {
 
 	public function getLogMessage( CancelDonationRequest $cancellationRequest ): string {
 		return sprintf( self::LOG_MESSAGE_DONATION_STATUS_CHANGE_BY_ADMIN, $cancellationRequest->getUserName() );
-	}
-
-	public function requestIsAllowedToModifyDonation( CancelDonationRequest $cancellationRequest ): bool {
-		return $this->authorizationService->systemCanModifyDonation( $cancellationRequest->getDonationId() );
 	}
 
 }
