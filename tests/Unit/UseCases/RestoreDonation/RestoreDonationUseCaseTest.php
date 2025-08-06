@@ -10,11 +10,13 @@ use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationEventLoggerSpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\DonationRepositorySpy;
 use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakeDonationRepository;
-use WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationResponse;
+use WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationFailureResponse;
+use WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationSuccessResponse;
 use WMDE\Fundraising\DonationContext\UseCases\RestoreDonation\RestoreDonationUseCase;
 
 #[CoversClass( RestoreDonationUseCase::class )]
-#[CoversClass( RestoreDonationResponse::class )]
+#[CoversClass( RestoreDonationSuccessResponse::class )]
+#[CoversClass( RestoreDonationFailureResponse::class )]
 class RestoreDonationUseCaseTest extends TestCase {
 
 	private const AUTH_USER_NAME = "coolAdmin";
@@ -26,7 +28,8 @@ class RestoreDonationUseCaseTest extends TestCase {
 		$useCase = new RestoreDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$response = $useCase->restoreCancelledDonation( 1, self::AUTH_USER_NAME );
 
-		$this->assertFalse( $response->restoreSucceeded() );
+		$this->assertInstanceOf( RestoreDonationFailureResponse::class, $response );
+		$this->assertSame( RestoreDonationFailureResponse::DONATION_NOT_FOUND, $response->message );
 		$this->assertCount( 0, $donationLogger->getLogCalls() );
 	}
 
@@ -37,7 +40,8 @@ class RestoreDonationUseCaseTest extends TestCase {
 		$useCase = new RestoreDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$response = $useCase->restoreCancelledDonation( 1, self::AUTH_USER_NAME );
 
-		$this->assertFalse( $response->restoreSucceeded() );
+		$this->assertInstanceOf( RestoreDonationFailureResponse::class, $response );
+		$this->assertSame( RestoreDonationFailureResponse::DONATION_NOT_CANCELED, $response->message );
 		$this->assertCount( 0, $donationLogger->getLogCalls() );
 	}
 
@@ -49,7 +53,7 @@ class RestoreDonationUseCaseTest extends TestCase {
 		$useCase = new RestoreDonationUseCase( $fakeDonationRepository, $donationLogger );
 		$response = $useCase->restoreCancelledDonation( $donation->getId(), self::AUTH_USER_NAME );
 
-		$this->assertTrue( $response->restoreSucceeded() );
+		$this->assertInstanceOf( RestoreDonationSuccessResponse::class, $response );
 		$this->assertFalse( $donation->isCancelled() );
 	}
 
@@ -61,7 +65,7 @@ class RestoreDonationUseCaseTest extends TestCase {
 		$useCase = new RestoreDonationUseCase( $donationRepositorySpy, $donationLogger );
 		$response = $useCase->restoreCancelledDonation( $donation->getId(), self::AUTH_USER_NAME );
 
-		$this->assertTrue( $response->restoreSucceeded() );
+		$this->assertInstanceOf( RestoreDonationSuccessResponse::class, $response );
 		$storeCalls = $donationRepositorySpy->getStoreDonationCalls();
 		$this->assertCount( 1, $storeCalls );
 		$this->assertSame( $donation->getId(), $storeCalls[0]->getId() );
