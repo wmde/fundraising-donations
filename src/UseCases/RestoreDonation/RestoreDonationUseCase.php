@@ -6,46 +6,38 @@ namespace WMDE\Fundraising\DonationContext\UseCases\RestoreDonation;
 
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
+use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\CancelPaymentUseCase;
+use WMDE\Fundraising\PaymentContext\UseCases\CancelPayment\FailureResponse;
 
 class RestoreDonationUseCase {
 
-	private const LOG_MESSAGE_DONATION_STATUS_CHANGE_BY_ADMIN = 'restored by user: %s';
+	private const string LOG_MESSAGE_DONATION_STATUS_CHANGE_BY_ADMIN = 'restored by user: %s';
 
-	private DonationRepository $donationRepository;
-	private DonationEventLogger $donationLogger;
-
-	public function __construct( DonationRepository $donationRepository, DonationEventLogger $donationLogger ) {
-		$this->donationRepository = $donationRepository;
-		$this->donationLogger = $donationLogger;
+	public function __construct(
+		private readonly DonationRepository $donationRepository,
+		private readonly DonationEventLogger $donationLogger,
+		private readonly CancelPaymentUseCase $cancelPaymentUseCase
+	) {
 	}
 
-	public function restoreCancelledDonation( int $donationId, string $authorizedUser ): RestoreDonationResponse {
+	public function restoreCancelledDonation( int $donationId, string $authorizedUser ): RestoreDonationSuccessResponse|RestoreDonationFailureResponse {
 		$donation = $this->donationRepository->getDonationById( $donationId );
 		if ( $donation === null ) {
-			return $this->newFailureResponse( $donationId );
+			return new RestoreDonationFailureResponse( $donationId, RestoreDonationFailureResponse::DONATION_NOT_FOUND );
 		}
 		if ( !$donation->isCancelled() ) {
-			return $this->newFailureResponse( $donationId );
+			return new RestoreDonationFailureResponse( $donationId, RestoreDonationFailureResponse::DONATION_NOT_CANCELED );
+		}
+
+		$restorePaymentResponse = $this->cancelPaymentUseCase->restorePayment( $donation->getPaymentId() );
+		if ( $restorePaymentResponse instanceof FailureResponse ) {
+			return new RestoreDonationFailureResponse( $donationId, $restorePaymentResponse->message );
 		}
 
 		$donation->revokeCancellation();
 		$this->donationRepository->storeDonation( $donation );
 		$this->donationLogger->log( $donationId, sprintf( self::LOG_MESSAGE_DONATION_STATUS_CHANGE_BY_ADMIN, $authorizedUser ) );
 
-		return $this->newSuccessResponse( $donationId );
-	}
-
-	private function newFailureResponse( int $donationId ): RestoreDonationResponse {
-		return new RestoreDonationResponse(
-			$donationId,
-			RestoreDonationResponse::FAILURE
-		);
-	}
-
-	private function newSuccessResponse( int $donationId ): RestoreDonationResponse {
-		return new RestoreDonationResponse(
-			$donationId,
-			RestoreDonationResponse::SUCCESS
-		);
+		return new RestoreDonationSuccessResponse( $donationId );
 	}
 }
