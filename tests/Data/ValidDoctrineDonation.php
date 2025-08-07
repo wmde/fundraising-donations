@@ -5,6 +5,8 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Data;
 
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 
 class ValidDoctrineDonation {
 	private const DONATION_ID = 1;
@@ -128,6 +130,20 @@ class ValidDoctrineDonation {
 		$donation->setDonorCity( '' );
 		$donation->setDonorEmail( '' );
 		$donation->scrub();
+		return $donation;
+	}
+
+	public static function newModeratedForAmountTooHighDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setModerationReasons( new ModerationReason( ModerationIdentifier::AMOUNT_TOO_HIGH, 'amount' ) );
+		return $donation;
+	}
+
+	public static function newModeratedForContentViolationDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setModerationReasons( new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION, 'firstName' ) );
 		return $donation;
 	}
 
