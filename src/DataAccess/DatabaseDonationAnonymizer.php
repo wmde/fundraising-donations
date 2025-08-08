@@ -43,16 +43,16 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	public function anonymizeAll(): int {
 		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 
+		// The following query only scrubs exported donations
+		// We need to add statements to
+		//   - scrub donations with abandoned external payments (using `$cutoffDate`)
+		//   - scrub deleted donations
+		// See https://phabricator.wikimedia.org/T401247
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb->select( 'd' )
 			->from( Donation::class, 'd' )
 			->where( 'd.isScrubbed = 0' )
-			->andWhere(
-				$qb->expr()->orX(
-					$qb->expr()->isNotNull( 'd.dtGruen' ),
-					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
-				)
-			)->setParameter( 'cutoffDate', $cutoffDate );
+			->andWhere(	$qb->expr()->isNotNull( 'd.dtGruen' ) );
 
 		/** @var iterable<Donation> $donations */
 		$donations = $qb->getQuery()->toIterable();
