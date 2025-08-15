@@ -56,7 +56,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 			$donor->getName()
 		);
 		$this->assertEquals(
-			new PostalAddress(
+			PostalAddress::fromLegacyStreetName(
 				ValidDonation::DONOR_STREET_ADDRESS,
 				ValidDonation::DONOR_POSTAL_CODE,
 				ValidDonation::DONOR_CITY,
@@ -112,7 +112,7 @@ class UpdateDonorUseCaseTest extends TestCase {
 			$donor->getName()
 		);
 		$this->assertEquals(
-			new PostalAddress(
+			PostalAddress::fromLegacyStreetName(
 				ValidDonation::DONOR_STREET_ADDRESS,
 				ValidDonation::DONOR_POSTAL_CODE,
 				ValidDonation::DONOR_CITY,
