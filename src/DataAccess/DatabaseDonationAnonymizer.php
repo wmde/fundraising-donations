@@ -10,8 +10,6 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Domain\AnonymizationException;
 use WMDE\Fundraising\DonationContext\Domain\DonationAnonymizer;
-use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
-use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 
 /**
@@ -47,22 +45,13 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 
 		$qb = $this->entityManager->createQueryBuilder();
-		$amountTooHighModerationId = $this->getAmountTooHighModerationReasonId();
 
 		$qb->select( 'd' )
 			->from( Donation::class, 'd' )
 			->where( 'd.isScrubbed = 0' )
 			->andWhere(
-				$qb->expr()->orX(
-					$qb->expr()->isNotNull( 'd.dtGruen' ),
-					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
-				)
-			)
-			->andWhere(
-				$qb->expr()->not( $qb->expr()->isMemberOf( ':moderationReason', 'd.moderationReasons' ) )
-			)
-			->setParameter( 'moderationReason', $amountTooHighModerationId )
-			->setParameter( 'cutoffDate', $cutoffDate );
+				$qb->expr()->isNotNull( 'd.dtGruen' )
+			);
 
 		/** @var iterable<Donation> $donations */
 		$donations = $qb->getQuery()->toIterable();
@@ -77,24 +66,5 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 			$count++;
 		}
 		return $count;
-	}
-
-	private function getAmountTooHighModerationReasonId(): ?ModerationReason {
-		$qb = $this->entityManager->createQueryBuilder();
-		$qb->select( 'mr' )
-			->from( ModerationReason::class, 'mr' )
-			->where( 'mr.moderationIdentifier = :moderationIdentifier' )
-			->andWhere( 'mr.source = :source' )
-			->setParameter( 'moderationIdentifier', ModerationIdentifier::AMOUNT_TOO_HIGH->value )
-			->setParameter( 'source', 'amount' );
-
-		/** @var array<ModerationReason> $result */
-		$result = $qb->getQuery()->getResult();
-
-		if ( count( $result ) === 0 ) {
-			return null;
-		}
-
-		return $result[ 0 ];
 	}
 }
