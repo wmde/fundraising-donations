@@ -76,7 +76,7 @@ class TemplateDonationNotifier implements DonationNotifier {
 	public function sendModerationNotificationToAdmin( Donation $donation ): void {
 		$importantReasons = array_filter(
 			$donation->getModerationReasons(),
-			fn ( $moderationReason ) => $moderationReason->getModerationIdentifier() === ModerationIdentifier::AMOUNT_TOO_HIGH
+			static fn ( $moderationReason ) => $moderationReason->getModerationIdentifier() === ModerationIdentifier::AMOUNT_TOO_HIGH
 		);
 		if ( count( $importantReasons ) === 0 ) {
 			return;

@@ -29,7 +29,6 @@ class DoctrineCommentFinder implements CommentFinder {
 	 *
 	 * @return Comment[]
 	 * @see CommentFinder::getPublicComments
-	 *
 	 */
 	public function getPublicComments( int $limit, int $offset = 0 ): array {
 		return array_map(
