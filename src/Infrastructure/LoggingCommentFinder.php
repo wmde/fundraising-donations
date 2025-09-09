@@ -30,7 +30,6 @@ class LoggingCommentFinder implements CommentFinder {
 	 * @return Comment[]
 	 * @throws CommentListingException
 	 * @see CommentFinder::getPublicComments
-	 *
 	 */
 	public function getPublicComments( int $limit, int $offset = 0 ): array {
 		try {

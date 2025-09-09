@@ -12,7 +12,6 @@ namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
  *
  * The notification log is an implementation detail of the notification class, not part of the core domain.
  * Therefore, we only reference donations by their ID, not by any direct reference.
- *
  */
 class DonationNotificationLog {
 

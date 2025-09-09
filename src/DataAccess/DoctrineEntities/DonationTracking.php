@@ -8,8 +8,8 @@ class DonationTracking {
 
 	/**
 	 * used for doctrine mapping only
-	 * @phpstan-ignore-next-line
 	 */
+	// @phpstan-ignore-next-line
 	private ?int $id;
 
 	public function __construct(
