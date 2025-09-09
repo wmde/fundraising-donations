@@ -25,7 +25,6 @@ use WMDE\FunValidators\ValidationResponse;
  *
  * DonationPaymentValidator is an implementation of DomainSpecificPaymentValidator.
  * Other domains (e.g. memberships) will have their own rules on minimum and maximum amounts.
- *
  */
 class DonationPaymentValidator implements DomainSpecificPaymentValidator {
 
