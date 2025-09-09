@@ -9,8 +9,8 @@ class ModerationReason {
 	/**
 	 * used for doctrine mapping only
 	 * @var ?int
-	 * @phpstan-ignore-next-line
 	 */
+	// @phpstan-ignore-next-line
 	private ?int $id;
 
 	/**
