@@ -9,5 +9,8 @@
     <indexes>
       <index name="dt_campaign_keyword" columns="campaign,keyword"/>
     </indexes>
+    <unique-constraints>
+      <unique-constraint columns="campaign,keyword" />
+    </unique-constraints>
   </entity>
 </doctrine-mapping>
