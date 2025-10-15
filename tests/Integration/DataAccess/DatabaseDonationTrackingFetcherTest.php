@@ -5,38 +5,39 @@ declare( strict_types = 1 );
 namespace Integration\DataAccess;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DatabaseDonationTrackingFetcher;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationTracking;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 
 #[CoversClass( DatabaseDonationTrackingFetcher::class )]
 class DatabaseDonationTrackingFetcherTest extends TestCase {
 
-	private const CAMPAIGN = 'Campaign McCampaigno';
-	private const KEYWORD = 'Keyword McKeywordo';
+	private const string CAMPAIGN = 'Campaign McCampaigno';
+	private const string KEYWORD = 'Keyword McKeywordo';
 
-	private Connection $connection;
+	private EntityManager $entityManager;
+
+	private DonationTracking $existingTracking;
 
 	public function setUp(): void {
+		$this->existingTracking = new DonationTracking( strtolower( self::CAMPAIGN ), strtolower( self::KEYWORD ) );
 		$factory = TestEnvironment::newInstance()->getFactory();
-		$this->connection = $factory->getConnection();
-
-		$this->connection->createQueryBuilder()->insert( 'donation_tracking' )
-			->values( [ 'campaign' => ':campaign', 'keyword' => ':keyword' ] )
-			->setParameter( 'campaign', self::CAMPAIGN )
-			->setParameter( 'keyword', self::KEYWORD )
-			->executeQuery();
+		$this->entityManager = $factory->getEntityManager();
+		$this->entityManager->persist( $this->existingTracking );
+		$this->entityManager->flush();
 	}
 
-	public function testReturnsExistingTracking(): void {
-		$trackingFetcher = new DatabaseDonationTrackingFetcher( $this->connection );
+	public function testGetTrackingIdReturnsExistingTracking(): void {
+		$trackingFetcher = new DatabaseDonationTrackingFetcher( $this->entityManager );
 
 		$this->assertSame( 1, $trackingFetcher->getTrackingId( self::CAMPAIGN, self::KEYWORD ) );
 	}
 
-	public function testInsertsTrackingItemWhenNeeded(): void {
-		$trackingFetcher = new DatabaseDonationTrackingFetcher( $this->connection );
+	public function testGetTrackingIdInsertsTrackingItemWhenNeeded(): void {
+		$trackingFetcher = new DatabaseDonationTrackingFetcher( $this->entityManager );
 
 		$this->assertSame( 2, $trackingFetcher->getTrackingId( 'A different Campaign', self::KEYWORD ) );
 		$this->assertSame( 3, $trackingFetcher->getTrackingId( self::CAMPAIGN, 'A different keyword' ) );
@@ -44,18 +45,51 @@ class DatabaseDonationTrackingFetcherTest extends TestCase {
 		$this->assertTrackingExistsInDatabase( 4, 'A different Campaign', 'A different keyword' );
 	}
 
-	private function assertTrackingExistsInDatabase( int $id, string $campaign, string $keyword ): void {
-		$qb = $this->connection->createQueryBuilder();
+	public function testGetTrackingIdReturnsExistingTrackingFromCacheForTheSameCombinationOfCampaignAndKeyword(): void {
+		$trackingFetcher = new class ( $this->entityManager ) extends DatabaseDonationTrackingFetcher {
+			public int $connectionCounter = 0;
 
-		$qb->select( 't.campaign as campaign, t.keyword as keyword' )
-			->from( 'donation_tracking', 't' )
+			protected function getConnection(): Connection {
+				$this->connectionCounter++;
+				return parent::getConnection();
+			}
+		};
+
+		$trackingFetcher->getTrackingId( self::CAMPAIGN, self::KEYWORD );
+		$trackingFetcher->getTrackingId( self::CAMPAIGN, self::KEYWORD );
+		$trackingFetcher->getTrackingId( self::CAMPAIGN, self::KEYWORD );
+
+		$this->assertSame( 1, $trackingFetcher->connectionCounter );
+	}
+
+	public function testGetTrackingReturnsExistingTracking(): void {
+		$trackingFetcher = new DatabaseDonationTrackingFetcher( $this->entityManager );
+
+		$tracking = $trackingFetcher->getTracking( self::CAMPAIGN, self::KEYWORD );
+
+		$this->assertSame( $this->existingTracking, $tracking );
+	}
+
+	public function testGetTrackingInsertsTrackingItemWhenNeeded(): void {
+		$trackingFetcher = new DatabaseDonationTrackingFetcher( $this->entityManager );
+
+		$trackingFetcher->getTracking( 'A different Campaign', self::KEYWORD );
+		$trackingFetcher->getTracking( self::CAMPAIGN, 'A different keyword' );
+		$trackingFetcher->getTracking( 'A different Campaign', 'A different keyword' );
+		$this->assertTrackingExistsInDatabase( 4, 'A different Campaign', 'A different keyword' );
+	}
+
+	private function assertTrackingExistsInDatabase( int $id, string $campaign, string $keyword ): void {
+		$qb = $this->entityManager->createQueryBuilder();
+		$qb->select( 't' )
+			->from( DonationTracking::class, 't' )
 			->where( 't.id = :id' )
 			->setParameter( 'id', $id );
+		/** @var DonationTracking|null $tracking */
+		$tracking = $qb->getQuery()->getOneOrNullResult();
 
-		$result = $qb->fetchAllAssociative();
-
-		$this->assertCount( 1, $result );
-		$this->assertSame( $campaign, $result[ 0 ][ 'campaign' ] );
-		$this->assertSame( $keyword, $result[ 0 ][ 'keyword' ] );
+		$this->assertNotNull( $tracking, 'Entity should be in the database' );
+		$this->assertSame( strtolower( $campaign ), $tracking->campaign );
+		$this->assertSame( strtolower( $keyword ), $tracking->keyword );
 	}
 }
