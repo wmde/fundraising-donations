@@ -60,10 +60,9 @@ class TestDonationContextFactory {
 		$paymentContext = new PaymentContextFactory();
 		$paymentContext->registerCustomTypes( $conn );
 		$paths = array_merge( $this->contextFactory->getDoctrineMappingPaths(), $paymentContext->getDoctrineMappingPaths() );
-		return new EntityManager(
-			$conn,
-			ORMSetup::createXMLMetadataConfiguration( $paths )
-		);
+		$config = ORMSetup::createXMLMetadataConfiguration( $paths );
+		$config->enableNativeLazyObjects( true );
+		return new EntityManager( $conn, $config );
 	}
 
 	public function newSchemaCreator(): SchemaCreator {
