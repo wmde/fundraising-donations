@@ -7,8 +7,10 @@ namespace WMDE\Fundraising\DonationContext\DataAccess;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\Exception\ORMException;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationTracking;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\DomainToLegacyConverter;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
+use WMDE\Fundraising\DonationContext\Domain\DonationTrackingFetcher;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationExistsChecker;
@@ -23,7 +25,8 @@ class DoctrineDonationRepository implements DonationRepository {
 		private readonly EntityManager $entityManager,
 		private readonly DonationExistsChecker $donationExistsChecker,
 		private readonly GetPaymentUseCase $getPaymentUseCase,
-		private readonly ModerationReasonRepository $moderationReasonRepository
+		private readonly ModerationReasonRepository $moderationReasonRepository,
+		private ?DonationTrackingFetcher $trackingFetcher = null
 	) {
 	}
 
@@ -43,10 +46,12 @@ class DoctrineDonationRepository implements DonationRepository {
 	 * @param ModerationReason[] $existingModerationReasons
 	 */
 	private function insertDonation( Donation $donation, array $existingModerationReasons ): void {
+		$doctrineDonation = new DoctrineDonation();
+		$doctrineDonation->setDonationTracking( $this->getDonationTracking( $donation ) );
 		$converter = new DomainToLegacyConverter();
 		$doctrineDonation = $converter->convert(
 			$donation,
-			new DoctrineDonation(),
+			$doctrineDonation,
 			$this->getPaymentUseCase->getLegacyPaymentDataObject( $donation->getPaymentId() ),
 			$existingModerationReasons
 		);
@@ -96,7 +101,14 @@ class DoctrineDonationRepository implements DonationRepository {
 
 	private function getDoctrineDonationById( int $id ): ?DoctrineDonation {
 		try {
-			return $this->entityManager->find( DoctrineDonation::class, $id );
+			$qb = $this->entityManager->createQueryBuilder();
+			$qb->select( 'd', 't' )
+				->from( DoctrineDonation::class, 'd' )
+				->leftJoin( 'd.donationTracking', 't' )
+				->where( 'd.id = :id' )
+				->setParameter( 'id', $id );
+			/** @var DoctrineDonation|null */
+			return $qb->getQuery()->getOneOrNullResult();
 		} catch ( ORMException $ex ) {
 			throw new GetDonationException( $ex, "Could not get donation with id '$id'" );
 		}
@@ -115,5 +127,17 @@ class DoctrineDonationRepository implements DonationRepository {
 		} catch ( \InvalidArgumentException $ex ) {
 			throw new GetDonationException( $ex, "Could not convert donation with id '$id' - " . $ex->getMessage() );
 		}
+	}
+
+	private function getDonationTracking( Donation $donation ): DonationTracking {
+		$trackingInfo = $donation->getTrackingInfo();
+		return $this->getDonationTrackingFetcher()->getTracking( $trackingInfo->campaign, $trackingInfo->keyword );
+	}
+
+	private function getDonationTrackingFetcher(): DonationTrackingFetcher {
+		if ( $this->trackingFetcher === null ) {
+			$this->trackingFetcher = new DatabaseDonationTrackingFetcher( $this->entityManager );
+		}
+		return $this->trackingFetcher;
 	}
 }
