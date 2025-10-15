@@ -24,7 +24,7 @@ class DonationTrackingInfo {
 	// phpcs:enable
 
 	/**
-	 * @deprecated Remove when {@see AddDonationRequest} no longer needs this
+	 * @deprecated Remove when {@see \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest} no longer needs this
 	 */
 	public static function newWithTrackingString( string $tracking, int $totalImpressionCount, int $singleBannerImpressionCount ): self {
 		$trackingPairs = explode( '/', $tracking );
