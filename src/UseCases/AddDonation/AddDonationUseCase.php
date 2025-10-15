@@ -6,7 +6,6 @@ namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Fundraising\DonationContext\Domain\Event\DonationCreatedEvent;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
-use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
@@ -86,7 +85,7 @@ class AddDonationUseCase {
 			$donationId,
 			$donor,
 			$paymentId,
-			$this->newTrackingInfoFromRequest( $donationRequest ),
+			$donationRequest->getTrackingInfo(),
 			new \DateTimeImmutable(),
 		);
 	}
@@ -139,14 +138,6 @@ class AddDonationUseCase {
 			$request->getDonorPostalCode(),
 			$request->getDonorCity(),
 			$request->getDonorCountryCode()
-		);
-	}
-
-	private function newTrackingInfoFromRequest( AddDonationRequest $request ): DonationTrackingInfo {
-		return new DonationTrackingInfo(
-			tracking: $request->getTracking(),
-			totalImpressionCount: $request->getTotalImpressionCount(),
-			singleBannerImpressionCount: $request->getSingleBannerImpressionCount()
 		);
 	}
 
