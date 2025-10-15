@@ -42,14 +42,19 @@ class LegacyToDomainConverter {
 	}
 
 	private function createTrackingInfo( DoctrineDonation $dd ): DonationTrackingInfo {
-		$data = new DataReaderWithDefault( $dd->getDecodedData() );
-		$trackingParts = explode( '/', $data->getValue( 'tracking' ), 2 );
-
-		// TODO check for trackingInfo instead
-
+		$tracking = $dd->getDonationTracking();
+		// 2025-10-15: This `if` statement should be removed when all donations have been data-migrated
+		if ( $tracking === null ) {
+			$data = new DataReaderWithDefault( $dd->getDecodedData() );
+			return DonationTrackingInfo::newWithTrackingString(
+				tracking: $data->getValue( 'tracking' ),
+				totalImpressionCount: $dd->getImpressionCount(),
+				singleBannerImpressionCount: $dd->getBannerImpressionCount()
+			);
+		}
 		return new DonationTrackingInfo(
-			campaign: $trackingParts[0],
-			keyword: $trackingParts[1] ?? '',
+			campaign: $tracking->campaign,
+			keyword: $tracking->keyword,
 			totalImpressionCount: $dd->getImpressionCount(),
 			singleBannerImpressionCount: $dd->getBannerImpressionCount()
 		);
