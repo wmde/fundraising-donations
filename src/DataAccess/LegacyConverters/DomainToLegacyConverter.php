@@ -165,6 +165,7 @@ class DomainToLegacyConverter {
 	 * @param DonationTrackingInfo $trackingInfo
 	 *
 	 * @return array<string,int|string>
+	 * @deprecated Remove when https://phabricator.wikimedia.org/T328075 (use DonationTracking table in all code of FOC) is fully done
 	 */
 	private function getDataFieldsFromTrackingInfo( DonationTrackingInfo $trackingInfo ): array {
 		return [
