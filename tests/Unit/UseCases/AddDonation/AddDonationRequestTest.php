@@ -5,6 +5,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\AddDonation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest;
 use WMDE\Fundraising\PaymentContext\Domain\Model\PaymentInterval;
@@ -83,10 +84,45 @@ class AddDonationRequestTest extends TestCase {
 	}
 
 	public function testTrackingFields(): void {
+		$trackingInfo = new DonationTrackingInfo( 'test_campaign', 'test_keyword', 10, 4 );
 		$request = new AddDonationRequest();
 		$request->setTracking( 'test_campaign/test_keyword' );
 		$request->setSingleBannerImpressionCount( 4 );
 		$request->setTotalImpressionCount( 10 );
+		$request->setTrackingInfo( $trackingInfo );
+
+		$this->assertSame( 'test_campaign/test_keyword', $request->getTracking() );
+		$this->assertSame( 10, $request->getTotalImpressionCount() );
+		$this->assertSame( 4, $request->getSingleBannerImpressionCount() );
+		$this->assertSame( $trackingInfo, $request->getTrackingInfo() );
+	}
+
+	/**
+	 * This test can be deleted when we remove the deprecated tracking properties from the class.
+	 */
+	public function testSettingLegacyTrackingFieldsChangesTrackingInfo(): void {
+		$trackingInfo = new DonationTrackingInfo( 'test_campaign', 'test_keyword', 10, 4 );
+		$expectedTrackingInfo = new DonationTrackingInfo( 'test_campaign_2', 'test_keyword_2', 22, 8 );
+		$request = new AddDonationRequest();
+		$request->setTrackingInfo( $trackingInfo );
+		$request->setTracking( 'test_campaign_2/test_keyword_2' );
+		$request->setSingleBannerImpressionCount( 8 );
+		$request->setTotalImpressionCount( 22 );
+
+		$this->assertNotSame( $trackingInfo, $request->getTrackingInfo(), 'Setting legacy fields should create new DonationTrackingInfo instance' );
+		$this->assertEquals( $expectedTrackingInfo, $request->getTrackingInfo() );
+	}
+
+	/**
+	 * This test can be deleted when we remove the deprecated tracking properties from the class.
+	 */
+	public function testSettingTrackingInfoChangesLegacyTrackingFields(): void {
+		$trackingInfo = new DonationTrackingInfo( 'test_campaign', 'test_keyword', 10, 4 );
+		$request = new AddDonationRequest();
+		$request->setTracking( 'test_campaign_2/test_keyword_2' );
+		$request->setSingleBannerImpressionCount( 8 );
+		$request->setTotalImpressionCount( 22 );
+		$request->setTrackingInfo( $trackingInfo );
 
 		$this->assertSame( 'test_campaign/test_keyword', $request->getTracking() );
 		$this->assertSame( 10, $request->getTotalImpressionCount() );
