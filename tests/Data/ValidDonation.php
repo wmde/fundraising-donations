@@ -40,9 +40,16 @@ class ValidDonation {
 	public const TRACKING_BANNER_IMPRESSION_COUNT = 1;
 	public const TRACKING_TOTAL_IMPRESSION_COUNT = 3;
 
-	// "tracking" is the name of the property on the object, "TRACKING" is our prefix, hence TRACKING_TRACKING
-	public const TRACKING_TRACKING = 'test/gelb';
+	public const TRACKING_CAMPAIGN = 'test';
 
+	public const TRACKING_KEYWORD = 'gelb';
+
+	/**
+	 * "tracking" is the name of the property on the object, "TRACKING" is our prefix, hence TRACKING_TRACKING
+	 *
+	 * @deprecated use {@see self::TRACKING_KEYWORD} and {@see self::TRACKING_CAMPAIGN}
+	 */
+	public const TRACKING_TRACKING = 'test/gelb';
 	public const COMMENT_TEXT = 'For great justice!';
 	public const COMMENT_IS_PUBLIC = true;
 
@@ -225,7 +232,8 @@ class ValidDonation {
 
 	public static function newTrackingInfo(): DonationTrackingInfo {
 		return new DonationTrackingInfo(
-			tracking: self::TRACKING_TRACKING,
+			campaign: self::TRACKING_CAMPAIGN,
+			keyword: self::TRACKING_KEYWORD,
 			totalImpressionCount: self::TRACKING_TOTAL_IMPRESSION_COUNT,
 			singleBannerImpressionCount: self::TRACKING_BANNER_IMPRESSION_COUNT
 		);

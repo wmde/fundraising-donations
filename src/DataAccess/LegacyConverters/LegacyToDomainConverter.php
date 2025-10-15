@@ -43,9 +43,13 @@ class LegacyToDomainConverter {
 
 	private function createTrackingInfo( DoctrineDonation $dd ): DonationTrackingInfo {
 		$data = new DataReaderWithDefault( $dd->getDecodedData() );
+		$trackingParts = explode( '/', $data->getValue( 'tracking' ), 2 );
+
+		// TODO check for trackingInfo instead
 
 		return new DonationTrackingInfo(
-			tracking: $data->getValue( 'tracking' ),
+			campaign: $trackingParts[0],
+			keyword: $trackingParts[1] ?? '',
 			totalImpressionCount: $dd->getImpressionCount(),
 			singleBannerImpressionCount: $dd->getBannerImpressionCount()
 		);

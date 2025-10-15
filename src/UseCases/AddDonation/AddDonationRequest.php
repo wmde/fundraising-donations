@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 
@@ -107,6 +108,10 @@ class AddDonationRequest {
 
 	public function setTracking( string $tracking ): void {
 		$this->tracking = trim( $tracking );
+	}
+
+	public function getTrackingInfo(): DonationTrackingInfo {
+		return DonationTrackingInfo::newWithTrackingString( $this->tracking, $this->totalImpressionCount, $this->singleBannerImpressionCount );
 	}
 
 	public function getTotalImpressionCount(): int {
