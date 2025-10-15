@@ -8,8 +8,11 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMSetup;
 use WMDE\Fundraising\DonationContext\DataAccess\DatabaseDonationTrackingFetcher;
 use WMDE\Fundraising\DonationContext\Domain\DonationTrackingFetcher;
+use WMDE\Fundraising\DonationContext\DonationContextFactory;
 
 class TrackingMigrationCommand {
 
@@ -152,7 +155,13 @@ class TrackingMigrationCommand {
 
 	private static function getTrackingFetcher( Connection $db ): DonationTrackingFetcher {
 		if ( self::$donationTrackingFetcher == null ) {
-			self::$donationTrackingFetcher = new DatabaseDonationTrackingFetcher( $db );
+			$contextFactory = new DonationContextFactory();
+			$contextFactory->registerCustomTypes( $db );
+			$contextFactory->registerDoctrineModerationIdentifierType( $db );
+			$config = ORMSetup::createXMLMetadataConfiguration( $contextFactory->getDoctrineMappingPaths() );
+			$config->enableNativeLazyObjects( true );
+			$em = new EntityManager( $db, $config );
+			self::$donationTrackingFetcher = new DatabaseDonationTrackingFetcher( $em );
 		}
 		return self::$donationTrackingFetcher;
 	}
