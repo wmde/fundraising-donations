@@ -14,15 +14,6 @@ class DonationTrackingInfo {
 	) {
 	}
 
-	// phpcs:disable
-	/**
-	 * @deprecated Remove when the legacy converters no longer access tracking
-	 */
-	public string $tracking {
-		get => $this->campaign ? sprintf( '%s/%s', $this->campaign, $this->keyword ) : '';
-	}
-	// phpcs:enable
-
 	/**
 	 * @deprecated Remove when {@see \WMDE\Fundraising\DonationContext\UseCases\AddDonation\AddDonationRequest} no longer needs this
 	 */
@@ -33,5 +24,23 @@ class DonationTrackingInfo {
 
 	public static function newBlankTrackingInfo(): self {
 		return new self();
+	}
+
+	/**
+	 * This method generates the concatenated tracking information for storing the "tracking" key in the data blob of the Doctrine Entity.
+	 *
+	 * You can remove this method when all code in the Fundraising Operation Center no longer uses the data blob to look up the tracking.
+	 * See https://phabricator.wikimedia.org/T328075
+	 *
+	 * @return string
+	 */
+	public function getTrackingString(): string {
+		if ( $this->campaign === '' ) {
+			return '';
+		}
+		if ( $this->keyword === '' ) {
+			return strtolower( $this->campaign );
+		}
+		return strtolower( sprintf( '%s/%s', $this->campaign, $this->keyword ) );
 	}
 }

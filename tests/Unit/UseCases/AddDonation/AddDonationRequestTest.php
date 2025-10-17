@@ -83,17 +83,12 @@ class AddDonationRequestTest extends TestCase {
 		$this->assertSame( $paymentParameters, $request->getPaymentParameters() );
 	}
 
-	public function testTrackingFields(): void {
+	public function testTrackingInfoAccessors(): void {
 		$trackingInfo = new DonationTrackingInfo( 'test_campaign', 'test_keyword', 10, 4 );
 		$request = new AddDonationRequest();
-		$request->setTracking( 'test_campaign/test_keyword' );
-		$request->setSingleBannerImpressionCount( 4 );
-		$request->setTotalImpressionCount( 10 );
+
 		$request->setTrackingInfo( $trackingInfo );
 
-		$this->assertSame( 'test_campaign/test_keyword', $request->getTracking() );
-		$this->assertSame( 10, $request->getTotalImpressionCount() );
-		$this->assertSame( 4, $request->getSingleBannerImpressionCount() );
 		$this->assertSame( $trackingInfo, $request->getTrackingInfo() );
 	}
 

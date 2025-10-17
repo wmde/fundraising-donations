@@ -119,7 +119,7 @@ class AddDonationRequest {
 
 	public function setTrackingInfo( DonationTrackingInfo $trackingInfo ): void {
 		$this->trackingInfo = $trackingInfo;
-		$this->tracking = $trackingInfo->tracking;
+		$this->tracking = $trackingInfo->getTrackingString();
 		$this->totalImpressionCount = $trackingInfo->totalImpressionCount;
 		$this->singleBannerImpressionCount = $trackingInfo->singleBannerImpressionCount;
 	}
