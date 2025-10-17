@@ -171,7 +171,7 @@ class DomainToLegacyConverter {
 		return [
 			'impCount' => $trackingInfo->totalImpressionCount,
 			'bImpCount' => $trackingInfo->singleBannerImpressionCount,
-			'tracking' => $trackingInfo->tracking,
+			'tracking' => $trackingInfo->getTrackingString(),
 		];
 	}
 

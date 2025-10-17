@@ -186,7 +186,6 @@ class LegacyToDomainConverterTest extends TestCase {
 
 		$this->assertSame( 0, $info->totalImpressionCount );
 		$this->assertSame( 0, $info->singleBannerImpressionCount );
-		$this->assertSame( '', $info->tracking );
 		$this->assertSame( '', $info->campaign );
 		$this->assertSame( '', $info->keyword );
 	}
@@ -209,6 +208,7 @@ class LegacyToDomainConverterTest extends TestCase {
 
 		$this->assertSame( ValidDonation::TRACKING_TOTAL_IMPRESSION_COUNT, $info->totalImpressionCount );
 		$this->assertSame( ValidDonation::TRACKING_BANNER_IMPRESSION_COUNT, $info->singleBannerImpressionCount );
-		$this->assertSame( ValidDonation::TRACKING_CAMPAIGN . '/' . ValidDonation::TRACKING_KEYWORD, $info->tracking );
+		$this->assertSame( ValidDonation::TRACKING_CAMPAIGN, $info->campaign );
+		$this->assertSame( ValidDonation::TRACKING_KEYWORD, $info->keyword );
 	}
 }
