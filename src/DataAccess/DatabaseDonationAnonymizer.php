@@ -20,6 +20,8 @@ use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
  */
 class DatabaseDonationAnonymizer implements DonationAnonymizer {
 
+	private const int BATCH_SIZE = 20;
+
 	public function __construct(
 		private readonly DonationRepository $donationRepository,
 		private readonly EntityManager $entityManager,
@@ -30,6 +32,7 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 
 	public function anonymizeWithIds( int ...$donationIds ): void {
 		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+		$counter = 0;
 		foreach ( $donationIds as $id ) {
 			$donation = $this->donationRepository->getDonationById( $id );
 			if ( $donation === null ) {
@@ -37,6 +40,12 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 			}
 			$donation->scrubPersonalData( $cutoffDate );
 			$this->donationRepository->storeDonation( $donation );
+
+			$counter++;
+			if ( $counter % self::BATCH_SIZE === 0 ) {
+				$this->entityManager->flush();
+				$this->entityManager->clear();
+			}
 		}
 	}
 
@@ -65,6 +74,12 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 			$donation->scrubPersonalData( $cutoffDate );
 			$this->donationRepository->storeDonation( $donation );
 			$count++;
+
+			if ( $count % self::BATCH_SIZE === 0 ) {
+				$this->entityManager->flush();
+				$this->entityManager->clear();
+			}
+
 		}
 		return $count;
 	}
