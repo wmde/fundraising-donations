@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\UseCases\AddDonation;
 
 use WMDE\Euro\Euro;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationTrackingInfo;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\PaymentContext\UseCases\CreatePayment\PaymentParameters;
 
@@ -24,9 +25,19 @@ class AddDonationRequest {
 	private bool $optsInToNewsletter = false;
 	private PaymentParameterBuilder $paymentParameterBuilder;
 	private PaymentParameters $paymentParameters;
+	/**
+	 * @deprecated Use trackingInfo
+	 */
 	private string $tracking = '';
+	/**
+	 * @deprecated Use trackingInfo
+	 */
 	private int $totalImpressionCount = 0;
+	/**
+	 * @deprecated Use trackingInfo
+	 */
 	private int $singleBannerImpressionCount = 0;
+	private DonationTrackingInfo $trackingInfo;
 	private bool $optsIntoDonationReceipt = true;
 
 	/**
@@ -35,6 +46,7 @@ class AddDonationRequest {
 	public function __construct() {
 		$this->donorType = DonorType::ANONYMOUS;
 		$this->paymentParameterBuilder = new PaymentParameterBuilder();
+		$this->trackingInfo = DonationTrackingInfo::newBlankTrackingInfo();
 	}
 
 	/**
@@ -101,28 +113,74 @@ class AddDonationRequest {
 		$this->paymentParameters = $this->paymentParameterBuilder->getPaymentParameters();
 	}
 
+	public function getTrackingInfo(): DonationTrackingInfo {
+		return $this->trackingInfo;
+	}
+
+	public function setTrackingInfo( DonationTrackingInfo $trackingInfo ): void {
+		$this->trackingInfo = $trackingInfo;
+		$this->tracking = $trackingInfo->getTrackingString();
+		$this->totalImpressionCount = $trackingInfo->totalImpressionCount;
+		$this->singleBannerImpressionCount = $trackingInfo->singleBannerImpressionCount;
+	}
+
+	/**
+	 * @deprecated use {@see self::getTrackingInfo()}
+	 */
 	public function getTracking(): string {
 		return $this->tracking;
 	}
 
+	/**
+	 * @deprecated use {@see self::setTrackingInfo()}
+	 */
 	public function setTracking( string $tracking ): void {
 		$this->tracking = trim( $tracking );
+		$this->trackingInfo = DonationTrackingInfo::newWithTrackingString(
+			$tracking,
+			$this->trackingInfo->totalImpressionCount,
+			$this->trackingInfo->singleBannerImpressionCount
+		);
 	}
 
+	/**
+	 * @deprecated use {@see self::getTrackingInfo()}
+	 */
 	public function getTotalImpressionCount(): int {
 		return $this->totalImpressionCount;
 	}
 
+	/**
+	 * @deprecated use {@see self::setTrackingInfo()}
+	 */
 	public function setTotalImpressionCount( int $totalImpressionCount ): void {
 		$this->totalImpressionCount = $totalImpressionCount;
+		$this->trackingInfo = new DonationTrackingInfo(
+			$this->trackingInfo->campaign,
+			$this->trackingInfo->keyword,
+			$totalImpressionCount,
+			$this->trackingInfo->singleBannerImpressionCount
+		);
 	}
 
+	/**
+	 * @deprecated use {@see self::getTrackingInfo()}
+	 */
 	public function getSingleBannerImpressionCount(): int {
 		return $this->singleBannerImpressionCount;
 	}
 
+	/**
+	 * @deprecated use {@see self::setTrackingInfo()}
+	 */
 	public function setSingleBannerImpressionCount( int $singleBannerImpressionCount ): void {
 		$this->singleBannerImpressionCount = $singleBannerImpressionCount;
+		$this->trackingInfo = new DonationTrackingInfo(
+			$this->trackingInfo->campaign,
+			$this->trackingInfo->keyword,
+			$this->trackingInfo->totalImpressionCount,
+			$singleBannerImpressionCount
+		);
 	}
 
 	public function getDonorType(): DonorType {

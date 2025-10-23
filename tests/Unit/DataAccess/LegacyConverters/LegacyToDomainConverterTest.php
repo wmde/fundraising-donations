@@ -6,26 +6,16 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
+use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\DonationTracking;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\IncompleteDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
 
 #[CoversClass( LegacyToDomainConverter::class )]
 class LegacyToDomainConverterTest extends TestCase {
-
-	public function testGivenIncompleteTrackingData_converterFillsTrackingDataWithDefaults(): void {
-		$doctrineDonation = IncompleteDoctrineDonation::newPaypalDonationWithMissingTrackingData();
-		$converter = new LegacyToDomainConverter();
-
-		$donation = $converter->createFromLegacyObject( $doctrineDonation );
-		$info = $donation->getTrackingInfo();
-
-		$this->assertSame( 0, $info->totalImpressionCount );
-		$this->assertSame( 0, $info->singleBannerImpressionCount );
-		$this->assertSame( '', $info->tracking );
-	}
 
 	public function testGivenDataSetWithExportDate_donationIsMarkedAsExported(): void {
 		$doctrineDonation = ValidDoctrineDonation::newExportedirectDebitDoctrineDonation();
@@ -165,5 +155,60 @@ class LegacyToDomainConverterTest extends TestCase {
 		$this->expectExceptionMessage( "Doctrine donation ID must not be null" );
 
 		( new LegacyToDomainConverter() )->createFromLegacyObject( $doctrineDonation );
+	}
+
+	public function testGivenTrackingData_converterPopulatesTrackingInfo(): void {
+		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
+		$doctrineDonation->setDonationTracking(
+			new DonationTracking(
+				ValidDonation::TRACKING_CAMPAIGN,
+				ValidDonation::TRACKING_KEYWORD
+			)
+		);
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		$info = $donation->getTrackingInfo();
+
+		$this->assertSame( ValidDonation::TRACKING_TOTAL_IMPRESSION_COUNT, $info->totalImpressionCount );
+		$this->assertSame( ValidDonation::TRACKING_BANNER_IMPRESSION_COUNT, $info->singleBannerImpressionCount );
+		$this->assertSame( ValidDonation::TRACKING_CAMPAIGN, $info->campaign );
+		$this->assertSame( ValidDonation::TRACKING_KEYWORD, $info->keyword );
+	}
+
+	public function testGivenIncompleteTrackingData_converterFillsTrackingDataWithDefaults(): void {
+		$doctrineDonation = IncompleteDoctrineDonation::newPaypalDonationWithMissingTrackingData();
+		$doctrineDonation->setDonationTracking( new DonationTracking( '', '' ) );
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		$info = $donation->getTrackingInfo();
+
+		$this->assertSame( 0, $info->totalImpressionCount );
+		$this->assertSame( 0, $info->singleBannerImpressionCount );
+		$this->assertSame( '', $info->campaign );
+		$this->assertSame( '', $info->keyword );
+	}
+
+	/**
+	 * You can delete this test when you delete the fallback to legacy data in the converter
+	 */
+	public function testGivenOnlyLegacyTrackingData_converterFillsTrackingDataFromLegacyFields(): void {
+		$doctrineDonation = ValidDoctrineDonation::newDirectDebitDoctrineDonation();
+		// By default, all donation fixtures have a DonationTracking instance
+		// We're using reflection to force a null value (because the setter doesn't allow them)
+		$reflectedDonation = new \ReflectionObject( $doctrineDonation );
+		$prop = $reflectedDonation->getProperty( 'donationTracking' );
+		$prop->setAccessible( true );
+		$prop->setValue( $doctrineDonation, null );
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		$info = $donation->getTrackingInfo();
+
+		$this->assertSame( ValidDonation::TRACKING_TOTAL_IMPRESSION_COUNT, $info->totalImpressionCount );
+		$this->assertSame( ValidDonation::TRACKING_BANNER_IMPRESSION_COUNT, $info->singleBannerImpressionCount );
+		$this->assertSame( ValidDonation::TRACKING_CAMPAIGN, $info->campaign );
+		$this->assertSame( ValidDonation::TRACKING_KEYWORD, $info->keyword );
 	}
 }
