@@ -6,10 +6,7 @@ namespace WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities;
 
 class DonationTracking {
 
-	/**
-	 * used for doctrine mapping only
-	 */
-	// @phpstan-ignore-next-line
+	// @phpstan-ignore property.unused (Doctrine will initialize this ID)
 	private ?int $id;
 
 	public function __construct(

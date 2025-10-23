@@ -8,8 +8,11 @@ use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\Query\QueryBuilder;
+use Doctrine\ORM\EntityManager;
+use Doctrine\ORM\ORMSetup;
 use WMDE\Fundraising\DonationContext\DataAccess\DatabaseDonationTrackingFetcher;
 use WMDE\Fundraising\DonationContext\Domain\DonationTrackingFetcher;
+use WMDE\Fundraising\DonationContext\DonationContextFactory;
 
 class TrackingMigrationCommand {
 
@@ -36,39 +39,46 @@ class TrackingMigrationCommand {
 		$iterations = 0;
 		$maxIterations = ceil( $numDonations / self::BATCH_SIZE );
 		$skippedDonations = 0;
+		$result = new UpdateResult( 0, 0, 0 );
 		do {
-			$migratedDonationsInLastBatch = self::updateDonationBatch( $db );
-			$skippedDonationsInLastBatch = $migratedDonationsInLastBatch > 0 ? self::BATCH_SIZE - $migratedDonationsInLastBatch : 0;
-			$migratedDonations += $migratedDonationsInLastBatch;
-			$skippedDonations += $skippedDonationsInLastBatch;
+			$result = self::updateDonationBatch( $db, $result->lastUpdatedId );
+			$migratedDonations += $result->updateCount;
+			$skippedDonations += $result->skipCount;
 			$iterations++;
 			printf(
-				"Migrated %d of %d donations (%d%% done)\n",
-				$migratedDonations,
-				$numDonations,
+				"Migrated %s of %s donations (%d%% done)\n",
+				number_format( $migratedDonations ),
+				number_format( $numDonations ),
 				( ( $migratedDonations + $skippedDonations ) / $numDonations ) * 100
 			);
-		} while ( $migratedDonationsInLastBatch > 0 && $iterations <= $maxIterations );
-		printf( "Migrated %d donations, skipped %d\n", $migratedDonations, $skippedDonations );
+		} while ( $result->getNumProcessed() > 0 && $iterations <= $maxIterations );
+		printf( "Migrated %s donations, skipped %s\n", number_format( $migratedDonations ), number_format( $skippedDonations ) );
 	}
 
-	private static function updateDonationBatch( Connection $db ): int {
+	private static function updateDonationBatch( Connection $db, int $idFromPreviousBatch ): UpdateResult {
 		$count = 0;
-		foreach ( self::getDonations( $db ) as $donation ) {
+		$skippedCount = 0;
+		$donationId = 0;
+		foreach ( self::getDonations( $db, $idFromPreviousBatch ) as $donation ) {
 			$data = self::unpackData( $donation['data'] );
 
 			$donationId = $donation['id'];
 			$tracking = explode( self::TRACKING_SEPARATOR, $data[self::TRACKING_DATA_BLOB_KEY] ?? '' );
 
-			if ( count( $tracking ) !== 2 || $tracking[0] === '' || $tracking[1] === '' ) {
-				echo "Skipping donation {$donationId} because it does not contain tracking information\n";
+			if ( $tracking[0] === '' ) {
+				error_log(
+					"Skipping donation {$donationId} because it does not contain tracking information\n",
+					3,
+					'tracking_migration.log'
+				);
+				$skippedCount++;
 				continue;
 			}
 
 			$impressionCount = $data['impCount'] ?? 0;
 			$bannerImpressionCount = $data['bImpCount'] ?? 0;
 
-			$trackingId = self::getTrackingId( $db, $tracking[0], $tracking[1] );
+			$trackingId = self::getTrackingId( $db, $tracking[0], $tracking[1] ?? '' );
 
 			$qb = $db->createQueryBuilder();
 			$qb->update( 'spenden' )
@@ -83,7 +93,7 @@ class TrackingMigrationCommand {
 				->executeQuery();
 			$count++;
 		}
-		return $count;
+		return new UpdateResult( $count, $skippedCount, $donationId );
 	}
 
 	private static function getConnection(): Connection {
@@ -108,17 +118,17 @@ class TrackingMigrationCommand {
 	}
 
 	/**
-	 * @param Connection $db
-	 *
 	 * @return \Traversable<int, array{'data': string, 'id': int}>
-	 * @throws Exception
 	 */
-	private static function getDonations( Connection $db ): \Traversable {
+	private static function getDonations( Connection $db, int $idFromPreviousBatch ): \Traversable {
 		$qb = $db->createQueryBuilder();
 		$qb->select( 'd.id', 'd.data' )
 			->from( 'spenden', 'd' )
+			->orderBy( 'd.id' )
 			->setMaxResults( self::BATCH_SIZE );
 		$qb = self::addDonationQueryConditions( $qb );
+		$qb->andWhere( 'd.id > :previousId' )
+			->setParameter( 'previousId', $idFromPreviousBatch );
 
 		$dbResult = $qb->executeQuery();
 
@@ -130,7 +140,6 @@ class TrackingMigrationCommand {
 	private static function addDonationQueryConditions( QueryBuilder $qb ): QueryBuilder {
 		$qb->where( 'd.tracking_id = :empty_tracking_id' )
 			->orWhere( 'd.tracking_id IS NULL' )
-			->setMaxResults( self::BATCH_SIZE )
 			->setParameter( 'empty_tracking_id', 0 );
 		return $qb;
 	}
@@ -152,7 +161,13 @@ class TrackingMigrationCommand {
 
 	private static function getTrackingFetcher( Connection $db ): DonationTrackingFetcher {
 		if ( self::$donationTrackingFetcher == null ) {
-			self::$donationTrackingFetcher = new DatabaseDonationTrackingFetcher( $db );
+			$contextFactory = new DonationContextFactory();
+			$contextFactory->registerCustomTypes( $db );
+			$contextFactory->registerDoctrineModerationIdentifierType( $db );
+			$config = ORMSetup::createXMLMetadataConfiguration( $contextFactory->getDoctrineMappingPaths() );
+			$config->enableNativeLazyObjects( true );
+			$em = new EntityManager( $db, $config );
+			self::$donationTrackingFetcher = new DatabaseDonationTrackingFetcher( $em );
 		}
 		return self::$donationTrackingFetcher;
 	}
