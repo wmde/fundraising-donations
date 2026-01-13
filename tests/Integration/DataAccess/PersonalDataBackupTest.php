@@ -21,14 +21,20 @@ class PersonalDataBackupTest extends TestCase {
 	public function testBackupClientIsCalledWithTableNameAndConditionsForDonors(): void {
 		$backupClientSpy = new DatabaseBackupClientSpy();
 		$personalBackup = $this->givenPersonalBackup( backupClient: $backupClientSpy );
+		// A regular expression to check that the conditions contain a subselect
+		$expectedSubSelect = '/select .* where is_scrubbed=0 AND dt_backup IS NULL/i';
 
 		$personalBackup->doBackup( $this->givenBackupTime() );
 
 		$backupConfigurations = $backupClientSpy->getTableBackupConfigurations();
-		$this->assertCount( 1, $backupConfigurations );
+		$this->assertCount( 3, $backupConfigurations );
+		$this->assertStringContainsString( 'payment', $backupConfigurations[0]->tableName, 'Should backup payment tables first' );
+		$this->assertMatchesRegularExpression( $expectedSubSelect, $backupConfigurations[0]->conditions );
+		$this->assertSame( 'donation_tracking', $backupConfigurations[1]->tableName, 'Should backup donation tracking' );
+		$this->assertMatchesRegularExpression( $expectedSubSelect, $backupConfigurations[1]->conditions );
 		$this->assertEquals(
 			new TableBackupConfiguration( 'spenden', 'is_scrubbed=0 AND dt_backup IS NULL' ),
-			$backupConfigurations[0]
+			$backupConfigurations[2]
 		);
 	}
 
