@@ -5,6 +5,7 @@ namespace WMDE\Fundraising\DonationContext\DataAccess\Backup;
 
 use Doctrine\ORM\EntityManager;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
+use WMDE\Fundraising\PaymentContext\DataAccess\Backup\PersonalDataBackup as PaymentPersonalDataBackup;
 
 /**
  * A class to back up the personal data of Donors (to a short-tem intermediate storage).
@@ -20,9 +21,17 @@ class PersonalDataBackup {
 	}
 
 	public function doBackup( \DateTimeImmutable $backupTime ): int {
+		$condition = 'is_scrubbed=0 AND dt_backup IS NULL';
+		$subselect = "SELECT tracking_id FROM spenden WHERE $condition";
+		$donationPaymentBackupConfigs = $this->getConditionsForPaymentTables( $subselect );
+
 		// The backup client will use `mysqldump` internally and may process the result further
 		$this->backupClient->backupDonationTables(
-			new TableBackupConfiguration( 'spenden', 'is_scrubbed=0 AND dt_backup IS NULL' )
+			...$donationPaymentBackupConfigs,
+			...[
+				new TableBackupConfiguration( 'donation_tracking', "id IN ( $subselect )" ),
+				new TableBackupConfiguration( 'spenden', $condition )
+			]
 		);
 
 		// Mark affected donations by setting their backup time.
@@ -41,5 +50,18 @@ class PersonalDataBackup {
 		$this->entityManager->clear();
 
 		return $affectedRows;
+	}
+
+	/**
+	 * @return TableBackupConfiguration[]
+	 */
+	private function getConditionsForPaymentTables( string $subselect ): array {
+		$paymentPersonalDataBackup = new PaymentPersonalDataBackup( $this->entityManager );
+		$paymentBackupConfigs = $paymentPersonalDataBackup->getTableBackupConfigurationForContext( $subselect );
+		$donationPaymentBackupConfigs = [];
+		foreach ( $paymentBackupConfigs as $config ) {
+			$donationPaymentBackupConfigs[] = new TableBackupConfiguration( $config->tableName, $config->conditions );
+		}
+		return $donationPaymentBackupConfigs;
 	}
 }
