@@ -122,8 +122,10 @@ class TemplateDonationNotifierTest extends TestCase {
 
 		$donation = ValidDonation::newDirectDebitDonation();
 		$donation->markForModeration( ...$moderationReasons );
-		$paymentService = $this->createStub( GetPaymentUseCase::class );
-		$paymentService->method( 'getPaymentDataArray' )->willReturn( ValidPayments::newDirectDebitPayment()->getDisplayValues() );
+		$paymentService = $this->createConfiguredStub(
+			GetPaymentUseCase::class,
+			[ 'getPaymentDataArray' => ValidPayments::newDirectDebitPayment()->getDisplayValues() ]
+		);
 		$confirmationMailer = new TemplateDonationNotifier(
 			new ThrowingDonorNotification(),
 			$mailerSpy,

@@ -105,9 +105,10 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 	}
 
 	private function makeGetPaymentUseCaseStub(): GetPaymentUseCase {
-		$stub = $this->createStub( GetPaymentUseCase::class );
-		$stub->method( 'getLegacyPaymentDataObject' )->willReturn( $this->createDefaultLegacyData() );
-		return $stub;
+		return $this->createConfiguredStub(
+			GetPaymentUseCase::class,
+			[ 'getLegacyPaymentDataObject' => $this->createDefaultLegacyData() ]
+		);
 	}
 
 	private function createDefaultLegacyData(): LegacyPaymentData {
