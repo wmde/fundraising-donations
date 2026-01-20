@@ -204,9 +204,10 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 
 	public function testFailingPaymentBookingService_notificationIsNotHandled(): void {
 		$errorMessage = 'Could not book payment - server is tired';
-		$failingPaymentService = $this->createStub( PaymentBookingService::class );
-		$failingPaymentService->method( 'bookPayment' )->willReturn( new FailureResponse( $errorMessage ) );
-
+		$failingPaymentService = $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => new FailureResponse( $errorMessage ) ]
+		);
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
 
 		$useCase = $this->givenNewUseCase(
@@ -275,21 +276,24 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	}
 
 	private function createSucceedingPaymentBookingServiceStub(): PaymentBookingService&Stub {
-		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
-		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new SuccessResponse() );
-		return $paymentBookingServiceStub;
+		return $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => new SuccessResponse() ]
+		);
 	}
 
 	private function createFailingPaymentBookingServiceStub( FailureResponse $response ): PaymentBookingService&Stub {
-		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
-		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( $response );
-		return $paymentBookingServiceStub;
+		return $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => $response ]
+		);
 	}
 
 	private function createFollowUpSucceedingPaymentBookingServiceStub(): PaymentBookingService&Stub {
-		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
-		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new FollowUpSuccessResponse( 1, 2 ) );
-		return $paymentBookingServiceStub;
+		return $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => new FollowUpSuccessResponse( 1, 2 ) ]
+		);
 	}
 
 	private function createFakeRepository(): DonationRepository {

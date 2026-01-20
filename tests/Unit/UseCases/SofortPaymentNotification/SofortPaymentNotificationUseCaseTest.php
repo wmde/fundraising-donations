@@ -137,9 +137,11 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	public function testWhenPaymentServiceReturnsFailure_unhandledResponseIsReturned(): void {
 		$fakeRepository = new FakeDonationRepository();
 		$fakeRepository->storeDonation( ValidDonation::newDirectDebitDonation() );
-		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
 		$errorMessage = 'Could not book payment - server is tired';
-		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new FailureResponse( $errorMessage ) );
+		$paymentBookingServiceStub = $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => new FailureResponse( $errorMessage ) ]
+		);
 
 		$useCase = new SofortPaymentNotificationUseCase(
 			new StaticDonationIdRepository(),
@@ -182,9 +184,10 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	}
 
 	private function getSucceedingPaymentBookingServiceStub(): PaymentBookingService&Stub {
-		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
-		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new SuccessResponse() );
-		return $paymentBookingServiceStub;
+		return $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => new SuccessResponse() ]
+		);
 	}
 
 	private function createEventLoggerStub(): DonationEventLogger {

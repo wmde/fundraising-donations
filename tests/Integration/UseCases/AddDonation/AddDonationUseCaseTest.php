@@ -398,37 +398,42 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	private function makeFakeSucceedingDonationValidator(): AddDonationValidator {
-		$validator = $this->createStub( AddDonationValidator::class );
-		$validator->method( 'validate' )->willReturn( new AddDonationValidationResult() );
-		return $validator;
+		return $this->createConfiguredStub(
+			AddDonationValidator::class,
+			[ 'validate' => new AddDonationValidationResult() ]
+		);
 	}
 
 	private function makeFakeFailingDonationValidator( ConstraintViolation $violation ): AddDonationValidator {
-		$validator = $this->createStub( AddDonationValidator::class );
-		$validator->method( 'validate' )->willReturn( new AddDonationValidationResult( $violation ) );
-		return $validator;
+		return $this->createConfiguredStub(
+			AddDonationValidator::class,
+			[ 'validate' => new AddDonationValidationResult( $violation ) ]
+		);
 	}
 
 	private function makeFakeSucceedingModerationService(): ModerationService {
-		$validator = $this->createStub( ModerationService::class );
-		$validator->method( 'moderateDonationRequest' )->willReturn( new ModerationResult() );
-		return $validator;
+		return $this->createConfiguredStub(
+			ModerationService::class,
+			[ 'moderateDonationRequest' => new ModerationResult() ]
+		);
 	}
 
 	private function makeFakeFailingModerationService(): ModerationService {
 		$result = new ModerationResult();
 		$result->addModerationReason( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
-		$validator = $this->createStub( ModerationService::class );
-		$validator->method( 'moderateDonationRequest' )->willReturn( $result );
-		return $validator;
+		return $this->createConfiguredStub(
+			ModerationService::class,
+			[ 'moderateDonationRequest' => $result ]
+		);
 	}
 
 	private function makeEmailBlockedModerationService(): ModerationService {
 		$result = new ModerationResult();
 		$result->addModerationReason( new ModerationReason( ModerationIdentifier::EMAIL_BLOCKED ) );
-		$validator = $this->createStub( ModerationService::class );
-		$validator->method( 'moderateDonationRequest' )->willReturn( $result );
-		return $validator;
+		return $this->createConfiguredStub(
+			ModerationService::class,
+			[ 'moderateDonationRequest' => $result ]
+		);
 	}
 
 	private function makeNotifierStub(): DonationNotifier {
@@ -436,31 +441,36 @@ class AddDonationUseCaseTest extends TestCase {
 	}
 
 	private function makeSuccessfulPaymentServiceWithUrl(): CreatePaymentService {
-		$paymentService = $this->createStub( CreatePaymentService::class );
-		$paymentService->method( 'createPayment' )->willReturn( new PaymentCreationSucceeded(
-			1,
-			self::PAYMENT_PROVIDER_URL,
-			true
-		) );
-		return $paymentService;
+		return $this->createConfiguredStub(
+			CreatePaymentService::class,
+			[ 'createPayment' => new PaymentCreationSucceeded(
+				1,
+				self::PAYMENT_PROVIDER_URL,
+				true
+			) ]
+		);
 	}
 
 	private function makeFailingPaymentService( string $message ): CreatePaymentService {
-		$paymentService = $this->createStub( CreatePaymentService::class );
-		$paymentService->method( 'createPayment' )->willReturn( new PaymentCreationFailed( $message ) );
-		return $paymentService;
+		return $this->createConfiguredStub(
+			CreatePaymentService::class,
+			[ 'createPayment' => new PaymentCreationFailed( $message ) ]
+		);
 	}
 
 	private function makeDonationAuthorizerStub( ?URLAuthenticator $authenticator = null ): DonationAuthorizer {
-		$authorizer = $this->createStub( DonationAuthorizer::class );
-		$authorizer->method( 'authorizeDonationAccess' )->willReturn( $authenticator ?? $this->makeUrlAuthenticatorStub() );
-		return $authorizer;
+		return $this->createConfiguredStub(
+			DonationAuthorizer::class,
+			[ 'authorizeDonationAccess' => $authenticator ?? $this->makeUrlAuthenticatorStub() ]
+		);
 	}
 
 	private function makeUrlAuthenticatorStub(): URLAuthenticator {
-		$authenticator = $this->createStub( URLAuthenticator::class );
+		$authenticator = $this->createConfiguredStub(
+			URLAuthenticator::class,
+			[ 'getAuthenticationTokensForPaymentProviderUrl' => [] ]
+		);
 		$authenticator->method( 'addAuthenticationTokensToApplicationUrl' )->willReturnArgument( 0 );
-		$authenticator->method( 'getAuthenticationTokensForPaymentProviderUrl' )->willReturn( [] );
 		return $authenticator;
 	}
 

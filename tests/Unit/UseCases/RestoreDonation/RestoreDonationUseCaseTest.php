@@ -55,9 +55,11 @@ class RestoreDonationUseCaseTest extends TestCase {
 	public function testGivenFailingPaymentRestoration_restoreFails(): void {
 		$donation = ValidDonation::newCancelledBankTransferDonation();
 		$fakeDonationRepository = new FakeDonationRepository( $donation );
-		$paymentUseCase = $this->createStub( CancelPaymentUseCase::class );
 		$failureMessage = 'Payment cannot be restored';
-		$paymentUseCase->method( 'restorePayment' )->willReturn( new FailureResponse( $failureMessage ) );
+		$paymentUseCase = $this->createConfiguredStub(
+			CancelPaymentUseCase::class,
+			[ 'restorePayment' => new FailureResponse( $failureMessage ) ]
+		);
 		$useCase = $this->givenRestoreDonationUseCase( donationRepository: $fakeDonationRepository, cancelPaymentUseCase: $paymentUseCase );
 
 		$response = $useCase->restoreCancelledDonation( $donation->getId(), self::AUTH_USER_NAME );
@@ -131,9 +133,11 @@ class RestoreDonationUseCaseTest extends TestCase {
 	}
 
 	private function createSucceedingCancelPaymentUseCase(): CancelPaymentUseCase {
-		$useCase = $this->createStub( CancelPaymentUseCase::class );
+		$useCase = $this->createConfiguredStub(
+			CancelPaymentUseCase::class,
+			[ 'restorePayment' => new SuccessResponse( true ) ]
+		);
 		$useCase->method( 'cancelPayment' )->willThrowException( new \LogicException( 'Restore donation use case must not call cancel payment use case' ) );
-		$useCase->method( 'restorePayment' )->willReturn( new SuccessResponse( true ) );
 		return $useCase;
 	}
 

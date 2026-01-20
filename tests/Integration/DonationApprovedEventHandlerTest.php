@@ -5,8 +5,6 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Integration;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
-use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -26,12 +24,10 @@ class DonationApprovedEventHandlerTest extends TestCase {
 
 	private DonationAuthorizationChecker $authorizer;
 	private DonationRepository $repository;
-	private (Stub&DonationNotifier)|(MockObject&DonationNotifier) $mailer;
 
 	public function setUp(): void {
 		$this->authorizer = new SucceedingDonationAuthorizer();
 		$this->repository = new FakeDonationRepository( $this->newDonation() );
-		$this->mailer = $this->createStub( DonationNotifier::class );
 	}
 
 	private function newDonation(): Donation {
@@ -40,23 +36,23 @@ class DonationApprovedEventHandlerTest extends TestCase {
 
 	public function testWhenAuthorizationFails_errorIsReturned(): void {
 		$this->authorizer = new FailingDonationAuthorizer();
-		$eventHandler = $this->newDonationApprovedEventHandler();
+		$eventHandler = $this->newDonationApprovedEventHandler( $this->createStub( DonationNotifier::class ) );
 
 		$result = $eventHandler->onDonationApproved( self::UNKNOWN_ID );
 
 		$this->assertSame( DonationApprovedEventHandler::AUTHORIZATION_FAILED, $result );
 	}
 
-	private function newDonationApprovedEventHandler(): DonationApprovedEventHandler {
+	private function newDonationApprovedEventHandler( DonationNotifier $mailer ): DonationApprovedEventHandler {
 		return new DonationApprovedEventHandler(
 			$this->authorizer,
 			$this->repository,
-			$this->mailer
+			$mailer
 		);
 	}
 
 	public function testGivenIdOfUnknownDonation_errorIsReturned(): void {
-		$eventHandler = $this->newDonationApprovedEventHandler();
+		$eventHandler = $this->newDonationApprovedEventHandler( $this->createStub( DonationNotifier::class ) );
 
 		$result = $eventHandler->onDonationApproved( self::UNKNOWN_ID );
 
@@ -64,7 +60,7 @@ class DonationApprovedEventHandlerTest extends TestCase {
 	}
 
 	public function testGivenKnownIdAndValidAuth_successIsReturned(): void {
-		$eventHandler = $this->newDonationApprovedEventHandler();
+		$eventHandler = $this->newDonationApprovedEventHandler( $this->createStub( DonationNotifier::class ) );
 
 		$result = $eventHandler->onDonationApproved( self::KNOWN_ID );
 
@@ -72,25 +68,25 @@ class DonationApprovedEventHandlerTest extends TestCase {
 	}
 
 	public function testGivenKnownIdAndValidAuth_mailerIsInvoked(): void {
-		$this->mailer = $this->createMock( DonationNotifier::class );
-		$this->mailer->expects( $this->once() )
+		$mailer = $this->createMock( DonationNotifier::class );
+		$mailer->expects( $this->once() )
 			->method( 'sendConfirmationFor' )
 			->with( $this->newDonation() );
 
-		$this->newDonationApprovedEventHandler()->onDonationApproved( self::KNOWN_ID );
+		$this->newDonationApprovedEventHandler( $mailer )->onDonationApproved( self::KNOWN_ID );
 	}
 
 	public function testGivenIdOfUnknownDonation_mailerIsNotInvoked(): void {
-		$this->mailer = $this->createMock( DonationNotifier::class );
-		$this->mailer->expects( $this->never() )->method( $this->anything() );
-		$this->newDonationApprovedEventHandler()->onDonationApproved( self::UNKNOWN_ID );
+		$mailer = $this->createMock( DonationNotifier::class );
+		$mailer->expects( $this->never() )->method( $this->anything() );
+		$this->newDonationApprovedEventHandler( $mailer )->onDonationApproved( self::UNKNOWN_ID );
 	}
 
 	public function testWhenAuthorizationFails_mailerIsNotInvoked(): void {
-		$this->mailer = $this->createMock( DonationNotifier::class );
+		$mailer = $this->createMock( DonationNotifier::class );
 		$this->authorizer = new FailingDonationAuthorizer();
-		$this->mailer->expects( $this->never() )->method( $this->anything() );
-		$this->newDonationApprovedEventHandler()->onDonationApproved( self::KNOWN_ID );
+		$mailer->expects( $this->never() )->method( $this->anything() );
+		$this->newDonationApprovedEventHandler( $mailer )->onDonationApproved( self::KNOWN_ID );
 	}
 
 }
