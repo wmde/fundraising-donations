@@ -220,8 +220,10 @@ class HandlePayPalPaymentCompletionNotificationUseCaseTest extends TestCase {
 	}
 
 	public function testWhenDonationDoesNotExist_returnsDonationWasNotFoundResponse(): void {
-		$repository = $this->createMock( DonationRepository::class );
-		$repository->method( 'getDonationById' )->willReturn( null );
+		$repository = $this->createConfiguredStub(
+			DonationRepository::class,
+			[ 'getDonationById' => null ]
+		);
 
 		$request = ValidPayPalNotificationRequest::newInstantPayment( 1 );
 

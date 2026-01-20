@@ -195,9 +195,9 @@ class UpdateDonorUseCaseTest extends TestCase {
 
 	public function testGivenFailingValidation_donationUpdateFails(): void {
 		$repository = $this->newRepository();
-		$validator = $this->createMock( UpdateDonorValidator::class );
-		$validator->method( 'validateDonorData' )->willReturn(
-			new UpdateDonorValidationResult( new ConstraintViolation( '', 'invalid_first_name', 'first_name' ) )
+		$validator = $this->createConfiguredStub(
+			UpdateDonorValidator::class,
+			[ 'validateDonorData' => new UpdateDonorValidationResult( new ConstraintViolation( '', 'invalid_first_name', 'first_name' ) ) ]
 		);
 		$donation = ValidDonation::newIncompleteAnonymousPayPalDonation();
 		$repository->storeDonation( $donation );
@@ -243,9 +243,10 @@ class UpdateDonorUseCaseTest extends TestCase {
 	}
 
 	private function newDonorValidator(): UpdateDonorValidator {
-		$validator = $this->createMock( UpdateDonorValidator::class );
-		$validator->method( 'validateDonorData' )->willReturn( new UpdateDonorValidationResult() );
-		return $validator;
+		return $this->createConfiguredStub(
+			UpdateDonorValidator::class,
+			[ 'validateDonorData' => new UpdateDonorValidationResult() ]
+		);
 	}
 
 	private function newUpdateDonorUseCase( DonationRepository $repository, ?DonationNotifier $confirmationMailer = null, ?EventEmitter $eventEmitter = null, ?UpdateDonorValidator $donorValidator = null, ?DonationAuthorizationChecker $donationAuthorizer = null ): UpdateDonorUseCase {

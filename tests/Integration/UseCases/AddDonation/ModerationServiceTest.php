@@ -76,30 +76,31 @@ class ModerationServiceTest extends TestCase {
 	}
 
 	private function newFailingAmountValidator(): AmountPolicyValidator {
-		$amountPolicyValidator = $this->createMock( AmountPolicyValidator::class );
-		$amountPolicyValidator->method( 'validate' )->willReturn(
-			new ValidationResult( new ConstraintViolation( 1000, 'too-high', 'amount' ) )
+		return $this->createConfiguredStub(
+			AmountPolicyValidator::class,
+			[ 'validate' => new ValidationResult( new ConstraintViolation( 1000, 'too-high', 'amount' ) ) ]
 		);
-		return $amountPolicyValidator;
 	}
 
 	private function newSucceedingAmountValidator(): AmountPolicyValidator {
-		$amountPolicyValidator = $this->createMock( AmountPolicyValidator::class );
-		$amountPolicyValidator->method( 'validate' )->willReturn( new ValidationResult() );
-		return $amountPolicyValidator;
+		return $this->createConfiguredStub(
+			AmountPolicyValidator::class,
+			[ 'validate' => new ValidationResult() ]
+		);
 	}
 
 	private function newSucceedingTextPolicyValidator(): TextPolicyValidator {
-		$succeedingTextPolicyValidator = $this->createMock( TextPolicyValidator::class );
-		$succeedingTextPolicyValidator->method( 'textIsHarmless' )->willReturn( true );
-		return $succeedingTextPolicyValidator;
+		return $this->createConfiguredStub(
+			TextPolicyValidator::class,
+			[ 'textIsHarmless' => true ]
+		);
 	}
 
 	private function newFailingTextPolicyValidator(): TextPolicyValidator {
-		$failingTextPolicyValidator = $this->createMock( TextPolicyValidator::class );
-		$failingTextPolicyValidator->method( 'hasHarmlessContent' )
-			->willReturn( false );
-		return $failingTextPolicyValidator;
+		return $this->createConfiguredStub(
+			TextPolicyValidator::class,
+			[ 'hasHarmlessContent' => false ]
+		);
 	}
 
 	#[DataProvider( 'allowedEmailAddressProvider' )]

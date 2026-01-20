@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -25,12 +26,12 @@ class DonationApprovedEventHandlerTest extends TestCase {
 
 	private DonationAuthorizationChecker $authorizer;
 	private DonationRepository $repository;
-	private MockObject&DonationNotifier $mailer;
+	private (Stub&DonationNotifier)|(MockObject&DonationNotifier) $mailer;
 
 	public function setUp(): void {
 		$this->authorizer = new SucceedingDonationAuthorizer();
 		$this->repository = new FakeDonationRepository( $this->newDonation() );
-		$this->mailer = $this->createMock( DonationNotifier::class );
+		$this->mailer = $this->createStub( DonationNotifier::class );
 	}
 
 	private function newDonation(): Donation {
@@ -71,6 +72,7 @@ class DonationApprovedEventHandlerTest extends TestCase {
 	}
 
 	public function testGivenKnownIdAndValidAuth_mailerIsInvoked(): void {
+		$this->mailer = $this->createMock( DonationNotifier::class );
 		$this->mailer->expects( $this->once() )
 			->method( 'sendConfirmationFor' )
 			->with( $this->newDonation() );
@@ -79,11 +81,13 @@ class DonationApprovedEventHandlerTest extends TestCase {
 	}
 
 	public function testGivenIdOfUnknownDonation_mailerIsNotInvoked(): void {
+		$this->mailer = $this->createMock( DonationNotifier::class );
 		$this->mailer->expects( $this->never() )->method( $this->anything() );
 		$this->newDonationApprovedEventHandler()->onDonationApproved( self::UNKNOWN_ID );
 	}
 
 	public function testWhenAuthorizationFails_mailerIsNotInvoked(): void {
+		$this->mailer = $this->createMock( DonationNotifier::class );
 		$this->authorizer = new FailingDonationAuthorizer();
 		$this->mailer->expects( $this->never() )->method( $this->anything() );
 		$this->newDonationApprovedEventHandler()->onDonationApproved( self::KNOWN_ID );
