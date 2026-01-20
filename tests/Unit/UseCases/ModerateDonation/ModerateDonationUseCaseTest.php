@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\ModerateDonation;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
@@ -28,14 +28,14 @@ class ModerateDonationUseCaseTest extends TestCase {
 
 	private DonationEventLoggerSpy $donationLogger;
 
-	private MockObject&DonationNotifier $notifier;
+	private Stub&DonationNotifier $notifier;
 
 	private NotificationLog $notificationLog;
 
 	protected function setUp(): void {
 		parent::setUp();
 		$this->donationLogger = new DonationEventLoggerSpy();
-		$this->notifier = $this->createMock( DonationNotifier::class );
+		$this->notifier = $this->createStub( DonationNotifier::class );
 		$this->notificationLog = new NotificationLogStub();
 	}
 
@@ -103,6 +103,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration( $this->makeGenericModerationReason() );
 
+		$this->notifier = $this->createMock( DonationNotifier::class );
 		$this->notifier->expects( $this->once() )->method( 'sendConfirmationFor' )->with( $donation );
 
 		$useCase = $this->newModerateDonationUseCase( $donation );
@@ -125,8 +126,8 @@ class ModerateDonationUseCaseTest extends TestCase {
 		$donation->markForModeration( $this->makeGenericModerationReason() );
 		$this->notificationLog = $this->createMock( NotificationLog::class );
 		$this->notificationLog->method( 'hasSentConfirmationFor' )->willReturn( true );
-
 		$this->notificationLog->expects( $this->never() )->method( 'logConfirmationSent' );
+		$this->notifier = $this->createMock( DonationNotifier::class );
 		$this->notifier->expects( $this->never() )->method( 'sendConfirmationFor' );
 
 		$useCase = $this->newModerateDonationUseCase( $donation );

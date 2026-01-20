@@ -42,11 +42,10 @@ class UpdateDonorValidatorTest extends TestCase {
 
 	public function testGivenFailingDonorValidator_validationFails(): void {
 		$addressViolation = new ValidationResult( new ConstraintViolation( '', 'donor_name_missing', 'first_name' ) );
-		$donorValidator = $this->createPartialMock(
+		$donorValidator = $this->createConfiguredStub(
 			AddressValidator::class,
-			[ 'validatePostalAddress', 'validatePersonName' ]
+			[ 'validatePersonName' => $addressViolation ]
 		);
-		$donorValidator->method( 'validatePersonName' )->willReturn( $addressViolation );
 		$validator = new UpdateDonorValidator( $donorValidator, new SucceedingEmailValidator() );
 
 		$result = $validator->validateDonorData( $this->newEmptyUpdateDonorRequest() );

@@ -29,13 +29,13 @@ class LoggingDonationRepositoryTest extends TestCase {
 	}
 
 	private function newThrowingRepository(): DonationRepository {
-		$repository = $this->createMock( DonationRepository::class );
+		$repository = $this->createStub( DonationRepository::class );
 
-		$repository->expects( $this->any() )
+		$repository
 			->method( 'getDonationById' )
 			->willThrowException( new GetDonationException() );
 
-		$repository->expects( $this->any() )
+		$repository
 			->method( 'storeDonation' )
 			->willThrowException( new StoreDonationException() );
 

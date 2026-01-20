@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\SofortPaymentNotification;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
@@ -31,8 +30,8 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 #[CoversClass( NotificationResponse::class )]
 class SofortPaymentNotificationUseCaseTest extends TestCase {
 
-	private function getMailer(): DonationNotifier&MockObject {
-		return $this->createMock( DonationNotifier::class );
+	private function getMailer(): DonationNotifier&Stub {
+		return $this->createStub( DonationNotifier::class );
 	}
 
 	public function testWhenNotificationIsForNonExistingDonation_failureResponseIsReturned(): void {
@@ -163,8 +162,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$fakeRepository = new FakeDonationRepository();
 		$fakeRepository->storeDonation( $donation );
 		$paymentBookingServiceStub = $this->getSucceedingPaymentBookingServiceStub();
-
-		$mailer = $this->getMailer();
+		$mailer = $this->createMock( DonationNotifier::class );
 		$mailer
 			->expects( $this->once() )
 			->method( 'sendConfirmationFor' )
