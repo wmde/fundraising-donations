@@ -53,10 +53,10 @@ class HandlePaypalPaymentWithoutDonationUseCaseTest extends TestCase {
 	}
 
 	public function testWhenPayPalBookingServiceFails_ReturnFailureResult(): void {
-		$paymentService = $this->createStub( PaypalBookingService::class );
-		$paymentService
-			->method( 'bookNewPayment' )
-			->willReturn( new FailureResponse( "Failing for whatever reason" ) );
+		$paymentService = $this->createConfiguredStub(
+			PaypalBookingService::class,
+			[ 'bookNewPayment' => new FailureResponse( "Failing for whatever reason" ) ]
+		);
 		$repositorySpy = new DonationRepositorySpy();
 		$notifier = $this->createNotifierExpectingNoNotification();
 		$loggerSpy = new DonationEventLoggerSpy();

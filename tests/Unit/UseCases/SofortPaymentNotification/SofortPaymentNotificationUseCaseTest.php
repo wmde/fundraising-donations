@@ -5,7 +5,6 @@ declare( strict_types = 1 );
 namespace WMDE\Fundraising\DonationContext\Tests\Unit\UseCases\SofortPaymentNotification;
 
 use PHPUnit\Framework\Attributes\CoversClass;
-use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Infrastructure\DonationEventLogger;
@@ -31,8 +30,8 @@ use WMDE\Fundraising\PaymentContext\UseCases\BookPayment\SuccessResponse;
 #[CoversClass( NotificationResponse::class )]
 class SofortPaymentNotificationUseCaseTest extends TestCase {
 
-	private function getMailer(): DonationNotifier&MockObject {
-		return $this->createMock( DonationNotifier::class );
+	private function getMailer(): DonationNotifier&Stub {
+		return $this->createStub( DonationNotifier::class );
 	}
 
 	public function testWhenNotificationIsForNonExistingDonation_failureResponseIsReturned(): void {
@@ -138,9 +137,11 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	public function testWhenPaymentServiceReturnsFailure_unhandledResponseIsReturned(): void {
 		$fakeRepository = new FakeDonationRepository();
 		$fakeRepository->storeDonation( ValidDonation::newDirectDebitDonation() );
-		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
 		$errorMessage = 'Could not book payment - server is tired';
-		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new FailureResponse( $errorMessage ) );
+		$paymentBookingServiceStub = $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => new FailureResponse( $errorMessage ) ]
+		);
 
 		$useCase = new SofortPaymentNotificationUseCase(
 			new StaticDonationIdRepository(),
@@ -163,8 +164,7 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 		$fakeRepository = new FakeDonationRepository();
 		$fakeRepository->storeDonation( $donation );
 		$paymentBookingServiceStub = $this->getSucceedingPaymentBookingServiceStub();
-
-		$mailer = $this->getMailer();
+		$mailer = $this->createMock( DonationNotifier::class );
 		$mailer
 			->expects( $this->once() )
 			->method( 'sendConfirmationFor' )
@@ -184,9 +184,10 @@ class SofortPaymentNotificationUseCaseTest extends TestCase {
 	}
 
 	private function getSucceedingPaymentBookingServiceStub(): PaymentBookingService&Stub {
-		$paymentBookingServiceStub = $this->createStub( PaymentBookingService::class );
-		$paymentBookingServiceStub->method( 'bookPayment' )->willReturn( new SuccessResponse() );
-		return $paymentBookingServiceStub;
+		return $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => new SuccessResponse() ]
+		);
 	}
 
 	private function createEventLoggerStub(): DonationEventLogger {

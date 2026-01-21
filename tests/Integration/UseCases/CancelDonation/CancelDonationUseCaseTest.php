@@ -42,15 +42,17 @@ class CancelDonationUseCaseTest extends TestCase {
 	}
 
 	private function getSucceedingCancelPaymentUseCase(): CancelPaymentUseCase {
-		$cancelPaymentUseCase = $this->createStub( CancelPaymentUseCase::class );
-		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new SuccessResponse( true ) );
-		return $cancelPaymentUseCase;
+		return $this->createConfiguredStub(
+			CancelPaymentUseCase::class,
+			[ 'cancelPayment' => new SuccessResponse( true ) ]
+		);
 	}
 
 	private function getFailingCancelPaymentUseCase(): CancelPaymentUseCase {
-		$cancelPaymentUseCase = $this->createStub( CancelPaymentUseCase::class );
-		$cancelPaymentUseCase->method( 'cancelPayment' )->willReturn( new FailureResponse( "canceling payment not allowed" ) );
-		return $cancelPaymentUseCase;
+		return $this->createConfiguredStub(
+			CancelPaymentUseCase::class,
+			[ 'cancelPayment' => new FailureResponse( "canceling payment not allowed" ) ]
+		);
 	}
 
 	public function testGivenIdOfUnknownDonation_cancellationIsNotSuccessful(): void {

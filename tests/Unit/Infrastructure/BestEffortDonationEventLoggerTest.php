@@ -6,6 +6,7 @@ namespace WMDE\Fundraising\DonationContext\Tests\Unit\Infrastructure;
 
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\LoggerInterface;
 use WMDE\Fundraising\DonationContext\Infrastructure\BestEffortDonationEventLogger;
@@ -23,7 +24,7 @@ class BestEffortDonationEventLoggerTest extends TestCase {
 		$eventLogger = new DonationEventLoggerSpy();
 		$bestEffortLogger = new BestEffortDonationEventLogger(
 			$eventLogger,
-			$this->getLogger()
+			$this->createStub( LoggerInterface::class )
 		);
 		$bestEffortLogger->log( self::DONATION_ID, self::MESSAGE );
 		$this->assertCount( 1, $eventLogger->getLogCalls() );
@@ -41,8 +42,8 @@ class BestEffortDonationEventLoggerTest extends TestCase {
 	}
 
 	public function testWhenEventLoggerThrows_itIsLogged(): void {
-		/** @var DonationEventLogger&MockObject $eventLogger */
-		$eventLogger = $this->createMock( DonationEventLogger::class );
+		/** @var DonationEventLogger&Stub $eventLogger */
+		$eventLogger = $this->createStub( DonationEventLogger::class );
 		$eventLogger->method( 'log' )->willThrowException( new DonationEventLogException( 'Fire Alarm!' ) );
 		$logger = $this->getLogger();
 		$logger->expects( $this->once() )->method( 'error' );

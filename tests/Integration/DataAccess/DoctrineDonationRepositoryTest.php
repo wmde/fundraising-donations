@@ -267,9 +267,9 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 	public function testWhenUpdateFails_domainExceptionIsThrown(): void {
 		$donation = ValidDonation::newDirectDebitDonation( 42 );
-		$trackingFetcher = $this->createStub( DonationTrackingFetcher::class );
-		$trackingFetcher->method( 'getTracking' )->willReturn(
-			new DonationTracking( '', '' )
+		$trackingFetcher = $this->createConfiguredStub(
+			DonationTrackingFetcher::class,
+			[ 'getTracking' => new DonationTracking( '', '' ) ]
 		);
 
 		$repository = new DoctrineDonationRepository(
@@ -285,9 +285,10 @@ class DoctrineDonationRepositoryTest extends TestCase {
 	}
 
 	public function makeGetPaymentUseCaseStub(): GetPaymentUseCase {
-		$stub = $this->createStub( GetPaymentUseCase::class );
-		$stub->method( 'getLegacyPaymentDataObject' )->willReturn( $this->legacyPaymentData );
-		return $stub;
+		return $this->createConfiguredStub(
+			GetPaymentUseCase::class,
+			[ 'getLegacyPaymentDataObject' => $this->legacyPaymentData ]
+		);
 	}
 
 	private function createDefaultLegacyData(): LegacyPaymentData {
@@ -371,10 +372,10 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$qb->method( 'setParameter' )->willReturn( $qb );
 		$qb->method( 'getQuery' )->willReturn( $query );
 
-		$em = $this->createStub( EntityManager::class );
-		$em->method( 'createQueryBuilder' )->willReturn( $qb );
-
-		return $em;
+		return $this->createConfiguredStub(
+			EntityManager::class,
+			[ 'createQueryBuilder' => $qb ]
+		);
 	}
 
 	private function newEntityManagerThatThrowsOnPersist(): EntityManager {
