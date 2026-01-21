@@ -25,7 +25,7 @@ class ModerateCommentUseCaseTest extends TestCase {
 	private const DONATION_ID = 7;
 
 	public function testWhenDonationIsNotFound_moderationFails(): void {
-		$repository = $this->createMock( CommentRepository::class );
+		$repository = $this->createStub( CommentRepository::class );
 		$repository->method( 'getCommentByDonationId' )->willThrowException( new GetDonationException() );
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
@@ -38,8 +38,10 @@ class ModerateCommentUseCaseTest extends TestCase {
 	}
 
 	public function testWhenDonationHasNoComment_moderationFails(): void {
-		$repository = $this->createMock( CommentRepository::class );
-		$repository->method( 'getCommentByDonationId' )->willReturn( null );
+		$repository = $this->createConfiguredStub(
+			CommentRepository::class,
+			[ 'getCommentByDonationId' => null ]
+		);
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
 		$request = ModerateCommentRequest::publishComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
@@ -52,8 +54,10 @@ class ModerateCommentUseCaseTest extends TestCase {
 
 	#[DataProvider( 'commentProviderForPublication' )]
 	public function testWhenDonationHasComment_publicationSucceeds( DonationComment $comment, string $assertMessage ): void {
-		$repository = $this->createMock( CommentRepository::class );
-		$repository->method( 'getCommentByDonationId' )->willReturn( $comment );
+		$repository = $this->createConfiguredStub(
+			CommentRepository::class,
+			[ 'getCommentByDonationId' => $comment ]
+		);
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
 		$request = ModerateCommentRequest::publishComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
@@ -87,8 +91,10 @@ class ModerateCommentUseCaseTest extends TestCase {
 
 	#[DataProvider( 'commentProviderForRetraction' )]
 	public function testWhenDonationHasComment_retractionSucceeds( DonationComment $comment, string $assertMessage ): void {
-		$repository = $this->createMock( CommentRepository::class );
-		$repository->method( 'getCommentByDonationId' )->willReturn( $comment );
+		$repository = $this->createConfiguredStub(
+			CommentRepository::class,
+			[ 'getCommentByDonationId' => $comment ]
+		);
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
 		$request = ModerateCommentRequest::retractComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );
@@ -121,8 +127,10 @@ class ModerateCommentUseCaseTest extends TestCase {
 	}
 
 	public function testPublicationAndRetractionLogAdminUserName(): void {
-		$repository = $this->createMock( CommentRepository::class );
-		$repository->method( 'getCommentByDonationId' )->willReturn( self::newPublicComment() );
+		$repository = $this->createConfiguredStub(
+			CommentRepository::class,
+			[ 'getCommentByDonationId' => self::newPublicComment() ]
+		);
 		$logger = new DonationEventLoggerSpy();
 		$useCase = new ModerateCommentUseCase( $repository, $logger );
 		$retractionRequest = ModerateCommentRequest::retractComment( self::DONATION_ID, self::AUTHORIZED_USER_NAME );

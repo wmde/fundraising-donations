@@ -193,9 +193,9 @@ class DoctrineCommentFinderTest extends TestCase {
 	}
 
 	private function newThrowingEntityManager(): EntityManager {
-		$entityManager = $this->createMock( EntityManager::class );
+		$entityManager = $this->createStub( EntityManager::class );
 
-		$entityManager->expects( $this->any() )
+		$entityManager
 			->method( $this->anything() )
 			->willThrowException( new class( 'Such error' ) extends RuntimeException implements ORMException {
 			} );

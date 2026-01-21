@@ -46,11 +46,10 @@ class AddCommentUseCaseTest extends TestCase {
 	}
 
 	private function newStubTextPolicyValidator( bool $returnValue ): TextPolicyValidator {
-		$validator = $this->createMock( TextPolicyValidator::class );
-
-		$validator->expects( $this->any() )->method( 'textIsHarmless' )->willReturn( $returnValue );
-
-		return $validator;
+		return $this->createConfiguredStub(
+			TextPolicyValidator::class,
+			[ 'textIsHarmless' => $returnValue ]
+		);
 	}
 
 	public function testGivenValidRequest_commentGetsAdded(): void {
@@ -185,13 +184,9 @@ class AddCommentUseCaseTest extends TestCase {
 
 	public function testWhenValidationFails_failureResponseIsReturned(): void {
 		$this->donationRepository = $this->newFakeRepositoryWithDonation();
-		$this->commentValidator = $this->createMock( AddCommentValidator::class );
-		$this->commentValidator->method( 'validate' )->willReturn(
-			new AddCommentValidationResult(
-				[
-					'comment' => 'failed'
-				]
-			)
+		$this->commentValidator = $this->createConfiguredStub(
+			AddCommentValidator::class,
+			[ 'validate' => new AddCommentValidationResult( [ 'comment' => 'failed' ] ) ]
 		);
 
 		$response = $this->newUseCase()->addComment( $this->newValidRequest() );
@@ -199,9 +194,10 @@ class AddCommentUseCaseTest extends TestCase {
 	}
 
 	private function newSucceedingAddCommentValidator(): AddCommentValidator {
-		$validator = $this->createMock( AddCommentValidator::class );
-		$validator->method( 'validate' )->willReturn( new AddCommentValidationResult( [] ) );
-		return $validator;
+		return $this->createConfiguredStub(
+			AddCommentValidator::class,
+			[ 'validate' => new AddCommentValidationResult( [] ) ]
+		);
 	}
 
 	public function testGivenAnonymousRequest_authorDisplayNameIsAnonymous(): void {

@@ -165,9 +165,10 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 	}
 
 	private function createSucceedingPaymentBookingService(): PaymentBookingService {
-		$service = $this->createStub( PaymentBookingService::class );
-		$service->method( 'bookPayment' )->willReturn( new SuccessResponse() );
-		return $service;
+		return $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => new SuccessResponse() ]
+		);
 	}
 
 	private function createEventLoggerStub(): DonationEventLogger {
@@ -175,9 +176,10 @@ class CreditCardNotificationUseCaseTest extends TestCase {
 	}
 
 	private function createFailingPaymentBookingService(): PaymentBookingService {
-		$service = $this->createStub( PaymentBookingService::class );
-		$service->method( 'bookPayment' )->willReturn( new FailureResponse( 'Amount does not match' ) );
-		return $service;
+		return $this->createConfiguredStub(
+			PaymentBookingService::class,
+			[ 'bookPayment' => new FailureResponse( 'Amount does not match' ) ]
+		);
 	}
 
 }
