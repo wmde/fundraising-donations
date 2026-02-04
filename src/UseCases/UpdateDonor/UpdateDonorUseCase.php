@@ -84,12 +84,22 @@ class UpdateDonorUseCase {
 	}
 
 	private function getDonorAddressFromRequest( UpdateDonorRequest $updateDonorRequest ): PostalAddress {
-		return new PostalAddress(
-			$updateDonorRequest->getStreetAddress(),
-			$updateDonorRequest->getPostalCode(),
-			$updateDonorRequest->getCity(),
-			$updateDonorRequest->getCountryCode()
-		);
+		if ( trim( $updateDonorRequest->getStreetName() ) !== '' && trim( $updateDonorRequest->getHouseNumber() ) !== '' ) {
+			return PostalAddress::fromStreetNameAndHouseNumber(
+				$updateDonorRequest->getStreetName(),
+				$updateDonorRequest->getHouseNumber(),
+				$updateDonorRequest->getPostalCode(),
+				$updateDonorRequest->getCity(),
+				$updateDonorRequest->getCountryCode()
+			);
+		} else {
+			return PostalAddress::fromLegacyStreetName(
+				$updateDonorRequest->getStreetAddress(),
+				$updateDonorRequest->getPostalCode(),
+				$updateDonorRequest->getCity(),
+				$updateDonorRequest->getCountryCode()
+			);
+		}
 	}
 
 	private function getDonorFromRequest( UpdateDonorRequest $updateDonorRequest ): Donor {

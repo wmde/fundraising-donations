@@ -124,6 +124,25 @@ class AddDonationValidatorTest extends TestCase {
 		$this->assertTrue( $this->donationValidator->validate( $request )->isSuccessful() );
 	}
 
+	public function testGivenCompleteEmailOnlyDonorWithStreetNameHouseNumber_validationSucceeds(): void {
+		$request = ValidAddDonationRequest::getRequest();
+
+		$request->setDonorType( DonorType::PERSON );
+
+		$request->setDonorSalutation( 'Mr.' );
+		$request->setDonorTitle( 'Dr.' );
+		$request->setDonorFirstName( 'Robert' );
+		$request->setDonorLastName( 'Cherry' );
+		$request->setDonorStreetName( 'Berliner straße' );
+		$request->setDonorHouseNumber( '83' );
+		$request->setDonorPostalCode( '12345' );
+		$request->setDonorCity( 'Munich' );
+		$request->setDonorCountryCode( '777' );
+		$request->setDonorEmailAddress( 'test@example.com' );
+
+		$this->assertTrue( $this->donationValidator->validate( $request )->isSuccessful() );
+	}
+
 	public function testGivenAnonymousDonorWithDirectDebit_validationFails(): void {
 		$request = ValidAddDonationRequest::getRequest();
 		$request->setDonorType( DonorType::ANONYMOUS );
