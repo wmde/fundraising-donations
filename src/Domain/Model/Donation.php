@@ -269,10 +269,16 @@ class Donation {
 	 *          which allows for the donation on 2024-12-11 to be scrubbed
 	 */
 	private function scrubbingIsAllowed( \DateTimeInterface $exportGracePeriodCutoffDate ): bool {
+		if ( $this->donorIsScrubbed() ) {
+			return false;
+		}
 		if ( $this->isExported() ) {
 			return true;
 		}
 		if ( $this->donatedOn <= $exportGracePeriodCutoffDate ) {
+			return true;
+		}
+		if ( $this->isCancelled() ) {
 			return true;
 		}
 		return false;
