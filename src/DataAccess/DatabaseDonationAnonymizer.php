@@ -27,19 +27,21 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		private readonly DonationRepository $donationRepository,
 		private readonly EntityManager $entityManager,
 		private readonly Clock $clock,
-		private readonly \DateInterval $exportGracePeriod
+		private readonly \DateInterval $exportGracePeriod,
+		private readonly \DateInterval $moderationGracePeriod
 	) {
 	}
 
 	public function anonymizeWithIds( int ...$donationIds ): void {
-		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+		$exportCutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+		$moderationCutoffDate = $this->clock->now()->sub( $this->moderationGracePeriod );
 		$counter = 0;
 		foreach ( $donationIds as $id ) {
 			$donation = $this->donationRepository->getDonationById( $id );
 			if ( $donation === null ) {
 				throw new AnonymizationException( "Could not find donation with id $id" );
 			}
-			$donation->scrubPersonalData( $cutoffDate );
+			$donation->scrubPersonalData( $exportCutoffDate, $moderationCutoffDate );
 			$this->donationRepository->storeDonation( $donation );
 
 			$counter++;
