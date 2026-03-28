@@ -28,7 +28,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 	private EntityManager $entityManager;
 
 	private \DateTime $anonymizationMarkerTime;
-	private \DateInterval $gracePeriod;
+	private \DateInterval $exportGracePeriod;
+	private \DateInterval $moderationGracePeriod;
 	private SystemClock $clock;
 
 	public function setUp(): void {
@@ -42,22 +43,35 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			new ModerationReasonRepository( $this->entityManager )
 		);
 		$this->clock = new SystemClock();
-		$this->gracePeriod = new \DateInterval( 'P2D' );
+		$this->exportGracePeriod = new \DateInterval( 'P2D' );
+		$this->moderationGracePeriod = new \DateInterval( 'P1M' );
 	}
 
 	public function testAnonymizeAllReturnsNumberOfAnonymizedDonations(): void {
 		$this->insertExampleDonations();
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
+		$anonymizer = new DatabaseDonationAnonymizer(
+			$this->donationRepository,
+			$this->entityManager,
+			$this->clock,
+			$this->exportGracePeriod,
+			$this->moderationGracePeriod
+		);
 
 		$count = $anonymizer->anonymizeAll();
 
-		$this->assertSame( 3, $count );
-		$this->assertNumberOfScrubbedDonations( 4 );
+		$this->assertSame( 5, $count );
+		$this->assertNumberOfScrubbedDonations( 6 );
 	}
 
 	public function testGivenDonation_anonymizeWillAnonymizeIt(): void {
 		$this->insertOneRow();
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
+		$anonymizer = new DatabaseDonationAnonymizer(
+			$this->donationRepository,
+			$this->entityManager,
+			$this->clock,
+			$this->exportGracePeriod,
+			$this->moderationGracePeriod
+		);
 
 		$anonymizer->anonymizeWithIds( self::DEFAULT_DONATION_ID );
 
@@ -68,7 +82,13 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$missingDonationId = 42;
 		$this->expectException( AnonymizationException::class );
 		$this->expectExceptionMessageMatches( "/Could not find donation with id $missingDonationId/" );
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
+		$anonymizer = new DatabaseDonationAnonymizer(
+			$this->donationRepository,
+			$this->entityManager,
+			$this->clock,
+			$this->exportGracePeriod,
+			$this->moderationGracePeriod
+		);
 
 		$anonymizer->anonymizeWithIds( $missingDonationId );
 	}
@@ -86,6 +106,12 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 
 	private function newScrubbedDonation( int $id = self::DEFAULT_DONATION_ID ): DoctrineDonation {
 		$donation = ValidDoctrineDonation::newScrubbedDonation();
+		$donation->setId( $id );
+		return $donation;
+	}
+
+	private function newDeletedDonation( int $id = self::DEFAULT_DONATION_ID ): DoctrineDonation {
+		$donation = ValidDoctrineDonation::newDeletedDoctrineDonation();
 		$donation->setId( $id );
 		return $donation;
 	}
@@ -130,8 +156,7 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$this->entityManager->persist( $this->newExportedDonation( 2 ) );
 		$this->entityManager->persist( $this->newExportedDonation( 3 ) );
 
-		// Insert un-exported donation that is older than two days, that should also be scrubbed
-		// This does not work, only when https://phabricator.wikimedia.org/T401247 is implemented
+		// Insert un-exported donation that is older than two days, should be scrubbed
 		$threeDaysAgo = \DateTime::createFromImmutable( $this->clock->now()->modify( '-3 days' ) );
 		$this->entityManager->persist( $this->newUnExportedDonation( 4, $threeDaysAgo ) );
 
@@ -140,6 +165,9 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 
 		// Insert an already scrubbed donation, that should NOT be scrubbed
 		$this->entityManager->persist( $this->newScrubbedDonation( 6 ) );
+
+		// Insert an already canceled/soft-deleted donation, should be scrubbed
+		$this->entityManager->persist( $this->newDeletedDonation( 7 ) );
 
 		$this->entityManager->flush();
 	}

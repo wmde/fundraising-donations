@@ -30,6 +30,12 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
+	public static function newDeletedDoctrineDonation(): Donation {
+		$donation = ( new self() )->createDonation();
+		$donation->setStatus( 'D' );
+		return $donation;
+	}
+
 	public static function newPaypalDoctrineDonation(): Donation {
 		$self = new self();
 		$donation = $self->createDonation();

@@ -3,6 +3,7 @@ declare( strict_types=1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManager;
 use WMDE\Clock\Clock;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
@@ -26,19 +27,21 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		private readonly DonationRepository $donationRepository,
 		private readonly EntityManager $entityManager,
 		private readonly Clock $clock,
-		private readonly \DateInterval $exportGracePeriod
+		private readonly \DateInterval $exportGracePeriod,
+		private readonly \DateInterval $moderationGracePeriod
 	) {
 	}
 
 	public function anonymizeWithIds( int ...$donationIds ): void {
-		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+		$exportCutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+		$moderationCutoffDate = $this->clock->now()->sub( $this->moderationGracePeriod );
 		$counter = 0;
 		foreach ( $donationIds as $id ) {
 			$donation = $this->donationRepository->getDonationById( $id );
 			if ( $donation === null ) {
 				throw new AnonymizationException( "Could not find donation with id $id" );
 			}
-			$donation->scrubPersonalData( $cutoffDate );
+			$donation->scrubPersonalData( $exportCutoffDate, $moderationCutoffDate );
 			$this->donationRepository->storeDonation( $donation );
 
 			$counter++;
@@ -52,16 +55,29 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	public function anonymizeAll(): int {
 		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 
-		// The following query only scrubs exported donations
-		// We need to add statements to
-		//   - scrub donations with abandoned external payments (using `$cutoffDate`)
-		//   - scrub deleted donations
-		// See https://phabricator.wikimedia.org/T401247
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb->select( 'd' )
 			->from( Donation::class, 'd' )
+
 			->where( 'd.isScrubbed = 0' )
-			->andWhere(	$qb->expr()->isNotNull( 'd.dtGruen' ) );
+
+			->andWhere(	$qb->expr()->orX(
+
+				// scrub all already exported donations
+				$qb->expr()->isNotNull( 'd.dtGruen' ),
+
+				// scrub all deleted donations
+				$qb->expr()->eq( 'd.status', ':deletedStatusFlag' ),
+
+				// scrub "abandoned" donations with incomplete external payments (within grace period)
+				$qb->expr()->andX(
+					$qb->expr()->eq( 'd.status', ':externalIncompletePaymentStatusFlag' ),
+					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
+				)
+			) )
+			->setParameter( 'deletedStatusFlag', 'D', Types::STRING )
+			->setParameter( 'externalIncompletePaymentStatusFlag', 'X', Types::STRING )
+			->setParameter( 'cutoffDate', $cutoffDate );
 
 		/** @var iterable<Donation> $donations */
 		$donations = $qb->getQuery()->toIterable();
