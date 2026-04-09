@@ -16,6 +16,8 @@ use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
+use WMDE\Fundraising\DonationContext\Tests\Data\ValidPayments;
+use WMDE\Fundraising\DonationContext\Tests\Fixtures\FakePaymentAnonymizer;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
 use WMDE\Fundraising\PaymentContext\Domain\Model\LegacyPaymentData;
 use WMDE\Fundraising\PaymentContext\UseCases\GetPayment\GetPaymentUseCase;
@@ -56,13 +58,38 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			$this->entityManager,
 			$this->clock,
 			$this->exportGracePeriod,
-			$this->moderationGracePeriod
+			$this->moderationGracePeriod,
+			new FakePaymentAnonymizer()
 		);
 
 		$count = $anonymizer->anonymizeAll();
 
 		$this->assertSame( 6, $count );
 		$this->assertNumberOfScrubbedDonations( 7 );
+	}
+
+	public function testAnonymizeAllAnonymisesPayments(): void {
+		$paymentAnonymizer = new FakePaymentAnonymizer();
+		$this->insertExampleDonations();
+		$anonymizer = new DatabaseDonationAnonymizer(
+			$this->donationRepository,
+			$this->entityManager,
+			$this->clock,
+			$this->exportGracePeriod,
+			$this->moderationGracePeriod,
+			$paymentAnonymizer
+		);
+
+		$anonymizer->anonymizeAll();
+
+		$this->assertSame( [
+			ValidPayments::ID_DIRECT_DEBIT,
+			ValidPayments::ID_DIRECT_DEBIT,
+			ValidPayments::ID_DIRECT_DEBIT,
+			ValidPayments::ID_DIRECT_DEBIT,
+			ValidPayments::ID_DIRECT_DEBIT,
+			ValidPayments::ID_BANK_TRANSFER
+		], $paymentAnonymizer->paymentIds );
 	}
 
 	public function testGivenDonation_anonymizeWillAnonymizeIt(): void {
@@ -72,12 +99,30 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			$this->entityManager,
 			$this->clock,
 			$this->exportGracePeriod,
-			$this->moderationGracePeriod
+			$this->moderationGracePeriod,
+			new FakePaymentAnonymizer()
 		);
 
 		$anonymizer->anonymizeWithIds( self::DEFAULT_DONATION_ID );
 
 		$this->assertNumberOfScrubbedDonations( 1 );
+	}
+
+	public function testAnonymizeWithIdsAnonymisesPayments(): void {
+		$paymentAnonymizer = new FakePaymentAnonymizer();
+		$this->insertOneRow();
+		$anonymizer = new DatabaseDonationAnonymizer(
+			$this->donationRepository,
+			$this->entityManager,
+			$this->clock,
+			$this->exportGracePeriod,
+			$this->moderationGracePeriod,
+			$paymentAnonymizer
+		);
+
+		$anonymizer->anonymizeWithIds( self::DEFAULT_DONATION_ID );
+
+		$this->assertSame( [ ValidPayments::ID_DIRECT_DEBIT ], $paymentAnonymizer->paymentIds );
 	}
 
 	public function testGivenNoDonation_anonymizeWillThrow(): void {
@@ -89,7 +134,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			$this->entityManager,
 			$this->clock,
 			$this->exportGracePeriod,
-			$this->moderationGracePeriod
+			$this->moderationGracePeriod,
+			new FakePaymentAnonymizer()
 		);
 
 		$anonymizer->anonymizeWithIds( $missingDonationId );

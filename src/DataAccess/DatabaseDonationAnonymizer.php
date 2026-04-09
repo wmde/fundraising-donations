@@ -11,6 +11,7 @@ use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainC
 use WMDE\Fundraising\DonationContext\Domain\AnonymizationException;
 use WMDE\Fundraising\DonationContext\Domain\DonationAnonymizer;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
+use WMDE\Fundraising\PaymentContext\Domain\PaymentAnonymizer;
 
 /**
  * This class selects and anonymizes individual donation entities.
@@ -28,7 +29,8 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		private readonly EntityManager $entityManager,
 		private readonly Clock $clock,
 		private readonly \DateInterval $exportGracePeriod,
-		private readonly \DateInterval $moderationGracePeriod
+		private readonly \DateInterval $moderationGracePeriod,
+		private readonly PaymentAnonymizer $paymentAnonymizer
 	) {
 	}
 
@@ -36,6 +38,7 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		$externalIncompleteCutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 		$moderationCutoffDate = $this->clock->now()->sub( $this->moderationGracePeriod );
 		$counter = 0;
+		$paymentIds = [];
 		foreach ( $donationIds as $id ) {
 			$donation = $this->donationRepository->getDonationById( $id );
 			if ( $donation === null ) {
@@ -44,12 +47,16 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 			$donation->scrubPersonalData( $externalIncompleteCutoffDate, $moderationCutoffDate );
 			$this->donationRepository->storeDonation( $donation );
 
+			$paymentIds[] = $donation->getPaymentId();
+
 			$counter++;
 			if ( $counter % self::BATCH_SIZE === 0 ) {
 				$this->entityManager->flush();
 				$this->entityManager->clear();
 			}
 		}
+
+		$this->paymentAnonymizer->anonymizeWithIds( ...$paymentIds );
 	}
 
 	/**
@@ -99,11 +106,13 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 
 		$converter = new LegacyToDomainConverter();
 		$count = 0;
+		$paymentIds = [];
 
 		foreach ( $donations as $doctrineDonation ) {
 			$donation = $converter->createFromLegacyObject( $doctrineDonation );
 			$donation->scrubPersonalData( $cutoffDateExternalIncomplete, $cutoffDateModeration );
 			$this->donationRepository->storeDonation( $donation );
+			$paymentIds[] = $donation->getPaymentId();
 			$count++;
 
 			if ( $count % self::BATCH_SIZE === 0 ) {
@@ -112,6 +121,9 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 			}
 
 		}
+
+		$this->paymentAnonymizer->anonymizeWithIds( ...$paymentIds );
+
 		return $count;
 	}
 
