@@ -69,14 +69,21 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 				// scrub all deleted donations
 				$qb->expr()->eq( 'd.status', ':deletedStatusFlag' ),
 
-				// scrub "abandoned" donations with incomplete external payments (within grace period)
+				// scrub "abandoned" donations with incomplete external payments (outside of grace period)
 				$qb->expr()->andX(
 					$qb->expr()->eq( 'd.status', ':externalIncompletePaymentStatusFlag' ),
+					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
+				),
+
+				// scrub "abandoned" donations that got flagged for moderation (outside of grace period)
+				$qb->expr()->andX(
+					$qb->expr()->eq( 'd.status', ':moderatedStatusFlag' ),
 					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
 				)
 			) )
 			->setParameter( 'deletedStatusFlag', 'D', Types::STRING )
 			->setParameter( 'externalIncompletePaymentStatusFlag', 'X', Types::STRING )
+			->setParameter( 'moderatedStatusFlag', 'P', Types::STRING )
 			->setParameter( 'cutoffDate', $cutoffDate );
 
 		/** @var iterable<Donation> $donations */
