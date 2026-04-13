@@ -33,7 +33,7 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 	}
 
 	public function anonymizeWithIds( int ...$donationIds ): void {
-		$exportCutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+		$externalIncompleteCutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
 		$moderationCutoffDate = $this->clock->now()->sub( $this->moderationGracePeriod );
 		$counter = 0;
 		foreach ( $donationIds as $id ) {
@@ -41,7 +41,7 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 			if ( $donation === null ) {
 				throw new AnonymizationException( "Could not find donation with id $id" );
 			}
-			$donation->scrubPersonalData( $exportCutoffDate, $moderationCutoffDate );
+			$donation->scrubPersonalData( $externalIncompleteCutoffDate, $moderationCutoffDate );
 			$this->donationRepository->storeDonation( $donation );
 
 			$counter++;
@@ -52,8 +52,15 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		}
 	}
 
+	/**
+	 * @return int amount of successfully scrubbed and re-written donations
+	 * @throws \DateInvalidOperationException
+	 * @throws \Doctrine\ORM\Exception\ORMException
+	 * @throws \Doctrine\ORM\OptimisticLockException
+	 */
 	public function anonymizeAll(): int {
-		$cutoffDate = $this->clock->now()->sub( $this->exportGracePeriod );
+		$cutoffDateExternalIncomplete = $this->clock->now()->sub( $this->exportGracePeriod );
+		$cutoffDateModeration = $this->clock->now()->sub( $this->moderationGracePeriod );
 
 		$qb = $this->entityManager->createQueryBuilder();
 		$qb->select( 'd' )
@@ -69,22 +76,23 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 				// scrub all deleted donations
 				$qb->expr()->eq( 'd.status', ':deletedStatusFlag' ),
 
-				// scrub "abandoned" donations with incomplete external payments (outside of grace period)
+				// scrub donations with incomplete external payments and are older than the grace period
 				$qb->expr()->andX(
 					$qb->expr()->eq( 'd.status', ':externalIncompletePaymentStatusFlag' ),
-					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
+					$qb->expr()->lte( 'd.creationTime', ':cutoffDateExternalIncomplete' )
 				),
 
-				// scrub "abandoned" donations that got flagged for moderation (outside of grace period)
+				// scrub donations that were flagged for moderation and are older than the grace period
 				$qb->expr()->andX(
 					$qb->expr()->eq( 'd.status', ':moderatedStatusFlag' ),
-					$qb->expr()->lte( 'd.creationTime', ':cutoffDate' )
+					$qb->expr()->lte( 'd.creationTime', ':cutoffDateModeration' )
 				)
 			) )
-			->setParameter( 'deletedStatusFlag', 'D', Types::STRING )
-			->setParameter( 'externalIncompletePaymentStatusFlag', 'X', Types::STRING )
-			->setParameter( 'moderatedStatusFlag', 'P', Types::STRING )
-			->setParameter( 'cutoffDate', $cutoffDate );
+			->setParameter( 'deletedStatusFlag', Donation::STATUS_CANCELLED, Types::STRING )
+			->setParameter( 'externalIncompletePaymentStatusFlag', Donation::STATUS_EXTERNAL_INCOMPLETE, Types::STRING )
+			->setParameter( 'moderatedStatusFlag', Donation::STATUS_MODERATION, Types::STRING )
+			->setParameter( 'cutoffDateExternalIncomplete', $cutoffDateExternalIncomplete )
+			->setParameter( 'cutoffDateModeration', $cutoffDateModeration );
 
 		/** @var iterable<Donation> $donations */
 		$donations = $qb->getQuery()->toIterable();
@@ -94,7 +102,7 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 
 		foreach ( $donations as $doctrineDonation ) {
 			$donation = $converter->createFromLegacyObject( $doctrineDonation );
-			$donation->scrubPersonalData( $cutoffDate );
+			$donation->scrubPersonalData( $cutoffDateExternalIncomplete, $cutoffDateModeration );
 			$this->donationRepository->storeDonation( $donation );
 			$count++;
 

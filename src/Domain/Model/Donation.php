@@ -243,12 +243,12 @@ class Donation {
 		return $this->donatedOn;
 	}
 
-	public function scrubPersonalData( \DateTimeInterface $exportGracePeriodCutoffDate, \DateTimeInterface $moderationGracePeriodCutoffDate ): void {
-		if ( !$this->scrubbingIsAllowed( $exportGracePeriodCutoffDate, $moderationGracePeriodCutoffDate ) ) {
+	public function scrubPersonalData( \DateTimeInterface $externalIncompleteGracePeriodCutoffDate, \DateTimeInterface $moderationGracePeriodCutoffDate ): void {
+		if ( !$this->scrubbingIsAllowed( $externalIncompleteGracePeriodCutoffDate, $moderationGracePeriodCutoffDate ) ) {
 			throw new \DomainException(
 				sprintf(
 					"You must not anonymize unexported donations before %s, neither moderated donations before %s, otherwise you'd lose data. Offending donation ID: %s",
-					$exportGracePeriodCutoffDate->format( 'Y-m-d H:i:s' ),
+					$externalIncompleteGracePeriodCutoffDate->format( 'Y-m-d H:i:s' ),
 					$moderationGracePeriodCutoffDate->format( 'Y-m-d H:i:s' ),
 					$this->getId()
 			)
@@ -272,9 +272,6 @@ class Donation {
 	 *          which allows for the donation on 2024-12-11 to be scrubbed
 	 */
 	private function scrubbingIsAllowed( \DateTimeInterface $exportGracePeriodCutoffDate, \DateTimeInterface $moderationGracePeriodCutoffDate ): bool {
-		if ( $this->donorIsScrubbed() ) {
-			return false;
-		}
 		if ( $this->isExported() ) {
 			return true;
 		}
