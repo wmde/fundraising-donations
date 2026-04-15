@@ -12,6 +12,8 @@ use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
 use WMDE\Fundraising\DonationContext\Domain\AnonymizationException;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
+use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDoctrineDonation;
 use WMDE\Fundraising\DonationContext\Tests\TestEnvironment;
@@ -28,7 +30,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 	private EntityManager $entityManager;
 
 	private \DateTime $anonymizationMarkerTime;
-	private \DateInterval $gracePeriod;
+	private \DateInterval $exportGracePeriod;
+	private \DateInterval $moderationGracePeriod;
 	private SystemClock $clock;
 
 	public function setUp(): void {
@@ -42,22 +45,35 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			new ModerationReasonRepository( $this->entityManager )
 		);
 		$this->clock = new SystemClock();
-		$this->gracePeriod = new \DateInterval( 'P2D' );
+		$this->exportGracePeriod = new \DateInterval( 'P2D' );
+		$this->moderationGracePeriod = new \DateInterval( 'P1M' );
 	}
 
 	public function testAnonymizeAllReturnsNumberOfAnonymizedDonations(): void {
 		$this->insertExampleDonations();
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
+		$anonymizer = new DatabaseDonationAnonymizer(
+			$this->donationRepository,
+			$this->entityManager,
+			$this->clock,
+			$this->exportGracePeriod,
+			$this->moderationGracePeriod
+		);
 
 		$count = $anonymizer->anonymizeAll();
 
-		$this->assertSame( 3, $count );
-		$this->assertNumberOfScrubbedDonations( 4 );
+		$this->assertSame( 6, $count );
+		$this->assertNumberOfScrubbedDonations( 7 );
 	}
 
 	public function testGivenDonation_anonymizeWillAnonymizeIt(): void {
 		$this->insertOneRow();
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
+		$anonymizer = new DatabaseDonationAnonymizer(
+			$this->donationRepository,
+			$this->entityManager,
+			$this->clock,
+			$this->exportGracePeriod,
+			$this->moderationGracePeriod
+		);
 
 		$anonymizer->anonymizeWithIds( self::DEFAULT_DONATION_ID );
 
@@ -68,7 +84,13 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$missingDonationId = 42;
 		$this->expectException( AnonymizationException::class );
 		$this->expectExceptionMessageMatches( "/Could not find donation with id $missingDonationId/" );
-		$anonymizer = new DatabaseDonationAnonymizer( $this->donationRepository, $this->entityManager, $this->clock, $this->gracePeriod );
+		$anonymizer = new DatabaseDonationAnonymizer(
+			$this->donationRepository,
+			$this->entityManager,
+			$this->clock,
+			$this->exportGracePeriod,
+			$this->moderationGracePeriod
+		);
 
 		$anonymizer->anonymizeWithIds( $missingDonationId );
 	}
@@ -90,6 +112,21 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		return $donation;
 	}
 
+	private function newDeletedDonation( int $id = self::DEFAULT_DONATION_ID ): DoctrineDonation {
+		$donation = ValidDoctrineDonation::newDeletedDoctrineDonation();
+		$donation->setId( $id );
+		return $donation;
+	}
+
+	private function newModeratedDonation( int $id = self::DEFAULT_DONATION_ID ): DoctrineDonation {
+		$donation = ValidDoctrineDonation::newBankTransferDonation();
+		$donation->setId( $id );
+		$donation->setCreationTime( ( new \DateTime() )->sub( new \DateInterval( 'P2M' ) ) );
+		$donation->setModerationReasons( new ModerationReason( ModerationIdentifier::ADDRESS_CONTENT_VIOLATION ) );
+		$donation->setStatus( 'P' );
+		return $donation;
+	}
+
 	private function newExportedDonation( int $id = self::DEFAULT_DONATION_ID ): DoctrineDonation {
 		$donation = ValidDoctrineDonation::newExportedirectDebitDoctrineDonation();
 		$donation->setDtBackup( $this->anonymizationMarkerTime );
@@ -97,6 +134,9 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		return $donation;
 	}
 
+	/**
+	 * @return DoctrineDonation donation with an incomplete payment
+	 */
 	private function newUnExportedDonation( int $id, \DateTime $donationDate ): DoctrineDonation {
 		$donation = ValidDoctrineDonation::newIncompletePaypalDonation();
 		$donation->setCreationTime( $donationDate );
@@ -130,9 +170,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$this->entityManager->persist( $this->newExportedDonation( 2 ) );
 		$this->entityManager->persist( $this->newExportedDonation( 3 ) );
 
-		// Insert un-exported donation that is older than two days, that should also be scrubbed
-		// This does not work, only when https://phabricator.wikimedia.org/T401247 is implemented
-		$threeDaysAgo = \DateTime::createFromImmutable( $this->clock->now()->modify( '-3 days' ) );
+		// Insert un-exported (incomplete payment) donation that is older than two days, should be scrubbed
+		$threeDaysAgo = \DateTime::createFromImmutable( $this->clock->now()->modify( '-1 month' ) );
 		$this->entityManager->persist( $this->newUnExportedDonation( 4, $threeDaysAgo ) );
 
 		// Insert un-exported donation that is just created, that should NOT be scrubbed
@@ -140,6 +179,12 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 
 		// Insert an already scrubbed donation, that should NOT be scrubbed
 		$this->entityManager->persist( $this->newScrubbedDonation( 6 ) );
+
+		// Insert an already canceled/soft-deleted donation, should be scrubbed
+		$this->entityManager->persist( $this->newDeletedDonation( 7 ) );
+
+		// Insert an old, moderated donation, should be scrubbed (after grace period)
+		$this->entityManager->persist( $this->newModeratedDonation( 8 ) );
 
 		$this->entityManager->flush();
 	}

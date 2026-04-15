@@ -171,7 +171,10 @@ class DonationTest extends TestCase {
 		$this->assertTrue( $donation->getDonor()->wantsReceipt(), 'We expect the fixture to want a receipt' );
 		$this->assertTrue( $donation->getDonor()->isSubscribedToMailingList(), 'We expect the fixture to be subscribed to the mailing list' );
 
-		$donation->scrubPersonalData( new \DateTimeImmutable() );
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+		);
 
 		$this->assertTrue( $donation->donorIsAnonymous(), 'Donor should be anonymous' );
 		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
@@ -180,14 +183,30 @@ class DonationTest extends TestCase {
 		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
 	}
 
-	public function testPreventsAnonymizeDonationOnUnexportedDonationsAfterTheCutoffDate(): void {
+	public function testPreventsAnonymizeDonationOnUnexportedDonationsAfterTheExternalIncompleteCutoffDate(): void {
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
 		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
 		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->sub( new \DateInterval( 'PT1H' ) );
 
 		$this->expectException( \DomainException::class );
 
-		$donation->scrubPersonalData( $cutoffDateInsideGracePeriod );
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: $cutoffDateInsideGracePeriod,
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+		);
+	}
+
+	public function testAllowsAnonymizeDonationOnUnapprovedDonationsAfterTheModerationCutoffDate(): void {
+		$donation = ValidDonation::newIncompleteCreditCardDonation();
+		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
+		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->sub( new \DateInterval( 'PT1H' ) );
+
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
+			moderationGracePeriodCutoffDate: $cutoffDateInsideGracePeriod,
+		);
+
+		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
 	}
 
 	public function testAllowsAnonymizeDonationOnUnexportedDonationsBeforeTheCutoffDate(): void {
@@ -195,7 +214,10 @@ class DonationTest extends TestCase {
 		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
 		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->modify( "+1 hour" );
 
-		$donation->scrubPersonalData( $cutoffDateInsideGracePeriod );
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: $cutoffDateInsideGracePeriod,
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+		);
 
 		$this->assertTrue( $donation->donorIsAnonymous(), 'Donor should be anonymous' );
 		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
@@ -207,7 +229,10 @@ class DonationTest extends TestCase {
 		$this->assertFalse( $donation->donorIsAnonymous(), 'We expect the fixture to be non-anonymous' );
 		$originalSalutation = $donation->getDonor()->getName()->getSalutation();
 		$donation->markAsExported();
-		$donation->scrubPersonalData( new \DateTimeImmutable() );
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+		);
 
 		$this->assertSame( $originalSalutation, $donation->getDonor()->getName()->getSalutation() );
 	}
