@@ -68,6 +68,36 @@ class ModerateDonationUseCase {
 	public function approveAsAnonymous( int $donationId, string $authorizedUser ): ModerateDonationResponse {
 		$donation = $this->donationRepository->getDonationById( $donationId );
 
+		if ( $donation === null ) {
+			return $this->newModerationFailureResponse( $donationId );
+		}
+
+		if ( !$donation->isMarkedForModeration() ) {
+			return $this->newModerationFailureResponse( $donationId );
+		}
+
+		$donation->setDonor( new AnonymousDonor() );
+
+		$donation->approve();
+
+		$this->donationRepository->storeDonation( $donation );
+
+		$this->donationLogger->log( $donationId, sprintf( self::LOG_MESSAGE_DONATION_MARKED_AS_APPROVED_AND_ANONYMIZED, $authorizedUser ) );
+
+		if (
+			$donation->shouldSendConfirmationMail() &&
+			!$this->notificationLog->hasSentConfirmationFor( $donation->getId() )
+		) {
+			$this->notifier->sendConfirmationFor( $donation );
+			$this->notificationLog->logConfirmationSent( $donation->getId() );
+		}
+
+		return $this->newModerationSuccessResponse( $donationId );
+	}
+
+	public function approveAsAnonymous( int $donationId, string $authorizedUser ): ModerateDonationResponse {
+		$donation = $this->donationRepository->getDonationById( $donationId );
+
 		if ( $donation === null || !$donation->isMarkedForModeration() ) {
 			return $this->newModerationFailureResponse( $donationId );
 		}
