@@ -204,6 +204,88 @@ class ModerateDonationUseCaseTest extends TestCase {
 		$this->assertTrue( $donation->isMarkedForModeration() );
 	}
 
+	public function testApproveAsAnonymous_convertsDonorToAnonymousAndApprovesDonation(): void {
+		$donation = ValidDonation::newBankTransferDonation();
+		$donation->markForModeration( $this->makeGenericModerationReason() );
+
+		$useCase = $this->newModerateDonationUseCase( $donation );
+
+		$response = $useCase->approveAsAnonymous( $donation->getId(), self::AUTH_USER_NAME );
+
+		$this->assertTrue( $response->moderationChangeSucceeded() );
+		$this->assertFalse( $donation->isMarkedForModeration() );
+
+		$this->assertTrue( $donation->donorIsAnonymous() );
+	}
+
+	public function testApproveAsAnonymous_logsCorrectMessage(): void {
+		$donation = ValidDonation::newBankTransferDonation();
+		$donation->markForModeration( $this->makeGenericModerationReason() );
+
+		$useCase = $this->newModerateDonationUseCase( $donation );
+
+		$useCase->approveAsAnonymous( $donation->getId(), self::AUTH_USER_NAME );
+
+		$this->assertSame(
+			[ [ $donation->getId(), 'marked as approved and anonymized by user: coolAdmin' ] ],
+			$this->donationLogger->getLogCalls()
+		);
+	}
+
+	public function testApproveAsAnonymous_withNonExistingDonationFails(): void {
+		$useCase = $this->newModerateDonationUseCase();
+
+		$response = $useCase->approveAsAnonymous( 1, self::AUTH_USER_NAME );
+
+		$this->assertFalse( $response->moderationChangeSucceeded() );
+	}
+
+	public function testApproveAsAnonymous_whenNotModeratedFails(): void {
+		$donation = ValidDonation::newBankTransferDonation();
+
+		$useCase = $this->newModerateDonationUseCase( $donation );
+
+		$response = $useCase->approveAsAnonymous( $donation->getId(), self::AUTH_USER_NAME );
+
+		$this->assertFalse( $response->moderationChangeSucceeded() );
+	}
+
+	public function testApproveAsAnonymous_doesNotSendEmail(): void {
+		$donation = ValidDonation::newBankTransferDonation();
+		$donation->markForModeration( $this->makeGenericModerationReason() );
+
+		$this->notifier = $this->createMock( DonationNotifier::class );
+
+		$this->notifier->expects( $this->never() )
+			->method( 'sendConfirmationFor' );
+
+		$this->notificationLog = $this->createMock( NotificationLog::class );
+
+		$this->notificationLog->expects( $this->never() )
+			->method( 'logConfirmationSent' );
+		$useCase = $this->newModerateDonationUseCase( $donation );
+
+		$useCase->approveAsAnonymous( $donation->getId(), self::AUTH_USER_NAME );
+	}
+
+	public function testApproveAsAnonymous_isPersisted(): void {
+		$donation = ValidDonation::newBankTransferDonation();
+		$donation->markForModeration( $this->makeGenericModerationReason() );
+
+		$repo = new DonationRepositorySpy( $donation );
+
+		$useCase = new ModerateDonationUseCase(
+			$repo,
+			new DonationEventLoggerSpy(),
+			$this->notifier,
+			$this->notificationLog
+		);
+
+		$useCase->approveAsAnonymous( $donation->getId(), self::AUTH_USER_NAME );
+
+		$this->assertCount( 1, $repo->getStoreDonationCalls() );
+	}
+
 	private function newModerateDonationUseCase( Donation ...$donations ): ModerateDonationUseCase {
 		return new ModerateDonationUseCase( new FakeDonationRepository( ...$donations ), $this->donationLogger, $this->notifier, $this->notificationLog );
 	}

@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\UseCases\ModerateDonation;
 
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -14,6 +15,7 @@ class ModerateDonationUseCase {
 
 	private const LOG_MESSAGE_DONATION_MARKED_FOR_MODERATION = 'marked for moderation by user: %s';
 	private const LOG_MESSAGE_DONATION_MARKED_AS_APPROVED = 'marked as approved by user: %s';
+	private const LOG_MESSAGE_DONATION_MARKED_AS_APPROVED_AND_ANONYMIZED = 'marked as approved and anonymized by user: %s';
 
 	private DonationRepository $donationRepository;
 	private DonationEventLogger $donationLogger;
@@ -56,6 +58,36 @@ class ModerateDonationUseCase {
 		$this->donationRepository->storeDonation( $donation );
 		$this->donationLogger->log( $donationId, sprintf( self::LOG_MESSAGE_DONATION_MARKED_AS_APPROVED, $authorizedUser ) );
 		if ( !$this->notificationLog->hasSentConfirmationFor( $donation->getId() ) ) {
+			$this->notifier->sendConfirmationFor( $donation );
+			$this->notificationLog->logConfirmationSent( $donation->getId() );
+		}
+
+		return $this->newModerationSuccessResponse( $donationId );
+	}
+
+	public function approveAsAnonymous( int $donationId, string $authorizedUser ): ModerateDonationResponse {
+		$donation = $this->donationRepository->getDonationById( $donationId );
+
+		if ( $donation === null ) {
+			return $this->newModerationFailureResponse( $donationId );
+		}
+
+		if ( !$donation->isMarkedForModeration() ) {
+			return $this->newModerationFailureResponse( $donationId );
+		}
+
+		$donation->setDonor( new AnonymousDonor() );
+
+		$donation->approve();
+
+		$this->donationRepository->storeDonation( $donation );
+
+		$this->donationLogger->log( $donationId, sprintf( self::LOG_MESSAGE_DONATION_MARKED_AS_APPROVED_AND_ANONYMIZED, $authorizedUser ) );
+
+		if (
+			$donation->shouldSendConfirmationMail() &&
+			!$this->notificationLog->hasSentConfirmationFor( $donation->getId() )
+		) {
 			$this->notifier->sendConfirmationFor( $donation );
 			$this->notificationLog->logConfirmationSent( $donation->getId() );
 		}
