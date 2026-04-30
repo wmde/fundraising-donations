@@ -58,6 +58,13 @@ class DonorFieldMapper {
 		return $result;
 	}
 
+	private static function getStreetAddress( Address $address ): string {
+		if ( $address->getStreetAddress() != '' ) {
+			return $address->getStreetAddress();
+		}
+		return "{$address->getStreetName()} {$address->getHouseNumber()}";
+	}
+
 	/**
 	 * @param Address $address
 	 *
@@ -67,8 +74,26 @@ class DonorFieldMapper {
 		if ( $address instanceof NoAddress ) {
 			return [];
 		}
+
+		/*
+		if ( trim( $address->getStreetName() ) === '' && trim( $address->getHouseNumber() ) === '' ) {
+			return [
+				'strasse' => $address->getStreetAddress(),
+				'plz' => $address->getPostalCode(),
+				'ort' => $address->getCity(),
+				'country' => $address->getCountryCode(),
+			];
+		}
 		return [
-			'strasse' => $address->getStreetAddress(),
+			'street_name' => $address->getStreetName(),
+			'house_number' => $address->getHouseNumber(),
+			'plz' => $address->getPostalCode(),
+			'ort' => $address->getCity(),
+			'country' => $address->getCountryCode(),
+		];
+		*/
+		return [
+			'strasse' => self::getStreetAddress( $address ),
 			'plz' => $address->getPostalCode(),
 			'ort' => $address->getCity(),
 			'country' => $address->getCountryCode(),
