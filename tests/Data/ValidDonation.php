@@ -132,17 +132,21 @@ class ValidDonation {
 	}
 
 	public static function newIncompleteCreditCardDonation( int $donationId = 1 ): Donation {
-		return self::createDonation(
+		$donation = self::createDonation(
 			$donationId,
 			ValidPayments::newCreditCardPayment(),
 		);
+		$donation->setIncomplete();
+		return $donation;
 	}
 
 	public static function newIncompleteAnonymousCreditCardDonation( int $donationId = 1 ): Donation {
-		return self::createAnonymousDonation(
+		$donation = self::createAnonymousDonation(
 			$donationId,
 			ValidPayments::newCreditCardPayment(),
 		);
+		$donation->setIncomplete();
+		return $donation;
 	}
 
 	public static function newCancelledPayPalDonation( int $donationId = 1 ): Donation {
