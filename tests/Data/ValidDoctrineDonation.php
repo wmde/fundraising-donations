@@ -51,6 +51,16 @@ class ValidDoctrineDonation {
 		return $donation;
 	}
 
+	public static function newIncompletePaypalDoctrineDonation(): Donation {
+		$self = new self();
+		$donation = $self->createDonation();
+		$donation->setPaymentType( self::PAYMENT_PAYPAL );
+		$donation->setPaymentId( ValidPayments::ID_PAYPAL );
+		$donation->setStatus( Donation::STATUS_EXTERNAL_INCOMPLETE );
+		$donation->encodeAndSetData( $donation->getDecodedData() );
+		return $donation;
+	}
+
 	public static function newCompanyDonation(): Donation {
 		$self = new self();
 		$donation = ( new self() )->createDonation();

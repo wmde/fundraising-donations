@@ -50,6 +50,24 @@ class LegacyToDomainConverterTest extends TestCase {
 		$this->assertSame( $moderationReasons, $donation->getModerationReasons() );
 	}
 
+	public function testGivenCompletedDonation_converterDoesNotMarkDonationAsIncomplete(): void {
+		$doctrineDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
+
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		$this->assertFalse( $donation->isIncomplete() );
+	}
+
+	public function testGivenIncompleteDonation_converterMarksDonationAsIncomplete(): void {
+		$doctrineDonation = ValidDoctrineDonation::newIncompletePaypalDoctrineDonation();
+
+		$converter = new LegacyToDomainConverter();
+
+		$donation = $converter->createFromLegacyObject( $doctrineDonation );
+		$this->assertTrue( $donation->isIncomplete() );
+	}
+
 	#[DataProvider( 'donationProviderForNewsletterSubscription' )]
 	public function testConverterPassesNewsletterSubscriptionToDonor( DoctrineDonation $doctrineDonation, bool $expectedDonorValue ): void {
 		$converter = new LegacyToDomainConverter();
