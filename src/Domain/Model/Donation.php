@@ -18,6 +18,7 @@ class Donation {
 	 */
 	private array $moderationReasons;
 	private bool $cancelled;
+	private bool $incomplete;
 
 	private int $id;
 	private Donor $donor;
@@ -56,6 +57,7 @@ class Donation {
 		$this->comment = $comment;
 		$this->exportDate = null;
 		$this->cancelled = false;
+		$this->incomplete = false;
 		$this->moderationReasons = [];
 	}
 
@@ -195,6 +197,14 @@ class Donation {
 		$this->cancelled = true;
 	}
 
+	public function isIncomplete(): bool {
+		return $this->incomplete;
+	}
+
+	public function setIncomplete(): void {
+		$this->incomplete = true;
+	}
+
 	/**
 	 * This might be used by the fundraising application for display purposes,
 	 * but should be removed when not used anymore.
@@ -271,11 +281,11 @@ class Donation {
 	 *          for the grace period will lead to a cutoff date of 2024-12-12,
 	 *          which allows for the donation on 2024-12-11 to be scrubbed
 	 */
-	private function scrubbingIsAllowed( \DateTimeInterface $exportGracePeriodCutoffDate, \DateTimeInterface $moderationGracePeriodCutoffDate ): bool {
+	private function scrubbingIsAllowed( \DateTimeInterface $externalIncompleteGracePeriodCutoffDate, \DateTimeInterface $moderationGracePeriodCutoffDate ): bool {
 		if ( $this->isExported() ) {
 			return true;
 		}
-		if ( $this->donatedOn <= $exportGracePeriodCutoffDate ) {
+		if ( $this->isIncomplete() && $this->donatedOn <= $externalIncompleteGracePeriodCutoffDate ) {
 			return true;
 		}
 		if ( $this->isCancelled() ) {
