@@ -136,6 +136,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 	public function testNewDonationPersistenceRoundTrip(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
 
 		$repository = $this->newRepository();
 
@@ -170,6 +171,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 	public function testScrubbedDonationPersistenceRoundTrip(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
 		$donation->markAsExported( new \DateTimeImmutable( '2024-06-21 00:05:00' ) );
 		$donation->scrubPersonalData(
 			externalIncompleteGracePeriodCutoffDate:  new \DateTimeImmutable(),
@@ -235,6 +237,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 	public function testCommentGetPersistedAndRetrieved(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
 		$donation->addComment( ValidDonation::newPublicComment() );
 
 		$repository = $this->newRepository();

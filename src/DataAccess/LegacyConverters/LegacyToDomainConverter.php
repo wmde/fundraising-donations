@@ -29,6 +29,7 @@ class LegacyToDomainConverter {
 		);
 		$this->setExportStatus( $doctrineDonation, $donation );
 		$this->assignCancellationAndModeration( $doctrineDonation, $donation );
+		$this->markIncomplete( $doctrineDonation, $donation );
 		return $donation;
 	}
 
@@ -38,6 +39,12 @@ class LegacyToDomainConverter {
 		}
 		if ( !$dd->getModerationReasons()->isEmpty() ) {
 			$donation->markForModeration( ...$dd->getModerationReasons()->toArray() );
+		}
+	}
+
+	private function markIncomplete( DoctrineDonation $dd, Donation $donation ): void {
+		if ( $dd->getStatus() === DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE ) {
+			$donation->setIncomplete();
 		}
 	}
 

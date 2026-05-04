@@ -183,45 +183,89 @@ class DonationTest extends TestCase {
 		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
 	}
 
-	public function testPreventsAnonymizeDonationOnUnexportedDonationsAfterTheExternalIncompleteCutoffDate(): void {
-		$donation = ValidDonation::newIncompleteCreditCardDonation();
-		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
-		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->sub( new \DateInterval( 'PT1H' ) );
+	public function testDoesNotAnonymizesUnexportedDonations(): void {
+		$donation = ValidDonation::newBookedCreditCardDonation();
+		$this->assertFalse( $donation->isExported(), "we expect the donation to be not exported" );
 
 		$this->expectException( \DomainException::class );
 
 		$donation->scrubPersonalData(
-			externalIncompleteGracePeriodCutoffDate: $cutoffDateInsideGracePeriod,
+			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
 			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
 		);
 	}
 
-	public function testAllowsAnonymizeDonationOnUnapprovedDonationsAfterTheModerationCutoffDate(): void {
+	public function testAnonymizesExternalIncompleteDonationsWhenTheyAreOlderThanTheirGracePeriod(): void {
 		$donation = ValidDonation::newIncompleteCreditCardDonation();
-		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
-		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->sub( new \DateInterval( 'PT1H' ) );
+		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
+
+		// Add one hour to the donation time for the grace period so it will always be outisde
+		$incompleteCutOffDate = $donation->getDonatedOn()->add( new \DateInterval( 'PT1H' ) );
+
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: $incompleteCutOffDate,
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+		);
+
+		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
+	}
+
+	public function testDoesNotAnonymizeExternalIncompleteDonationsWhenTheyAreYoungerThanTheirGracePeriod(): void {
+		$donation = ValidDonation::newIncompleteCreditCardDonation();
+		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
+
+		// Subtract one hour to the donation time for the grace period so it will always be inside
+		$incompleteCutOffDate = $donation->getDonatedOn()->sub( new \DateInterval( 'PT1H' ) );
+
+		$this->expectException( \DomainException::class );
+
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: $incompleteCutOffDate,
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+		);
+	}
+
+	public function testAnonymizesCancelledDonations(): void {
+		$donation = ValidDonation::newBookedCreditCardDonation();
+		$donation->cancel();
 
 		$donation->scrubPersonalData(
 			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
-			moderationGracePeriodCutoffDate: $cutoffDateInsideGracePeriod,
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
 		);
 
 		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
 	}
 
-	public function testAllowsAnonymizeDonationOnUnexportedDonationsBeforeTheCutoffDate(): void {
-		$donation = ValidDonation::newIncompleteCreditCardDonation();
+	public function testAnonymizesUnapprovedDonationsWhenTheyAreOlderThanTheirGracePeriod(): void {
+		$donation = ValidDonation::newBookedCreditCardDonation();
+		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
-		$cutoffDateInsideGracePeriod = $donation->getDonatedOn()->modify( "+1 hour" );
+
+		// Add one hour to the donation time for the grace period so it will always be outisde
+		$moderationGracePeriod = $donation->getDonatedOn()->add( new \DateInterval( 'PT1H' ) );
 
 		$donation->scrubPersonalData(
-			externalIncompleteGracePeriodCutoffDate: $cutoffDateInsideGracePeriod,
-			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
+			moderationGracePeriodCutoffDate: $moderationGracePeriod,
 		);
 
-		$this->assertTrue( $donation->donorIsAnonymous(), 'Donor should be anonymous' );
 		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
-		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
+	}
+
+	public function testDoesNotAnonymizeUnapprovedDonationsWhenTheyAreYoungerThanTheirGracePeriod(): void {
+		$donation = ValidDonation::newBookedCreditCardDonation();
+		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
+
+		// Subtract one hour to the donation time for the grace period so it will always be inside
+		$moderationGracePeriod = $donation->getDonatedOn()->sub( new \DateInterval( 'PT1H' ) );
+
+		$this->expectException( \DomainException::class );
+
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
+			moderationGracePeriodCutoffDate: $moderationGracePeriod
+		);
 	}
 
 	#[DataProvider( 'provideDonationsForAnonymization' )]
