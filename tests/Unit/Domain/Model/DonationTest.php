@@ -237,7 +237,7 @@ class DonationTest extends TestCase {
 		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
 	}
 
-	public function testAnonnymizesUnapprovedDonationsWhenTheyAreOlderThanTheirGracePeriod(): void {
+	public function testAnonymizesUnapprovedDonationsWhenTheyAreOlderThanTheirGracePeriod(): void {
 		$donation = ValidDonation::newBookedCreditCardDonation();
 		$donation->markForModeration( new ModerationReason( ModerationIdentifier::MANUALLY_FLAGGED_BY_ADMIN ) );
 		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
@@ -253,7 +253,7 @@ class DonationTest extends TestCase {
 		$this->assertTrue( $donation->donorIsScrubbed(), 'Donor should be scrubbed' );
 	}
 
-	public function testDoesNotAnonnymizesUnapprovedDonationsWhenTheyAreYoungerThanTheirGracePeriod(): void {
+	public function testDoesNotAnonymizeUnapprovedDonationsWhenTheyAreYoungerThanTheirGracePeriod(): void {
 		$donation = ValidDonation::newBookedCreditCardDonation();
 		$this->assertFalse( $donation->isExported(), "we expect the incomplete donation to be not exported" );
 
