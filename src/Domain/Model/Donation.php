@@ -91,6 +91,10 @@ class Donation {
 		$this->comment = $comment;
 	}
 
+	public function clearComment(): void {
+		$this->comment = null;
+	}
+
 	public function getPaymentId(): int {
 		return $this->paymentId;
 	}
