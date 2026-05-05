@@ -77,6 +77,7 @@ class ModerateDonationUseCase {
 		}
 
 		$donation->setDonor( new AnonymousDonor() );
+		$donation->clearComment();
 
 		$donation->approve();
 
