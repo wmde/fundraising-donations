@@ -204,8 +204,19 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			999,
 			'PPL',
 			[
-				'paymentValue' => 'almostInfinite',
-				'paid' => 'certainly'
+				'ext_payment_id' => 'PAY-1B56960729604235TKQQIYVY',
+				'paypal_payer_id' => 'payer_id',
+				'paypal_subscr_id' => 'subscr_id',
+				'paypal_payer_status' => 'payer_status',
+				'paypal_mc_gross' => 'mc_gross',
+				'paypal_mc_currency' => 'mc_currency',
+				'paypal_mc_fee' => 'mc_fee',
+				'paypal_settle_amount' => 'settle_amount',
+				'ext_subscr_id' => 'subscr_id',
+				'ext_payment_type' => 'payment_type',
+				'ext_payment_status' => 'payment_status',
+				'ext_payment_account' => 'payer_id',
+				'ext_payment_timestamp' => 'payment_date',
 			],
 		);
 	}

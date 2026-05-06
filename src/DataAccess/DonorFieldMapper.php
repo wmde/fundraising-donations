@@ -75,24 +75,9 @@ class DonorFieldMapper {
 		];
 	}
 
-	/**
-	 * Update donation information if the Donor is not anonymous
-	 *
-	 * @param DoctrineDonation $doctrineDonation
-	 * @param Donor $donor
-	 */
 	public static function updateDonorInformation( DoctrineDonation $doctrineDonation, Donor $donor ): void {
-		if ( $donor instanceof AnonymousDonor ) {
-			return;
-		}
 		$doctrineDonation->setDonorFullName( $donor->getName()->getFullName() );
 		$doctrineDonation->setDonorEmail( $donor->getEmailAddress() );
-
-		// protect against email-only updates accidentally overwriting city information
-		if ( $donor->getPhysicalAddress() instanceof NoAddress ) {
-			return;
-		}
-
 		$doctrineDonation->setDonorCity( $donor->getPhysicalAddress()->getCity() );
 	}
 
