@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonationComment;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -207,6 +208,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 	public function testApproveAsAnonymous_convertsDonorToAnonymousAndApprovesDonation(): void {
 		$donation = ValidDonation::newBankTransferDonation();
 		$donation->markForModeration( $this->makeGenericModerationReason() );
+		$donation->addComment( new DonationComment( 'Moderated comment :grimacing:', true, 'Moderated name', ) );
 
 		$useCase = $this->newModerateDonationUseCase( $donation );
 
@@ -216,6 +218,7 @@ class ModerateDonationUseCaseTest extends TestCase {
 		$this->assertFalse( $donation->isMarkedForModeration() );
 
 		$this->assertTrue( $donation->donorIsAnonymous() );
+		$this->assertFalse( $donation->hasComment() );
 	}
 
 	public function testApproveAsAnonymous_logsCorrectMessage(): void {
