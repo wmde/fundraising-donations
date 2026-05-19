@@ -17,7 +17,13 @@ class AddDonationRequest {
 	private string $donorSalutation = '';
 	private string $donorTitle = '';
 	private string $donorCompany = '';
+
+	/**
+	 * @deprecated Use $donorStreetName and $donorHouseNumber instead.
+	 */
 	private string $donorStreetAddress = '';
+	private string $donorStreetName = '';
+	private string $donorHouseNumber = '';
 	private string $donorPostalCode = '';
 	private string $donorCity = '';
 	private string $donorCountryCode = '';
@@ -231,12 +237,34 @@ class AddDonationRequest {
 		$this->donorCompany = trim( $donorCompany );
 	}
 
+	/**
+	 * @deprecated Use getDonorStreetName() and getDonorHouseNumber() instead.
+	 */
 	public function getDonorStreetAddress(): string {
 		return $this->donorStreetAddress;
 	}
 
+	/**
+	 * @deprecated Use setDonorStreetName() and setDonorHouseNumber() instead.
+	 */
 	public function setDonorStreetAddress( string $donorStreetAddress ): void {
 		$this->donorStreetAddress = trim( $donorStreetAddress );
+	}
+
+	public function getDonorStreetName(): string {
+		return $this->donorStreetName;
+	}
+
+	public function setDonorStreetName( string $donorStreetName ): void {
+		$this->donorStreetName = trim( $donorStreetName );
+	}
+
+	public function getDonorHouseNumber(): string {
+		return $this->donorHouseNumber;
+	}
+
+	public function setDonorHouseNumber( string $donorHouseNumber ): void {
+		$this->donorHouseNumber = trim( $donorHouseNumber );
 	}
 
 	public function getDonorPostalCode(): string {

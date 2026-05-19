@@ -8,7 +8,18 @@ use WMDE\Fundraising\DonationContext\Domain\Model\Address;
 
 class ScrubbedAddress implements Address {
 
+	/**
+	 * @deprecated Use getStreetName() and getHouseNumber() instead.
+	 */
 	public function getStreetAddress(): string {
+		return '';
+	}
+
+	public function getStreetName(): string {
+		return '';
+	}
+
+	public function getHouseNumber(): string {
 		return '';
 	}
 

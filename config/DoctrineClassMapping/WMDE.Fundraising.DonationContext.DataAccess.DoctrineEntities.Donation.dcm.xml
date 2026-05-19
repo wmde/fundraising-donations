@@ -100,6 +100,9 @@
       </options>
     </field>
 
+    <field name="streetName" type="string" column="street_name" length="255" nullable="true"/>
+    <field name="houseNumber" type="string" column="house_number" length="10" nullable="true"/>
+
     <many-to-many
             field="moderationReasons"
             target-entity="WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason"
