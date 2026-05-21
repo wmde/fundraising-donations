@@ -178,8 +178,7 @@ class DomainToLegacyConverter {
 	private function modifyDonationForAnonymousDonor( Donor $donor, DoctrineDonation $doctrineDonation ): void {
 		if ( $donor instanceof Donor\ScrubbedDonor ) {
 			$doctrineDonation->scrub();
-			// needs to use scrubAllPersonalData see https://phabricator.wikimedia.org/T426020
-			DataBlobScrubber::makeDonorAnonymous( $doctrineDonation );
+			DataBlobScrubber::scrubAllPersonalData( $doctrineDonation );
 		} elseif ( $donor instanceof Donor\AnonymousDonor ) {
 			DataBlobScrubber::makeDonorAnonymous( $doctrineDonation );
 		}
