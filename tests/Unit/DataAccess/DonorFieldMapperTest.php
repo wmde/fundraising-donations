@@ -7,6 +7,7 @@ use PHPUnit\Framework\TestCase;
 use WMDE\Fundraising\DonationContext\DataAccess\DonorFieldMapper;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Address\PostalAddress;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\PersonName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
@@ -65,12 +66,24 @@ class DonorFieldMapperTest extends TestCase {
 		$this->assertArrayNotHasKey( 'firma', $fields );
 	}
 
-	public function testGivenPersonalDonationUpdatingWithEmailOnlyKeepsCity(): void {
+	public function testGivenPersonalDonationUpdatingWithEmailOnlyTypeClearsCity(): void {
 		$personalDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
 
 		DonorFieldMapper::updateDonorInformation( $personalDonation, ValidDonation::newEmailOnlyDonor() );
 
-		$this->assertSame( ValidDonation::DONOR_CITY, $personalDonation->getDonorCity() );
+		$this->assertSame( ValidDonation::DONOR_FULL_NAME, $personalDonation->getDonorFullName() );
+		$this->assertSame( ValidDonation::DONOR_EMAIL_ADDRESS, $personalDonation->getDonorEmail() );
+		$this->assertSame( '', $personalDonation->getDonorCity() );
+	}
+
+	public function testGivenPersonalDonationUpdatingWithAnonymousClearsAllInfo(): void {
+		$personalDonation = ValidDoctrineDonation::newPaypalDoctrineDonation();
+
+		DonorFieldMapper::updateDonorInformation( $personalDonation, new AnonymousDonor() );
+
+		$this->assertSame( 'Anonym', $personalDonation->getDonorFullName() );
+		$this->assertSame( '', $personalDonation->getDonorEmail() );
+		$this->assertSame( '', $personalDonation->getDonorCity() );
 	}
 
 	public function testGivenScrubbedDonorItPassesTheOriginalDonorTypeAndTitle(): void {

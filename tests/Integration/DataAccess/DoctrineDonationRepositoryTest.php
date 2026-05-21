@@ -223,7 +223,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$repository->getDonationById( self::ID_OF_DONATION_NOT_IN_DB );
 	}
 
-	public function testGivenDonationUpdateWithoutDonorInformation_DonorNameStaysTheSame(): void {
+	public function testGivenDonationUpdateWithAnonymousDonor_DonorInfoIsCleared(): void {
 		$donation = ValidDonation::newBookedPayPalDonation();
 		$this->newRepository()->storeDonation( $donation );
 
@@ -232,7 +232,21 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 		$doctrineDonation = $this->getDoctrineDonationById( $donation->getId() );
 
-		$this->assertSame( $donation->getDonor()->getName()->getFullName(), $doctrineDonation->getDonorFullName() );
+		$this->assertSame( 'Anonym', $doctrineDonation->getDonorFullName() );
+		$this->assertSame( '', $doctrineDonation->getDonorCity() );
+		$this->assertSame( '', $doctrineDonation->getDonorEmail() );
+		$this->assertSame( $donation->getTrackingInfo()->totalImpressionCount, $doctrineDonation->getImpressionCount() );
+		$this->assertSame( $donation->getTrackingInfo()->singleBannerImpressionCount, $doctrineDonation->getBannerImpressionCount() );
+		$this->assertSame( $donation->getTrackingInfo()->totalImpressionCount, $doctrineDonation->getDecodedData()[ 'impCount' ] );
+		$this->assertSame( $donation->getTrackingInfo()->singleBannerImpressionCount, $doctrineDonation->getDecodedData()[ 'bImpCount' ] );
+		$this->assertSame( $donation->getTrackingInfo()->getTrackingString(), $doctrineDonation->getDecodedData()[ 'tracking' ] );
+		$this->assertNull( $doctrineDonation->getDecodedData()[ 'titel' ] );
+		$this->assertNull( $doctrineDonation->getDecodedData()[ 'vorname' ] );
+		$this->assertNull( $doctrineDonation->getDecodedData()[ 'nachname' ] );
+		$this->assertNull( $doctrineDonation->getDecodedData()[ 'strasse' ] );
+		$this->assertNull( $doctrineDonation->getDecodedData()[ 'plz' ] );
+		$this->assertNull( $doctrineDonation->getDecodedData()[ 'ort' ] );
+		$this->assertNull( $doctrineDonation->getDecodedData()[ 'email' ] );
 	}
 
 	public function testCommentGetPersistedAndRetrieved(): void {
@@ -366,6 +380,38 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertArrayNotHasKey( 'paypal_first_name', $data );
 		$this->assertArrayNotHasKey( 'paypal_last_name', $data );
 		$this->assertArrayNotHasKey( 'paypal_address_name', $data );
+	}
+
+	public function testCommentStaysPersistedWhenDonationIsScrubbed(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
+		$donation->addComment( ValidDonation::newPublicComment() );
+
+		$repository = $this->newRepository();
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$retrievedDonation = $repository->getDonationById( $donation->getId() );
+		$comment = $retrievedDonation?->getComment();
+
+		$this->assertNotNull( $comment );
+		$this->assertSame( ValidDonation::COMMENT_IS_PUBLIC, $comment->isPublic() );
+		$this->assertSame( ValidDonation::COMMENT_TEXT, $comment->getCommentText() );
+		$this->assertSame( ValidDonation::COMMENT_AUTHOR_DISPLAY_NAME, $comment->getAuthorDisplayName() );
+
+		$donation->markAsExported();
+		$donation->scrubPersonalData( new \DateTimeImmutable(), new \DateTimeImmutable() );
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$retrievedDonation = $repository->getDonationById( $donation->getId() );
+		$comment = $retrievedDonation?->getComment();
+
+		$this->assertTrue( $retrievedDonation?->donorIsScrubbed() );
+		$this->assertNotNull( $comment );
+		$this->assertEquals( ValidDonation::COMMENT_IS_PUBLIC, $comment->isPublic() );
+		$this->assertEquals( ValidDonation::COMMENT_TEXT, $comment->getCommentText() );
+		$this->assertEquals( ValidDonation::COMMENT_AUTHOR_DISPLAY_NAME, $comment->getAuthorDisplayName() );
 	}
 
 	private function newEntityManagerThatThrowsWithQueryBuilder(): EntityManager {
