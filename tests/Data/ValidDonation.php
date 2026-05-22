@@ -52,6 +52,7 @@ class ValidDonation {
 	public const TRACKING_TRACKING = 'test/gelb';
 	public const COMMENT_TEXT = 'For great justice!';
 	public const COMMENT_IS_PUBLIC = true;
+	public const COMMENT_IS_PRIVATE = false;
 
 	public const COMMENT_AUTHOR_DISPLAY_NAME = 'Such a tomato';
 
@@ -247,6 +248,14 @@ class ValidDonation {
 		return new DonationComment(
 			self::COMMENT_TEXT,
 			self::COMMENT_IS_PUBLIC,
+			self::COMMENT_AUTHOR_DISPLAY_NAME
+		);
+	}
+
+	public static function newPrivateComment(): DonationComment {
+		return new DonationComment(
+			self::COMMENT_TEXT,
+			self::COMMENT_IS_PRIVATE,
 			self::COMMENT_AUTHOR_DISPLAY_NAME
 		);
 	}

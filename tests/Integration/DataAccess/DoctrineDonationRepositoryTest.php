@@ -413,7 +413,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		], $data );
 	}
 
-	public function testCommentStaysPersistedWhenDonationIsScrubbed(): void {
+	public function testPublicCommentStaysPersistedWhenDonationIsScrubbed(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
 		$donation->addComment( ValidDonation::newPublicComment() );
@@ -443,6 +443,34 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertEquals( ValidDonation::COMMENT_IS_PUBLIC, $comment->isPublic() );
 		$this->assertEquals( ValidDonation::COMMENT_TEXT, $comment->getCommentText() );
 		$this->assertEquals( ValidDonation::COMMENT_AUTHOR_DISPLAY_NAME, $comment->getAuthorDisplayName() );
+	}
+
+	public function testPrivateCommentIsRemovedWhenDonationIsScrubbed(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
+		$donation->addComment( ValidDonation::newPrivateComment() );
+
+		$repository = $this->newRepository();
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$connection = $this->entityManager->getConnection();
+		$row = $connection->executeQuery( "SELECT * FROM spenden WHERE id = {$donation->getId()}" )->fetchAssociative();
+		$this->assertIsArray( $row );
+
+		$this->assertEquals( ValidDonation::COMMENT_AUTHOR_DISPLAY_NAME, $row[ 'eintrag' ] );
+		$this->assertEquals( ValidDonation::COMMENT_TEXT, $row[ 'kommentar' ] );
+
+		$donation->markAsExported();
+		$donation->scrubPersonalData( new \DateTimeImmutable(), new \DateTimeImmutable() );
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$row = $connection->executeQuery( "SELECT * FROM spenden WHERE id = {$donation->getId()}" )->fetchAssociative();
+		$this->assertIsArray( $row );
+
+		$this->assertSame( '', $row[ 'eintrag' ] );
+		$this->assertSame( '', $row[ 'kommentar' ] );
 	}
 
 	private function newEntityManagerThatThrowsWithQueryBuilder(): EntityManager {
