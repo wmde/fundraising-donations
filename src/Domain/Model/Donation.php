@@ -274,6 +274,10 @@ class Donation {
 			$this->donor->isSubscribedToMailingList(),
 			$this->donor->wantsReceipt()
 		);
+
+		if ( $this->comment !== null && !$this->comment->isPublic() ) {
+			$this->comment = null;
+		}
 	}
 
 	/**

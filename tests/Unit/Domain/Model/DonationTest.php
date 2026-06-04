@@ -183,6 +183,19 @@ class DonationTest extends TestCase {
 		$this->assertInstanceOf( ScrubbedDonor::class, $donation->getDonor() );
 	}
 
+	public function testAnonymizeDonationRemovesNonPublicComment(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$donation->markAsExported();
+		$donation->addComment( ValidDonation::newPrivateComment() );
+
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+		);
+
+		$this->assertNull( $donation->getComment() );
+	}
+
 	public function testDoesNotAnonymizesUnexportedDonations(): void {
 		$donation = ValidDonation::newBookedCreditCardDonation();
 		$this->assertFalse( $donation->isExported(), "we expect the donation to be not exported" );

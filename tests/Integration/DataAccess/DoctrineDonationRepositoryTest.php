@@ -341,7 +341,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 
 	public function testWhenScrubbingDonation_repositoryRemovesDataAndSets(): void {
 		$donationId = 3;
-		$donation = ValidDonation::newBankTransferDonation( $donationId );
+		$donation = ValidDonation::newBookedPayPalDonation( $donationId );
 		$donation->markAsExported();
 		$repository = $this->newRepository();
 		$repository->storeDonation( $donation );
@@ -364,25 +364,56 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		// @phpstan-ignore argument.type
 		$data = unserialize( base64_decode( $row['data'] ) );
 		$this->assertIsArray( $data );
-		$this->assertArrayNotHasKey( 'titel', $data );
-		$this->assertArrayNotHasKey( 'vorname', $data );
-		$this->assertArrayNotHasKey( 'nachname', $data );
-		$this->assertArrayNotHasKey( 'email', $data );
-		$this->assertArrayNotHasKey( 'strasse', $data );
-		$this->assertArrayNotHasKey( 'plz', $data );
-		$this->assertArrayNotHasKey( 'ort', $data );
-		$this->assertArrayNotHasKey( 'phone', $data );
-		$this->assertArrayNotHasKey( 'bankname', $data );
-		$this->assertArrayNotHasKey( 'iban', $data );
-		$this->assertArrayNotHasKey( 'bic', $data );
-		$this->assertArrayNotHasKey( 'blz', $data );
-		$this->assertArrayNotHasKey( 'konto', $data );
-		$this->assertArrayNotHasKey( 'paypal_first_name', $data );
-		$this->assertArrayNotHasKey( 'paypal_last_name', $data );
-		$this->assertArrayNotHasKey( 'paypal_address_name', $data );
+
+		$this->assertEquals( [
+			'impCount' => 3,
+			'bImpCount' => 1,
+			'tracking' => 'test/gelb',
+			'anrede' => 'nyan',
+			'adresstyp' => 'person'
+		], $data );
 	}
 
-	public function testCommentStaysPersistedWhenDonationIsScrubbed(): void {
+	public function testWhenScrubbingDonation_allUnneededDataISClearedFromDataBlob(): void {
+		$donationId = 3;
+		$donation = ValidDonation::newBookedPayPalDonation( $donationId );
+		$donation->markAsExported();
+		$repository = $this->newRepository();
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$connection = $this->entityManager->getConnection();
+		$row = $connection->executeQuery( "SELECT data FROM spenden WHERE id = $donationId" )->fetchAssociative();
+		// @phpstan-ignore argument.type, offsetAccess.nonOffsetAccessible
+		$data = unserialize( base64_decode( $row['data'] ) );
+		// @phpstan-ignore offsetAccess.nonOffsetAccessible
+		$data[ 'unexpected_pii_data' ] = 'Jasper Carrott';
+		$serialisedData = base64_encode( serialize( $data ) );
+		$connection->executeQuery( "UPDATE spenden SET data = '$serialisedData' WHERE id = $donationId" );
+
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+		);
+		$repository->storeDonation( $donation );
+
+		$connection = $this->entityManager->getConnection();
+		$row = $connection->executeQuery( "SELECT * FROM spenden WHERE id=$donationId" )->fetchAssociative();
+		$this->assertIsArray( $row );
+		// @phpstan-ignore argument.type
+		$data = unserialize( base64_decode( $row['data'] ) );
+		$this->assertIsArray( $data );
+
+		$this->assertEquals( [
+			'impCount' => 3,
+			'bImpCount' => 1,
+			'tracking' => 'test/gelb',
+			'anrede' => 'nyan',
+			'adresstyp' => 'person'
+		], $data );
+	}
+
+	public function testPublicCommentStaysPersistedWhenDonationIsScrubbed(): void {
 		$donation = ValidDonation::newDirectDebitDonation();
 		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
 		$donation->addComment( ValidDonation::newPublicComment() );
@@ -412,6 +443,34 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertEquals( ValidDonation::COMMENT_IS_PUBLIC, $comment->isPublic() );
 		$this->assertEquals( ValidDonation::COMMENT_TEXT, $comment->getCommentText() );
 		$this->assertEquals( ValidDonation::COMMENT_AUTHOR_DISPLAY_NAME, $comment->getAuthorDisplayName() );
+	}
+
+	public function testPrivateCommentIsRemovedWhenDonationIsScrubbed(): void {
+		$donation = ValidDonation::newDirectDebitDonation();
+		$this->legacyPaymentData = ValidPayments::newDirectDebitLegacyData();
+		$donation->addComment( ValidDonation::newPrivateComment() );
+
+		$repository = $this->newRepository();
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$connection = $this->entityManager->getConnection();
+		$row = $connection->executeQuery( "SELECT * FROM spenden WHERE id = {$donation->getId()}" )->fetchAssociative();
+		$this->assertIsArray( $row );
+
+		$this->assertEquals( ValidDonation::COMMENT_AUTHOR_DISPLAY_NAME, $row[ 'eintrag' ] );
+		$this->assertEquals( ValidDonation::COMMENT_TEXT, $row[ 'kommentar' ] );
+
+		$donation->markAsExported();
+		$donation->scrubPersonalData( new \DateTimeImmutable(), new \DateTimeImmutable() );
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$row = $connection->executeQuery( "SELECT * FROM spenden WHERE id = {$donation->getId()}" )->fetchAssociative();
+		$this->assertIsArray( $row );
+
+		$this->assertSame( '', $row[ 'eintrag' ] );
+		$this->assertSame( '', $row[ 'kommentar' ] );
 	}
 
 	private function newEntityManagerThatThrowsWithQueryBuilder(): EntityManager {
