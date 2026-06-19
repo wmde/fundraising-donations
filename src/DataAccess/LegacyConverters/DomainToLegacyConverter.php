@@ -93,6 +93,10 @@ class DomainToLegacyConverter {
 			return;
 		}
 
+		if ( $donation->donorIsScrubbed() ) {
+			return;
+		}
+
 		// Set status from payment type. This encodes a bit of payment domain knowledge into the donation domain.
 		// But as long as we have the status field in the database and the Fundraising Operation Center and export
 		// script uses the status, we have to have this code.

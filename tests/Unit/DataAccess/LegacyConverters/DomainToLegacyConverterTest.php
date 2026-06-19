@@ -226,4 +226,24 @@ class DomainToLegacyConverterTest extends TestCase {
 
 		$this->assertSame( [ $existingReason1 ], $doctrineModerationReasons->toArray() );
 	}
+
+	public function testGivenScrubbedDonationDoesNotUpdateStatusForPayment(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newBookedPayPalDonation();
+		$donation->markAsExported( new \DateTimeImmutable() );
+		$donation->scrubPersonalData( new \DateTimeImmutable(), new \DateTimeImmutable() );
+		$legacyPaymentData = new LegacyPaymentData(
+			9999,
+			1,
+			'PPL',
+			[ 'ext_payment_id' => 'blah' ],
+		);
+
+		$doctrineDonation = new DoctrineDonation();
+		$doctrineDonation->setStatus( DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE );
+
+		$updatedDoctrineDonation = $converter->convert( $donation, $doctrineDonation, $legacyPaymentData, [] );
+
+		$this->assertSame( DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE, $updatedDoctrineDonation->getStatus() );
+	}
 }
