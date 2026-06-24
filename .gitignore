@@ -16,3 +16,15 @@ ubuntu-xenial-16.04-cloudimg-console.log
 .phpunit.cache
 
 coverage
+
+# prevent accidental data uploads, we do not expect any sql or csv files here except in the database folder
+*.sql
+*.sql.gz
+*.csv
+
+/.docker/database/*
+!/.docker/database/01_legacy_payments.sql
+!/.docker/database/02_donations.sql
+!/.docker/database/03_new_payments.sql
+
+*.bak
