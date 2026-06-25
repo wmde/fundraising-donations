@@ -1,10 +1,12 @@
 <?php
-declare( strict_types=1 );
+
+declare( strict_types = 1 );
 
 namespace WMDE\Fundraising\DonationContext\DataAccess;
 
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\EntityManager;
+use Symfony\Component\Console\Output\OutputInterface;
 use WMDE\Clock\Clock;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation;
 use WMDE\Fundraising\DonationContext\DataAccess\LegacyConverters\LegacyToDomainConverter;
@@ -30,7 +32,8 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		private readonly Clock $clock,
 		private readonly \DateInterval $exportGracePeriod,
 		private readonly \DateInterval $moderationGracePeriod,
-		private readonly PaymentAnonymizer $paymentAnonymizer
+		private readonly PaymentAnonymizer $paymentAnonymizer,
+		private readonly OutputInterface $ouput
 	) {
 	}
 
@@ -40,12 +43,21 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		$counter = 0;
 		$paymentIds = [];
 		foreach ( $donationIds as $id ) {
-			$donation = $this->donationRepository->getDonationById( $id );
-			if ( $donation === null ) {
-				throw new AnonymizationException( "Could not find donation with id $id" );
+
+			try {
+				$donation = $this->donationRepository->getDonationById( $id );
+
+				if ( $donation === null ) {
+					throw new AnonymizationException( "Could not find donation with id $id" );
+				}
+
+				$donation->scrubPersonalData( $externalIncompleteCutoffDate, $moderationCutoffDate );
+				$this->donationRepository->storeDonation( $donation );
+			} catch ( \Exception $e ) {
+				$this->ouput->writeln( $e->getMessage() );
+				$this->ouput->writeln( "Failed donation id: $id" );
+				continue;
 			}
-			$donation->scrubPersonalData( $externalIncompleteCutoffDate, $moderationCutoffDate );
-			$this->donationRepository->storeDonation( $donation );
 
 			$paymentIds[] = $donation->getPaymentId();
 
@@ -75,7 +87,7 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 
 			->where( 'd.isScrubbed = 0' )
 
-			->andWhere(	$qb->expr()->orX(
+			->andWhere( $qb->expr()->orX(
 
 				// scrub all already exported donations
 				$qb->expr()->isNotNull( 'd.dtGruen' ),
