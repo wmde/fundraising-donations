@@ -473,6 +473,34 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		$this->assertSame( '', $row[ 'kommentar' ] );
 	}
 
+	public function testFollowUpDonationIsNotMarkedAsScrubbed(): void {
+		$donation = ValidDonation::newBookedPayPalDonation();
+		$donation->markAsExported();
+		$donation->scrubPersonalData( new \DateTimeImmutable(), new \DateTimeImmutable() );
+
+		$repository = $this->newRepository();
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$followUpDonation = $donation->createFollowupDonationForPayment( 42, 2 );
+
+		$repository->storeDonation( $followUpDonation );
+
+		echo $donation->getId();
+		echo $followUpDonation->getId();
+
+		$connection = $this->entityManager->getConnection();
+		$row = $connection->executeQuery( "SELECT * FROM spenden WHERE id = 42" )->fetchAssociative();
+
+		$this->assertIsArray( $row );
+		$this->assertSame( 0, $row[ 'is_scrubbed' ] );
+
+		// @phpstan-ignore argument.type
+		$data = unserialize( base64_decode( $row['data'] ) );
+		$this->assertIsArray( $data );
+		$this->assertSame( 'nyan', $data[ 'anrede' ] );
+	}
+
 	private function newEntityManagerThatThrowsWithQueryBuilder(): EntityManager {
 		$query = $this->createStub( Query::class );
 		$query->method( 'getOneOrNullResult' )

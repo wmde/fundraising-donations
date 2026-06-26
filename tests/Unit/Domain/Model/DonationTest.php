@@ -11,8 +11,11 @@ use RuntimeException;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donation;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\CompanyDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\ScrubbedName;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\PersonDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\RecurringDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\ScrubbedDonor;
+use WMDE\Fundraising\DonationContext\Domain\Model\DonorType;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Tests\Data\ValidDonation;
@@ -133,8 +136,13 @@ class DonationTest extends TestCase {
 		$donation = ValidDonation::newBookedPayPalDonation( donationId: 1 );
 		$followupUpDonation = $donation->createFollowupDonationForPayment( donationId: 1, paymentId: 99 );
 
+		$expectedDonor = new RecurringDonor(
+			new ScrubbedName( ValidDonation::DONOR_SALUTATION ),
+			DonorType::PERSON
+		);
+
 		$this->assertSame( 99, $followupUpDonation->getPaymentId() );
-		$this->assertEquals( $followupUpDonation->getDonor(), $donation->getDonor() );
+		$this->assertEquals( $expectedDonor, $followupUpDonation->getDonor() );
 		$this->assertEquals( $followupUpDonation->getTrackingInfo(), $donation->getTrackingInfo() );
 		$this->assertFalse(
 			$followupUpDonation->isExported(),
