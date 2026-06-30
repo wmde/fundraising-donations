@@ -246,4 +246,24 @@ class DomainToLegacyConverterTest extends TestCase {
 
 		$this->assertSame( DoctrineDonation::STATUS_EXTERNAL_INCOMPLETE, $updatedDoctrineDonation->getStatus() );
 	}
+
+	public function testGivenScrubbedBankTransferDonationClearsUEBCode(): void {
+		$converter = new DomainToLegacyConverter();
+		$donation = ValidDonation::newBankTransferDonation();
+		$donation->markAsExported( new \DateTimeImmutable() );
+		$donation->scrubPersonalData( new \DateTimeImmutable(), new \DateTimeImmutable() );
+
+		$legacyPaymentData = new LegacyPaymentData(
+			9999,
+			1,
+			'UEB',
+			[ 'ueb_code' => ValidPayments::PAYMENT_BANK_TRANSFER_CODE ],
+		);
+
+		$doctrineDonation = new DoctrineDonation();
+
+		$updatedDoctrineDonation = $converter->convert( $donation, $doctrineDonation, $legacyPaymentData, [] );
+
+		$this->assertSame( '', $updatedDoctrineDonation->getBankTransferCode() );
+	}
 }

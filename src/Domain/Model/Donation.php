@@ -9,6 +9,7 @@ use RuntimeException;
 use WMDE\Euro\Euro;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\AnonymousDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\Name\ScrubbedName;
+use WMDE\Fundraising\DonationContext\Domain\Model\Donor\RecurringDonor;
 use WMDE\Fundraising\DonationContext\Domain\Model\Donor\ScrubbedDonor;
 
 class Donation {
@@ -242,7 +243,10 @@ class Donation {
 	public function createFollowupDonationForPayment( int $donationId, int $paymentId ): self {
 		return new Donation(
 			$donationId,
-			$this->getDonor(),
+			new RecurringDonor(
+				new ScrubbedName( $this->donor->getName()->getSalutation() ),
+				$this->getDonor()->getDonorType()
+			),
 			$paymentId,
 			$this->getTrackingInfo(),
 			// We don't want to clone comments for followup donations because they would show up again in the feed.

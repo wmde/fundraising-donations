@@ -5,13 +5,13 @@ namespace WMDE\Fundraising\DonationContext\Tests\Integration\DataAccess;
 use Doctrine\ORM\EntityManager;
 use PHPUnit\Framework\Attributes\CoversClass;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Console\Output\OutputInterface;
 use WMDE\Clock\SystemClock;
 use WMDE\Fundraising\DonationContext\DataAccess\DatabaseDonationAnonymizer;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationExistsChecker;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineDonationRepository;
 use WMDE\Fundraising\DonationContext\DataAccess\DoctrineEntities\Donation as DoctrineDonation;
 use WMDE\Fundraising\DonationContext\DataAccess\ModerationReasonRepository;
-use WMDE\Fundraising\DonationContext\Domain\AnonymizationException;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationIdentifier;
 use WMDE\Fundraising\DonationContext\Domain\Model\ModerationReason;
 use WMDE\Fundraising\DonationContext\Domain\Repositories\DonationRepository;
@@ -59,7 +59,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			$this->clock,
 			$this->exportGracePeriod,
 			$this->moderationGracePeriod,
-			new FakePaymentAnonymizer()
+			new FakePaymentAnonymizer(),
+			$this->createStub( OutputInterface::class )
 		);
 
 		$count = $anonymizer->anonymizeAll();
@@ -77,7 +78,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			$this->clock,
 			$this->exportGracePeriod,
 			$this->moderationGracePeriod,
-			$paymentAnonymizer
+			$paymentAnonymizer,
+			$this->createStub( OutputInterface::class )
 		);
 
 		$anonymizer->anonymizeAll();
@@ -100,7 +102,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			$this->clock,
 			$this->exportGracePeriod,
 			$this->moderationGracePeriod,
-			new FakePaymentAnonymizer()
+			new FakePaymentAnonymizer(),
+			$this->createStub( OutputInterface::class )
 		);
 
 		$anonymizer->anonymizeWithIds( self::DEFAULT_DONATION_ID );
@@ -117,7 +120,8 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 			$this->clock,
 			$this->exportGracePeriod,
 			$this->moderationGracePeriod,
-			$paymentAnonymizer
+			$paymentAnonymizer,
+			$this->createStub( OutputInterface::class )
 		);
 
 		$anonymizer->anonymizeWithIds( self::DEFAULT_DONATION_ID );
@@ -125,17 +129,26 @@ class DatabaseDonationAnonymizerTest extends TestCase {
 		$this->assertSame( [ ValidPayments::ID_DIRECT_DEBIT ], $paymentAnonymizer->paymentIds );
 	}
 
-	public function testGivenNoDonation_anonymizeWillThrow(): void {
+	public function testGivenNoDonation_anonymizeWillOutput(): void {
 		$missingDonationId = 42;
-		$this->expectException( AnonymizationException::class );
-		$this->expectExceptionMessageMatches( "/Could not find donation with id $missingDonationId/" );
+
+		$output = $this->createMock( OutputInterface::class );
+		$output->expects( $this->exactly( 2 ) )
+			->method( 'writeln' )
+			->with( $this->logicalOr(
+				$this->equalTo( "Could not find donation with id $missingDonationId" ),
+				$this->equalTo( "Failed donation id: $missingDonationId" )
+			)
+		);
+
 		$anonymizer = new DatabaseDonationAnonymizer(
 			$this->donationRepository,
 			$this->entityManager,
 			$this->clock,
 			$this->exportGracePeriod,
 			$this->moderationGracePeriod,
-			new FakePaymentAnonymizer()
+			new FakePaymentAnonymizer(),
+			$output
 		);
 
 		$anonymizer->anonymizeWithIds( $missingDonationId );
