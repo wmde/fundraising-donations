@@ -374,7 +374,7 @@ class DoctrineDonationRepositoryTest extends TestCase {
 		], $data );
 	}
 
-	public function testWhenScrubbingDonation_allUnneededDataISClearedFromDataBlob(): void {
+	public function testWhenScrubbingDonation_allUnneededDataIsClearedFromDataBlob(): void {
 		$donationId = 3;
 		$donation = ValidDonation::newBookedPayPalDonation( $donationId );
 		$donation->markAsExported();
@@ -411,6 +411,28 @@ class DoctrineDonationRepositoryTest extends TestCase {
 			'anrede' => 'nyan',
 			'adresstyp' => 'person'
 		], $data );
+	}
+
+	public function testWhenScrubbingBankTransferDonation_repositoryRemovesUEBCode(): void {
+		$donationId = 3;
+		$donation = ValidDonation::newBankTransferDonation( $donationId );
+		$this->legacyPaymentData = ValidPayments::newBankTransferPayment()->getLegacyData();
+		$donation->markAsExported();
+		$repository = $this->newRepository();
+		$repository->storeDonation( $donation );
+		$this->entityManager->clear();
+
+		$donation->scrubPersonalData(
+			externalIncompleteGracePeriodCutoffDate: new \DateTimeImmutable(),
+			moderationGracePeriodCutoffDate: new \DateTimeImmutable()
+		);
+		$repository->storeDonation( $donation );
+
+		$connection = $this->entityManager->getConnection();
+		$row = $connection->executeQuery( "SELECT * FROM spenden WHERE id=$donationId" )->fetchAssociative();
+		$this->assertIsArray( $row );
+
+		$this->assertSame( '', $row[ 'ueb_code' ] );
 	}
 
 	public function testPublicCommentStaysPersistedWhenDonationIsScrubbed(): void {
