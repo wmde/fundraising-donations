@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "d3990ad5e199d15223f028090e278de0",
+    "content-hash": "0da7021c63977efe7d61c860db115c41",
     "packages": [
         {
             "name": "doctrine/collections",
@@ -3499,16 +3499,16 @@
         },
         {
             "name": "wmde/fun-validators",
-            "version": "v5.1.0",
+            "version": "dev-validate-ibans",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wmde/fun-validators",
-                "reference": "255ad85d10aa9fa4c4db58fe518e2d4bdc8d53b6"
+                "reference": "2d797769e9e2c0a08318e1239e1d558152467c9d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wmde/fun-validators/zipball/255ad85d10aa9fa4c4db58fe518e2d4bdc8d53b6",
-                "reference": "255ad85d10aa9fa4c4db58fe518e2d4bdc8d53b6",
+                "url": "https://api.github.com/repos/wmde/fun-validators/zipball/2d797769e9e2c0a08318e1239e1d558152467c9d",
+                "reference": "2d797769e9e2c0a08318e1239e1d558152467c9d",
                 "shasum": ""
             },
             "require": {
@@ -3517,7 +3517,7 @@
             "require-dev": {
                 "phpstan/phpstan": "^2.1",
                 "phpunit/phpunit": "~12.0",
-                "wmde/fundraising-phpcs": "~12.0"
+                "wmde/fundraising-phpcs": "~15.0"
             },
             "type": "library",
             "extra": {
@@ -3539,20 +3539,20 @@
                 "GPL-2.0-or-later"
             ],
             "description": "General and shared validation services created as part of the WMDE fundraising software",
-            "time": "2025-04-22T10:41:14+00:00"
+            "time": "2026-08-13T06:57:53+00:00"
         },
         {
             "name": "wmde/fundraising-payments",
-            "version": "v8.4.2",
+            "version": "dev-validate-non-german-ibans",
             "source": {
                 "type": "git",
                 "url": "https://github.com/wmde/fundraising-payments",
-                "reference": "4f593ddf408fa4bfe618344c573ecf8523c0079e"
+                "reference": "a8ffe4af425e2485fe5046d56a21fc9d63eeb790"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/wmde/fundraising-payments/zipball/4f593ddf408fa4bfe618344c573ecf8523c0079e",
-                "reference": "4f593ddf408fa4bfe618344c573ecf8523c0079e",
+                "url": "https://api.github.com/repos/wmde/fundraising-payments/zipball/a8ffe4af425e2485fe5046d56a21fc9d63eeb790",
+                "reference": "a8ffe4af425e2485fe5046d56a21fc9d63eeb790",
                 "shasum": ""
             },
             "require": {
@@ -3568,7 +3568,7 @@
                 "symfony/dotenv": "^8.0",
                 "symfony/yaml": "^8.0",
                 "wmde/euro": "~1.0",
-                "wmde/fun-validators": "~v5.0"
+                "wmde/fun-validators": "dev-validate-ibans"
             },
             "require-dev": {
                 "deptrac/deptrac": "^4.1",
@@ -3598,7 +3598,7 @@
                 "GPL-2.0-or-later"
             ],
             "description": "Bounded Context for the Wikimedia Deutschland fundraising payment subdomain",
-            "time": "2026-08-10T10:34:46+00:00"
+            "time": "2026-08-13T11:51:59+00:00"
         }
     ],
     "packages-dev": [
@@ -3956,20 +3956,20 @@
         },
         {
             "name": "myclabs/deep-copy",
-            "version": "1.13.4",
+            "version": "1.14.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/myclabs/DeepCopy.git",
-                "reference": "07d290f0c47959fd5eed98c95ee5602db07e0b6a"
+                "reference": "8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/07d290f0c47959fd5eed98c95ee5602db07e0b6a",
-                "reference": "07d290f0c47959fd5eed98c95ee5602db07e0b6a",
+                "url": "https://api.github.com/repos/myclabs/DeepCopy/zipball/8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae",
+                "reference": "8680aa248f8e07bc8fb43f56f0f5fc77a0c96aae",
                 "shasum": ""
             },
             "require": {
-                "php": "^7.1 || ^8.0"
+                "php": "^8.0"
             },
             "conflict": {
                 "doctrine/collections": "<1.6.8",
@@ -4004,15 +4004,15 @@
             ],
             "support": {
                 "issues": "https://github.com/myclabs/DeepCopy/issues",
-                "source": "https://github.com/myclabs/DeepCopy/tree/1.13.4"
+                "source": "https://github.com/myclabs/DeepCopy/tree/1.14.0"
             },
             "funding": [
                 {
-                    "url": "https://tidelift.com/funding/github/packagist/myclabs/deep-copy",
-                    "type": "tidelift"
+                    "url": "https://github.com/mnapoli",
+                    "type": "github"
                 }
             ],
-            "time": "2025-08-01T08:46:24+00:00"
+            "time": "2026-08-11T10:17:44+00:00"
         },
         {
             "name": "nikic/php-parser",
@@ -6226,7 +6226,10 @@
     ],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {},
+    "stability-flags": {
+        "wmde/fun-validators": 20,
+        "wmde/fundraising-payments": 20
+    },
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
