@@ -33,7 +33,7 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 		private readonly \DateInterval $exportGracePeriod,
 		private readonly \DateInterval $moderationGracePeriod,
 		private readonly PaymentAnonymizer $paymentAnonymizer,
-		private readonly OutputInterface $ouput
+		private readonly OutputInterface $output
 	) {
 	}
 
@@ -54,8 +54,8 @@ class DatabaseDonationAnonymizer implements DonationAnonymizer {
 				$donation->scrubPersonalData( $externalIncompleteCutoffDate, $moderationCutoffDate );
 				$this->donationRepository->storeDonation( $donation );
 			} catch ( \Exception $e ) {
-				$this->ouput->writeln( $e->getMessage() );
-				$this->ouput->writeln( "Failed donation id: $id" );
+				$this->output->writeln( $e->getMessage() );
+				$this->output->writeln( "Failed donation id: $id" );
 				continue;
 			}
 
